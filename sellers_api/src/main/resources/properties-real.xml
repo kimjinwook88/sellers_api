@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>common_code</comment>
+
+<!-- company -->
+<entry key="spring.jwt.secret">sellersSecurity</entry>
+<entry key="spring.jwt.access.header">Access-Token</entry>
+<entry key="spring.jwt.refresh.header">Refresh-Token</entry>
+
+<!-- 임시 Data --> <!-- 형식 :    '엑셀본부명.엑셀직원이름,변경본부장이름' -->
+<entry key="tmp.Data">IBM SW 사업본부.주진현,주진현/영업팀.박재현,박재현/IBM HW 사업본부.임주윤,김해도/Software사업본부.이형준,김재준/IBM SW 사업본부.장준호,김정훈/인프라사업부.박승현,김진영</entry>
+
+
+<!-- name -->
+<entry key="name.company">회사전체</entry>
+
+<!-- 사내 캘린더 url (Office 365)-->
+<entry key="url.calendarSync">https://outlook.office365.com/ews/Exchange.asmx</entry>
+
+<!-- 모바일 앱 로그인 페이지 url device_token, logout 파라미터 값 필요 컨트롤러 /logout.do 참조  -->
+<entry key="url.mobileAppLogin">http://sellers.dunet.co.kr/login2.do?</entry>
+
+<!-- ip -->
+<entry key="ip.addr">http://thesellers.unipoint.co.kr:30100</entry>
+<!-- mail host -->
+<entry key="ip.mailhost">127.0.0.1</entry>
+
+<entry key="ip.image">http://thesellers.unipoint.co.kr:30100</entry>
+
+
+<!-- file path -->
+<entry key="path.file">/dbms/sellers_data/sellers_unipoint/files/</entry>
+<entry key="path.sampleFile">/dbms/sellers_data/sellers_unipoint/files/sample/</entry>
+<entry key="path.resultFile">/dbms/sellers_data/sellers_unipoint/tmp/excel_result/</entry>
+
+<entry key="path.companyBizResultFile">/dbms/sellers_data/sellers_unipoint/files/sample/companyBiz/</entry>
+<entry key="path.clientBizResultFile">/dbms/sellers_data/sellers_unipoint/files/sample/clientBiz/</entry>
+<entry key="path.projectBizResultFile">/dbms/sellers_data/sellers_unipoint/files/sample/projectBiz/</entry>
+<entry key="path.partnerCooperationFile">/dbms/sellers_data/sellers_unipoint/files/sample/partnerCooperationSales/</entry>
+
+<entry key="path.image">/dbms/sellers_data/sellers_unipoint/images/</entry>
+<entry key="path.calUserInfo">/dbms/sellers_data/sellers_unipoint/files/.calendar/</entry>
+
+<!-- msg -->
+<!-- firebase cloud messaging -->
+<entry key="fcm.webApiKey">AIzaSyCIysjqBUSxWoy1bqYrQp2-kzRiEwU5nO0</entry>
+<entry key="fcm.serverKey">AAAAyVDh3nI:APA91bF7mC8KDdwzT9ovZhIJwoxZl8c7OETGJavQXw3U2z38-HvbmcbsncnA7UpeTcYorn8gvOPy-cSj4vCrtfYAocTS6xPYaUh9Wxzl5ZDIO1JBUW8BGtXUy7u9Jy-1vXcJZd4nr4Q9</entry><!--최영완 -->
+
+<!-- code (jqGrid) -->
+<!-- 고도리분류 -->
+<entry key="code.clientGodoryCategory">
+<![CDATA[
+<option value="">=== 선택 ===</option>
+<option value="1">고쳐주세요</option>
+<option value="2">도와주세요</option>
+<option value="3">이런건어때요</option>
+]]>
+</entry>
+
+<entry key="code.positiontype">:==선택==;임원:임원;영업직:영업직;관리직:관리직;기술직:기술직</entry>
+
+<!-- code (Html) -->
+<!-- 고객분류 -->
+<entry key="code.clientCompanyCategory">
+<![CDATA[
+]]>
+</entry>
+
+<!-- 파트너분류 -->
+<entry key="code.partnerCompanyCategoryLength">2</entry>
+<entry key="code.partnerCompanyCategory1">협력사</entry>
+<entry key="code.partnerCompanyCategory2">영업채널</entry>
+
+<!-- 고객컨택 방법 -->
+<entry key="code.contactMethod">
+<![CDATA[
+<option value="">== 선택 ==</option>
+<option value="방문">방문</option>
+<option value="마케팅">마케팅</option>
+<option value="SNS">SNS</option>
+<option value="E-mail">E-mail</option>
+<option value="전화">전화</option>
+]]>
+</entry>
+
+<!-- 영업기회 Sales Cycle (검색)  -->
+<entry key="code.oppSalesCycle">
+<![CDATA[
+<option value="">=== 선택 ===</option>
+<option value="1">Identify</option>
+<option value="2">Qualification</option>
+<option value="3">Close</option>
+]]>
+</entry>
+
+<!-- 영업기회 매출금액  -->
+<entry key="code.oppSalesPlan">
+<![CDATA[
+]]>
+</entry>
+
+
+<entry key="code.calModalEventList">
+<![CDATA[
+<option value="">선택</option>
+<option value="1" id="meeting">고객컨택</option>
+<option value="2">컨택준비</option>
+<option value="3">내부회의</option>
+<option value="4">교육</option>
+<option value="6">기타</option>
+<option value="7">휴가</option>
+]]>
+</entry>
+
+
+
+<!--############################################# Tracking 설정 #############################################-->
+
+<entry key="flag.trackingSendMail">sellers@unipoint.co.kr</entry>
+<entry key="flag.trackingSendMailName">The Seller's</entry>
+
+<!-- 코칭톡 -->
+<entry key="flag.sendCoachingTalkMail">Y</entry> 	<!-- 코칭톡 메일 발송 여부 Y/N--> 
+<entry key="flag.sendCoachingTalkNotice">Y</entry> 	<!-- 코칭톡 웹 알림 여부 Y/N-->
+<entry key="flag.sendCoachingTalkMobile">Y</entry> 	<!-- 코칭톡 모바일 알림 여부 Y/N-->
+
+
+<!-- 고객영업활동 Tracking -->
+
+<!-- 1.고객컨택 Follow Up Action-->
+<entry key="flag.trackingMenuClientContactFollowUpAction">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuClientContactFollowUpActionCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuClientContactFollowUpActionAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuClientContactFollowUpActionAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuClientContactFollowUpActionMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 2.영업기회 마일스톤 -->
+<entry key="flag.trackingMenuOpportunityMilestones">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuOpportunityMilestonesCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuOpportunityMilestonesAfterCount">30</entry> 	<!-- 기한날짜가 지난 후,d Tracking 할 것인지-->
+<entry key="flag.trackingMenuOpportunityMilestonesAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuOpportunityMilestonesMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 3.영업기회 체크리스트 -->
+<entry key="flag.trackingMenuOpportunityCheckList">N</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuOpportunityCheckListCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuOpportunityCheckListAfterCount">30</entry> 	<!-- 기한날짜가 지난 후,d Tracking 할 것인지-->
+<entry key="flag.trackingMenuOpportunityCheckListAlarm">N</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuOpportunityCheckListMail">N</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 4.영업기회 윈플랜 -->
+<entry key="flag.trackingMenuOpportunityWinPlan">N</entry> 			<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuOpportunityWinPlanCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuOpportunityWinPlanAfterCount">30</entry> 	<!-- 기한날짜가 지난 후,d Tracking 할 것인지-->
+<entry key="flag.trackingMenuOpportunityWinPlanAlarm">N</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuOpportunityWinPlanMail">N</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 5.잠재영업기회 액션플랜 -->
+<entry key="flag.trackingMenuHiddenOpportunityActionPlan">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuHiddenOpportunityActionPlanCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuHiddenOpportunityActionPlanAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuHiddenOpportunityActionPlanAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuHiddenOpportunityActionPlanMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 6.영업기회 계약일 -->
+<entry key="flag.trackingMenuOpportunityContractDate">Y</entry> 			<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuOpportunityContractDateCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuOpportunityContractDateAfterCount">0</entry> 	<!-- 기한날짜가 지난 후,d Tracking 할 것인지-->
+<entry key="flag.trackingMenuOpportunityContractDateAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuOpportunityContractDateMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 7.영업기회 매출계획 -->
+<entry key="flag.trackingMenuOpportunityAmountSP">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuOpportunityAmountSPCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuOpportunityAmountSPAfterCount">0</entry> 	<!-- 기한날짜가 지난 후,d Tracking 할 것인지-->
+<entry key="flag.trackingMenuOpportunityAmountSPAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuOpportunityAmountSPMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 8.영업기회 수금계획 -->
+<entry key="flag.trackingMenuOpportunityAmountCP">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuOpportunityAmountCPCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuOpportunityAmountCPAfterCount">0</entry> 	<!-- 기한날짜가 지난 후,d Tracking 할 것인지-->
+<entry key="flag.trackingMenuOpportunityAmountCPAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuOpportunityAmountCPMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+
+
+<!-- 고객만족 Tracking -->
+<!-- 6.고객 이슈 -->
+<entry key="flag.trackingMenuClientIssue">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N-->
+<entry key="flag.trackingMenuClientIssueCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuClientIssueAfterCount">30</entry> 	<!-- 해결날짜일이 지나고 몇번 알려줄 것인지. 세팅 ( 0 으로 세팅할 경우, DueDate 지나고 계속 카운트 ) -->
+<entry key="flag.trackingMenuClientIssueAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuClientIssueMail">Y</entry> 	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 7.고객 이슈 액션플랜 -->
+<entry key="flag.trackingMenuClientIssueActionPlan">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuClientIssueActionPlanCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuClientIssueActionAfterCount">30</entry> 	<!-- 해결날짜일이 지나고 몇번 알려줄 것인지. 세팅 -->
+<entry key="flag.trackingMenuClientIssueActionPlanAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuClientIssueActionPlanMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 8.고객만족도 Follow-Up-Action -->
+<entry key="flag.trackingMenuClientSatisfactionFollowUpAction">N</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuClientSatisfactionFollowUpActionCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuClientSatisfactionFollowUpActionAfterCount">30</entry> 	<!-- 해결날짜일이 지나고 몇번 알려줄 것인지. 세팅 -->
+<entry key="flag.trackingMenuClientSatisfactionFollowUpActionAlarm">N</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuClientSatisfactionFollowUpActionMail">N</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 9.서비스프로젝트 마일스톤-->
+<entry key="flag.trackingMenuServiceProjectMilestones">N</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuServiceProjectMilestonesCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuServiceProjectMilestonesAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuServiceProjectMilestonesAlarm">N</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuServiceProjectMilestonesMail">N</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 10.서비스프로젝트 이슈 -->
+<entry key="flag.trackingMenuServiceProjectIssue">N</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuServiceProjectIssueCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuServiceProjectIssueAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuServiceProjectIssueAlarm">N</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuServiceProjectIssueMail">N</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+
+
+<!-- 성과관리 Tracking -->
+<!-- 제안서 정보 -->
+<!-- 제안서 정보 Tracking 불필요 판단. -->
+<entry key="flag.trackingMenuProposalsInfo">N</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuProposalsInfoCycle">1</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuProposalsInfoAlarm">N</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuProposalsInfoMail">N</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+
+
+
+<!-- 사업전략 Tracking -->
+<!-- 11.회사/부문별 전략 키마일스톤-->
+<entry key="flag.trackingMenuBizStrategyCompanyKeyMilestones">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuBizStrategyCompanyKeyMilestonesCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuBizStrategyCompanyKeyMilestonesAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuBizStrategyCompanyKeyMilestonesAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuBizStrategyCompanyKeyMilestonesMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 12.회사/부문별 전략  이슈-->
+<entry key="flag.trackingMenuBizStrategyCompanyIssue">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuBizStrategyCompanyIssueCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuBizStrategyCompanyIssueAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuBizStrategyCompanyIssueAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuBizStrategyCompanyIssueMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 13.고객별전략 키마일스톤-->
+<entry key="flag.trackingMenuBizStrategyClientKeyMilestones">Y</entry> 			<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuBizStrategyClientKeyMilestonesCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuBizStrategyClientKeyMilestonesAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuBizStrategyClientKeyMilestonesAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuBizStrategyClientKeyMilestonesMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 14.고객별전략 이슈 -->
+<entry key="flag.trackingMenuBizStrategyClientIssue">Y</entry> 			<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuBizStrategyClientIssueCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuBizStrategyClientIssueAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuBizStrategyClientIssueAlarm">Y</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuBizStrategyClientIssueMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 15.전략프로젝트 마일스톤 -->
+<entry key="flag.trackingMenuBizStrategyProjectPlanMilestones">N</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuBizStrategyProjectPlanMilestonesCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuBizStrategyProjectPlanMilestonesAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuBizStrategyProjectPlanMilestonesAlarm">N</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuBizStrategyProjectPlanMilestonesMail">N</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+<!-- 16.전략프로젝트 이슈 -->
+<entry key="flag.trackingMenuBizStrategyProjectPlanIssue">N</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuBizStrategyProjectPlanIssueCycle">3</entry> 	<!-- DUEDATE 몇일전에 알릴 것인지-->
+<entry key="flag.trackingMenuBizStrategyProjectPlanIssueAfterCount">30</entry> 	<!-- 기한날짜가 지난 후, 몇번 더 Tracking 할 것인지-->
+<entry key="flag.trackingMenuBizStrategyProjectPlanIssueAlarm">N</entry> 	<!-- Tracking 방법-미리알림 사용여부 Y/N-->
+<entry key="flag.trackingMenuBizStrategyProjectPlanIssueMail">N</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+
+
+
+
+<!-- 캘린더 Tracking -->
+<!-- 17.캘린더 -->
+<entry key="flag.trackingMenuCalendarEvent">Y</entry> 		<!-- Tracking 메뉴 사용여부 Y/N--> 
+<entry key="flag.trackingMenuCalendarEventMail">Y</entry>  	<!-- Tracking 방법-메일 사용여부 Y/N-->
+</properties>
+
+<!-- ###########################################################
+#
+# Configuration properties
+# info.properties
+# by Hoon
+###########################################################
+
+
+## URL
+outlook=https://umail.unipoint.co.kr/ews/Exchange.asmx
+office365=https://outlook.office365.com/ews/Exchange.asmx
+
+## Mail Host IP (from)
+## default host to send mail
+hostIP=192.168.1.165
+ -->

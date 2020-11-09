@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>고객이슈관리 Basic</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+    <nav class="navbar-default navbar-static-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav metismenu" id="side-menu">
+                <li class="nav-header ta-c">
+                    <div class="dropdown profile-element">
+                        <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                        <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                        <a href="#">
+                            <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                        </a>
+                    </div>
+                    <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                        디유넷
+                    </div>
+                </li>
+                <li class="">
+                    <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li class=""><a href="#">고객사정보</a></li>
+                        <li><a href="#">고객개인정보</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">고객컨택내용</a></li>
+                        <li><a href="#">영업기회</a></li>
+                        <li><a href="#">잠재영업기회</a></li>
+                    </ul>
+                </li>
+                <li class="active">
+                    <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li class="active"><a href="#">고객이슈</a></li>
+                        <li><a href="#">고객만족도</a></li>
+                        <li><a href="#">서비스프로젝트</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">파트너사협업</a></li>
+                        <li><a href="#">파트너사정보</a></li>
+                        <li><a href="#">파트너사개인정보</a></li>
+                    </ul>
+                </li>
+                <li class="">
+                    <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li class=""><a href="#">성과관리</a></li>
+                        <li><a href="#">생산성</a></li>
+                        <li><a href="#">제안서정보</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">회사/부문별전략</a></li>
+                        <li><a href="#">고객별전략</a></li>
+                        <li><a href="#">전략프로젝트</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">캘린더</a></li>
+                        <li><a href="#">나의 할 일</a></li>
+                    </ul>
+                </li>
+                <li class="special_link">
+                    <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                </li>
+            </ul>
+            <div class="product-logo text-center">
+                <img src="../../images/pc/product_logo.png" alt=""/>
+                <span>Copyright Seller’s Company © 2016</span>
+            </div>
+        </div>
+    </nav>
+
+        <div id="page-wrapper" class="white-bg">
+        <div class="row border-bottom">
+        <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+           
+        </div>
+            <ul class="nav navbar-top-links navbar-right">
+                <li>
+                    <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                </li>
+                <li class="">
+                    <a class=" count-info" data-toggle="" href="#">
+                        <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class=" count-info" data-toggle="" href="#">
+                        <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                    </a>
+                </li>
+
+
+                <li>
+                    <a href="#">
+                        <i class="fa fa-sign-out"></i> 로그아웃
+                    </a>
+                </li>
+            </ul>
+
+        </nav>
+        </div>
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-4">
+                    <h2>고객이슈</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a>고객만족</a>
+                        </li>
+                        <li class="active">
+                            <strong>고객이슈</strong>
+                        </li>
+                    </ol>
+                </div>
+                <div class="col-sm-8">
+                    <div class="time-update">
+                        <span class="text-muted small pull-right">최근 업데이트: <i class="fa fa-clock-o"></i> 2:10 pm - 12.06.2014</span>
+                    </div>
+                    <div class="search-common">
+                        <div class="input-default" style="margin:0;">
+                            <span class="input-group-btn">
+                                    <a href="#" class="btn btn-search-option"><i class="fa fa-search"></i> 검색</a>
+                            </span>
+
+                            <div class="search-detail off">
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>고객명</label> <select class="form-control" name="account">
+                                        <option>고객명을 선택해주세요</option>
+                                        <option>김고객</option>
+                                        <option>홍길동</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>회사명</label> <select class="form-control" name="account">
+                                        <option>회사를 선택해주세요</option>
+                                        <option>삼성</option>
+                                        <option>LG</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">메일주소</label>
+                                    <div class="input-group" style="width:100%;" ><input type="text" placeholder="" class="input form-control"></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>작성자</label> <select class="form-control" name="account">
+                                        <option>작성자를 선택해주세요</option>
+                                        <option>관리자</option>
+                                        <option>영업사원1</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">최종변경일</label>
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="03/04/2016">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 m-b">                                    
+                                    <label class="control-label" for="date_modified">기간설정</label>
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="시작일">
+                                        </div>
+                                    </div>
+                                
+                                    <div style="padding:0px 5px; text-align:center; font-size:18px;">~</div>                                 
+                                
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="종료일">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">전체</label>
+                                    <div class="input-group" style="width:100%;" ><input type="text" placeholder="" class="input form-control"></div>
+                                </div>
+                                <div class="col-sm-12 ag_r">
+                                    <label for="result-in-search" class="mg-r10"> <input type="checkbox" id="result-in-search" class="input v-m" /> 결과내 검색</label>
+                                    <button type="button" class="btn btn-w-m btn-primary btn-seller"><i class="fa fa-search"></i> 상세검색</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        
+        <div class="wrapper wrapper-content  animated fadeInRight">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="ibox">
+                        <div class="ibox-content border_n">
+                            <div class="clear">
+                                <div class="pos-rel">
+                                    <div class="func-top-left fl_l">
+                                        <div class="table-menu-wrapper2 fl_l mg-r10 mg-t7 m-b">
+                                            <a href="#" class="table-menu-btn"><i class="fa fa-th-list"></i> 항목보기 설정</a>
+                                            <div class="table-menu table-menu-hidden">
+                                                <ul>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-3" value="co-3" checked="checked"> <label for="toggle-col-3">작성자</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-4" value="co-4" checked="checked"> <label for="toggle-col-4">최종변경일</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-5" value="co-5" checked="checked"> <label for="toggle-col-5">Key Milestones</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-6" value="co-6" checked="checked"> <label for="toggle-col-6">Status</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-7" value="co-7" checked="checked"> <label for="toggle-col-7">첨부</label></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="table-sel-view fl_l">
+                                            <div class="selgrid selgrid1 mg-r5">
+                                                <select class="form-control m-b" name="account">
+                                                    <option>회계년도 선택</option>
+                                                    <option>2016년</option>
+                                                    <option>2015년</option>
+                                                </select>
+                                            </div>
+                                            <div class="selgrid selgrid1 mg-r5">
+                                                <select class="form-control m-b" name="account">
+                                                    <option>보기 선택</option>
+                                                    <option>산업별</option>
+                                                    <option>고객별</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="func-top-right fl_r pd-b20">
+                                        <div class="fl_l template-doc">
+                                            <button type="button" class="btn btn-outline btn-seller-outline">템플릿 다운로드</button>
+                                            <ul class="template-list off">
+                                                <li><a href="#">템플릿1.ppt</a></li>
+                                                <li><a href="#">템플릿2.doc</a></li>
+                                                <li><a href="#">템플릿3.ppt</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="fl_l">
+                                            <!-- 도움말 팝업 버튼 -->
+                                            <!-- <a href="#" class="btn-help mg-r5"><i class="fa fa-question fa-lg"></i></a> -->
+                                            <button type="button" class="btn btn-w-m btn-seller">신규등록</button>
+                                        </div>
+                                    </div>
+                                    <table id="tech-companies" class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th id="co-0">No</th>
+                                            <th id="co-1">이슈종류</th>
+                                            <th id="co-2">고객사</th>
+                                            <th id="co-3">이슈제기자</th>
+                                            <th id="co-4">이슈제목</th>
+                                            <th id="co-5">해결책임자</th>
+                                            <th id="co-6">발생일자</th>
+                                            <th id="co-7">해결목표일자</th>
+                                            <th id="co-8">해결일자</th>
+                                            <th id="co-9">이슈상태</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-0">15</td>
+                                            <td headers="co-1">제품불만</td>
+                                            <td headers="co-2">롯데제과</td>
+                                            <td headers="co-3">손아섭</td>
+                                            <td headers="co-4">불만 있어요</td>
+                                            <td headers="co-5">윤보선</td>
+                                            <td headers="co-6">2016-05-11</td>
+                                            <td headers="co-7">2016-05-11</td>
+                                            <td headers="co-8">2016-05-11</td>
+                                            <td headers="co-9"><span class="statusColor statusColor-green"></span></td>
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-0">14</td>
+                                            <td headers="co-1">서비스불만</td>
+                                            <td headers="co-2">롯데제과</td>
+                                            <td headers="co-3">손아섭</td>
+                                            <td headers="co-4">지원해주세요</td>
+                                            <td headers="co-5">윤보선</td>
+                                            <td headers="co-6">2016-05-11</td>
+                                            <td headers="co-7">2016-05-11</td>
+                                            <td headers="co-8">2016-05-11</td>
+                                            <td headers="co-9"><span class="statusColor statusColor-yellow"></span></td>
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-0">13</td>
+                                            <td headers="co-1">서비스불만</td>
+                                            <td headers="co-2">롯데제과</td>
+                                            <td headers="co-3">손아섭</td>
+                                            <td headers="co-4">지원해주세요</td>
+                                            <td headers="co-5">윤보선</td>
+                                            <td headers="co-6">2016-05-11</td>
+                                            <td headers="co-7">2016-05-11</td>
+                                            <td headers="co-8">2016-05-11</td>
+                                            <td headers="co-9"><span class="statusColor statusColor-red"></span></td>
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-0">12</td>
+                                            <td headers="co-1">서비스불만</td>
+                                            <td headers="co-2">롯데제과</td>
+                                            <td headers="co-3">손아섭</td>
+                                            <td headers="co-4">지원해주세요</td>
+                                            <td headers="co-5">윤보선</td>
+                                            <td headers="co-6">2016-05-11</td>
+                                            <td headers="co-7">2016-05-11</td>
+                                            <td headers="co-8">2016-05-11</td>
+                                            <td headers="co-9"><span class="statusColor statusColor-green"></span></td>
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-0">11</td>
+                                            <td headers="co-1">서비스불만</td>
+                                            <td headers="co-2">롯데제과</td>
+                                            <td headers="co-3">손아섭</td>
+                                            <td headers="co-4">지원해주세요</td>
+                                            <td headers="co-5">윤보선</td>
+                                            <td headers="co-6">2016-05-11</td>
+                                            <td headers="co-7">2016-05-11</td>
+                                            <td headers="co-8">2016-05-11</td>
+                                            <td headers="co-9"><span class="statusColor statusColor-green"></span></td>
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-0">10</td>
+                                            <td headers="co-1">서비스불만</td>
+                                            <td headers="co-2">롯데제과</td>
+                                            <td headers="co-3">손아섭</td>
+                                            <td headers="co-4">지원해주세요</td>
+                                            <td headers="co-5">윤보선</td>
+                                            <td headers="co-6">2016-05-11</td>
+                                            <td headers="co-7">2016-05-11</td>
+                                            <td headers="co-8">2016-05-11</td>
+                                            <td headers="co-9"><span class="statusColor statusColor-green"></span></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+        </div>
+
+        <!-- 상세보기 -->
+        <div class="modal inmodal fade" id="myModal1" tabindex="-1" role="dialog"  aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title">불만 있어요</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="ibox float-e-margins">
+                                    
+                                    <div class="ibox-content border_n">
+                                        <form method="get" class="form-horizontal">
+                                            <div class="form-group">
+                                                <div class="col-sm-12 ag_r">작성자 : 홍길동 / 작성일 : 2016-05-10</div>
+                                            </div>
+                                            <div class="hr-line-dashed"></div>
+                                            <div class="form-group"><label class="col-sm-2 control-label">이슈 제목</label>
+                                                <div class="col-sm-10"><input type="text" class="form-control" /></div>
+                                            </div>                                            
+
+                                            <div class="hr-line-dashed"></div>
+
+                                            <div class="form-group"><label class="col-sm-2 control-label">고객사</label>
+                                                <div class="col-sm-4"><input type="text" class="form-control" /></div>
+                                                <label class="col-sm-2 control-label">고객사ID</label>
+                                                <div class="col-sm-4"><input type="text" disabled class="form-control" /></div>
+                                            </div>
+
+                                            <div class="hr-line-dashed"></div>
+
+                                            <div class="form-group"><label class="col-sm-2 control-label">고객명</label>
+                                                <div class="col-sm-4"><input type="text" class="form-control" /></div>
+                                                <label class="col-sm-2 control-label">영업대표</label>
+                                                <div class="col-sm-4"><input type="text" class="form-control" /></div>
+                                            </div>
+                                            <div class="hr-line-dashed"></div>                                                
+                                            <div class="form-group"><label class="col-sm-2 control-label">이슈해결책임자</label>
+                                                <div class="col-sm-4"><input type="text" class="form-control" /></div>
+                                                <label class="col-sm-2 control-label">이슈영역</label>
+                                                <div class="col-sm-4">
+                                                    <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                        <select class="form-control" name="account">
+                                                        <option>항목을 선택하세요</option>
+                                                        <option>제품</option>
+                                                        <option>서비스</option>
+                                                        <option>지원</option>
+                                                    </select></div>
+                                                </div>
+                                            </div>                                                         
+                                            
+                                            <div class="hr-line-dashed"></div>
+                                            
+                                            <div class="form-group"><label class="col-sm-2 control-label">이슈내용</label>
+                                                <div class="col-sm-10"><textarea class="pop-textarea-input" rows="5"></textarea></div>
+                                            </div>
+
+                                            <div class="hr-line-dashed"></div>                                                
+                                            <div class="form-group"><label class="col-sm-2 control-label" for="date_modified">이슈발생일자</label>
+                                                <div class="col-sm-4">
+                                                    <div id="data_1">
+                                                        <div class="input-group date">
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="03/04/2016">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <label class="col-sm-2 control-label" for="date_modified">해결목표일자</label>
+                                                <div class="col-sm-4">
+                                                    <div id="data_1">
+                                                        <div class="input-group date">
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="06/30/2016">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="hr-line-dashed"></div>                                                
+                                            <div class="form-group"><label class="col-sm-2 control-label" for="date_modified">이슈해결일자</label>
+                                                <div class="col-sm-4">
+                                                    <div id="data_1">
+                                                        <div class="input-group date">
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="06/30/2016">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <label class="col-sm-2 control-label" for="date_modified">연관 고객컨택내용</label>
+                                                <div class="col-sm-4 pd-t7">
+                                                    <a href="" class="btn_quick">바로가기</a>
+                                                </div>
+                                            </div>
+                                            <div class="hr-line-dashed"></div>
+                                            <div class="form-group"><label class="col-sm-2 control-label">이슈해결계획</label>
+                                                <div class="col-sm-10">
+                                                    <table id="" class="table table-bordered">
+                                                        <colgroup>
+                                                            <col width=""/>
+                                                            <col width="15%"/>
+                                                            <col width="15%"/>
+                                                            <col width="15%"/>
+                                                            <col width=""/>
+                                                            <col width="10%"/>
+                                                        </colgroup>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>해결계획</th>
+                                                                <th>책임자</th>
+                                                                <th>해결목표일</th>
+                                                                <th>실제완료일</th>
+                                                                <th>Status</th>
+                                                                <th>삭제</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>일정/예산</td>
+                                                                <td>김정훈</td>
+                                                                <td>2016-04-10</td>
+                                                                <td>2016-05-10</td>
+                                                                <td class="cell-status cell-statusColor-yellow"></td>
+                                                                <td><a href="#"><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>일정/예산</td>
+                                                                <td>김정훈</td>
+                                                                <td>2016-04-10</td>
+                                                                <td>2016-05-10</td>
+                                                                <td class="cell-status cell-statusColor-green"></td>
+                                                                <td><a href="#"><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>일정/예산</td>
+                                                                <td>김정훈</td>
+                                                                <td>2016-04-10</td>
+                                                                <td>2016-05-10</td>
+                                                                <td class="cell-status cell-statusColor-green"></td>
+                                                                <td><a href="#"><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>일정/예산</td>
+                                                                <td>김정훈</td>
+                                                                <td>2016-04-10</td>
+                                                                <td>2016-05-10</td>
+                                                                <td class="cell-status cell-statusColor-green"></td>
+                                                                <td><a href="#"><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                    <p class="text-center pd-t10">
+                                                        <a href="javascript:void(0);" class="btn-row-add" name="buttonSaleAddRow" onclick="modal.addRow();">+ 이슈해결계획 추가</a>
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div class="hr-line-dashed"></div>
+                                            <div class="form-group pos-rel"><label class="col-sm-2 control-label">메일공유</label>
+                                                <div class="col-sm-10">
+                                                    <div class="company-search mg-b5"><!-- 고객사 검색 -->
+                                                        <div class="company-current"><!-- 현재 등록된 고객사 -->
+                                                            <span>삼성증권<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                            <span>삼성캐미칼<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                            <span>삼성자동차<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                            <span>삼성전자<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                        </div>
+                                                        <button type="button" class="btn btn-gray btn-file">직원추가</button>
+                                                        <!-- 검색버튼 클릭시 아래의 "custom-company" 팝업 노출 -->
+                                                    </div>                                                                                            
+                                                </div>
+
+                                                <!-- 추가 팝업 -->
+                                                <div class="custom-company-pop off">
+                                                    <div class="pop-header">
+                                                        <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                                        <strong class="pop-title">직원 선택</strong>
+                                                    </div>
+                                                    <div class="col-sm-12 cont">
+                                                        <div class="form-group">
+                                                            <div class="col-sm-12">
+                                                                <div class="company-search-after mg-b5"><!-- 검색 -->
+                                                                    <input type="text" placeholder="직원 검색" class="form-control">
+                                                                    <button type="button" class="btn btn-seller btn-file">검색</button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-12 company-result mg-b10 "><!-- 검색 결과 노출시 "off" 삭제 -->
+                                                                <strong>[직원 검색 결과]</strong>
+                                                                <ul class="company-list">
+                                                                    <li><span>이상현</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <!-- <div class="ta-c">
+                                                            <button type="button" class="btn btn-seller btn-file">추가하기</button>
+                                                        </div> -->
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="hr-line-dashed"></div>
+                                            <div class="form-group"><label class="col-sm-2 control-label">파일첨부</label>
+                                                <div class="col-sm-10">
+                                                    <div class="input-default pop-file">
+                                                        <div class="file-dragdrap-area">
+                                                            <div class="fileUpload btn btn-gray">
+                                                                <span>파일찾기</span>
+                                                                <input type="file" class="upload" />
+                                                            </div>
+                                                            <div class="file-in-list">
+                                                                <!-- 선택된 파일이 없는 경우 아래 멘트 노출 -->
+                                                                <!-- <span class="blank-ment ">선택된 파일이 없습니다</span> -->
+
+                                                                <!-- 선택된 파일이 있으면 아래 리스트 노촐되고, 위 "blank-ment"는 hidden 처리함 -->
+                                                                <span><a href="#"><i class="fa fa-file-powerpoint-o fa-lg"></i> 영업1팀1분기전략사업제안서.ppt</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                                <span><a href="#"><i class="fa fa-file-word-o fa-lg"></i> 영업1팀1분기전략사업제안서.word</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="hr-line-dashed"></div>
+
+                                            <p class="text-center">
+                                                <button type="button" class="btn btn-outline btn-seller-outline">삭제하기</button>
+                                                <button type="button" class="btn btn-w-m btn-seller">저장하기</button>
+                                            </p>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- // 상세보기 -->
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

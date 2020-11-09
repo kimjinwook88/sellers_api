@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>달력</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/fullcalendar/fullcalendar.css" rel="stylesheet">
+    <link href="../../css/pc/fullcalendar/fullcalendar.print.css" rel="stylesheet" media="print">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+    <script src="http://momentjs.com/downloads/moment.js"></script>
+    <script type="text/javascript" src="../../js/pc/fullcalendar-2.6.1/fullcalendar.js"></script>
+    <script type="text/javascript" src="http://fullcalendar.io/js/fullcalendar-2.7.1/gcal.js"></script>
+
+</head>
+
+<body class="mem-calendar-bg">
+    <div class="mem-calendar-title">
+        <span>이상현 부장 캘린더</span>
+        <a href="#" class="btn-close"><i class="fa fa-times"></i></a>
+    </div>
+
+    <div id="" class="mem-calendar-cont">
+
+        <script>
+            function layer_calendar() {
+            }
+
+            /* function clickfccontent(test) {
+                var x = document.getElementById(test.getAttribute('id')).getAttribute('id');
+                var data = $('#'+x).text().split(" ");
+                var time = data[0];
+                var hour = parseInt(time.substring(0, time.length-2));
+                var title = data[1].replace("　", " ");
+                var date = data[2];
+                
+                if(time.charAt(time.length-2)=='P') {
+                    hour = hour + 12;
+                }else if(time.charAt(time.length-2)!='A') {
+                    alert("에러");
+                    return;
+                }
+                
+                var objDiv = document.getElementById('testdiv');
+                if(objDiv.style.display=="block") {
+                    objDiv.style.display = "none";
+                    } else {
+                        objDiv.style.display = "block";
+                        
+                        $('#schedule_title').val(title);
+                        $('#schedule_s_date').val(date);
+                        $('#schedule_e_date').val('');
+                        $('#schedule_s_hour').val(hour); */
+                        
+                        /* $('#frm3').attr('action', 'fullshceduleinfo.do').submit();
+                        return true; */
+                        /* $.ajax({
+                            type:'POST',
+                            dataType:'text',
+                            url:'fullshceduleinfo.do',
+                            data:"schedule_title="+$('#schedule_title').val()+"&schedule_s_date="+$('#schedule_s_date').val()+"&schedule_s_hour="+$('#schedule_s_hour').val(),
+                            success:function(res){
+                                //alert(res);
+                                $('#testdiv').html(res);
+                                $('#schedule_title').val(title);
+                                $('#schedule_s_date').val(date);
+                                $('#schedule_e_date').val('');
+                                $('#schedule_s_hour').val(hour);
+                            }
+                        }); 
+                        
+                        }
+                
+                var divTop = test.clientY - 40; //상단 좌표 위치 안맞을시 e.pageY
+                var divLeft = test.clientX; //좌측 좌표 위치 안맞을시 e.pageX
+                var serial = $(this).attr("serial");
+                var idx = $(this).attr("idx"); */
+                /* $('#divView').empty().append('<div style="position:absolute;top:5px;right:5px"><span id="close" style="cursor:pointer;font-size:1.5em" title="닫기">X</span> </div><br><a href="?serial=' + serial + '">serial</a><BR><a href="?idx=' + idx + '">idx</a>');
+                $('#divView').css({
+                     "top": divTop
+                     ,"left": divLeft
+                     , "position": "fixed"
+                }).show(); */
+                /* $('#btn_cancle').click(function(){document.getElementById('testdiv').style.display='none'});
+                
+            } */
+
+            //빈 날짜 클릭한 날짜 값 들어옴
+            function clickfunc(test) {
+                //if(!event.url) {
+                    var x = document.getElementById(test.getAttribute('id')).getAttribute('id');
+                    var objDiv = document.getElementById('testdiv');
+                    if(objDiv.style.display=="block") {
+                        objDiv.style.display = "none";
+                        } else {
+                            objDiv.style.display = "block";
+                            $('#schedule_s_date').val(x);
+                            $('#schedule_e_date').val(x);
+                            }
+                
+                    var divTop = test.clientY - 40; //상단 좌표 위치 안맞을시 e.pageY
+                    var divLeft = test.clientX; //좌측 좌표 위치 안맞을시 e.pageX
+                    var serial = $(this).attr("serial");
+                    var idx = $(this).attr("idx");
+                    $('#divView').empty().append('<div style="position:absolute;top:5px;right:5px"><span id="close" style="cursor:pointer;font-size:1.5em" title="닫기">X</span> </div><br><a href="?serial=' + serial + '">serial</a><BR><a href="?idx=' + idx + '">idx</a>');
+                    $('#divView').css({
+                         "top": divTop
+                         ,"left": divLeft
+                         , "position": "fixed"
+                    }).show();
+                    $('#btn_cancle').click(function(){document.getElementById('testdiv').style.display='none'});
+                //}
+                //location.href='/rnd/scheduleinsert.do';
+            }
+
+            $(document).ready(function() {
+                var date = new Date();
+                var d = date.getDate();
+                var m = date.getMonth();
+                var y = date.getFullYear();
+                
+                //일정
+                //var monthData = document.getElementById('monthData').value;
+                //monthData = JSON.parse(monthData);
+                
+                var calendar = $('#calendar').fullCalendar({
+                    header: {
+                        left: 'today prev,next', //좌측버튼
+                        center: 'title', //가운데 타이틀
+                        right: 'month,agendaWeek,agendaDay' //우측버튼
+                    },
+                    //time formats
+                    titleFormat: {
+                        month: 'YYYY년 MMMM',
+                        week: 'YYYY년 MMMM 일 D일',
+                        day: 'YYYY년 MMM d dddd'
+                    },
+                    columnFormat: {
+                        month: 'ddd',
+                        week: 'M/D ddd',
+                        day: 'M월D일 dddd'
+                    },
+                    timeFormat: 'h(:mm)T', //주간,일간
+                    allDayText: '시간', //주간,일간
+                    axisFormat: 'Thh', //주간,일간
+                    monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+                    monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+                    dayNames: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'],
+                    dayNamesShort: ['일','월','화','수','목','금','토'],
+                    buttonText: {
+                        prev: '이전',
+                        next: '다음',
+                        today: '오늘',
+                        month: '월간',
+                        week: '주간',
+                        day: '일간'
+                    },
+                    //defaultDate: '2016-01-12',
+                    /* selectable: true,
+                    selectHelper: true,
+                    select: function(start, end, allDay) { //빈곳 클릭(일정 추가 폼으로 이동)
+                        var sta_dt = moment().format('YYYY-MM-D');
+                        var end_dt = moment().format('YYYY-MM-D');
+                        var sta_tm = moment().format('HH:mm');
+                        var end_tm = moment().format('HH:mm'); */
+                        /* alert(sta_dt);
+                        location.href='/rnd/scheduleinsert.do'; */
+                        /* var title = prompt('일정 제목을 입력하세요.:');
+                        var eventData;
+                        if (title) {
+                            eventData = {
+                                title: title,
+                                start: start,
+                                end: end,
+                                allDay: allDay
+                            };
+                            $('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
+                        }
+                        $('#calendar').fullCalendar('unselect');
+                    }, */
+                    editable: true,
+                    eventLimit: true, // allow "more" link when too many events
+                    /*
+                    
+                        id : 아이디
+                        title : 일정 제목
+                        allDay : 시간 상관없이 시작일부터 끝일까지  true/false
+                        start : 시작 일
+                        end : 끝 일
+                        url : 클릭시 해당 페이지로 이동
+                        className : 특정 class의 css를 참조하는듯? String/배열
+                        editable : 마우스 수정옵션 true/false, default false
+                        startEditable : true/false, default true
+                        durationEditable : true/false, default true
+                        rendering : 특정일정을 배경에 표시함 'background'/'inverse-background'
+                        overlap : eventOverlap선언되어있는  이벤트를 참고하는듯? true/false, default true
+                            
+                    */
+                    googleCalendarApiKey: 'AIzaSyCKE8qrncJjPcV5T3uk2ZAi49l2yI7C1sg',
+                    
+                    //events: monthData,
+                    events: 'youn9412@gmail.com',
+                    
+                    eventClick: function(event) {
+                        //alert(event.url);
+                        // opens events in a popup window
+                        if(event.url) {
+                        window.open(event.url, 'gcalevent', 'width=700,height=600');
+                        return false;
+                        }
+                    },
+                    /* events: [
+                             {
+                                 title:'hh',
+                                 start:new Date(y,m,05,08,00),
+                                 end:new Date(y,m,06,11,00)
+                                    //allDay: false
+                             }
+                             ], */
+                    /* events: [
+                                {
+                                    title: '01 All Day Event',
+                                    body: '으아아아아아아아',
+                                    start: new Date(y, m, 1),
+                                    color: 'red'
+                                    //rendering : 'inverse-background'
+                                },] */
+                    /* events: [
+                        {
+                            title: '01 All Day Event',
+                            body: '으아아아아아아아',
+                            start: new Date(y, m, 1),
+                            backgroundColor: 'red'
+                            //rendering : 'inverse-background'
+                        },
+                        {
+                            title: '02 Long Event',
+                            allDay: true,
+                            start: new Date(y, m, d-5),
+                            end: new Date(y, m, d-2)
+                        },
+                        {
+                            id: 999,
+                            title: '03 Repeating Event',
+                            start: new Date(y, m, d-3, 16, 00),
+                            allDay: false
+                        },
+                        {
+                            id: 999,
+                            title: '03 Repeating Event',
+                            start: new Date(y, m, d+4, 16, 00),
+                            allDay: false
+                        },
+                        { 
+                            title: '05 Conference',
+                            start: '2016-04-11',
+                            end: '2016-04-13' 
+                        },
+                        {
+                            title: '06 Meeting',
+                            start: new Date(y, m, d+1, 19, 00),
+                            end: new Date(y, m, d+1, 22, 30),
+                            allDay: false //[주간]에 나타남, true 나타나지않음
+                        },
+                        {
+                            title: 'Click for Google',
+                            start: new Date(y, m, 28),
+                            end: new Date(y, m, 29),
+                            url: 'http://google.com/'
+                        },
+                    ] */
+                });
+                
+            });
+        </script>
+
+        <div class="row animated fadeInDown">                
+            <div class="">
+                <div class="ibox">
+                    <div class="ibox-content border_n">
+                        <div id="calendar" class="fc fc-ltr fc-unthemed">
+                            <div class="fc-toolbar">
+                                <div class="fc-left">
+                                    <button type="button" class="fc-today-button fc-button fc-state-default fc-corner-left fc-corner-right fc-state-disabled fc-today-sellers" disabled="disabled">오늘</button>
+                                    <div class="fc-button-group">
+                                        <button type="button" class="fc-prev-button fc-button fc-state-default fc-corner-left"><i class="fa fa-angle-left fa-lg"></i> 이전</button>
+                                        <button type="button" class="fc-next-button fc-button fc-state-default fc-corner-right">다음 <i class="fa fa-angle-right fa-lg"></i></button>
+                                    </div>
+                                </div>
+                                <div class="fc-right">
+                                    <div class="fc-button-group">
+                                        <button type="button" class="fc-month-button fc-button fc-state-default fc-corner-left fc-state-active">월간</button>
+                                        <button type="button" class="fc-agendaWeek-button fc-button fc-state-default">주간</button>
+                                        <button type="button" class="fc-agendaWeek-button fc-button fc-state-default">일간</button>
+                                        <button type="button" class="fc-agendaDay-button fc-button fc-state-default fc-corner-right"><i class="fa fa-search v-m"></i> <span class="v-m">일정검색</span></button>
+                                    </div>
+                                </div>
+                                
+                                <div class="fc-center"><h2 class="current-date">2016년 6월</h2></div>
+
+                                <div class="fc-clear"></div>
+                            </div>
+
+                            <div class="fc-view-container" style="">
+                                <div class="fc-view fc-month-view fc-basic-view" style="">
+                                    <table>
+                                        <thead class="fc-head">
+                                            <tr>
+                                                <td class="fc-head-container fc-widget-header">
+                                                    <div class="fc-row fc-widget-header"><table><thead><tr><th class="fc-day-header fc-widget-header fc-sun">일</th><th class="fc-day-header fc-widget-header fc-mon">월</th><th class="fc-day-header fc-widget-header fc-tue">화</th><th class="fc-day-header fc-widget-header fc-wed">수</th><th class="fc-day-header fc-widget-header fc-thu">목</th><th class="fc-day-header fc-widget-header fc-fri">금</th><th class="fc-day-header fc-widget-header fc-sat">토</th></tr></thead></table></div>
+                                                </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="fc-body">
+                                            <tr>
+                                                <td class="fc-widget-content">
+                                                    <div class="fc-day-grid-container" style="">
+                                                        <div class="fc-day-grid">
+                                                            <div class="fc-row fc-week fc-widget-content fc-rigid" style="height: 107px;">
+                                                                <div class="fc-bg">
+                                                                    <table><tbody><tr><td id="2016-05-29" class="fc-day fc-widget-content fc-sun fc-other-month fc-past" data-date="2016-05-29"></td><td id="2016-05-30" class="fc-day fc-widget-content fc-mon fc-other-month fc-past" data-date="2016-05-30"></td><td id="2016-05-31" class="fc-day fc-widget-content fc-tue fc-other-month fc-past" data-date="2016-05-31"></td><td id="2016-06-01" class="fc-day fc-widget-content fc-wed fc-past" data-date="2016-06-01"></td><td id="2016-06-02" class="fc-day fc-widget-content fc-thu fc-past" data-date="2016-06-02"></td><td id="2016-06-03" class="fc-day fc-widget-content fc-fri fc-past" data-date="2016-06-03"></td><td id="2016-06-04" class="fc-day fc-widget-content fc-sat fc-past" data-date="2016-06-04"></td></tr></tbody></table>
+                                                                </div>
+                                                                <div class="fc-content-skeleton">
+                                                                    <table><thead><tr><td class="fc-day-number fc-sun fc-other-month fc-past" data-date="2016-05-29"><input type="button" id="2016-05-29" value="+" onclick="clickfunc(this)">29</td><td class="fc-day-number fc-mon fc-other-month fc-past" data-date="2016-05-30"><input type="button" id="2016-05-30" value="+" onclick="clickfunc(this)">30</td><td class="fc-day-number fc-tue fc-other-month fc-past" data-date="2016-05-31"><input type="button" id="2016-05-31" value="+" onclick="clickfunc(this)">31</td><td class="fc-day-number fc-wed fc-past" data-date="2016-06-01"><input type="button" id="2016-06-01" value="+" onclick="clickfunc(this)">1</td><td class="fc-day-number fc-thu fc-past" data-date="2016-06-02"><input type="button" id="2016-06-02" value="+" onclick="clickfunc(this)">2</td><td class="fc-day-number fc-fri fc-past" data-date="2016-06-03"><input type="button" id="2016-06-03" value="+" onclick="clickfunc(this)">3</td><td class="fc-day-number fc-sat fc-past" data-date="2016-06-04"><input type="button" id="2016-06-04" value="+" onclick="clickfunc(this)">4</td></tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    <tr>
+                                                                        <td rowspan="2"></td>
+                                                                        <td class="fc-event-container">
+                                                                            <a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-event-bg2" href="https://www.google.com/calendar/event?eid=dWpxcWwzYWY3amo2dW1jaXZhMjcwZDV0dmdfMjAxNjA2MDhUMDEwMDAwWiB5b3VuOTQxMkBt">
+
+                                                                            <div class="fc-content" id="xsfsfds" onclick="clickfccontent(this)">
+                                                                                <img src="../../images/pc/calendar_icon2.png" class="v-m" />
+                                                                                <span class="fc-time">09:00</span> <span class="fc-title">조회</span> 
+                                                                                <span class="fc-start" style="display:none">2016-06-01</span>
+                                                                            </div>
+
+                                                                            </a>
+                                                                        </td>
+                                                                        <td rowspan="2"></td>
+                                                                        <td class="fc-event-container">
+                                                                            <a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-event-bg3" href="https://www.google.com/calendar/event?eid=dWpxcWwzYWY3amo2dW1jaXZhMjcwZDV0dmdfMjAxNjA2MDhUMDEwMDAwWiB5b3VuOTQxMkBt">
+
+                                                                            <div class="fc-content" id="xsfsfds" onclick="clickfccontent(this)">
+                                                                                <img src="../../images/pc/calendar_icon3.png" class="v-m" />
+                                                                                <span class="fc-time">10:00</span> <span class="fc-title">사내미팅</span> 
+                                                                                <span class="fc-start" style="display:none">2016-06-01</span>
+                                                                            </div>
+
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="fc-event-container">
+                                                                            <a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-event-bg3" href="https://www.google.com/calendar/event?eid=dWpxcWwzYWY3amo2dW1jaXZhMjcwZDV0dmdfMjAxNjA2MDhUMDEwMDAwWiB5b3VuOTQxMkBt">
+
+                                                                            <div class="fc-content" id="xsfsfds" onclick="clickfccontent(this)">
+                                                                                <img src="../../images/pc/calendar_icon3.png" class="v-m" />
+                                                                                <span class="fc-time">11:00</span> <span class="fc-title">오전 팀미팅</span> 
+                                                                                <span class="fc-start" style="display:none">2016-06-01</span>
+                                                                            </div>
+
+                                                                            </a>
+                                                                        </td>
+                                                                        <td class="fc-event-container">
+                                                                            <a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-event-bg4" href="https://www.google.com/calendar/event?eid=dWpxcWwzYWY3amo2dW1jaXZhMjcwZDV0dmdfMjAxNjA2MDhUMDEwMDAwWiB5b3VuOTQxMkBt">
+
+                                                                            <div class="fc-content" id="xsfsfds" onclick="clickfccontent(this)">
+                                                                                <img src="../../images/pc/calendar_icon4.png" class="v-m" />
+                                                                                <span class="fc-time">10:00</span> <span class="fc-title">사내교육</span> 
+                                                                                <span class="fc-start" style="display:none">2016-06-01</span>
+                                                                            </div>
+
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="fc-row fc-week fc-widget-content fc-rigid" style="height: 107px;">
+                                                                <div class="fc-bg">
+                                                                    <table><tbody><tr><td id="2016-06-05" class="fc-day fc-widget-content fc-sun fc-past" data-date="2016-06-05"></td><td id="2016-06-06" class="fc-day fc-widget-content fc-mon fc-past" data-date="2016-06-06"></td><td id="2016-06-07" class="fc-day fc-widget-content fc-tue fc-past" data-date="2016-06-07"></td><td id="2016-06-08" class="fc-day fc-widget-content fc-wed fc-past" data-date="2016-06-08"></td><td id="2016-06-09" class="fc-day fc-widget-content fc-thu fc-past" data-date="2016-06-09"></td><td id="2016-06-10" class="fc-day fc-widget-content fc-fri fc-past" data-date="2016-06-10"></td><td id="2016-06-11" class="fc-day fc-widget-content fc-sat fc-past" data-date="2016-06-11"></td></tr></tbody></table>
+                                                                </div>
+                                                                <div class="fc-content-skeleton">
+                                                                    <table><thead><tr><td class="fc-day-number fc-sun fc-past" data-date="2016-06-05"><input type="button" id="2016-06-05" value="+" onclick="clickfunc(this)">5</td><td class="fc-day-number fc-mon fc-past" data-date="2016-06-06"><input type="button" id="2016-06-06" value="+" onclick="clickfunc(this)">6</td><td class="fc-day-number fc-tue fc-past" data-date="2016-06-07"><input type="button" id="2016-06-07" value="+" onclick="clickfunc(this)">7</td><td class="fc-day-number fc-wed fc-past" data-date="2016-06-08"><input type="button" id="2016-06-08" value="+" onclick="clickfunc(this)">8</td><td class="fc-day-number fc-thu fc-past" data-date="2016-06-09"><input type="button" id="2016-06-09" value="+" onclick="clickfunc(this)">9</td><td class="fc-day-number fc-fri fc-past" data-date="2016-06-10"><input type="button" id="2016-06-10" value="+" onclick="clickfunc(this)">10</td><td class="fc-day-number fc-sat fc-past" data-date="2016-06-11"><input type="button" id="2016-06-11" value="+" onclick="clickfunc(this)">11</td></tr></thead><tbody><tr><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td><td class="fc-event-container">
+
+                                                                    <a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-event-bg2" href="https://www.google.com/calendar/event?eid=dWpxcWwzYWY3amo2dW1jaXZhMjcwZDV0dmdfMjAxNjA2MDhUMDEwMDAwWiB5b3VuOTQxMkBt">
+
+                                                                    <div class="fc-content" id="xsfsfds" onclick="clickfccontent(this)">
+                                                                        <img src="../../images/pc/calendar_icon2.png" class="v-m" />
+                                                                        <span class="fc-time">09:00</span> <span class="fc-title">xsfsfds</span> 
+                                                                        <span class="fc-start" style="display:none">2016-06-01</span>
+                                                                    </div>
+
+                                                                    </a></td><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td></tr><tr><td class="fc-event-container">
+
+                                                                    <a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-event-bg5" href="https://www.google.com/calendar/event?eid=djJhcmwyZHFtcWd0M2phMGxzZGRib2RvNGNfMjAxNjA2MDhUMDIwMDAwWiB5b3VuOTQxMkBt">
+
+                                                                    <div class="fc-content" id="xsfsfds" onclick="clickfccontent(this)">
+                                                                        <img src="../../images/pc/calendar_icon5.png" class="v-m" />
+                                                                        <span class="fc-time">10:30</span> <span class="fc-title">미팅 이동시간</span> 
+                                                                        <span class="fc-start" style="display:none">2016-06-01</span>
+                                                                    </div>
+
+                                                                    </a></td></tr></tbody></table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="fc-row fc-week fc-widget-content fc-rigid" style="height: 107px;">
+                                                                <div class="fc-bg">
+                                                                    <table><tbody><tr><td id="2016-06-12" class="fc-day fc-widget-content fc-sun fc-past" data-date="2016-06-12"></td><td id="2016-06-13" class="fc-day fc-widget-content fc-mon fc-today fc-state-highlight" data-date="2016-06-13"></td><td id="2016-06-14" class="fc-day fc-widget-content fc-tue fc-future" data-date="2016-06-14"></td><td id="2016-06-15" class="fc-day fc-widget-content fc-wed fc-future" data-date="2016-06-15"></td><td id="2016-06-16" class="fc-day fc-widget-content fc-thu fc-future" data-date="2016-06-16"></td><td id="2016-06-17" class="fc-day fc-widget-content fc-fri fc-future" data-date="2016-06-17"></td><td id="2016-06-18" class="fc-day fc-widget-content fc-sat fc-future" data-date="2016-06-18"></td></tr></tbody></table>
+                                                                </div>
+                                                                <div class="fc-content-skeleton">
+                                                                    <table><thead><tr><td class="fc-day-number fc-sun fc-past" data-date="2016-06-12"><input type="button" id="2016-06-12" value="+" onclick="clickfunc(this)">12</td><td class="fc-day-number fc-mon fc-today fc-state-highlight" data-date="2016-06-13"><input type="button" id="2016-06-13" value="+" onclick="clickfunc(this)">13</td><td class="fc-day-number fc-tue fc-future" data-date="2016-06-14"><input type="button" id="2016-06-14" value="+" onclick="clickfunc(this)">14</td><td class="fc-day-number fc-wed fc-future" data-date="2016-06-15"><input type="button" id="2016-06-15" value="+" onclick="clickfunc(this)">15</td><td class="fc-day-number fc-thu fc-future" data-date="2016-06-16"><input type="button" id="2016-06-16" value="+" onclick="clickfunc(this)">16</td><td class="fc-day-number fc-fri fc-future" data-date="2016-06-17"><input type="button" id="2016-06-17" value="+" onclick="clickfunc(this)">17</td><td class="fc-day-number fc-sat fc-future" data-date="2016-06-18"><input type="button" id="2016-06-18" value="+" onclick="clickfunc(this)">18</td></tr></thead><tbody><tr><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td><td class="fc-event-container">
+
+                                                                    <a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-event-bg6" href="https://www.google.com/calendar/event?eid=dWpxcWwzYWY3amo2dW1jaXZhMjcwZDV0dmdfMjAxNjA2MDhUMDEwMDAwWiB5b3VuOTQxMkBt">
+
+                                                                    <div class="fc-content" id="xsfsfds" onclick="clickfccontent(this)">
+                                                                        <img src="../../images/pc/calendar_icon6.png" class="v-m" />
+                                                                        <span class="fc-time">09:00</span> <span class="fc-title">휴가</span> 
+                                                                        <span class="fc-start" style="display:none">2016-06-01</span>
+                                                                    </div>
+
+                                                                    </a></td><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td></tr><tr><td class="fc-event-container">
+
+                                                                    <a class="fc-day-grid-event fc-h-event fc-event fc-start fc-end fc-event-bg7" href="https://www.google.com/calendar/event?eid=dWpxcWwzYWY3amo2dW1jaXZhMjcwZDV0dmdfMjAxNjA2MDhUMDEwMDAwWiB5b3VuOTQxMkBt">
+
+                                                                    <div class="fc-content" id="xsfsfds" onclick="clickfccontent(this)">
+                                                                        <img src="../../images/pc/calendar_icon7.png" class="v-m" />
+                                                                        <span class="fc-time">15:00</span> <span class="fc-title">개인일정</span> 
+                                                                        <span class="fc-start" style="display:none">2016-06-01</span>
+                                                                    </div>
+
+                                                                    </a></td></tr></tbody></table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="fc-row fc-week fc-widget-content fc-rigid" style="height: 107px;">
+                                                                <div class="fc-bg">
+                                                                    <table><tbody><tr><td id="2016-06-19" class="fc-day fc-widget-content fc-sun fc-future" data-date="2016-06-19"></td><td id="2016-06-20" class="fc-day fc-widget-content fc-mon fc-future" data-date="2016-06-20"></td><td id="2016-06-21" class="fc-day fc-widget-content fc-tue fc-future" data-date="2016-06-21"></td><td id="2016-06-22" class="fc-day fc-widget-content fc-wed fc-future" data-date="2016-06-22"></td><td id="2016-06-23" class="fc-day fc-widget-content fc-thu fc-future" data-date="2016-06-23"></td><td id="2016-06-24" class="fc-day fc-widget-content fc-fri fc-future" data-date="2016-06-24"></td><td id="2016-06-25" class="fc-day fc-widget-content fc-sat fc-future" data-date="2016-06-25"></td></tr></tbody></table>
+                                                                </div>
+                                                                <div class="fc-content-skeleton">
+                                                                    <table><thead><tr><td class="fc-day-number fc-sun fc-future" data-date="2016-06-19"><input type="button" id="2016-06-19" value="+" onclick="clickfunc(this)">19</td><td class="fc-day-number fc-mon fc-future" data-date="2016-06-20"><input type="button" id="2016-06-20" value="+" onclick="clickfunc(this)">20</td><td class="fc-day-number fc-tue fc-future" data-date="2016-06-21"><input type="button" id="2016-06-21" value="+" onclick="clickfunc(this)">21</td><td class="fc-day-number fc-wed fc-future" data-date="2016-06-22"><input type="button" id="2016-06-22" value="+" onclick="clickfunc(this)">22</td><td class="fc-day-number fc-thu fc-future" data-date="2016-06-23"><input type="button" id="2016-06-23" value="+" onclick="clickfunc(this)">23</td><td class="fc-day-number fc-fri fc-future" data-date="2016-06-24"><input type="button" id="2016-06-24" value="+" onclick="clickfunc(this)">24</td><td class="fc-day-number fc-sat fc-future" data-date="2016-06-25"><input type="button" id="2016-06-25" value="+" onclick="clickfunc(this)">25</td></tr></thead><tbody><tr><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td><td class="fc-event-container"></td><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td></tr><tr><td class="fc-event-container"></td></tr></tbody></table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="fc-row fc-week fc-widget-content fc-rigid" style="height: 107px;">
+                                                                <div class="fc-bg">
+                                                                    <table><tbody><tr><td id="2016-06-26" class="fc-day fc-widget-content fc-sun fc-future" data-date="2016-06-26"></td><td id="2016-06-27" class="fc-day fc-widget-content fc-mon fc-future" data-date="2016-06-27"></td><td id="2016-06-28" class="fc-day fc-widget-content fc-tue fc-future" data-date="2016-06-28"></td><td id="2016-06-29" class="fc-day fc-widget-content fc-wed fc-future" data-date="2016-06-29"></td><td id="2016-06-30" class="fc-day fc-widget-content fc-thu fc-future" data-date="2016-06-30"></td><td id="2016-07-01" class="fc-day fc-widget-content fc-fri fc-other-month fc-future" data-date="2016-07-01"></td><td id="2016-07-02" class="fc-day fc-widget-content fc-sat fc-other-month fc-future" data-date="2016-07-02"></td></tr></tbody></table>
+                                                                </div>
+                                                                <div class="fc-content-skeleton">
+                                                                    <table><thead><tr><td class="fc-day-number fc-sun fc-future" data-date="2016-06-26"><input type="button" id="2016-06-26" value="+" onclick="clickfunc(this)">26</td><td class="fc-day-number fc-mon fc-future" data-date="2016-06-27"><input type="button" id="2016-06-27" value="+" onclick="clickfunc(this)">27</td><td class="fc-day-number fc-tue fc-future" data-date="2016-06-28"><input type="button" id="2016-06-28" value="+" onclick="clickfunc(this)">28</td><td class="fc-day-number fc-wed fc-future" data-date="2016-06-29"><input type="button" id="2016-06-29" value="+" onclick="clickfunc(this)">29</td><td class="fc-day-number fc-thu fc-future" data-date="2016-06-30"><input type="button" id="2016-06-30" value="+" onclick="clickfunc(this)">30</td><td class="fc-day-number fc-fri fc-other-month fc-future" data-date="2016-07-01"><input type="button" id="2016-07-01" value="+" onclick="clickfunc(this)">1</td><td class="fc-day-number fc-sat fc-other-month fc-future" data-date="2016-07-02"><input type="button" id="2016-07-02" value="+" onclick="clickfunc(this)">2</td></tr></thead><tbody><tr><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td><td class="fc-event-container"></td><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td></tr><tr><td class="fc-event-container"></td></tr></tbody></table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="fc-row fc-week fc-widget-content fc-rigid" style="height: 109px;">
+                                                                <div class="fc-bg">
+                                                                    <table><tbody><tr><td id="2016-07-03" class="fc-day fc-widget-content fc-sun fc-other-month fc-future" data-date="2016-07-03"></td><td id="2016-07-04" class="fc-day fc-widget-content fc-mon fc-other-month fc-future" data-date="2016-07-04"></td><td id="2016-07-05" class="fc-day fc-widget-content fc-tue fc-other-month fc-future" data-date="2016-07-05"></td><td id="2016-07-06" class="fc-day fc-widget-content fc-wed fc-other-month fc-future" data-date="2016-07-06"></td><td id="2016-07-07" class="fc-day fc-widget-content fc-thu fc-other-month fc-future" data-date="2016-07-07"></td><td id="2016-07-08" class="fc-day fc-widget-content fc-fri fc-other-month fc-future" data-date="2016-07-08"></td><td id="2016-07-09" class="fc-day fc-widget-content fc-sat fc-other-month fc-future" data-date="2016-07-09"></td></tr></tbody></table>
+                                                                </div>
+                                                                <div class="fc-content-skeleton">
+                                                                    <table><thead><tr><td class="fc-day-number fc-sun fc-other-month fc-future" data-date="2016-07-03"><input type="button" id="2016-07-03" value="+" onclick="clickfunc(this)">3</td><td class="fc-day-number fc-mon fc-other-month fc-future" data-date="2016-07-04"><input type="button" id="2016-07-04" value="+" onclick="clickfunc(this)">4</td><td class="fc-day-number fc-tue fc-other-month fc-future" data-date="2016-07-05"><input type="button" id="2016-07-05" value="+" onclick="clickfunc(this)">5</td><td class="fc-day-number fc-wed fc-other-month fc-future" data-date="2016-07-06"><input type="button" id="2016-07-06" value="+" onclick="clickfunc(this)">6</td><td class="fc-day-number fc-thu fc-other-month fc-future" data-date="2016-07-07"><input type="button" id="2016-07-07" value="+" onclick="clickfunc(this)">7</td><td class="fc-day-number fc-fri fc-other-month fc-future" data-date="2016-07-08"><input type="button" id="2016-07-08" value="+" onclick="clickfunc(this)">8</td><td class="fc-day-number fc-sat fc-other-month fc-future" data-date="2016-07-09"><input type="button" id="2016-07-09" value="+" onclick="clickfunc(this)">9</td></tr></thead><tbody><tr><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td><td class="fc-event-container"></td><td rowspan="2"></td><td rowspan="2"></td><td rowspan="2"></td></tr><tr><td class="fc-event-container"></td></tr></tbody></table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- 주간 -->
+                                <div class="fc-view fc-agendaWeek-view fc-agenda-view off" style="">
+                                    <table>
+                                        <thead class="fc-head">
+                                            <tr>
+                                                <td class="fc-head-container fc-widget-header">
+                                                    <div class="fc-row fc-widget-header" style="border-right-width: 1px; margin-right: 16px;">
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th class="fc-axis fc-widget-header" style="width: 38px;"></th>
+                                                                    <th class="fc-day-header fc-widget-header fc-sun" data-date="2016-06-12">6/12 일</th>
+                                                                    <th class="fc-day-header fc-widget-header fc-mon" data-date="2016-06-13">6/13 월</th>
+                                                                    <th class="fc-day-header fc-widget-header fc-tue" data-date="2016-06-14">6/14 화</th>
+                                                                    <th class="fc-day-header fc-widget-header fc-wed" data-date="2016-06-15">6/15 수</th>
+                                                                    <th class="fc-day-header fc-widget-header fc-thu" data-date="2016-06-16">6/16 목</th>
+                                                                    <th class="fc-day-header fc-widget-header fc-fri" data-date="2016-06-17">6/17 금</th>
+                                                                    <th class="fc-day-header fc-widget-header fc-sat" data-date="2016-06-18">6/18 토</th>
+                                                                </tr>
+                                                            </thead>
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="fc-body">
+                                            <tr>
+                                                <td class="fc-widget-content">
+                                                    <div class="fc-day-grid">
+                                                        <div class="fc-row fc-week fc-widget-content" style="border-right-width: 1px; margin-right: 16px;">
+                                                            <div class="fc-bg">
+                                                                <table>
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="fc-axis fc-widget-content" style="width: 38px;"><span>시간</span></td>
+                                                                            <td id="2016-06-12" class="fc-day fc-widget-content fc-sun fc-past" data-date="2016-06-12"></td>
+                                                                            <td id="2016-06-13" class="fc-day fc-widget-content fc-mon fc-today fc-state-highlight" data-date="2016-06-13"></td>
+                                                                            <td id="2016-06-14" class="fc-day fc-widget-content fc-tue fc-future" data-date="2016-06-14"></td>
+                                                                            <td id="2016-06-15" class="fc-day fc-widget-content fc-wed fc-future" data-date="2016-06-15"></td>
+                                                                            <td id="2016-06-16" class="fc-day fc-widget-content fc-thu fc-future" data-date="2016-06-16"></td>
+                                                                            <td id="2016-06-17" class="fc-day fc-widget-content fc-fri fc-future" data-date="2016-06-17"></td>
+                                                                            <td id="2016-06-18" class="fc-day fc-widget-content fc-sat fc-future" data-date="2016-06-18"></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <div class="fc-content-skeleton">
+                                                                <table>
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="fc-axis" style="width:38px"></td>
+                                                                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <hr class="fc-divider fc-widget-header">
+                                                    <div class="fc-time-grid-container fc-scroller" style="height: 598px;">
+                                                        <div class="fc-time-grid">
+                                                            <div class="fc-bg">
+                                                                <table>
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="fc-axis fc-widget-content" style="width: 38px;"></td>
+                                                                            <td id="2016-06-12" class="fc-day fc-widget-content fc-sun fc-past" data-date="2016-06-12"></td>
+                                                                            <td id="2016-06-13" class="fc-day fc-widget-content fc-mon fc-today fc-state-highlight" data-date="2016-06-13"></td>
+                                                                            <td id="2016-06-14" class="fc-day fc-widget-content fc-tue fc-future" data-date="2016-06-14"></td>
+                                                                            <td id="2016-06-15" class="fc-day fc-widget-content fc-wed fc-future" data-date="2016-06-15"></td>
+                                                                            <td id="2016-06-16" class="fc-day fc-widget-content fc-thu fc-future" data-date="2016-06-16"></td>
+                                                                            <td id="2016-06-17" class="fc-day fc-widget-content fc-fri fc-future" data-date="2016-06-17"></td>
+                                                                            <td id="2016-06-18" class="fc-day fc-widget-content fc-sat fc-future" data-date="2016-06-18"></td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <div class="fc-slats">
+                                                                <table>
+                                                                    <tbody>
+                                                                        <tr data-time="00:00:00">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM12</span></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="00:30:00" class="fc-minor">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="01:00:00">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM01</span></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="01:30:00" class="fc-minor">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="02:00:00">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM02</span></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="02:30:00" class="fc-minor">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="03:00:00">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM03</span></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="03:30:00" class="fc-minor">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="04:00:00">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM04</span></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="04:30:00" class="fc-minor">
+                                                                            <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td>
+                                                                            <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="05:00:00">
+                                                                        <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM05</span></td>
+                                                                        <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="05:30:00" class="fc-minor">
+                                                                        <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td>
+                                                                        <td class="fc-widget-content"></td>
+                                                                        </tr>
+                                                                        <tr data-time="06:00:00">
+                                                                        <td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM06</span></td><td class="fc-widget-content"></td></tr><tr data-time="06:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="07:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM07</span></td><td class="fc-widget-content"></td></tr><tr data-time="07:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="08:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM08</span></td><td class="fc-widget-content"></td></tr><tr data-time="08:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="09:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM09</span></td><td class="fc-widget-content"></td></tr><tr data-time="09:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="10:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM10</span></td><td class="fc-widget-content"></td></tr><tr data-time="10:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="11:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM11</span></td><td class="fc-widget-content"></td></tr><tr data-time="11:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="12:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM12</span></td><td class="fc-widget-content"></td></tr><tr data-time="12:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="13:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM01</span></td><td class="fc-widget-content"></td></tr><tr data-time="13:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="14:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM02</span></td><td class="fc-widget-content"></td></tr><tr data-time="14:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="15:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM03</span></td><td class="fc-widget-content"></td></tr><tr data-time="15:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="16:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM04</span></td><td class="fc-widget-content"></td></tr><tr data-time="16:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="17:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM05</span></td><td class="fc-widget-content"></td></tr><tr data-time="17:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="18:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM06</span></td><td class="fc-widget-content"></td></tr><tr data-time="18:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="19:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM07</span></td><td class="fc-widget-content"></td></tr><tr data-time="19:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="20:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM08</span></td><td class="fc-widget-content"></td></tr><tr data-time="20:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="21:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM09</span></td><td class="fc-widget-content"></td></tr><tr data-time="21:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="22:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM10</span></td><td class="fc-widget-content"></td></tr><tr data-time="22:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="23:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM11</span></td><td class="fc-widget-content"></td></tr><tr data-time="23:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr></tbody></table></div><div class="fc-content-skeleton"><table><tbody><tr><td class="fc-axis" style="width: 38px;"></td><td><div class="fc-content-col"><div class="fc-event-container fc-helper-container"></div><div class="fc-event-container"></div><div class="fc-highlight-container"></div><div class="fc-bgevent-container"></div><div class="fc-business-container"></div></div></td><td><div class="fc-content-col"><div class="fc-event-container fc-helper-container"></div><div class="fc-event-container"></div><div class="fc-highlight-container"></div><div class="fc-bgevent-container"></div><div class="fc-business-container"></div></div></td><td><div class="fc-content-col"><div class="fc-event-container fc-helper-container"></div><div class="fc-event-container"></div><div class="fc-highlight-container"></div><div class="fc-bgevent-container"></div><div class="fc-business-container"></div></div></td><td><div class="fc-content-col"><div class="fc-event-container fc-helper-container"></div><div class="fc-event-container"><a class="fc-time-grid-event fc-v-event fc-event fc-start fc-end" href="https://www.google.com/calendar/event?eid=dWpxcWwzYWY3amo2dW1jaXZhMjcwZDV0dmdfMjAxNjA2MTVUMDEwMDAwWiB5b3VuOTQxMkBt" style="top: 439px; bottom: -483px; z-index: 1; left: 0%; right: 0%;"><div class="fc-content"><div class="fc-time" data-start="10AM" data-full="10:00 AM - 11:00 AM"><span>10AM - 11AM</span></div><div class="fc-title">xsfsfds</div></div><div class="fc-bg"></div></a><a class="fc-time-grid-event fc-v-event fc-event fc-start fc-end" href="https://www.google.com/calendar/event?eid=djJhcmwyZHFtcWd0M2phMGxzZGRib2RvNGNfMjAxNjA2MTVUMDIwMDAwWiB5b3VuOTQxMkBt" style="top: 483px; bottom: -527px; z-index: 1; left: 0%; right: 0%;"><div class="fc-content"><div class="fc-time" data-start="11AM" data-full="11:00 AM - 12:00 PM"><span>11AM - 12PM</span></div><div class="fc-title">asdasd</div></div><div class="fc-bg"></div></a></div><div class="fc-highlight-container"></div><div class="fc-bgevent-container"></div><div class="fc-business-container"></div></div></td><td><div class="fc-content-col"><div class="fc-event-container fc-helper-container"></div><div class="fc-event-container"></div><div class="fc-highlight-container"></div><div class="fc-bgevent-container"></div><div class="fc-business-container"></div></div></td><td><div class="fc-content-col"><div class="fc-event-container fc-helper-container"></div><div class="fc-event-container"></div><div class="fc-highlight-container"></div><div class="fc-bgevent-container"></div><div class="fc-business-container"></div></div></td><td><div class="fc-content-col"><div class="fc-event-container fc-helper-container"></div><div class="fc-event-container"></div><div class="fc-highlight-container"></div><div class="fc-bgevent-container"></div><div class="fc-business-container"></div></div></td></tr></tbody></table></div><hr class="fc-divider fc-widget-header" style="display: none;"></div></div></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- 일간 -->
+                                <div class="fc-view fc-agendaDay-view fc-agenda-view off" style="">
+                                    <table>
+                                        <thead class="fc-head">
+                                            <tr>
+                                                <td class="fc-head-container fc-widget-header">
+                                                    <div class="fc-row fc-widget-header" style="border-right-width: 1px; margin-right: 16px;">
+                                                        <table><thead><tr><th class="fc-axis fc-widget-header" style="width: 38px;"></th><th class="fc-day-header fc-widget-header fc-mon" data-date="2016-06-13">6월13일 월요일</th></tr></thead></table></div></td></tr></thead><tbody class="fc-body"><tr><td class="fc-widget-content"><div class="fc-day-grid"><div class="fc-row fc-week fc-widget-content" style="border-right-width: 1px; margin-right: 16px;"><div class="fc-bg"><table><tbody><tr><td class="fc-axis fc-widget-content" style="width: 38px;"><span>시간</span></td><td id="2016-06-13" class="fc-day fc-widget-content fc-mon fc-today fc-state-highlight" data-date="2016-06-13"></td></tr></tbody></table></div><div class="fc-content-skeleton"><table><tbody><tr><td class="fc-axis" style="width:38px"></td><td></td></tr></tbody></table></div></div></div><hr class="fc-divider fc-widget-header"><div class="fc-time-grid-container fc-scroller" style="height: 598px;"><div class="fc-time-grid"><div class="fc-bg"><table><tbody><tr><td class="fc-axis fc-widget-content" style="width: 38px;"></td><td id="2016-06-13" class="fc-day fc-widget-content fc-mon fc-today fc-state-highlight" data-date="2016-06-13"></td></tr></tbody></table></div><div class="fc-slats"><table><tbody><tr data-time="00:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM12</span></td><td class="fc-widget-content"></td></tr><tr data-time="00:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="01:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM01</span></td><td class="fc-widget-content"></td></tr><tr data-time="01:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="02:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM02</span></td><td class="fc-widget-content"></td></tr><tr data-time="02:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="03:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM03</span></td><td class="fc-widget-content"></td></tr><tr data-time="03:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="04:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM04</span></td><td class="fc-widget-content"></td></tr><tr data-time="04:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="05:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM05</span></td><td class="fc-widget-content"></td></tr><tr data-time="05:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="06:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM06</span></td><td class="fc-widget-content"></td></tr><tr data-time="06:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="07:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM07</span></td><td class="fc-widget-content"></td></tr><tr data-time="07:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="08:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM08</span></td><td class="fc-widget-content"></td></tr><tr data-time="08:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="09:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM09</span></td><td class="fc-widget-content"></td></tr><tr data-time="09:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="10:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM10</span></td><td class="fc-widget-content"></td></tr><tr data-time="10:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="11:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>AM11</span></td><td class="fc-widget-content"></td></tr><tr data-time="11:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="12:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM12</span></td><td class="fc-widget-content"></td></tr><tr data-time="12:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="13:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM01</span></td><td class="fc-widget-content"></td></tr><tr data-time="13:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="14:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM02</span></td><td class="fc-widget-content"></td></tr><tr data-time="14:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="15:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM03</span></td><td class="fc-widget-content"></td></tr><tr data-time="15:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="16:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM04</span></td><td class="fc-widget-content"></td></tr><tr data-time="16:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="17:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM05</span></td><td class="fc-widget-content"></td></tr><tr data-time="17:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="18:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM06</span></td><td class="fc-widget-content"></td></tr><tr data-time="18:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="19:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM07</span></td><td class="fc-widget-content"></td></tr><tr data-time="19:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="20:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM08</span></td><td class="fc-widget-content"></td></tr><tr data-time="20:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="21:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM09</span></td><td class="fc-widget-content"></td></tr><tr data-time="21:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="22:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM10</span></td><td class="fc-widget-content"></td></tr><tr data-time="22:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr><tr data-time="23:00:00"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"><span>PM11</span></td><td class="fc-widget-content"></td></tr><tr data-time="23:30:00" class="fc-minor"><td class="fc-axis fc-time fc-widget-content" style="width: 38px;"></td><td class="fc-widget-content"></td></tr></tbody></table></div><div class="fc-content-skeleton"><table><tbody><tr><td class="fc-axis" style="width: 38px;"></td><td><div class="fc-content-col"><div class="fc-event-container fc-helper-container"></div><div class="fc-event-container"></div><div class="fc-highlight-container"></div><div class="fc-bgevent-container"></div><div class="fc-business-container"></div></div></td></tr></tbody></table>
+                                                        </div>
+                                                        <hr class="fc-divider fc-widget-header" style="display: none;">
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>                
+        </div>
+
+    </div>
+
+    <div id='calendar'></div>
+    <div id="testdiv-1" style="position:fixed; border:double; top:25%; left:25%; width:50%; height:50%; z-index:1; display:none; background-color:white;">
+        <form name="frm3" id="frm3" method="post">
+        <div>일정추가</div>
+        <br>
+        <input type="text" id="user_id" name="user_id" value="" disabled="disabled" />
+        <br>
+        <input type="text" id="schedule_title" name="schedule_title" placeholder="일정 제목" />
+        <br>
+        <textarea id="schedule_content" name="schedule_content" placeholder="일정내용" style="margin-top: 5px;">
+        </textarea>
+        <br>
+        <input type="text" id="schedule_s_date" name="schedule_s_date" placeholder="시작 일" value="" style="width: 95px"/>
+        -
+        <input type="text" id="schedule_e_date" name="schedule_e_date" placeholder="종료 일" value="" onclick="" style="width: 95px"/>
+        <br>
+        시간 <input type="text" id="schedule_s_hour" name="schedule_s_hour" maxlength="2" style="width: 22px"/>
+        :
+        <input type="text" id="schedule_s_min" name="schedule_s_min" maxlength="2" style="width: 22px"/>
+        ~
+        <input type="text" id="schedule_e_hour" name="schedule_e_hour" maxlength="2" style="width: 22px"/>
+        :
+        <input type="text" id="schedule_e_min" name="schedule_e_min" maxlength="2" style="width: 22px"/>
+        <br>
+        <input type="text" id="schedule_share" name="schedule_share" placeholder="일정 공유" />
+        <br>
+        <input type="text" id="schedule_importance" name="schedule_importance" placeholder="중요도" /> 
+        <br>
+        <input type="button" id="btn_promise" name="btn_promise" value="약속  추가" />
+        <input type="button" id="btn_work" name="btn_work" value="업무 추가" />
+        </form>
+        <form name="frm4" id="frm4" method="get">
+        <input type="button" id="btn_cancle" name="btn_cancle" value="취  소" />
+        </form>
+        <!-- <div id="divView"></div> -->
+    </div>
+    
+
+    <style type="text/css">
+            div.ajaxMask 
+            { 
+                position:fixed; 
+                width:100%; 
+                height:100%; 
+                top:0; 
+                left:0; 
+                background-color:#777; 
+                opacity:0.5;
+                filter: alpha(opacity=50); 
+                z-index:99999999;
+                display:none;
+            }
+            div.ajax-loader_sellers{
+                position:fixed; 
+                width:100%; 
+                height:100%; 
+                top:50%; 
+                left:50%;
+                display:none;
+            }
+    </style>
+
+
+    <!-- 화면 전체 덮을 loading img -->
+    <div class="ajaxMask"></div>
+
+    <div class="ajax-loader_sellers" style="z-index:9999999;">
+        <img src = "/img/ajax-loader_sellers.gif" width="70px;"/>
+    </div>
+
+
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+
+
+
+    <script>
+       $(document).ready(function() { 
+           // datapicker : 달력 노출 스크립트
+           $('#data_1 .input-group.date').datepicker({
+               todayBtn: "linked",
+               keyboardNavigation: false,
+               forceParse: false,
+               calendarWeeks: true,
+               autoclose: true
+           }).on('hide.bs.modal', function(event) {
+            // prevent datepicker from firing bootstrap modal "show.bs.modal"
+            event.stopPropagation(); 
+            });
+         
+           $.ajaxLoading = function(){
+               $("div.ajax-loader_sellers").show(); //ajax Loading
+              setTimeout(function(){$("div.ajax-loader_sellers").hide();},300); //ajax Loading
+           }
+       });
+       
+        //윈도우 리사이즈 시 그리드 리사이즈
+       $(window).resize(function(e){ 
+         $sellersGrid.setGridWidth($(".pos-rel").width()-2);
+       });
+        
+        
+     //not event f5  event.clientY < 0
+     //event.altKey When press Alt +F4 
+     //event.ctrlKey When press Ctrl +F4 
+     //event.clientY 107 or 129 is  Alt F4 postion on window screen it may change base on screen resolution 
+     //브라우저 로그아웃 체크
+    /*   $(window).bind('beforeunload', function() {
+         if ((event.clientY < 0) ||(event.altKey) ||(event.ctrlKey)||((event.clientY < 129) && (event.clientY>107))) { 
+        $.ajax({
+         url : "/j_spring_security_logout"  //스프링시큐리티 에서 적용시켜놓은 custom logout url
+         ,success : function(){
+            alert("잘갔냐"); 
+         }
+        }); 
+             }
+      });  */
+    </script>
+
+</body>
+</html>

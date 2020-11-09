@@ -1,0 +1,42 @@
+/* Styles for the tables test page */
+
+
+
+.table-wrapper {
+   position: relative;
+   margin: 5em 5%;
+}
+.table-menu-wrapper {
+   position: absolute;
+   top: -3em;
+   right: 0;
+}
+.table-menu {
+   position: absolute;
+   background-color: #fff;
+   padding: 10px;
+   border: 1px solid #ccc;
+   font-size: 1.2em;
+   width: 12em;
+   right: 0;
+   left: auto;
+}
+.table-menu-hidden {
+   left: -999em;
+   right: auto;
+}
+.table-menu-btn {
+   text-decoration: none;
+   color: #333;
+   font-size: 1.2em;
+   background: #eee;
+   padding: .3em 10px .3em 20px;
+   border: 1px solid #ccc;
+}
+.table-menu ul {
+     
+}
+.table-menu li {
+   
+}
+

@@ -1,0 +1,37 @@
+						<tr>
+                      	  	<td>
+                      	  		<ul name="ulBizPpOppMultiple" class="flexdatalist-multiple" style="border: 1px solid rgb(204, 204, 204); border-radius: 4px; background-color: rgb(255, 255, 255); padding:none;">
+	                                <li class="input-container flexdatalist-multiple-value pos-rel" name="liBizPpOppCompanySeach" style="width: 100%;">
+		                                <input type="text" class="form-control" name="textBizPpOppCompany" placeholder="검색해 주세요." autocomplete="off" style="width: 100%;" auto-bind="0">
+		                                <input type="hidden" name="hiddenBizPpOppCompanyId" value="" />
+		                                <input type="hidden" name="hiddenBizPpOppCompanyName" value="" />
+	                                </li>
+	                            </ul>
+                      	  	</td>
+                      	  	<td>
+	                            <input type="text" name="textBizPpOppName" class="form-control">
+							</td>
+							<td>
+	                            <input type="text" name="textBizPpOppAmount" style="text-align: right;" onclick="bizPpOpp.zero(this);" onblur="bizPpOpp.blur(this);" onkeyup="commonCheck.onlyRealNumber(this);" class="form-control" value="0">
+							</td>
+	                      	<td>
+								<div class="data_1">
+                                     <div class="input-group date">
+                                         <span class="input-group-addon" style="display: none;"><i class="fa fa-calendar"></i></span><input type="text" name="textModalBizPpOppPlanDate" class="form-control" value="" placeholder="ex)1988-11-18">
+                                     </div>
+                                 </div>		                      
+	                      	</td>
+                       		<td>
+                      	  		<ul name="ulBizPpOppMultiple" class="flexdatalist-multiple" style="border: 1px solid rgb(204, 204, 204); border-radius: 4px; background-color: rgb(255, 255, 255); padding:none;">
+	                                <li class="input-container flexdatalist-multiple-value pos-rel" name="liBizPpOppMemberSeach" style="width: 100%;">
+		                                <input type="text" class="form-control" name="textBizPpOppMember" placeholder="검색해 주세요." autocomplete="off" style="width: 100%;" auto-bind="0">
+		                                <input type="hidden" name="hiddenBizPpOppMemberId" value="" />
+		                                <input type="hidden" name="hiddenBizPpOppMemberName" value="" />
+	                               </li>
+	                            </ul>
+                      	  	</td>
+                      		<td>
+                      			<a href="javascript:void(0);" onclick="bizPpOpp.del(this);"><i class="fa fa-trash-o fa-lg"></i></a>
+                      			<input type="hidden" name="hiddenBizPpOppId" value="" />
+                      		</td>
+                   		</tr>

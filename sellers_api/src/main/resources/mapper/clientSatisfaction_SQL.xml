@@ -1,0 +1,4434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="clientSatisfaction">
+
+
+	<!-- 셀러스 standard 버전 작업 -->
+
+	<!-- 고객이슈 대시보드 _본부 -->
+	<select id="selectClientIssueDashBoardDivision"
+		parameterType="hashmap" resultType="hashmap">
+	<![CDATA[ 
+	SELECT 
+		DISTINCT
+		ODI.DIVISION_NO,
+		ODI.DIVISION_NAME,
+		COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '제품' THEN 1 ELSE 0 END) AS CATEGORY_1,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '서비스' THEN 1 ELSE 0 END) AS CATEGORY_2,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '지원' THEN 1 ELSE 0 END) AS CATEGORY_3,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '기타' THEN 1 ELSE 0 END) AS CATEGORY_4,
+		SUM(CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_1,
+		SUM(CASE WHEN CURRENT_DATE() >  CIL.DUE_DATE AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_2,
+		SUM(CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != '' THEN 1 ELSE 0 END) AS ISSUE_STATUS_3
+	FROM 
+		CLIENT_ISSUE_LOG AS CIL
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+	WHERE 1=1
+	AND YEAR(CIL.SYS_REGISTER_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CIL.SYS_REGISTER_DATE) =  QUARTER(#{searchDate})
+	]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND (OMI.MEMBER_DIVISION = #{global_member_division} OR
+				OMI2.MEMBER_DIVISION = #{global_member_division} OR
+				OMI3.MEMBER_DIVISION = #{global_member_division} OR
+				OMI4.MEMBER_DIVISION = #{global_member_division})
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND (OMI.MEMBER_DIVISION = #{global_member_division} OR
+				OMI2.MEMBER_DIVISION = #{global_member_division} OR
+				OMI3.MEMBER_DIVISION = #{global_member_division} OR
+				OMI4.MEMBER_DIVISION = #{global_member_division})
+				AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM =
+				#{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team} OR
+				OMI4.MEMBER_TEAM = #{global_member_team})
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND (OMI.MEMBER_DIVISION = #{global_member_division} OR
+				OMI2.MEMBER_DIVISION = #{global_member_division} OR
+				OMI3.MEMBER_DIVISION = #{global_member_division} OR
+				OMI4.MEMBER_DIVISION = #{global_member_division})
+				AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM =
+				#{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team} OR
+				OMI4.MEMBER_TEAM = #{global_member_team})
+			</when>
+		</choose>
+		GROUP BY OMI.MEMBER_DIVISION
+		HAVING 1=1
+	</select>
+
+	<!-- 고객이슈 대시보드 _팀 -->
+	<select id="selectClientIssueDashBoardTeam"
+		parameterType="hashmap" resultType="hashmap">
+	<![CDATA[ 
+	SELECT 
+		OMI.MEMBER_DIVISION,
+		OMI.MEMBER_TEAM,
+		OTI.TEAM_NAME,
+		COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '제품' THEN 1 ELSE 0 END) AS CATEGORY_1,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '서비스' THEN 1 ELSE 0 END) AS CATEGORY_2,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '지원' THEN 1 ELSE 0 END) AS CATEGORY_3,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '기타' THEN 1 ELSE 0 END) AS CATEGORY_4,
+		SUM(CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_1,
+		SUM(CASE WHEN CURRENT_DATE() >  CIL.DUE_DATE AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_2,
+		SUM(CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != '' THEN 1 ELSE 0 END) AS ISSUE_STATUS_3
+	FROM 
+		CLIENT_ISSUE_LOG AS CIL
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+	WHERE 1=1
+	AND YEAR(CIL.SYS_REGISTER_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CIL.SYS_REGISTER_DATE) =  QUARTER(#{searchDate})
+	]]>
+		GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM
+		HAVING 1=1
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				ORDER BY FIELD(OMI.MEMBER_TEAM, #{global_member_team}) DESC,
+				OMI.MEMBER_DIVISION ASC, OMI.MEMBER_DIVISION ASC
+				<!-- AND OMI.MEMBER_DIVISION = #{global_member_division} AND OMI.MEMBER_TEAM 
+					= #{global_member_team} -->
+			</when>
+		</choose>
+	</select>
+
+	<!-- 고객이슈 대시보드 _직원 -->
+	<select id="selectClientIssueDashBoardMember"
+		parameterType="hashmap" resultType="hashmap">
+	<![CDATA[ 
+	SELECT 
+		OMI.MEMBER_DIVISION,
+		OMI.MEMBER_TEAM,
+		OMI.MEMBER_ID_NUM,
+		OMI.HAN_NAME,
+		
+		OMI.POSITION_STATUS,
+		
+		COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '제품' THEN 1 ELSE 0 END) AS CATEGORY_1,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '서비스' THEN 1 ELSE 0 END) AS CATEGORY_2,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '지원' THEN 1 ELSE 0 END) AS CATEGORY_3,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '기타' THEN 1 ELSE 0 END) AS CATEGORY_4,
+		SUM(CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_1,
+		SUM(CASE WHEN CURRENT_DATE() >  CIL.DUE_DATE AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_2,
+		SUM(CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != '' THEN 1 ELSE 0 END) AS ISSUE_STATUS_3
+	FROM 
+		CLIENT_ISSUE_LOG AS CIL
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+	WHERE 1=1
+	AND YEAR(CIL.SYS_REGISTER_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CIL.SYS_REGISTER_DATE) =  QUARTER(#{searchDate})
+	]]>
+		<!-- GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM HAVING 
+			1=1 -->
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+				HAVING 1=1
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+				GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+				HAVING 1=1
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+				HAVING 1=1
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+				GROUP BY OMI.MEMBER_ID_NUM
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				GROUP BY OMI.HAN_NAME
+				ORDER BY FIELD(OMI.MEMBER_ID_NUM, #{global_member_id}) DESC,
+				FIELD(OMI.MEMBER_TEAM, #{global_member_team}) DESC
+			</when>
+		</choose>
+	</select>
+
+
+	<!-- 고객이슈 -->
+	<select id="selectClientIssueList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT TB.* 
+			FROM
+			( 
+				SELECT 
+						CIL.ISSUE_ID, 
+						CIL.ISSUE_CREATOR, 
+						CIL.SALES_REPRESENTIVE_ID, 
+						CIL.ISSUE_CATEGORY, 
+						CIL.ISSUE_SUBJECT, 
+						CIL.ISSUE_DATE, 
+						CIL.DUE_DATE, 
+						CIL.ISSUE_STATUS,
+						CASE 
+							WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+							THEN '#1ab394'
+							WHEN CIL.DUE_DATE >= CURRENT_DATE()
+							THEN '#ffc000' 
+							WHEN CURRENT_DATE() >  CIL.DUE_DATE
+							THEN '#f20056' 
+						END AS ISSUE_STATUS_TEXT, 
+						CIL.ISSUE_DETAIL, 
+						CIL.SOLVE_OWNER, 
+						CIL.ISSUE_CLOSE_DATE, 
+						CIL.SOLVE_EVIDENCE_YN, 
+						CIL.SOLVE_EVIDENCE_DETAIL, 
+						CIL.SOLVE_PLAN,
+						CIL.CSAT_DETAIL_ID,
+						CIL.ISSUE_CONFIRM_ID,
+						DATE_FORMAT(CIL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+						DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+						DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+						GROUP_CONCAT(CII.CUSTOMER_NAME) AS CUSTOMER_NAME,
+						OMI.HAN_NAME,
+						OMI2.HAN_NAME AS SALES_REPRESENTIVE_NAME,
+						OMI3.HAN_NAME AS SOLVE_OWNER_NAME,
+						OMI4.HAN_NAME AS CONFIRM_NAME,
+						GROUP_CONCAT(CCI.COMPANY_ID) AS COMPANY_ID,
+						GROUP_CONCAT(CCI.COMPANY_NAME) AS COMPANY_NAME,
+						MAX(IF(OHA.RANK=1, OHA.DUE_DATE, "")) AS DUE_DATE_1,
+						MAX(IF(OHA.RANK=2, OHA.DUE_DATE, "")) AS DUE_DATE_2,
+						MAX(IF(OHA.RANK=3, OHA.DUE_DATE, "")) AS DUE_DATE_3,
+						MAX(IF(OHA.RANK=4, OHA.DUE_DATE, "")) AS DUE_DATE_4,
+						MAX(IF(OHA.RANK=5, OHA.DUE_DATE, "")) AS DUE_DATE_5,
+						MAX(IF(OHA.RANK=1, OHA.CLOSE_DATE, "")) AS CLOSE_DATE_1,
+						MAX(IF(OHA.RANK=2, OHA.CLOSE_DATE, "")) AS CLOSE_DATE_2,
+						MAX(IF(OHA.RANK=3, OHA.CLOSE_DATE, "")) AS CLOSE_DATE_3,
+						MAX(IF(OHA.RANK=4, OHA.CLOSE_DATE, "")) AS CLOSE_DATE_4,
+						MAX(IF(OHA.RANK=5, OHA.CLOSE_DATE, "")) AS CLOSE_DATE_5,
+						MAX(IF(OHA.RANK=1, OHA.SOLVE_PLAN, "")) AS CONTENTS_1,
+						MAX(IF(OHA.RANK=2, OHA.SOLVE_PLAN, "")) AS CONTENTS_2,
+						MAX(IF(OHA.RANK=3, OHA.SOLVE_PLAN, "")) AS CONTENTS_3,
+						MAX(IF(OHA.RANK=4, OHA.SOLVE_PLAN, "")) AS CONTENTS_4,
+						MAX(IF(OHA.RANK=5, OHA.SOLVE_PLAN, "")) AS CONTENTS_5,
+						IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT,
+						(
+							SELECT COUNT(*) 
+							FROM COACHING_TALK AS CT 
+							WHERE 1=1 
+							AND CT.CATEGORY = 'ISSUE'
+							AND CIL.ISSUE_ID = CT.ID
+						)AS COACHING_TALK_COUNT
+					FROM 
+						CLIENT_ISSUE_LOG AS CIL
+						INNER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON CIL.CREATOR_ID = OMI.MEMBER_ID_NUM
+						INNER JOIN
+						OUR_MEMBERS_INFO AS OMI2 ON CIL.SALES_REPRESENTIVE_ID = OMI2.MEMBER_ID_NUM
+						LEFT OUTER JOIN 
+						OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI2.MEMBER_TEAM
+						LEFT OUTER JOIN 
+						OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI2.MEMBER_DIVISION
+						INNER JOIN
+						COM_CLIENT_LIST AS CCL ON CCL.LOG_ID = CIL.ISSUE_ID AND CCL.CATEGORY = '2'
+						INNER JOIN
+						CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID 
+						INNER JOIN
+						CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+						LEFT OUTER JOIN
+						( 
+								SELECT * 
+								FROM (
+									SELECT ISSUE_ID, ACTION_ID, SOLVE_PLAN, DUE_DATE, CLOSE_DATE,
+								           IF(@PREV <> ISSUE_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := ISSUE_ID	
+								    FROM CLIENT_ISSUE_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+								    WHERE 1=1
+								    ORDER BY ISSUE_ID ASC, ACTION_ID DESC
+							    ) AS SUB_OHA 
+								WHERE 1=1
+								AND SUB_OHA.RANK <= 5
+			            ) AS OHA ON CIL.ISSUE_ID = OHA.ISSUE_ID
+						LEFT OUTER JOIN
+						(
+			            	SELECT COUNT(ISSUE_ID) AS FILE_COUNT, ISSUE_ID
+			            	FROM CLIENT_ISSUE_FILE_STORE
+			            	GROUP BY ISSUE_ID
+			            ) AS FC ON FC.ISSUE_ID = CIL.ISSUE_ID
+					WHERE 1=1
+		]]>
+		<include refid="clientIssueWhere" />
+		<!-- 모바일 검색 조건 -->
+		<if test="deivceCheck == 'mobile' ">
+			<if test="searchKeyword != null and searchKeyword != '' ">
+				AND
+				(
+				CIL.ISSUE_SUBJECT LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR
+				CII.CUSTOMER_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR
+				CCI.COMPANY_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</if>
+		
+			<if test="searchCategory != null and searchCategory != '' ">
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+						AND OMI2.MEMBER_DIVISION = #{searchCategory}
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND OMI2.MEMBER_TEAM = #{searchCategory}
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')">
+						AND OMI2.MEMBER_ID_NUM = #{searchCategory}
+					</when>
+					<when test="global_role_code.contains('ROLE_MEMBER')">
+						AND OMI2.MEMBER_ID_NUM = #{global_member_id}
+					</when>
+					<otherwise>
+						AND OMI2.MEMBER_DIVISION = #{searchCategory}
+					</otherwise>
+				</choose>
+			</if>
+		</if>
+		GROUP BY CIL.ISSUE_ID
+		HAVING 1=1
+		<if test="searchCustomerName != null and searchCustomerName != '' ">
+			AND CUSTOMER_NAME LIKE CONCAT('%', #{searchCustomerName}, '%')
+		</if>
+		<if test="detailSearchStatus != null and detailSearchStatus != '' ">
+			<if test="detailSearchStatus == 'statusY' ">
+				AND ISSUE_STATUS_TEXT = '#1ab394'
+			</if>
+			<if test="detailSearchStatus == 'statusN' ">
+				AND ISSUE_STATUS_TEXT = '#ffc000'
+			</if>
+			<if test="detailSearchStatus == 'statusX' ">
+				AND ISSUE_STATUS_TEXT = '#f20056'
+			</if>
+		</if>
+		
+		) AS TB
+
+		<choose>
+			<when test="sortCategory != null and sortCategory != '' ">
+				ORDER BY ${sortCategory}
+			</when>
+			<otherwise>
+				ORDER BY TB.LATELY_UPDATE_DATE DESC
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="numberPagingUseYn != null and numberPagingUseYn.equalsIgnoreCase('Y')">
+				<include refid="common.pagingPost2" />
+			</when>
+			<otherwise>
+				<!-- <include refid="common.pagingPost2" /> -->
+			</otherwise>
+		</choose>
+	</select>
+
+
+	<!-- 이슈 카운트 -->
+	<select id="selectIssueCount" parameterType="hashmap"	resultType="hashmap">		
+			SELECT 
+				COUNT(TB.ISSUE_ID) AS listCount, GROUP_CONCAT(TB.ISSUE_ID) AS searchPKArray
+				<choose>
+					<when test="global_role_code.contains('CEO')">
+						, GROUP_CONCAT(DISTINCT TB.DIVISION_NO) AS searchNoArray
+						, GROUP_CONCAT(DISTINCT TB.DIVISION_NAME) AS searchNameArray
+					</when>
+					<when test="global_role_code.contains('DIVISION')">
+						, GROUP_CONCAT(DISTINCT TB.TEAM_NO) AS searchNoArray
+						, GROUP_CONCAT(DISTINCT TB.TEAM_NAME) AS searchNameArray
+					</when>
+					<when test="global_role_code.contains('TEAM')">
+						, GROUP_CONCAT(DISTINCT TB.MEMBER_ID_NUM) AS searchNoArray
+						, GROUP_CONCAT(DISTINCT TB.HAN_NAME) AS searchNameArray
+					</when>
+					<when test="global_role_code.contains('MEMBER')">
+					</when>
+					<otherwise>
+						, GROUP_CONCAT(DISTINCT TB.DIVISION_NO) AS searchNoArray
+						, GROUP_CONCAT(DISTINCT TB.DIVISION_NAME) AS searchNameArray
+					</otherwise>								
+				</choose>
+			FROM
+			<![CDATA[
+			(
+					SELECT 
+						CIL.ISSUE_ID, GROUP_CONCAT(CII.CUSTOMER_NAME) AS CUSTOMER_NAME
+						, ODI.DIVISION_NO
+						, ODI.DIVISION_NAME
+						, OTI.TEAM_NO
+						, OTI.TEAM_NAME
+						, OMI2.MEMBER_ID_NUM
+						, OMI2.HAN_NAME
+					FROM 
+						CLIENT_ISSUE_LOG AS CIL
+						INNER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON CIL.CREATOR_ID = OMI.MEMBER_ID_NUM
+						INNER JOIN
+						OUR_MEMBERS_INFO AS OMI2 ON CIL.SALES_REPRESENTIVE_ID = OMI2.MEMBER_ID_NUM
+						LEFT OUTER JOIN 
+						OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI2.MEMBER_TEAM
+						LEFT OUTER JOIN 
+						OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI2.MEMBER_DIVISION
+						INNER JOIN
+						COM_CLIENT_LIST AS CCL ON CCL.LOG_ID = CIL.ISSUE_ID AND CCL.CATEGORY = '2'
+						INNER JOIN
+						CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID 
+						INNER JOIN
+						CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+						LEFT OUTER JOIN
+						( 
+								SELECT * 
+								FROM (
+									SELECT ISSUE_ID, ACTION_ID, SOLVE_PLAN, DUE_DATE, CLOSE_DATE,
+								           IF(@PREV <> ISSUE_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := ISSUE_ID	
+								    FROM CLIENT_ISSUE_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+								    WHERE 1=1
+								    ORDER BY ISSUE_ID ASC, ACTION_ID DESC
+							    ) AS SUB_OHA 
+								WHERE 1=1
+								AND SUB_OHA.RANK <= 5
+			            ) AS OHA ON CIL.ISSUE_ID = OHA.ISSUE_ID
+		]]>
+		WHERE 1=1
+		<include refid="clientIssueWhere" />
+		<if test="detailSearchStatus != null and detailSearchStatus != '' ">
+			<if test="detailSearchStatus == 'statusY' ">
+				AND CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+			</if>
+			<if test="detailSearchStatus == 'statusN' ">
+				AND CIL.DUE_DATE >= CURRENT_DATE()
+			</if>
+			<if test="detailSearchStatus == 'statusX' ">
+				AND CURRENT_DATE() > CIL.DUE_DATE
+			</if>
+		</if>
+		
+		<!-- 모바일 검색 조건 -->
+		<if test="deivceCheck == 'mobile' ">
+			<if test="searchKeyword != null and searchKeyword != '' ">
+				AND
+				(
+				CIL.ISSUE_SUBJECT LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR
+				CII.CUSTOMER_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR
+				CCI.COMPANY_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</if>		
+		
+			<if test="searchCategory != null and searchCategory != '' ">
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+						AND OMI2.MEMBER_DIVISION = #{searchCategory}
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND OMI2.MEMBER_TEAM = #{searchCategory}
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')">
+						AND OMI2.MEMBER_ID_NUM = #{searchCategory}
+					</when>
+					<when test="global_role_code.contains('ROLE_MEMBER')">
+						AND OMI2.MEMBER_ID_NUM = #{global_member_id}
+					</when>
+					<otherwise>
+						AND OMI2.MEMBER_DIVISION = #{searchCategory}
+					</otherwise>
+				</choose>
+			</if>			
+		</if>
+		
+		GROUP BY CIL.ISSUE_ID
+		HAVING 1=1
+		<if test="searchCustomerName != null and searchCustomerName != '' ">
+			AND CUSTOMER_NAME LIKE CONCAT('%', #{searchCustomerName}, '%')
+		</if>
+		) AS TB
+	</select>
+
+	<sql id="clientIssueWhere">
+		<if test="companyInfoIssue != 'true' ">
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_CFO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					AND (OMI.MEMBER_DIVISION = #{global_member_division} OR
+					OMI2.MEMBER_DIVISION = #{global_member_division} OR
+					OMI3.MEMBER_DIVISION = #{global_member_division} OR
+					OMI4.MEMBER_DIVISION = #{global_member_division})
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+					AND (OMI.MEMBER_DIVISION = #{global_member_division} OR
+					OMI2.MEMBER_DIVISION = #{global_member_division} OR
+					OMI3.MEMBER_DIVISION = #{global_member_division} OR
+					OMI4.MEMBER_DIVISION = #{global_member_division})
+					AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM =
+					#{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team}
+					OR OMI4.MEMBER_TEAM = #{global_member_team})
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+					AND (OMI.MEMBER_DIVISION = #{global_member_division} OR
+					OMI2.MEMBER_DIVISION = #{global_member_division} OR
+					OMI3.MEMBER_DIVISION = #{global_member_division} OR
+					OMI4.MEMBER_DIVISION = #{global_member_division})
+					AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM =
+					#{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team}
+					OR OMI4.MEMBER_TEAM = #{global_member_team})
+				</when>
+			</choose>
+		</if>
+
+		<if
+			test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND CIL.ISSUE_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND CIL.ISSUE_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+
+		<if test="searchCSatId != null and searchCSatId != '' ">
+			AND CIL.CSAT_DETAIL_ID IN
+			(
+			SELECT CSI.CSAT_DETAIL_ID FROM CLIENT_ISSUE_LOG AS CSI
+			WHERE CSI.CSAT_DETAIL_ID IN
+			(
+			SELECT
+			CSLD.CSAT_DETAIL_ID
+			FROM CLIENT_SAT_LOG AS CSL
+			INNER JOIN
+			CLIENT_SATDETAIL_LOG AS CSLD ON CSLD.CSAT_ID = CSL.CSAT_ID
+			WHERE CSL.CSAT_ID = #{searchCSatId}
+			)
+			)
+		</if>
+
+		<!-- 검색 고객사 -->
+		<if test="searchCompanyName != null and searchCompanyName != '' ">
+			AND CCI.COMPANY_NAME LIKE CONCAT('%', #{searchCompanyName}, '%')
+		</if>
+
+		<!-- 부서 -->
+		<if test="searchDivision != null and searchDivision != '' ">
+			AND OMI2.MEMBER_DIVISION = #{searchDivision}
+		</if>
+		<!-- 팀 -->
+		<if test="searchTeam != null and searchTeam != '' ">
+			AND OMI2.MEMBER_TEAM = #{searchTeam}
+		</if>
+
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				<if
+					test="searchTabFlag !=null and searchTabFlag != '' and searchTabFlag == 'individual'">
+					<if test="searchMember != null and searchMember != '' ">
+						<!-- AND OMI2.MEMBER_ID_NUM = #{searchMember} -->
+						AND CIL.SOLVE_OWNER = #{searchMember}
+					</if>
+				</if>
+				<if
+					test="searchTabFlag !=null and searchTabFlag != '' and searchTabFlag == 'companyGroup'">
+				</if>
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				<if test="searchMember != null and searchMember != '' ">
+					<!-- AND OMI2.MEMBER_ID_NUM = #{searchMember} -->
+					AND CIL.SOLVE_OWNER = #{searchMember}
+				</if>
+			</when>
+		</choose>
+
+		<!-- 고객사 -->
+		<if
+			test="searchClientCompanyID != null and searchClientCompanyID != '' ">
+			<!-- AND OMI2.MEMBER_ID_NUM = #{searchMember} -->
+			AND CCI.COMPANY_ID = #{searchClientCompanyID}
+		</if>
+
+		<!-- 검색 고객사 그룹 -->
+		<if test="searchSegmentCode != null and searchSegmentCode != '' ">
+			AND CCI.SEGMENT_CODE = #{searchSegmentCode}
+		</if>
+
+		<!-- year -->
+		<if test="searchYear != null and searchYear != '' ">
+			AND YEAR(CIL.SYS_REGISTER_DATE) = #{searchYear}
+		</if>
+		<!-- quarter -->
+		<if test="searchQuarter != null and searchQuarter != '' ">
+			AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+		</if>
+
+		<!-- 진행상황 -->
+		<choose>
+			<when test="searchStatus == '진행중' ">
+				AND CIL.ISSUE_CLOSE_DATE is null AND CIL.DUE_DATE >= CURRENT_DATE()
+			</when>
+			<when test="searchStatus == '지연' ">
+				<!-- AND CURRENT_DATE() > CIL.DUE_DATE -->
+				AND CIL.ISSUE_CLOSE_DATE is null and CURRENT_DATE() > CIL.DUE_DATE
+			</when>
+			<when test="searchStatus == '완료' ">
+				AND CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+			</when>
+		</choose>
+
+		<!-- <choose> <when test="sortCategory != null and sortCategory != '' "> 
+			ORDER BY ${sortCategory} DESC </when> <otherwise> ORDER BY CIL.SYS_UPDATE_DATE 
+			ASC </otherwise> </choose> -->
+		<if test="searchActionStatus != null and searchActionStatus != '' ">
+			AND OHA.STATUS = #{searchActionStatus}
+		</if>
+
+		<!-- 이슈카테고리 -->
+		<choose>
+			<when test="searchCategory == '서비스' ">
+				AND CIL.ISSUE_CATEGORY = '서비스'
+			</when>
+			<when test="searchCategory == '지원' ">
+				<!-- AND CURRENT_DATE() > CIL.DUE_DATE -->
+				AND CIL.ISSUE_CATEGORY = '지원'
+			</when>
+			<when test="searchCategory == '제품' ">
+				AND CIL.ISSUE_CATEGORY = '제품'
+			</when>
+		</choose>
+
+	</sql>
+
+
+	<select id="selectSolvePlanIssue" parameterType="java.util.List"
+		resultType="hashmap">
+		SELECT
+			CIA.ACTION_ID,
+			CIA.ISSUE_ID,
+			CIA.SOLVE_PLAN,
+			OMI.HAN_NAME AS	SOLVE_OWNER,
+			OMI.POSITION_STATUS AS SOLVE_OWNER_POSITION,
+			CIA.SOLVE_OWNER_ID,
+			CIA.DUE_DATE,
+			CIA.CLOSE_DATE,
+			CASE
+				WHEN CIA.CLOSE_DATE IS NOT NULL AND CIA.CLOSE_DATE != '' 
+				THEN 'G'
+				WHEN CIA.DUE_DATE >= CURRENT_DATE() 
+				THEN 'Y'
+				WHEN CURRENT_DATE() > CIA.DUE_DATE 
+				THEN 'R'
+			END AS STATUS,
+			DATE_FORMAT(CIA.SYS_REGISTER_DATE,'%Y-%m-%d') AS SYS_REGISTER_DATE,
+			CIA.SYS_UPDATE_DATE
+			<!-- STATUS AS HIDDEN_STATUS -->
+
+		FROM 
+			CLIENT_ISSUE_ACTION_PLAN as CIA
+		LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI 
+			ON CIA.SOLVE_OWNER_ID = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		AND ISSUE_ID = #{pkNo}
+		ORDER BY CIA.ACTION_ID ASC
+	</select>
+
+
+	<insert id="insertClientIssue" parameterType="hashmap">
+		INSERT INTO CLIENT_ISSUE_LOG
+		(
+		CREATOR_ID,
+		SALES_REPRESENTIVE_ID,
+		ISSUE_CATEGORY,
+		ISSUE_SUBJECT,
+		ISSUE_DATE,
+		DUE_DATE,
+		ISSUE_DETAIL,
+		SOLVE_OWNER,
+		<if
+			test="textModalIssueCloseDate != null and textModalIssueCloseDate != '' ">
+			ISSUE_CLOSE_DATE,
+		</if>
+		SOLVE_EVIDENCE_YN,
+		SOLVE_EVIDENCE_DETAIL,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE,
+		<if
+			test="hiddenModalContactId != null and hiddenModalContactId != '' ">
+			EVENT_ID,
+		</if>
+		<if test="hiddenCsatDetailId != null and hiddenCsatDetailId != '' ">
+			CSAT_DETAIL_ID,
+		</if>
+		SOLVE_PLAN,
+		ISSUE_CONFIRM_ID
+		)
+		VALUES
+		(
+		#{hiddenModalCreatorId},
+		#{hiddenModalSalesId},
+		#{selectModalIssueCategory},
+		#{textModalSubject},
+		#{textModalIssueDate},
+		#{textModalDueDate},
+		#{textareaModalIssueDetail},
+		#{hiddenModalSolveOwnerId},
+		<if
+			test="textModalIssueCloseDate != null and textModalIssueCloseDate != '' ">
+			#{textModalIssueCloseDate},
+		</if>
+		#{selectModalSolveEvidenceYN},
+		#{textareaSolveEvidenceDetail},
+		CURRENT_TIMESTAMP,
+		CURRENT_TIMESTAMP,
+		<if
+			test="hiddenModalContactId != null and hiddenModalContactId != '' ">
+			#{hiddenModalContactId},
+		</if>
+		<if test="hiddenCsatDetailId != null and hiddenCsatDetailId != '' ">
+			#{hiddenCsatDetailId},
+		</if>
+		#{textareaModalSolvePlan},
+		#{hiddenModalIssueConfirmId}
+		);
+		<selectKey keyProperty="filePK" resultType="Integer"
+			order="AFTER">
+			SELECT LAST_INSERT_ID();
+		</selectKey>
+	</insert>
+
+
+	<insert id="insertClientIssueSolvePlan" parameterType="hashmap">
+		INSERT INTO CLIENT_ISSUE_ACTION_PLAN
+		(
+		ISSUE_ID,
+		SOLVE_PLAN,
+		SOLVE_OWNER,
+		SOLVE_OWNER_ID,
+		DUE_DATE,
+		CLOSE_DATE,
+		<!-- STATUS, -->
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+		#{pkNo},
+		#{SOLVE_PLAN},
+		#{SOLVE_OWNER},
+		#{SOLVE_OWNER_ID},
+		<choose>
+			<when test="DUE_DATE != null and DUE_DATE != '' ">
+				#{DUE_DATE},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+				#{CLOSE_DATE},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+		<!-- #{HIDDEN_STATUS}, -->
+		CURRENT_TIMESTAMP,
+		CURRENT_TIMESTAMP
+		);
+	</insert>
+
+	<select id="selectClientIssueDetail" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		CIL.ISSUE_ID,
+		CIL.ISSUE_CREATOR,
+		CIL.ISSUE_SUBJECT,
+		CIL.ISSUE_DATE,
+		CIL.DUE_DATE,
+		CIL.ISSUE_STATUS,
+		CIL.ISSUE_CATEGORY,
+		CIL.SALES_REPRESENTIVE_ID,
+		CASE
+		WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+		THEN '#1ab394'
+		WHEN CIL.DUE_DATE >= CURRENT_DATE()
+		THEN '#ffc000'
+		WHEN CURRENT_DATE() > CIL.DUE_DATE
+		THEN '#f20056'
+		END AS ISSUE_STATUS_TEXT,
+		CIL.ISSUE_DETAIL,
+		CIL.SOLVE_OWNER,
+		CIL.ISSUE_CLOSE_DATE,
+		CIL.SOLVE_EVIDENCE_YN,
+		CIL.SOLVE_EVIDENCE_DETAIL,
+		CIL.ISSUE_CONFIRM_ID,
+		CIL.SOLVE_PLAN,
+		DATE_FORMAT(CIL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE,
+		DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+		DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+		OMI.HAN_NAME,
+		OMI.MEMBER_ID_NUM,
+		OMI2.HAN_NAME AS SALES_REPRESENTIVE_NAME,
+		IFNULL(OMI2.POSITION_RANK, '') AS SALES_REPRESENTIVE_RANK,
+		OMI3.HAN_NAME AS SOLVE_OWNER_NAME,
+		IFNULL(OMI3.POSITION_RANK, '') AS SOLVE_OWNER_RANK,
+		OMI4.HAN_NAME AS CONFIRM_NAME,
+		IFNULL(OMI4.POSITION_RANK, '') AS CONFIRM_RANK,
+		GROUP_CONCAT(CCI.COMPANY_ID) AS COMPANY_ID,
+		GROUP_CONCAT(CCI.COMPANY_NAME) AS COMPANY_NAME,
+		GROUP_CONCAT(CII.CUSTOMER_ID) AS CUSTOMER_ID,
+		GROUP_CONCAT(CII.CUSTOMER_NAME) AS CUSTOMER_NAME,
+		GROUP_CONCAT(CII.POSITION) AS CUSTOMER_POSITION,
+		CIL.EVENT_ID,
+		IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT,
+		(
+		SELECT COUNT(*)
+		FROM COACHING_TALK AS CT
+		WHERE 1=1
+		AND CT.CATEGORY = 'ISSUE'
+		AND CIL.ISSUE_ID = CT.ID
+		)AS COACHING_TALK_COUNT
+		FROM
+		CLIENT_ISSUE_LOG AS CIL
+		INNER JOIN
+		COM_CLIENT_LIST AS CCL ON CCL.LOG_ID = CIL.ISSUE_ID AND CCL.CATEGORY = '2'
+		INNER JOIN
+		CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CIL.CREATOR_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON CIL.SALES_REPRESENTIVE_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		(
+		SELECT COUNT(ISSUE_ID) AS FILE_COUNT, ISSUE_ID
+		FROM CLIENT_ISSUE_FILE_STORE
+		GROUP BY ISSUE_ID
+		) AS FC ON FC.ISSUE_ID = CIL.ISSUE_ID
+		WHERE 1=1
+		AND CIL.ISSUE_ID =
+		#{pkNo}
+	</select>
+
+
+	<select id="selectClientIssueFileList" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		FILE_ID,
+		ISSUE_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		FILE_NAME,
+		FILE_PATH,
+		FILE_TYPE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		FROM CLIENT_ISSUE_FILE_STORE
+		WHERE 1=1
+		AND ISSUE_ID = #{pkNo}
+	</select>
+
+
+	<update id="updateClientIssue" parameterType="hashmap">
+		UPDATE CLIENT_ISSUE_LOG
+		SET
+		SALES_REPRESENTIVE_ID= #{hiddenModalSalesId},
+		ISSUE_CATEGORY= #{selectModalIssueCategory},
+		ISSUE_SUBJECT= #{textModalSubject},
+		ISSUE_DATE= #{textModalIssueDate},
+		DUE_DATE= #{textModalDueDate},
+		ISSUE_DETAIL= #{textareaModalIssueDetail},
+		SOLVE_OWNER= #{hiddenModalSolveOwnerId},
+		<choose>
+			<when
+				test="textModalIssueCloseDate != null and textModalIssueCloseDate != '' ">
+				ISSUE_CLOSE_DATE= #{textModalIssueCloseDate},
+			</when>
+			<otherwise>
+				ISSUE_CLOSE_DATE= NULL,
+			</otherwise>
+		</choose>
+		SOLVE_EVIDENCE_YN= #{selectModalSolveEvidenceYN},
+		SOLVE_EVIDENCE_DETAIL= #{textareaSolveEvidenceDetail},
+		SYS_UPDATE_DATE=CURRENT_TIMESTAMP,
+		SOLVE_PLAN= #{textareaModalSolvePlan},
+		ISSUE_CONFIRM_ID = #{hiddenModalIssueConfirmId}
+		WHERE ISSUE_ID=#{hiddenModalPK};
+	</update>
+
+
+	<!-- 이슈 고객사별 대시보드 -->
+	<select id="selectClientIssueCompanyDashBoard"
+		parameterType="hashmap" resultType="hashmap">
+	<![CDATA[ 
+	SELECT 
+		CCI.SEGMENT_CODE,
+		CIS.SEGMENT_HAN_NAME,
+		OMI.HAN_NAME, 
+		CIL.SALES_REPRESENTIVE_ID,
+		
+		CCI.COMPANY_ID,
+		CCI.COMPANY_NAME,
+		COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+		
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '제품' THEN 1 ELSE 0 END) AS CATEGORY_1,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '서비스' THEN 1 ELSE 0 END) AS CATEGORY_2,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '지원' THEN 1 ELSE 0 END) AS CATEGORY_3,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '기타' THEN 1 ELSE 0 END) AS CATEGORY_4,
+		
+		SUM(CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_1,
+		SUM(CASE WHEN CURRENT_DATE() >  CIL.DUE_DATE AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_2,
+		SUM(CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != '' THEN 1 ELSE 0 END) AS ISSUE_STATUS_3
+	FROM 
+			CLIENT_ISSUE_LOG AS CIL
+			INNER JOIN
+			OUR_MEMBERS_INFO AS OMI ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+			INNER JOIN
+			(
+				SELECT CII.COMPANY_ID, CCL.LOG_ID
+				FROM
+				COM_CLIENT_LIST AS CCL
+				INNER JOIN
+				CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID AND CCL.CATEGORY = '2' 
+				INNER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+				GROUP BY CII.COMPANY_ID, CCL.LOG_ID
+			) AS OUT_CCL ON OUT_CCL.LOG_ID = CIL.ISSUE_ID
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON OUT_CCL.COMPANY_ID = CCI.COMPANY_ID 
+			INNER JOIN
+			CODE_INDUSTRY_SEGMENT AS CIS ON CCI.SEGMENT_CODE = CIS.SEGMENT_CODE
+	WHERE 1=1
+	AND YEAR(CIL.SYS_REGISTER_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CIL.SYS_REGISTER_DATE) =  QUARTER(#{searchDate})
+	]]>
+
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+
+				<!-- GROUP BY CCI.COMPANY_NAME WITH ROLLUP -->
+				GROUP BY CCI.SEGMENT_CODE WITH ROLLUP
+
+				HAVING 1=1
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				<!-- AND (OMI.MEMBER_ID_NUM = #{global_member_id} OR OMI2.MEMBER_ID_NUM= 
+					#{global_member_id} OR OMI3.MEMBER_ID_NUM = #{global_member_id}) -->
+				<!-- AND CIL.SOLVE_OWNER = #{global_member_id} -->
+				GROUP BY CCI.SEGMENT_CODE WITH ROLLUP
+			</when>
+
+			<when test="global_role_code.contains('ROLE_CFO')">
+				GROUP BY CCI.SEGMENT_CODE WITH ROLLUP
+				HAVING 1=1
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				GROUP BY CCI.SEGMENT_CODE WITH ROLLUP
+				HAVING 1=1
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				GROUP BY CCI.SEGMENT_CODE WITH ROLLUP
+				HAVING 1=1
+			</when>
+
+		</choose>
+
+	</select>
+
+
+	<select id="selectClientIssueCompany" parameterType="hashmap"
+		resultType="hashmap">
+	<![CDATA[ 
+	SELECT 
+		CCI.SEGMENT_CODE,
+		CIS.SEGMENT_HAN_NAME,
+		OMI.HAN_NAME, 
+		CIL.SALES_REPRESENTIVE_ID,
+		
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '제품' THEN 1 ELSE 0 END) AS CATEGORY_1,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '서비스' THEN 1 ELSE 0 END) AS CATEGORY_2,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '지원' THEN 1 ELSE 0 END) AS CATEGORY_3,
+		SUM(CASE WHEN CIL.ISSUE_CATEGORY = '기타' THEN 1 ELSE 0 END) AS CATEGORY_4,
+		
+		CCI.COMPANY_ID,
+		CCI.COMPANY_NAME,
+		COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+		SUM(CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_1,
+		SUM(CASE WHEN CURRENT_DATE() >  CIL.DUE_DATE AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_2,
+		SUM(CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != '' THEN 1 ELSE 0 END) AS ISSUE_STATUS_3
+	FROM 
+		CLIENT_ISSUE_LOG AS CIL
+		INNER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+		INNER JOIN
+		(
+			SELECT CII.COMPANY_ID, CCL.LOG_ID
+			FROM
+			COM_CLIENT_LIST AS CCL
+			INNER JOIN
+			CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID AND CCL.CATEGORY = '2' 
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+			GROUP BY CII.COMPANY_ID, CCL.LOG_ID
+		) AS OUT_CCL ON OUT_CCL.LOG_ID = CIL.ISSUE_ID
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON OUT_CCL.COMPANY_ID = CCI.COMPANY_ID 
+		INNER JOIN
+		CODE_INDUSTRY_SEGMENT AS CIS ON CCI.SEGMENT_CODE = CIS.SEGMENT_CODE
+	WHERE 1=1
+	AND YEAR(CIL.SYS_REGISTER_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CIL.SYS_REGISTER_DATE) =  QUARTER(#{searchDate})
+	AND CCI.SEGMENT_CODE = #{searchCategory}
+	]]>
+
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+
+				<!-- GROUP BY CCI.COMPANY_NAME WITH ROLLUP -->
+				GROUP BY CCI.COMPANY_NAME WITH ROLLUP
+				HAVING 1=1
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				<!-- AND CIL.SOLVE_OWNER = #{global_member_id} -->
+				<!-- AND (OMI.MEMBER_ID_NUM = #{global_member_id} OR OMI2.MEMBER_ID_NUM 
+					= #{global_member_id} OR OMI3.MEMBER_ID_NUM = #{global_member_id}) -->
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				GROUP BY CCI.COMPANY_NAME WITH ROLLUP
+				HAVING 1=1
+			</when>
+
+			<when test="global_role_code.contains('ROLE_CFO')">
+				GROUP BY OMI.MEMBER_ID_NUM WITH ROLLUP
+				HAVING 1=1
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				GROUP BY CCI.COMPANY_NAME
+				HAVING 1=1
+			</when>
+
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				GROUP BY CCI.COMPANY_NAME WITH ROLLUP
+			</when>
+
+		</choose>
+		<if test="searchMember != null and searchMember != '' ">
+			<!-- AND OMI2.MEMBER_ID_NUM = #{searchMember} -->
+			AND CIL.SOLVE_OWNER = #{searchMember}
+		</if>
+
+	</select>
+
+	<!-- 셀러스 standard 버전 ENd -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<select id="clientIssueSearchDetailGroup1"
+		parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	       SELECT 
+					CIL.ISSUE_CATEGORY
+			FROM
+			CLIENT_ISSUE_LOG AS CIL
+			INNER JOIN
+			OUR_MEMBERS_INFO AS OMI ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+			INNER JOIN
+			(
+				SELECT CII.COMPANY_ID, CCL.LOG_ID
+				FROM
+				COM_CLIENT_LIST AS CCL
+				INNER JOIN
+				CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID AND CCL.CATEGORY = '2' 
+				INNER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+				GROUP BY CII.COMPANY_ID, CCL.LOG_ID
+			) AS OUT_CCL ON OUT_CCL.LOG_ID = CIL.ISSUE_ID
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON OUT_CCL.COMPANY_ID = CCI.COMPANY_ID 
+			WHERE 1=1
+			GROUP BY CIL.ISSUE_CATEGORY
+		]]>
+	</select>
+
+	<select id="clientIssueSearchDetailGroup2"
+		parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	       SELECT 
+					CCI.COMPANY_NAME
+			FROM 
+			CLIENT_ISSUE_LOG AS CIL
+			INNER JOIN
+			OUR_MEMBERS_INFO AS OMI ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+			INNER JOIN
+			(
+				SELECT CII.COMPANY_ID, CCL.LOG_ID
+				FROM
+				COM_CLIENT_LIST AS CCL
+				INNER JOIN
+				CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID AND CCL.CATEGORY = '2' 
+				INNER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+				GROUP BY CII.COMPANY_ID, CCL.LOG_ID
+			) AS OUT_CCL ON OUT_CCL.LOG_ID = CIL.ISSUE_ID
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON OUT_CCL.COMPANY_ID = CCI.COMPANY_ID 
+			WHERE 1=1
+			GROUP BY CCI.COMPANY_NAME
+		]]>
+	</select>
+	
+	<!-- 모바일 고객만족 -> 고객이슈 -> 고객이슈 접수 및 처리현황 테이블 data -->
+	<select id="selectClientIssueStatus" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		<choose>
+			<when test="global_role_code.contains('CEO')">
+				COALESCE(T.TARGET_NAME,'회사전체') AS TARGET_NAME
+			</when>
+			<when test="global_role_code.contains('DIVISION')">
+				COALESCE(T.TARGET_NAME,'본부전체') AS TARGET_NAME
+			</when>
+			<when test="global_role_code.contains('TEAM')">
+				COALESCE(T.TARGET_NAME,'팀전체') AS TARGET_NAME
+			</when>
+			<when test="global_role_code.contains('MEMBER')">
+				T.TARGET_NAME AS TARGET_NAME
+			</when>
+			<otherwise>
+				COALESCE(T.TARGET_NAME,'회사전체') AS TARGET_NAME
+			</otherwise>
+		</choose>
+			,(
+				CASE WHEN T.TARGET_NAME IS NULL THEN 1
+				WHEN T.TARGET_NAME = '임원' THEN 2
+				ELSE BLANK_CNT
+				END
+			) AS BLANK_CNT
+			,T.*
+		FROM
+		(
+		SELECT
+			ODI.DIVISION_NO,
+			OTI.TEAM_NO,
+			OMI.MEMBER_ID_NUM,
+		<choose>
+			<when test="global_role_code.contains('CEO')">
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						(
+						CASE WHEN OMI.POSITION_TYPE = '임원'
+						THEN '임원'
+						ELSE OTI.TEAM_NAME
+						END
+						) AS TARGET_NAME,
+					</when>
+					<otherwise> -->
+						(
+						CASE WHEN OMI.POSITION_TYPE = '임원'
+						THEN '임원'
+						ELSE ODI.DIVISION_NAME
+						END
+						) AS TARGET_NAME,
+					<!-- </otherwise>
+				</choose> -->
+			</when>
+			<when test="global_role_code.contains('DIVISION')">
+				(
+				CASE WHEN OMI.POSITION_RANK = '본부장'
+				THEN '본부장'
+				ELSE OTI.TEAM_NAME
+				END
+				) AS TARGET_NAME,
+			</when>
+			<when test="global_role_code.contains('TEAM')">
+				(
+				CASE WHEN OMI.POSITION_TYPE = '팀장'
+				THEN '팀장'
+				ELSE OMI.HAN_NAME
+				END
+				) AS TARGET_NAME,
+			</when>
+			<when test="global_role_code.contains('MEMBER')">
+				OMI.HAN_NAME AS TARGET_NAME,
+			</when>
+			<otherwise>
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						(
+						CASE WHEN OMI.POSITION_TYPE = '임원'
+						THEN '임원'
+						ELSE OTI.TEAM_NAME
+						END
+						) AS TARGET_NAME,
+					</when>
+					<otherwise> -->
+						(
+						CASE WHEN OMI.POSITION_TYPE = '임원'
+						THEN '임원'
+						ELSE ODI.DIVISION_NAME
+						END
+						) AS TARGET_NAME,
+					<!-- </otherwise>
+				</choose> -->
+			</otherwise>
+		</choose>
+		3 AS BLANK_CNT,
+		COUNT(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE)  = #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+			THEN 1
+			END
+		) AS TOTAL_COUNT,
+		SUM(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE)  = #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+				AND CIL.DUE_DATE >= CURRENT_DATE()
+				AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '')
+			THEN 1
+			ELSE 0
+			END
+		) AS ISSUE_STATUS_1,
+		SUM(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE)  = #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+				AND CURRENT_DATE() > CIL.DUE_DATE
+				AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '')
+			THEN 1
+			ELSE 0
+			END
+		) AS ISSUE_STATUS_2,
+		SUM(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE)  = #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+				AND CIL.ISSUE_CLOSE_DATE IS NOT NULL
+				AND CIL.ISSUE_CLOSE_DATE != ''
+			THEN 1
+			ELSE 0
+			END
+		) AS ISSUE_STATUS_3,
+		SUM(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE) != #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) != #{searchQuarter}
+				AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '')
+				AND CURRENT_DATE() > CIL.DUE_DATE
+			THEN 1
+			ELSE 0
+			END
+		) AS ISSUE_STATUS_4
+		FROM
+		OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+			CLIENT_ISSUE_LOG AS CIL
+			ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+		INNER JOIN
+			OUR_MEMBERS_INFO AS OMI2
+			ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+		INNER JOIN
+			OUR_TEAM_INFO AS OTI
+			ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		INNER JOIN
+			OUR_DIVISION_INFO AS ODI
+			ON ODI.DIVISION_NO = OTI.DIVISION_NO
+			OR OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		WHERE 1=1
+		<!-- AND OMI.USE_YN = 'Y' -->
+		<if test='rank != "Y" '>
+			<!-- AND OTI.TEAM_TYPE = 'S' -->
+		</if>
+		<choose>
+			<when test="global_role_code.contains('CEO')">
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						AND (OMI.POSITION_TYPE IN ('영업직','임원') OR OMI.POSITION_RANK IN ('팀장'))
+						AND (OMI.POSITION_TYPE IN ('영업직'))
+						AND ODI.DIVISION_NO = #{global_member_division}
+					</when>
+					<otherwise>
+						AND (OMI.POSITION_TYPE IN ('영업직','임원') OR OMI.POSITION_RANK IN ('팀장','본부장'))
+						AND (OMI.POSITION_TYPE IN ('영업직'))
+					</otherwise>
+				</choose> -->
+				GROUP BY TARGET_NAME WITH ROLLUP
+			</when>
+			<when test="global_role_code.contains('DIVISION')">
+				<choose>
+					<when test='rank != "Y" '>
+						<!-- AND (OMI.POSITION_TYPE IN ('영업직') OR OMI.POSITION_RANK IN ('팀장','본부장')) -->
+						<!-- AND (OMI.POSITION_TYPE IN ('영업직')) -->
+						AND ODI.DIVISION_NO = #{global_member_division}
+					</when>
+					<otherwise>
+						AND OMI.MEMBER_ID_NUM = #{global_member_id}
+					</otherwise>
+				</choose>
+				GROUP BY TARGET_NAME WITH ROLLUP
+			</when>
+			<when test="global_role_code.contains('TEAM')">
+				<!-- AND (OMI.POSITION_TYPE IN ('영업직') OR OMI.POSITION_RANK IN ('팀장')) -->
+				<!-- AND (OMI.POSITION_TYPE IN ('영업직')) -->
+				AND OTI.TEAM_NO = #{global_member_team}
+				GROUP BY TARGET_NAME WITH ROLLUP
+			</when>
+			<when test="global_role_code.contains('MEMBER')">
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+			<otherwise>
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						AND (OMI.POSITION_TYPE IN ('영업직', '임원') OR OMI.POSITION_RANK IN ('팀장'))
+						AND (OMI.POSITION_TYPE IN ('영업직'))
+						AND OTD.DIVISION_NO = #{global_member_division}
+					</when>
+					<otherwise>
+						AND (OMI.POSITION_TYPE IN ('영업직', '임원') OR OMI.POSITION_RANK IN ('팀장','본부장'))
+						AND (OMI.POSITION_TYPE IN ('영업직'))
+					</otherwise>
+				</choose> -->
+			</otherwise>
+		</choose>
+		<!-- <if test='rank != "Y" '>
+			<choose>
+				<when test='ranksub != "Y" '>
+					GROUP BY TARGET_NAME WITH ROLLUP
+				</when>
+				<otherwise>
+					GROUP BY TARGET_NAME
+				</otherwise>
+			</choose>
+		</if> -->
+		) AS T
+		GROUP BY TARGET_NAME
+		<![CDATA[ HAVING TOTAL_COUNT > 0 ]]>
+		ORDER BY BLANK_CNT ASC,
+		TARGET_NAME ASC
+	</select>
+	
+	<!-- 모바일 고객만족 -> 고객이슈 -> 이슈 종류별 테이블 data -->
+	<select id="selectClientIssueTypeStatus" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				COALESCE(T.TARGET_NAME2, '회사전체') AS TARGET_NAME
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				COALESCE(T.TARGET_NAME2, '본부장') AS TARGET_NAME
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				COALESCE(T.TARGET_NAME2, '팀전체') AS TARGET_NAME
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				COALESCE(T.TARGET_NAME2, '팀전체') AS TARGET_NAME
+			</when>
+			<otherwise>
+				COALESCE(T.TARGET_NAME2, '회사전체') AS TARGET_NAME
+			</otherwise>
+		</choose>
+			,(
+				CASE WHEN T.TARGET_NAME2 IS NULL THEN 1
+				ELSE 2
+				END
+			) AS BLANK_CNT
+			,T.*
+		FROM
+		(
+		SELECT
+			OMI.MEMBER_DIVISION,
+			OMI.MEMBER_TEAM,
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						(
+							CASE WHEN OTI.TEAM_NAME = 'CEO'
+							THEN '임원'
+							ELSE OTI.TEAM_NAME
+							END
+						) AS TARGET_NAME2,
+					</when>
+					<otherwise> -->
+						ODI.DIVISION_NAME AS TARGET_NAME2,
+					<!-- </otherwise>
+				</choose> -->
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				<choose>
+					<when test='rank != "Y" '>
+						OTI.TEAM_NAME AS TARGET_NAME2,
+					</when>
+					<otherwise>
+						'본부장' AS TARGET_NAME2,
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				OMI.HAN_NAME AS TARGET_NAME2,
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				OMI.HAN_NAME AS TARGET_NAME2,
+			</when>
+			<otherwise>
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						(
+							CASE WHEN OTI.TEAM_NAME = 'CEO'
+							THEN '임원'
+							ELSE OTI.TEAM_NAME
+							END
+						) AS TARGET_NAME2,
+					</when>
+					<otherwise> -->
+						(
+							CASE WHEN OMI.POSITION_TYPE = '임원'
+							THEN '임원'
+							ELSE ODI.DIVISION_NAME
+							END
+						) AS TARGET_NAME2,
+					<!-- </otherwise>
+				</choose> -->
+			</otherwise>
+		</choose>
+		2 AS BLANK_CNT,
+		COUNT(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE) = #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+			THEN 1
+			END
+		) AS TOTAL_COUNT,
+		SUM(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE) = #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+				AND CIL.ISSUE_CATEGORY = '제품'
+			THEN 1
+			ELSE 0
+			END
+		) AS CATEGORY_1,
+		SUM(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE) = #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+				AND CIL.ISSUE_CATEGORY = '서비스'
+			THEN 1
+			ELSE 0
+			END
+		) AS CATEGORY_2,
+		SUM(
+			CASE WHEN YEAR(CIL.SYS_REGISTER_DATE) = #{searchYear}
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+				AND CIL.ISSUE_CATEGORY = '지원' 
+			THEN 1
+			ELSE 0
+			END
+		) AS CATEGORY_3
+		FROM OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+			CLIENT_ISSUE_LOG AS CIL
+			ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+		INNER JOIN
+			OUR_MEMBERS_INFO AS OMI2
+			ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+		INNER JOIN
+			OUR_TEAM_INFO AS OTI
+			ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		INNER JOIN
+			OUR_DIVISION_INFO AS ODI
+			ON ODI.DIVISION_NO = OTI.DIVISION_NO
+			OR ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		<!-- LEFT OUTER JOIN
+		CLIENT_ISSUE_ACTION_PLAN CIAP
+		ON CIL.ISSUE_ID = CIAP.ISSUE_ID -->
+		WHERE 1=1
+		<!-- AND OMI.USE_YN = 'Y' -->
+		<if test='rank != "Y" '>
+		<!-- AND OTI.TEAM_TYPE = 'S' -->
+		</if>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						AND ODI.DIVISION_NO = #{global_member_division}
+						AND (OMI.POSITION_TYPE IN ('영업직','임원') OR OMI.POSITION_RANK = '팀장')
+						AND OTI.TEAM_NO IN (
+							SELECT OTI2.TEAM_NO FROM OUR_TEAM_INFO AS OTI2
+							LEFT OUTER JOIN
+							OUR_MEMBERS_INFO AS OMI2
+							ON OMI2.MEMBER_TEAM = OTI2.TEAM_NO
+							WHERE OMI2.POSITION_TYPE IN ('영업직', '임원')
+							GROUP BY OTI2.TEAM_NO
+						)
+						GROUP BY TARGET_NAME2 WITH ROLLUP
+					</when>
+					<otherwise> -->
+						<!-- AND (OMI.POSITION_TYPE IN ('영업직','임원') OR OMI.POSITION_RANK IN
+						('팀장','본부장')) -->
+						GROUP BY TARGET_NAME2 WITH ROLLUP
+					<!-- </otherwise>
+				</choose> -->
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				<choose>
+					<when test='rank != "Y" '>
+						AND ODI.DIVISION_NO = #{global_member_division}
+						<!-- AND (OMI.POSITION_TYPE IN ('영업직') OR OMI.POSITION_RANK IN ('팀장','본부장')) -->
+						<choose>
+							<when test='ranksub != "Y" '>
+								GROUP BY TARGET_NAME2 WITH ROLLUP
+							</when>
+							<otherwise>
+								GROUP BY TARGET_NAME2
+							</otherwise>
+						</choose>
+					</when>
+					<otherwise>
+						AND OMI.MEMBER_ID_NUM = #{global_member_id}
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OTI.TEAM_NO = #{global_member_team}
+				<!-- AND (OMI.POSITION_TYPE IN ('영업직') OR OMI.POSITION_RANK = '팀장') -->
+				GROUP BY TARGET_NAME2 WITH ROLLUP
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+				AND 1=1
+			</when>
+			<otherwise>
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						AND ODI.DIVISION_NO = #{global_member_division}
+						AND (OMI.POSITION_TYPE IN ('영업직','임원') OR OMI.POSITION_RANK = '팀장')
+						AND OTI.TEAM_NO IN (
+							SELECT 
+								OTI2.TEAM_NO
+							FROM OUR_TEAM_INFO AS OTI2
+							LEFT OUTER JOIN
+								OUR_MEMBERS_INFO AS OMI2
+								ON OMI2.MEMBER_TEAM = OTI2.TEAM_NO
+							WHERE OMI2.POSITION_TYPE IN ('영업직', '임원')
+							GROUP BY OTI2.TEAM_NO
+						)
+						GROUP BY TARGET_NAME2 WITH ROLLUP
+					</when>
+					<otherwise> -->
+						<!-- AND (OMI.POSITION_TYPE IN ('영업직','임원') OR OMI.POSITION_RANK IN ('팀장','본부장')) -->
+						GROUP BY TARGET_NAME2 WITH ROLLUP
+					<!-- </otherwise>
+				</choose> -->
+			</otherwise>
+		</choose>
+		) AS T
+		GROUP BY TARGET_NAME
+		<![CDATA[ HAVING TOTAL_COUNT > 0 ]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '임원')DESC, TARGET_NAME ASC
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '본부전체')DESC, TARGET_NAME ASC
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '팀전체')DESC, TARGET_NAME ASC
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '팀전체')DESC, TARGET_NAME ASC
+			</when>
+			<otherwise>
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '임원') DESC,TARGET_NAME ASC
+			</otherwise>
+		</choose>
+		
+	</select>
+	
+	<!-- 모바일 고객만족 -> 고객만족 -> 고객이슈 현황 -->
+	<select id="selectClientIssueStatusCount" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			COUNT(*) AS TOTAL_CNT
+			,IFNULL(
+				SUM(
+					CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() 
+						AND (
+							CIL.ISSUE_CLOSE_DATE IS NULL
+							OR
+							CIL.ISSUE_CLOSE_DATE = ''
+						)
+					THEN 1
+					ELSE 0
+					END
+				), 0) AS ISSUE_STATUS_1
+			
+			,IFNULL(
+				SUM(
+					CASE WHEN CURRENT_DATE() > CIL.DUE_DATE 
+						AND (
+							CIL.ISSUE_CLOSE_DATE IS NULL
+							OR
+							CIL.ISSUE_CLOSE_DATE = ''
+						)
+					THEN 1
+					ELSE 0
+					END
+				), 0) AS ISSUE_STATUS_2
+				
+			,IFNULL(
+				SUM(
+					CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL
+						AND CIL.ISSUE_CLOSE_DATE != ''
+					THEN 1
+					ELSE 0
+					END
+				), 0) AS ISSUE_STATUS_3
+		
+		FROM CLIENT_ISSUE_LOG AS CIL
+		INNER JOIN
+			OUR_MEMBERS_INFO AS OMI
+			ON OMI.MEMBER_ID_NUM = CIL.SALES_REPRESENTIVE_ID
+		WHERE 1=1
+		<!-- year -->
+		<if test="searchYear != null and searchYear != '' ">
+			AND YEAR(CIL.SYS_REGISTER_DATE) = #{searchYear}
+		</if>
+		<!-- quarter -->
+		<if test="searchQuarter != null and searchQuarter != '' ">
+			AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+		</if>
+		<choose>
+			<when test="global_role_code.contains('CEO')">
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						AND ODI.DIVISION_NO = #{global_member_division}
+						AND
+						(OMI.POSITION_TYPE IN ('영업직','임원') OR OMI.POSITION_RANK = '팀장')
+					</when>
+					<otherwise>
+						AND (OMI.POSITION_TYPE IN ('영업직','임원') OR
+						OMI.POSITION_RANK IN ('팀장','본부장'))
+					</otherwise>
+				</choose> -->
+			</when>
+			<when test="global_role_code.contains('DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				<!-- AND
+				(OMI.POSITION_TYPE IN ('영업직') OR OMI.POSITION_RANK IN ('팀장','본부장')) -->
+			</when>
+			<when test="global_role_code.contains('TEAM')">
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				<!-- AND
+				(OMI.POSITION_TYPE IN ('영업직') OR OMI.POSITION_RANK = '팀장') -->
+			</when>
+			<when test="global_role_code.contains('MEMBER')">
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+			<otherwise>
+				<!-- <choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						AND ODI.DIVISION_NO = #{global_member_division}
+						AND
+						(OMI.POSITION_TYPE IN ('영업직','임원') OR OMI.POSITION_RANK = '팀장')
+					</when>
+					<otherwise>
+						AND (OMI.POSITION_TYPE IN ('영업직','임원') OR
+						OMI.POSITION_RANK IN ('팀장','본부장'))
+					</otherwise>
+				</choose> -->
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="clientIssueFileList" parameterType="java.util.List"
+		resultType="hashmap">
+		SELECT
+		FILE_ID,
+		ISSUE_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		FILE_NAME,
+		FILE_PATH,
+		FILE_TYPE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		FROM CLIENT_ISSUE_FILE_STORE
+		<choose>
+			<when test="filePKArray != null and filePKArray != '' ">
+				WHERE ISSUE_ID IN(${filePKArray})
+			</when>
+			<otherwise>
+				WHERE ISSUE_ID IN('')
+			</otherwise>
+		</choose>
+		<!-- <foreach item="item" index="index" collection="list" open="(" separator="," 
+			close=")"> #{item.BIZ_ID} </foreach> -->
+	</select>
+
+	<update id="updateClientIssueSolvePlan" parameterType="hashmap">
+		UPDATE CLIENT_ISSUE_ACTION_PLAN
+		SET
+		<!-- CATEGORY='', -->
+		SOLVE_PLAN=#{SOLVE_PLAN},
+		SOLVE_OWNER=#{SOLVE_OWNER},
+		SOLVE_OWNER_ID=#{SOLVE_OWNER_ID},
+		<choose>
+			<when test="DUE_DATE != null and DUE_DATE != '' ">
+				DUE_DATE = #{DUE_DATE},
+			</when>
+			<otherwise>
+				DUE_DATE = NULL,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+				CLOSE_DATE = #{CLOSE_DATE},
+			</when>
+			<otherwise>
+				CLOSE_DATE = NULL,
+			</otherwise>
+		</choose>
+		<!-- STATUS=#{HIDDEN_STATUS}, -->
+		SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE ACTION_ID = #{ACTION_ID};
+	</update>
+
+	<delete id="deleteClientIssue" parameterType="hashmap">
+		DELETE FROM
+		CLIENT_ISSUE_FILE_STORE WHERE ISSUE_ID=#{hiddenModalPK};
+
+		DELETE FROM CLIENT_ISSUE_LOG WHERE ISSUE_ID=#{hiddenModalPK};
+	</delete>
+
+	<delete id="deleteClientIssueActionPlan" parameterType="hashmap">
+		DELETE
+		FROM CLIENT_ISSUE_ACTION_PLAN WHERE ISSUE_ID=#{hiddenModalPK} AND
+		ACTION_ID=#{issueActionId};
+	</delete>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!-- 고객만족 -->
+	<select id="gridClientSatisfaction" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+				 SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				TMP.*
+				FROM 
+					(
+						SELECT 
+							CSL.CSAT_ID, 
+							CSL.CREATOR_ID, 
+							CSL.CREATE_DATETIME,
+							CSL.CSAT_SURVEY_ID,
+							CSL.CSAT_SURVEY_DATE, 
+							CSL.CSAT_CATEGORY, 
+							CSL.CSAT_SUBJECT, 
+							CSL.CSAT_DETAIL, 
+							DATE_FORMAT(CSL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+							DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+							OMI.HAN_NAME,
+							OMI.MEMBER_ID_NUM
+					FROM 
+						CLIENT_SAT_LOG AS CSL
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON CSL.CREATOR_ID = OMI.MEMBER_ID_NUM
+					WHERE 1=1
+		]]>
+		<if
+			test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND CSL.CSAT_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND CSL.CSAT_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+
+		<!-- 일반검색 전체 -->
+		<if test="allsearch != null and allsearch != '' ">
+			AND CONCAT(IFNULL(CSL.CSAT_CATEGORY,''), IFNULL(CSL.CSAT_SUBJECT ,''),
+			IFNULL(OMI.HAN_NAME,'')) REGEXP #{allsearch}
+		</if>
+		<!-- 일반검색 제목 -->
+		<if test=" csat_subject != null and csat_subject != '' ">
+			AND CSL.CSAT_SUBJECT LIKE CONCAT('%', #{csat_subject}, '%')
+		</if>
+		<!-- 일반검색 조사사 -->
+		<if test=" csat_survey_name != null and csat_survey_name != '' ">
+			AND CSL.CSAT_SURVEY_ID LIKE CONCAT('%', #{CSAT_SURVEY_ID}, '%')
+		</if>
+		<!-- 일반검색 작성자 -->
+		<if test=" han_name != null and han_name != '' ">
+			AND OMI.HAN_NAME LIKE CONCAT('%', #{han_name}, '%')
+		</if>
+		<!-- 상세검색 전체 -->
+		<if test="allSearchDetail != null and allSearchDetail != '' ">
+			AND CONCAT(IFNULL(CSL.CSAT_CATEGORY,''), IFNULL(CSL.CSAT_SUBJECT ,''))
+			REGEXP #{allSearchDetail}
+		</if>
+		<!-- 상세검색 이슈종류 -->
+		<if test="detailCategory != null and detailCategory != '' ">
+			AND CSL.CSAT_CATEGORY = #{detailCategory}
+		</if>
+		<!-- 상세검색 고객사 -->
+		<if test="SysUpdateDate != null and SysUpdateDate != '' ">
+			AND DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d') = #{SysUpdateDate}
+		</if>
+		ORDER BY CSL.SYS_UPDATE_DATE ASC
+		) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE 1=1
+		ORDER BY ROWNUM DESC;
+	</select>
+
+	<select id="clientSatisfactionSearchDetailGroup1"
+		parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	       SELECT 
+					CSL.CSAT_CATEGORY 
+			FROM 
+				CLIENT_SAT_LOG AS CSL
+			LEFT OUTER JOIN
+			OUR_MEMBERS_INFO AS OMI ON CSL.CREATOR_ID = OMI.MEMBER_ID_NUM
+			WHERE 1=1
+			GROUP BY CSL.CSAT_CATEGORY
+		]]>
+	</select>
+
+	<!-- <select id="clientSatisfactionSearchDetailGroup2" parameterType="hashmap" 
+		resultType="hashmap"> <![CDATA[ SELECT CCI.COMPANY_NAME FROM CLIENT_EVENT_LOG 
+		AS CEL LEFT OUTER JOIN CLIENT_COMPANY_INFO AS CCI ON CEL.COMPANY_ID = CCI.COMPANY_ID 
+		LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI ON CEL.CREATOR_ID= OMI.MEMBER_ID_NUM 
+		WHERE 1=1 GROUP BY CCI.COMPANY_NAME ]]> </select> -->
+
+	<select id="clientSatisfactionFileList"
+		parameterType="java.util.List" resultType="hashmap">
+		SELECT
+		FILE_ID,
+		CSAT_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		FILE_NAME,
+		FILE_PATH,
+		FILE_TYPE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		FROM CLIENT_SAT_FILE_STORE
+		<choose>
+			<when test="filePKArray != null and filePKArray != '' ">
+				WHERE CSAT_ID IN(${filePKArray})
+			</when>
+			<otherwise>
+				WHERE CSAT_ID IN('')
+			</otherwise>
+		</choose>
+		<!-- <foreach item="item" index="index" collection="list" open="(" separator="," 
+			close=")"> #{item.BIZ_ID} </foreach> -->
+	</select>
+
+
+	<insert id="insertClientSatisfaction" parameterType="hashmap">
+	 	<![CDATA[
+	        INSERT INTO CLIENT_SAT_LOG
+	        (
+	        	CREATOR_ID, 
+	        	CREATE_DATETIME,
+	        	CSAT_SUBJECT,
+	        	CSAT_DETAIL,
+	        	CSAT_SURVEY_ID,
+	        	CSAT_SURVEY_DATE,
+	        	CSAT_CATEGORY
+	        )
+			VALUES
+			(
+				#{hiddenModalCreatorId}, 
+				CURRENT_TIMESTAMP, 
+				#{textModalSubject}, 
+				#{textareaModalContents},
+				#{textModalCsatSurveyId}, 
+				#{textModalCsatDate},
+				#{selectModalCategory}
+			);
+		]]>
+		<selectKey keyProperty="filePK" resultType="Integer"
+			order="AFTER">
+			SELECT LAST_INSERT_ID();
+		</selectKey>
+	</insert>
+
+	<update id="updateClientSatisfaction" parameterType="hashmap">
+		<![CDATA[
+	        UPDATE CLIENT_SAT_LOG
+	        SET 
+	        	CSAT_SUBJECT = #{textModalSubject},
+	        	CSAT_DETAIL = #{textareaModalContents},
+	        	CSAT_SURVEY_ID = #{textModalCsatSurveyId},
+	        	CSAT_SURVEY_DATE = #{textModalCsatDate},
+	        	CSAT_CATEGORY = #{selectModalCategory},
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+			WHERE CSAT_ID=#{hiddenModalPK};
+		]]>
+	</update>
+
+	<delete id="deleteClientSatisfaction" parameterType="hashmap">
+		DELETE FROM
+		CLIENT_SATDETAIL_LOG WHERE CSAT_ID=#{hiddenModalPK};
+		DELETE FROM
+		CLIENT_SAT_FILE_STORE WHERE CSAT_ID=#{hiddenModalPK};
+		DELETE FROM
+		CLIENT_SAT_LOG WHERE CSAT_ID=#{hiddenModalPK};
+	</delete>
+
+	<select id="gridClientSatisfactionDetailList"
+		parameterType="hashmap" resultType="hashmap">
+		SELECT
+		@ROWNUM := @ROWNUM +1 AS ROWNUM,
+		TMP.*
+		FROM
+		(
+		SELECT
+
+		CSL.CSAT_DETAIL_ID,
+		CSL.CSAT_ID,
+		CSL.COMPANY_NAME,
+		CSL.COMPANY_ID,
+		CSL.RESP_CUSTOMER_NAME,
+		CII.POSITION AS RESP_CUSTOMER_RANK,
+		CSL.RESP_CUSTOMER_ID,
+		CSL.CSAT_SURVEY_DATE,
+		CSL.CSAT_METHOD,
+		CSL.CSAT_VALUE,
+		CSL.CSAT_DETAIL,
+		CIL.CSAT_DETAIL_ID AS CSAT_DETAIL_ISSUE,
+		CIL.ISSUE_ID,
+		CSL.SYS_REGISTER_DATE,
+		CSL.SYS_UPDATE_DATE
+		FROM CLIENT_SATDETAIL_LOG AS CSL
+		LEFT OUTER JOIN
+		CLIENT_ISSUE_LOG AS CIL ON CIL.CSAT_DETAIL_ID = CSL.CSAT_DETAIL_ID
+		LEFT OUTER JOIN
+		CLIENT_INDIVIDUAL_INFO AS CII ON CII.CUSTOMER_ID = CSL.RESP_CUSTOMER_ID
+		WHERE CSL.CSAT_ID = #{csat_id}
+		ORDER BY CSL.CSAT_DETAIL_ID asc
+		) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM
+	</select>
+
+
+	<insert id="insertClientSatisfactionDetailList"
+		parameterType="hashmap">
+		INSERT INTO CLIENT_SATDETAIL_LOG
+		(
+		CSAT_ID,
+		COMPANY_NAME,
+		RESP_CUSTOMER_NAME,
+		CSAT_SURVEY_DATE,
+		CSAT_METHOD,
+		CSAT_VALUE,
+		CSAT_DETAIL,
+		CSAT_REG_DATE,
+		MEMBER_ID_NUM
+		)
+		VALUES
+		(
+		#{hiddenModalPK},
+		#{COMPANY_NAME},
+		#{RESP_CUSTOMER_NAME},
+		#{CSAT_SURVEY_DATE},
+		#{CSAT_METHOD},
+		#{CSAT_VALUE},
+		#{CSAT_DETAIL},
+		CURRENT_TIMESTAMP,
+		#{hiddenModalCreatorId}
+		);
+	</insert>
+
+	<!-- 2016-10-10 심윤영 start -->
+	<insert id="insertClientSatisfactionDetail"
+		parameterType="hashmap">
+		INSERT INTO CLIENT_SATDETAIL_LOG
+		(
+		CSAT_ID,
+		COMPANY_NAME,
+		COMPANY_ID,
+		RESP_CUSTOMER_NAME,
+		<if test="RESP_CUSTOMER_ID != null and RESP_CUSTOMER_ID != '' ">
+			RESP_CUSTOMER_ID,
+		</if>
+		<if test="CSAT_SURVEY_DATE != null and CSAT_SURVEY_DATE != '' ">
+			CSAT_SURVEY_DATE,
+		</if>
+		CSAT_METHOD,
+		CSAT_VALUE,
+		CSAT_DETAIL,
+		CSAT_REG_DATE,
+		MEMBER_ID_NUM,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+		#{hiddenModalPK},
+		#{COMPANY_NAME},
+		#{COMPANY_ID},
+		#{RESP_CUSTOMER_NAME},
+		<if test="RESP_CUSTOMER_ID != null and RESP_CUSTOMER_ID != '' ">
+			#{RESP_CUSTOMER_ID},
+		</if>
+		<if test="CSAT_SURVEY_DATE != null and CSAT_SURVEY_DATE != '' ">
+			#{CSAT_SURVEY_DATE},
+		</if>
+		#{CSAT_METHOD},
+		#{CSAT_VALUE},
+		#{CSAT_DETAIL},
+		CURRENT_TIMESTAMP,
+		#{hiddenModalCreatorId},
+		CURRENT_TIMESTAMP,
+		CURRENT_TIMESTAMP
+		);
+		<selectKey keyProperty="filePK" resultType="Integer"
+			order="AFTER">
+			SELECT LAST_INSERT_ID();
+		</selectKey>
+	</insert>
+
+	<update id="updateClientSatisfactionDetail"
+		parameterType="hashmap">
+		UPDATE CLIENT_SATDETAIL_LOG
+		SET
+		COMPANY_NAME=#{COMPANY_NAME},
+		COMPANY_ID=#{COMPANY_ID},
+		RESP_CUSTOMER_NAME=#{RESP_CUSTOMER_NAME},
+		<if test="RESP_CUSTOMER_ID != null and RESP_CUSTOMER_ID != '' ">
+			RESP_CUSTOMER_ID=#{RESP_CUSTOMER_ID},
+		</if>
+		<if test="CSAT_SURVEY_DATE != null and CSAT_SURVEY_DATE != '' ">
+			CSAT_SURVEY_DATE=#{CSAT_SURVEY_DATE},
+		</if>
+		CSAT_METHOD=#{CSAT_METHOD},
+		CSAT_VALUE=#{CSAT_VALUE},
+		CSAT_DETAIL=#{CSAT_DETAIL},
+		SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND CSAT_ID = #{hiddenModalPK}
+		AND CSAT_DETAIL_ID = #{CSAT_DETAIL_ID}
+	</update>
+
+	<select id="gridSolvePlanClientSatisfaction"
+		parameterType="java.util.List" resultType="hashmap">
+		SELECT
+		ACTION_ID,
+		CSAT_ID,
+		SOLVE_PLAN,
+		SOLVE_OWNER,
+		SOLVE_OWNER_ID,
+		CSAT_ACTION_DETAIL,
+		DUE_DATE,
+		CLOSE_DATE,
+		STATUS,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE,
+		STATUS AS HIDDEN_STATUS
+		FROM CLIENT_SAT_LOG_ACTION_PLAN
+		WHERE 1=1
+		AND CSAT_ID =
+		#{pkNo}
+	</select>
+
+	<insert id="insertClientSatisfactionSolvePlan"
+		parameterType="hashmap">
+		INSERT INTO CLIENT_SAT_LOG_ACTION_PLAN
+		(
+		CSAT_ID,
+		SOLVE_PLAN,
+		SOLVE_OWNER,
+		SOLVE_OWNER_ID,
+		CSAT_ACTION_DETAIL,
+		DUE_DATE,
+		CLOSE_DATE,
+		STATUS,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+		#{pkNo},
+		#{SOLVE_PLAN},
+		#{SOLVE_OWNER},
+		#{SOLVE_OWNER_ID},
+		#{CSAT_ACTION_DETAIL},
+		<choose>
+			<when test="DUE_DATE != null and DUE_DATE != '' ">
+				#{DUE_DATE},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+				#{CLOSE_DATE},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+		#{HIDDEN_STATUS},
+		CURRENT_TIMESTAMP,
+		CURRENT_TIMESTAMP
+		);
+	</insert>
+
+	<update id="updateClientSatisfactionSolvePlan"
+		parameterType="hashmap">
+		UPDATE CLIENT_SAT_LOG_ACTION_PLAN
+		SET
+		<!-- CATEGORY='', -->
+		SOLVE_PLAN=#{SOLVE_PLAN},
+		SOLVE_OWNER=#{SOLVE_OWNER},
+		SOLVE_OWNER_ID=#{SOLVE_OWNER_ID},
+		CSAT_ACTION_DETAIL=#{CSAT_ACTION_DETAIL},
+		<choose>
+			<when test="DUE_DATE != null and DUE_DATE != '' ">
+				DUE_DATE = #{DUE_DATE},
+			</when>
+			<otherwise>
+				DUE_DATE = NULL,
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+				CLOSE_DATE = #{CLOSE_DATE},
+			</when>
+			<otherwise>
+				CLOSE_DATE = NULL,
+			</otherwise>
+		</choose>
+		STATUS=#{HIDDEN_STATUS},
+		SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE ACTION_ID = #{ACTION_ID};
+	</update>
+
+	<select id="gridClientSatisfactionDetailIssue"
+		parameterType="java.util.List" resultType="hashmap">
+		SELECT
+		ISSUE_ID
+		FROM CLIENT_ISSUE_LOG
+		WHERE 1=1
+		AND CSAT_DETAIL_ID = #{pkNo}
+	</select>
+
+	<delete id="deleteClientSatisfactionFollowUpAction"
+		parameterType="hashmap">
+		DELETE FROM CLIENT_SAT_LOG_ACTION_PLAN
+		WHERE 1=1
+		AND
+		ACTION_ID = #{actionId}
+	</delete>
+
+	<insert id="insertClientSatisfactionDetailIssue"
+		parameterType="hashmap">
+		INSERT INTO CLIENT_ISSUE_LOG
+		(
+		CSAT_DETAIL_ID,
+		COMPANY_ID,
+		ISSUE_CREATOR,
+		SALES_REPRESENTIVE_ID,
+		ISSUE_CATEGORY,
+		ISSUE_SUBJECT,
+		ISSUE_DATE,
+		ISSUE_STATUS,
+		ISSUE_DETAIL,
+		SYS_REGISTER_DATE,
+		CREATOR_ID
+		)
+		VALUES
+		(
+		#{hiddenModalModifiedDetailId},
+		#{textModalModifiedCompanyId},
+		#{textModalModifiedCustomerName},
+		#{textModalCsatSurveyId},
+		#{selectModalDetailIssueCategory},
+		#{textModalSubject},
+		#{textModalCsatDate},
+		'1',
+		#{textModalModifiedIssueDetail},
+		CURRENT_TIMESTAMP,
+		#{hiddenModalModifiedDetailId}
+		);
+		<selectKey keyProperty="filePK" resultType="Integer"
+			order="AFTER">
+			SELECT LAST_INSERT_ID();
+		</selectKey>
+	</insert>
+
+	<update id="updateClientSatisfactionDetailIssue"
+		parameterType="hashmap">
+		UPDATE INTO CLIENT_ISSUE_LOG
+		SET
+		COMPANY_ID = #{textModalModifiedCompanyId},
+		ISSUE_CREATOR = #{textModalModifiedCustomerName},
+		SALES_REPRESENTIVE_ID = #{textModalCsatSurveyId},
+		ISSUE_CATEGORY = #{selectModalDetailIssueCategory},
+		ISSUE_SUBJECT = #{textModalSubject},
+		ISSUE_DATE = #{textModalCsatDate},
+		ISSUE_DETAIL, = #{textModalModifiedIssueDetail},
+		SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+		WHERE 1=1
+		AND ISSUE_ID = #{hiddenModalPK}
+	</update>
+
+	<select id="checkClientSatisfactionDetailIssue"
+		parameterType="java.util.List" resultType="Integer">
+		SELECT
+		COUNT(*)
+		FROM CLIENT_ISSUE_LOG
+		WHERE 1=1
+		AND CSAT_DETAIL_ID =
+		#{hiddenModalModifiedDetailId}
+	</select>
+	<!-- 2016-10-10 심윤영 end -->
+
+	<update id="updateClientSatisfactionDetailList"
+		parameterType="hashmap">
+		UPDATE CLIENT_SATDETAIL_LOG
+		SET
+		COMPANY_NAME=#{COMPANY_NAME},
+		RESP_CUSTOMER_NAME=#{RESP_CUSTOMER_NAME},
+		CSAT_SURVEY_DATE=#{CSAT_SURVEY_DATE},
+		CSAT_METHOD=#{CSAT_METHOD},
+		CSAT_VALUE=#{CSAT_VALUE},
+		CSAT_DETAIL=#{CSAT_DETAIL},
+		SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+		<!-- <trim prefix="SET" suffixOverrides=","> <if test="category != null">Category=#{category},</if> 
+			<if test="creator_id != null">CREATOR_ID=#{creator_id},</if> <if test="KEY_MILESTONE 
+			!= null">KEY_MILESTONE=#{KEY_MILESTONE},</if> <if test="ACT_ID != null">ACT_ID=#{ACT_ID},</if> 
+			<if test="STATUS != null">STATUS=#{STATUS},</if> <if test="ACT_DUE_DATE != 
+			null">ACT_DUE_DATE=#{ACT_DUE_DATE},</if> <if test="ACT_CLOSE_DATE != null">ACT_CLOSE_DATE=#{ACT_CLOSE_DATE},</if> 
+			SYS_UPDATE_DATE = CURRENT_TIMESTAMP </trim> -->
+		WHERE 1=1
+		AND CSAT_ID = #{hiddenModalPK}
+		AND CSAT_DETAIL_ID = #{CSAT_DETAIL_ID}
+	</update>
+
+	<delete id="deleteClientSatisfactionDetailList"
+		parameterType="hashmap">
+		DELETE FROM CLIENT_SATDETAIL_LOG
+		WHERE 1=1
+		AND CSAT_ID =
+		#{hiddenModalPK}
+		AND CSAT_DETAIL_ID = #{csat_detail_id}
+	</delete>
+
+	<select id="selectClientSatisfactionMasterListCount"
+		parameterType="hashmap" resultType="hashmap">
+			SELECT 
+				COUNT(*) AS listCount,
+				COUNT(DISTINCT CSL.CSAT_ID) as mListCount,
+				GROUP_CONCAT(CSL.CSAT_ID) AS CSAT_ID,
+				searchPKArray,
+				FILE_IDS AS FILE_ID,
+				GROUP_CONCAT(CSI.HAN_NAME) AS HAN_NAME, GROUP_CONCAT(CSL.CSAT_SUBJECT) AS CSAT_SUBJECT, GROUP_CONCAT(CSL.CSAT_SURVEY_DATE) AS CSAT_SURVEY_DATE,
+				GROUP_CONCAT(CSL.CSAT_DETAIL) AS CSAT_DETAIL, GROUP_CONCAT(CSDL2.RESP_CUSTOMER_NAME) AS RESP_CUSTOMER_NAME, GROUP_CONCAT(CSDL2.COMPANY_NAME) AS COMPANY_NAME,
+				<choose>
+					<when test="global_role_code.contains('CEO')">
+						GROUP_CONCAT(DISTINCT ODI.DIVISION_NO) AS searchNoArray
+						, GROUP_CONCAT(DISTINCT ODI.DIVISION_NAME) AS searchNameArray
+					</when>
+					<when test="global_role_code.contains('DIVISION')">
+						GROUP_CONCAT(DISTINCT OTI.TEAM_NO) AS searchNoArray
+						, GROUP_CONCAT(DISTINCT OTI.TEAM_NAME) AS searchNameArray
+					</when>
+					<when test="global_role_code.contains('TEAM')">
+						GROUP_CONCAT(DISTINCT CSI.MEMBER_ID_NUM) AS searchNoArray
+						, GROUP_CONCAT(DISTINCT CSI.HAN_NAME) AS searchNameArray
+					</when>
+					<when test="global_role_code.contains('MEMBER')">
+					</when>
+					<otherwise>
+						GROUP_CONCAT(DISTINCT ODI.DIVISION_NO) AS searchNoArray
+						, GROUP_CONCAT(DISTINCT ODI.DIVISION_NAME) AS searchNameArray
+					</otherwise>								
+				</choose>
+			FROM 
+			<![CDATA[
+				CLIENT_SAT_LOG AS CSL
+				LEFT OUTER JOIN
+							(
+								SELECT COUNT(CSAT_ID) AS FILE_COUNT, CSAT_ID, FILE_ID, GROUP_CONCAT(FILE_ID) AS FILE_IDS
+					        	FROM CLIENT_SAT_FILE_STORE
+					        	GROUP BY CSAT_ID
+							) AS FC ON FC.CSAT_ID = CSL.CSAT_ID
+				LEFT OUTER JOIN
+					        (
+					        	SELECT COUNT(CSAT_ID) AS CSAT_DETAIL_COUNT, CSAT_ID, CSAT_DETAIL_ID, GROUP_CONCAT(CSAT_DETAIL_ID) AS searchPKArray
+					        	FROM CLIENT_SATDETAIL_LOG
+					        	GROUP BY CSAT_ID
+					        ) AS CSDL ON CSL.CSAT_ID = CSDL.CSAT_ID
+				LEFT OUTER JOIN 
+					CLIENT_SATDETAIL_LOG AS CSDL2 ON CSL.CSAT_ID = CSDL2.CSAT_ID
+				LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS CSI ON CSL.CSAT_SURVEY_ID = CSI.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+					OUR_TEAM_INFO AS OTI ON CSI.MEMBER_TEAM = OTI.TEAM_NO
+				LEFT OUTER JOIN 
+					OUR_DIVISION_INFO AS ODI ON CSI.MEMBER_DIVISION = ODI.DIVISION_NO
+				WHERE 1=1 AND CSL.CSAT_CATEGORY = #{satisfactionCategory}
+		]]>
+		<if
+			test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND PM.PROJECT_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND PM.PROJECT_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+		<!-- 검색 -->
+		<if test="searchAll != null and searchAll != '' ">
+			AND CONCAT(IFNULL(CSL.CSAT_SUBJECT,''), IFNULL(CSI.HAN_NAME,''),
+			IFNULL(CSL.CSAT_SURVEY_DATE,''), IFNULL(CSL.CSAT_DETAIL,''),
+			IFNULL(CSDL2.RESP_CUSTOMER_NAME,''), IFNULL(CSDL2.COMPANY_NAME,'')) REGEXP
+			#{searchAll}
+		</if>
+		<!-- 검색 고객사 -->
+		<if test="searchCompanyName != null and searchCompanyName != '' ">
+			AND CCI.COMPANY_NAME = #{searchCompanyName}
+		</if>
+		
+		<if test="deviceCheck == 'mobile' ">
+			<if test="searchKeyword != null and searchKeyword != '' ">
+				AND
+				(
+				CSL.CSAT_SUBJECT LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR
+				CSDL2.RESP_CUSTOMER_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR
+				CSDL2.COMPANY_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</if>
+			<choose>
+				<when test="satisfactionTargetCategory != ''">
+					<choose>
+						<when test="global_role_code.contains('ROLE_CEO')">
+							AND ODI.DIVISION_NO = #{satisfactionTargetCategory}
+						</when>
+						<when test="global_role_code.contains('ROLE_DIVISION')">
+							AND OTI.TEAM_NO = #{satisfactionTargetCategory}
+						</when>
+						<when test="global_role_code.contains('ROLE_TEAM')">
+							AND CSI.MEMBER_ID_NUM = #{satisfactionTargetCategory}
+						</when>
+						<when test="global_role_code.contains('ROLE_MEMBER')">
+							AND CSI.MEMBER_ID_NUM = #{global_member_id}
+						</when>
+						<otherwise>
+							AND ODI.DIVISION_NO = #{satisfactionTargetCategory}
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					<choose>
+						<when test="global_role_code.contains('ROLE_CEO')">
+						</when>
+						<when test="global_role_code.contains('ROLE_DIVISION')">
+							AND ODI.DIVISION_NO = #{global_member_division}
+						</when>
+						<when test="global_role_code.contains('ROLE_TEAM')">
+							AND ODI.DIVISION_NO = #{global_member_team}
+						</when>
+						<when test="global_role_code.contains('ROLE_MEMBER')">
+							AND CSI.MEMBER_TEAM = #{global_member_member}
+						</when>
+						<otherwise>
+						</otherwise>
+					</choose>
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+
+	<select id="selectClientSatisfactionListCount"
+		parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				COUNT(*) AS listCount, GROUP_CONCAT(CSL.CSAT_ID) AS CSAT_ID, GROUP_CONCAT(CSDL.CSAT_DETAIL_ID) AS searchPKArray, GROUP_CONCAT(FC.FILE_ID) AS FILE_ID,
+				GROUP_CONCAT(CSI.HAN_NAME) AS HAN_NAME, GROUP_CONCAT(CSL.CSAT_SUBJECT) AS CSAT_SUBJECT, GROUP_CONCAT(CSL.CSAT_SURVEY_DATE) AS CSAT_SURVEY_DATE,
+				GROUP_CONCAT(CSL.CSAT_DETAIL) AS CSAT_DETAIL, GROUP_CONCAT(CSDL.RESP_CUSTOMER_NAME) AS RESP_CUSTOMER_NAME, GROUP_CONCAT(CSDL.COMPANY_NAME) AS COMPANY_NAME
+			FROM 
+				CLIENT_SATDETAIL_LOG AS CSDL
+				LEFT OUTER JOIN
+		        (
+		        	SELECT COUNT(CSAT_ID) AS FILE_COUNT, CSAT_ID, FILE_ID
+		        	FROM CLIENT_SAT_FILE_STORE
+		        	GROUP BY CSAT_ID
+		        ) AS FC ON FC.CSAT_ID = CSDL.CSAT_ID
+		        LEFT OUTER JOIN
+	            	CLIENT_SAT_LOG AS CSL ON CSL.CSAT_ID = CSDL.CSAT_ID
+	            LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS CSI ON CSL.CSAT_SURVEY_ID = CSI.MEMBER_ID_NUM
+	            WHERE 1=1 AND CSL.CSAT_CATEGORY = #{satisfactionCategory}
+		]]>
+		<if
+			test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND PM.PROJECT_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND PM.PROJECT_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+		<!-- 검색 -->
+		<if test="searchAll != null and searchAll != '' ">
+			AND CONCAT(IFNULL(CSL.CSAT_SUBJECT,''), IFNULL(CSI.HAN_NAME,''),
+			IFNULL(CSL.CSAT_SURVEY_DATE,''), IFNULL(CSL.CSAT_DETAIL,''),
+			IFNULL(CSDL.RESP_CUSTOMER_NAME,''), IFNULL(CSDL.COMPANY_NAME,'')) REGEXP
+			#{searchAll}
+		</if>
+		<!-- 검색 고객사 -->
+		<if test="searchCompanyName != null and searchCompanyName != '' ">
+			AND CCI.COMPANY_NAME = #{searchCompanyName}
+		</if>
+	</select>
+
+	<select id="selectClientSatisfactionMasterList"
+		parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+	@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+	TMP_TABLE.*
+FROM
+(
+	SELECT
+		CSL.CSAT_ID,
+		CSL.CREATOR_ID,
+		CSL.CREATE_DATETIME,
+		CSL.CSAT_SUBJECT,
+		CSL.CSAT_CATEGORY,
+		CSL.CSAT_SURVEY_ID,
+		CSI.MEMBER_POST AS CSAT_SURVEY_POST,
+		CSI.HAN_NAME AS CSAT_SURVEY_NAME,
+		CSL.CSAT_SURVEY_DATE,
+		CSL.CSAT_DETAIL,
+		DATE_FORMAT(CSL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+		DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+		DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+		IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT,
+		IF(CSAT_VALUE_TOTAL != '', ROUND(CSAT_VALUE_TOTAL/TOTAL_COUNT, 1), 0) AS AVG_CSAT_VALUE,
+		IFNULL(TOTAL_COUNT,0) AS TOTAL_COUNT,
+		IFNULL(GREAT_COUNT,0) AS GREAT_COUNT,
+		IFNULL(NICE_COUNT,0) AS NICE_COUNT,
+		IFNULL(GOOD_COUNT,0) AS GOOD_COUNT,
+		IFNULL(BAD_COUNT,0) AS BAD_COUNT,
+		IFNULL(HATE_COUNT,0) AS HATE_COUNT,
+		OMI.HAN_NAME,
+		IFNULL(ISSUE_COUNT,0) AS ISSUE_COUNT,
+		IFNULL(ISSUE_STATUS_1,0) AS ISSUE_STATUS_1,
+		IFNULL(ISSUE_STATUS_2,0) AS ISSUE_STATUS_2,
+		IFNULL(ISSUE_STATUS_3,0) AS ISSUE_STATUS_3,
+		CSDL.COMPANY_NAME,
+		CSDL.RESP_CUSTOMER_NAME
+	FROM 
+		CLIENT_SAT_LOG AS CSL
+		LEFT OUTER JOIN
+            (
+            	SELECT COUNT(CSAT_ID) AS FILE_COUNT, CSAT_ID
+            	FROM CLIENT_SAT_FILE_STORE
+            	GROUP BY CSAT_ID
+            ) AS FC ON FC.CSAT_ID = CSL.CSAT_ID
+		LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON CSL.CREATOR_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS CSI ON CSL.CSAT_SURVEY_ID = CSI.MEMBER_ID_NUM
+		LEFT OUTER JOIN 
+			OUR_TEAM_INFO AS OTI ON CSI.MEMBER_TEAM = OTI.TEAM_NO
+		LEFT OUTER JOIN 
+			OUR_DIVISION_INFO AS ODI ON CSI.MEMBER_DIVISION = ODI.DIVISION_NO
+		LEFT OUTER JOIN 
+			(
+				SELECT 
+					CSAT_ID,
+					CSAT_VALUE,
+					COMPANY_NAME,
+					RESP_CUSTOMER_NAME,
+					SUM(IF(CSAT_VALUE='1', 1, 0)) AS HATE_COUNT,
+					SUM(IF(CSAT_VALUE='2', 1, 0)) AS BAD_COUNT,
+					SUM(IF(CSAT_VALUE='3', 1, 0)) AS GOOD_COUNT,
+					SUM(IF(CSAT_VALUE='4', 1, 0)) AS NICE_COUNT,
+					SUM(IF(CSAT_VALUE='5', 1, 0)) AS GREAT_COUNT,
+					COUNT(CSAT_VALUE) AS TOTAL_COUNT,
+					SUM(CSAT_VALUE) AS CSAT_VALUE_TOTAL
+				FROM CLIENT_SATDETAIL_LOG
+				GROUP BY CSAT_ID
+			) AS CSDL ON CSL.CSAT_ID = CSDL.CSAT_ID
+		LEFT OUTER JOIN
+			(
+				SELECT 
+					CSLD2.CSAT_ID,
+					COUNT(CIL.ISSUE_ID) AS ISSUE_COUNT,
+					SUM(IF(CIL.ISSUE_STATUS='1', 1, 0)) AS ISSUE_STATUS_1,
+					SUM(IF(CIL.ISSUE_STATUS='2', 1, 0)) AS ISSUE_STATUS_2,
+					SUM(IF(CIL.ISSUE_STATUS='3', 1, 0)) AS ISSUE_STATUS_3
+				FROM 
+					CLIENT_SATDETAIL_LOG AS CSLD2 
+					INNER JOIN
+					CLIENT_ISSUE_LOG AS CIL ON CSLD2.CSAT_DETAIL_ID = CIL.CSAT_DETAIL_ID
+				GROUP BY CSLD2.CSAT_ID
+			) AS DIS ON DIS.CSAT_ID = CSL.CSAT_ID
+			
+					WHERE 1=1 AND CSL.CSAT_CATEGORY = #{satisfactionCategory}
+		]]>
+		<if
+			test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND CSDL.CSAT_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND CSDL.CSAT_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+		<!-- 검색 -->
+		<if test="searchAll != null and searchAll != '' ">
+			AND CONCAT(IFNULL(CSL.CSAT_SUBJECT,''), IFNULL(CSI.HAN_NAME,''),
+			IFNULL(CSL.CSAT_SURVEY_DATE,''), IFNULL(CSL.CSAT_DETAIL,''),
+			IFNULL(CSDL.RESP_CUSTOMER_NAME,''), IFNULL(CSDL.COMPANY_NAME,'')) REGEXP
+			#{searchAll}
+		</if>
+
+		<if test="deviceCheck == 'mobile' ">
+			<if test="searchKeyword != null and searchKeyword != '' ">
+				AND
+				(
+				CSL.CSAT_SUBJECT LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR
+				CSDL.RESP_CUSTOMER_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				OR
+				CSDL.COMPANY_NAME LIKE CONCAT('%', #{searchKeyword}, '%')
+				)
+			</if>
+			<choose>
+				<when test="satisfactionTargetCategory != ''">
+					<choose>
+						<when test="global_role_code.contains('ROLE_CEO')">
+							AND ODI.DIVISION_NO = #{satisfactionTargetCategory}
+						</when>
+						<when test="global_role_code.contains('ROLE_DIVISION')">
+							AND OTI.TEAM_NO = #{satisfactionTargetCategory}
+						</when>
+						<when test="global_role_code.contains('ROLE_TEAM')">
+							AND CSI.MEMBER_ID_NUM = #{satisfactionTargetCategory}
+						</when>
+						<when test="global_role_code.contains('ROLE_MEMBER')">
+							AND CSI.MEMBER_ID_NUM = #{global_member_id}
+						</when>
+						<otherwise>
+							AND ODI.DIVISION_NO = #{satisfactionTargetCategory}
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					<choose>
+						<when test="global_role_code.contains('ROLE_CEO')">
+						</when>
+						<when test="global_role_code.contains('ROLE_DIVISION')">
+							AND ODI.DIVISION_NO = #{global_member_division}
+						</when>
+						<when test="global_role_code.contains('ROLE_TEAM')">
+							AND ODI.DIVISION_NO = #{global_member_team}
+						</when>
+						<when test="global_role_code.contains('ROLE_MEMBER')">
+							AND CSI.MEMBER_TEAM = #{global_member_member}
+						</when>
+						<otherwise>
+						</otherwise>
+					</choose>
+				</otherwise>
+			</choose>
+		</if>
+
+		) AS TMP_TABLE, (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE 1=1
+
+		<choose>
+			<when test="sortCategory != null and sortCategory != '' ">
+				ORDER BY ${sortCategory}
+			</when>
+			<otherwise>
+				ORDER BY TMP_TABLE.LATELY_UPDATE_DATE DESC
+			</otherwise>
+		</choose>
+
+		<include refid="common.pagingPost2" />
+	</select>
+
+	<select id="selectClientSatisfactionList"
+		parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+					TMP_TABLE.*
+				FROM
+				(
+					SELECT 
+						CSDL.CSAT_DETAIL_ID,
+						CSDL.CSAT_ID,
+						CSDL.COMPANY_ID,
+						CSDL.COMPANY_NAME,
+						CSDL.RESP_CUSTOMER_NAME,
+						CSDL.CSAT_SURVEY_DATE,
+						CSDL.MEMBER_ID_NUM,
+						CSDL.CSAT_REG_DATE,
+						CSDL.CSAT_METHOD,
+						CSDL.CSAT_VALUE,
+						CSDL.CSAT_DETAIL AS CSDL_DETAIL,
+						DATE_FORMAT(CSDL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+						DATE_FORMAT(CSDL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+						IFNULL(DATE_FORMAT(CSDL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+						IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT,
+						CSL.CREATOR_ID,
+						CSL.CREATE_DATETIME,
+						CSL.CSAT_SUBJECT,
+						CSL.CSAT_CATEGORY,
+						CSL.CSAT_DETAIL AS CSL_DETAIL,
+						CMI.HAN_NAME AS CSAT_SURVEY_NAME,
+						CMI.MEMBER_POST AS CSAT_SURVEY_POST
+					FROM 
+						CLIENT_SATDETAIL_LOG AS CSDL
+						LEFT OUTER JOIN
+			            (
+			            	SELECT COUNT(CSAT_ID) AS FILE_COUNT, CSAT_ID
+			            	FROM CLIENT_SAT_FILE_STORE
+			            	GROUP BY CSAT_ID
+			            ) AS FC ON FC.CSAT_ID = CSDL.CSAT_ID
+			            LEFT OUTER JOIN
+			            	CLIENT_SAT_LOG AS CSL ON CSL.CSAT_ID = CSDL.CSAT_ID
+			            LEFT OUTER JOIN
+			            	OUR_MEMBERS_INFO AS CMI ON CMI.MEMBER_ID_NUM = CSDL.MEMBER_ID_NUM
+			            LEFT OUTER JOIN 
+							OUR_MEMBERS_INFO AS CSI ON CSL.CSAT_SURVEY_ID = CSI.MEMBER_ID_NUM
+					WHERE 1=1 AND CSL.CSAT_CATEGORY = #{satisfactionCategory}
+		]]>
+		<if
+			test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND CSDL.CSAT_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND CSDL.CSAT_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+		<!-- 검색 -->
+		<if test="searchAll != null and searchAll != '' ">
+			AND CONCAT(IFNULL(CSL.CSAT_SUBJECT,''), IFNULL(CSI.HAN_NAME,''),
+			IFNULL(CSL.CSAT_SURVEY_DATE,''), IFNULL(CSL.CSAT_DETAIL,''),
+			IFNULL(CSDL.RESP_CUSTOMER_NAME,''), IFNULL(CSDL.COMPANY_NAME,'')) REGEXP
+			#{searchAll}
+		</if>
+
+
+		) AS TMP_TABLE, (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE 1=1
+
+		<choose>
+			<when test="sortCategory != null and sortCategory != '' ">
+				ORDER BY ${sortCategory}
+			</when>
+			<otherwise>
+				ORDER BY TMP_TABLE.LATELY_UPDATE_DATE DESC
+			</otherwise>
+		</choose>
+
+		<include refid="common.pagingPost2" />
+	</select>
+
+	<select id="selectClientSatisfactionDetail"
+		parameterType="hashmap" resultType="hashmap">
+		SELECT
+		CSL.CSAT_ID,
+		CSL.CREATOR_ID,
+		CSL.CREATE_DATETIME,
+		CSL.CSAT_SUBJECT,
+		CSL.CSAT_DETAIL,
+		CSL.CSAT_CATEGORY,
+		CSI.HAN_NAME AS CSAT_SURVEY_NAME,
+		CSL.CSAT_SURVEY_ID,
+		CSL.CSAT_SURVEY_DATE,
+		DATE_FORMAT(CSL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE,
+		DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+		DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+		IF(CSDL.CSAT_VALUE_TOTAL != '', ROUND(CSDL.CSAT_VALUE_TOTAL/CSDL.CSAT_TOTAL_COUNT, 1), 0) AS
+		CSAT_AVG_VALUE,
+		CSDL.CSAT_TOTAL_COUNT,
+		OMI.HAN_NAME,
+		OMI.MEMBER_ID_NUM
+		FROM
+		CLIENT_SAT_LOG AS CSL
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CSL.CREATOR_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS CSI ON CSL.CSAT_SURVEY_ID = CSI.MEMBER_ID_NUM
+		LEFT OUTER join
+		(
+		SELECT
+		CSAT_ID,
+		CSAT_VALUE,
+		COUNT(CSAT_VALUE) AS CSAT_TOTAL_COUNT,
+		SUM(CSAT_VALUE) AS CSAT_VALUE_TOTAL
+		FROM CLIENT_SATDETAIL_LOG
+		GROUP BY CSAT_ID
+		) AS CSDL ON CSL.CSAT_ID = CSDL.CSAT_ID
+		WHERE 1=1 AND CSL.CSAT_ID = #{pkNo}
+	</select>
+
+	<select id="selectClientSatisfactionFileList"
+		parameterType="java.util.List" resultType="hashmap">
+		SELECT
+		FILE_ID,
+		CSAT_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		FILE_NAME,
+		FILE_PATH,
+		FILE_TYPE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		FROM CLIENT_SAT_FILE_STORE
+		WHERE 1=1 AND CSAT_ID = #{pkNo}
+	</select>
+
+
+
+	<select id="gridCurrentOpportunity" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					OL.SUBJECT,
+					OL.ROUTE,
+					OL.SALES_REPRESENTIVE,
+					OL.CONTRACT_AMOUNT,
+					OL.GP_AMOUNT,
+					OL.CONTRACT_DATE,
+					OL.SALES_CYCLE,
+					OL.FORECAST_YN,
+					OL.BIZ_OWNER
+				
+					FROM OPPORTUNITY_LOG AS OL
+					WHERE 1=1 AND OL.COMPANY_ID = #{hiddenModalPK}
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					
+		]]>
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+
+
+	<select id="gridClientIssueView" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					CIL.ISSUE_CATEGORY,
+					CIL.ISSUE_CREATOR,
+					CIL.ISSUE_SUBJECT,
+					CIL.SOLVE_OWNER,
+					CIL.ISSUE_DATE,
+					CIL.DUE_DATE,
+					CIL.ISSUE_STATUS,
+					CASE 
+						WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+						THEN '#1ab394'
+						WHEN CIL.DUE_DATE >= CURRENT_DATE()
+						THEN '#ffc000' 
+						WHEN CURRENT_DATE() >  CIL.DUE_DATE
+						THEN '#f20056' 
+					END AS ISSUE_STATUS_TEXT, 
+					CIL.ISSUE_CLOSE_DATE
+					
+				
+					FROM CLIENT_ISSUE_LOG AS CIL
+					WHERE 1=1 AND CIL.COMPANY_ID = #{hiddenModalPK}
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					
+		]]>
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+
+
+	<select id="gridServiceProject" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					PM.PROJECT_SUBJECT,
+					PM.SALES_REPRESENTIVE,
+					PM.PROGRESS,
+					PMM.KEY_MILESTONE,
+					PMM.MILESTONE_SEQ,
+					PMI.TOTAL_COUNT,
+					PMI.ISSUE_STATUS,
+					PMI.R_COUNT,
+					PMI.Y_COUNT,
+					PMI.G_COUNT
+					FROM 
+						PROJECT_MGMT AS PM
+						LEFT OUTER JOIN
+						(	
+							SELECT TMP.*
+							FROM 
+							(
+								SELECT  MILESTONE_ID, MILESTONE_SEQ, KEY_MILESTONE,ACT_DUE_DATE,ACT_CLOSE_DATE,PROJECT_ID,
+											  IF(@PREV <> PROJECT_ID , @CNT := 1, @CNT := @CNT + 1) AS RANK,@PREV := PROJECT_ID
+								FROM PROJECT_MGMT_MILESTONE,(SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT	
+								WHERE 1=1
+								AND ACT_CLOSE_DATE IS NOT NULL
+								AND TRIM(ACT_CLOSE_DATE) <> ''
+								ORDER BY PROJECT_ID, MILESTONE_SEQ ASC
+							) AS TMP
+							WHERE 1=1
+							AND TMP.RANK = 1
+						) AS PMM ON PM.PROJECT_ID = PMM.PROJECT_ID
+						LEFT OUTER JOIN	
+						(
+							SELECT 
+								PROJECT_ID,
+								SUM(R_STATUS) AS R_COUNT,
+								SUM(Y_STATUS) AS Y_COUNT,
+								SUM(G_STATUS) AS G_COUNT,
+								SUM(TOTAL_COUNT) AS TOTAL_COUNT,
+								ISSUE_STATUS
+							FROM (
+								SELECT
+											PROJECT_ID,
+											IF(ISSUE_STATUS='R',1,0) AS R_STATUS,
+											IF(ISSUE_STATUS='Y',1,0) AS Y_STATUS,
+											IF(ISSUE_STATUS='G',1,0) AS G_STATUS,
+											1 AS TOTAL_COUNT,
+											ISSUE_STATUS
+								FROM PROJECT_MGMT_ISSUE
+							) AS TMP
+							WHERE 1=1
+							GROUP BY TMP.PROJECT_ID
+						) AS PMI ON PM.PROJECT_ID = PMI.PROJECT_ID
+						LEFT OUTER JOIN
+						CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PM.CLIENT_COMPANY_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON PM.CREATOR_ID = OMI.MEMBER_ID_NUM
+					WHERE 1=1 AND PM.CLIENT_COMPANY_ID = #{hiddenModalPK}
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					
+		]]>
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+
+
+	<select id="gridClientContactView" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+					(
+						SELECT 
+							CEL.EVENT_ID, 
+							CEL.CREATOR_ID, 
+							CEL.CREATE_DATETIME, 
+							CEL.EVENT_OWNER, 
+							CEL.CUSTOMER_NAME, 
+							CEL.CUSTOMER_RANK, 
+							CEL.EVENT_DATE, 
+							CEL.EVENT_CATEGORY, 
+							CEL.EVENT_SUBJECT, 
+							CEL.EVENT_CONTENTS, 
+							DATE_FORMAT(CEL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(CEL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+							DATE_FORMAT(CEL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+							OMI.HAN_NAME,
+							OMI.MEMBER_ID_NUM,
+							CCI.COMPANY_ID,
+							CCI.COMPANY_NAME,
+							CIL.ISSUE_ID
+					FROM 
+						CLIENT_EVENT_LOG AS CEL		
+						LEFT OUTER JOIN
+						CLIENT_COMPANY_INFO AS CCI ON CEL.COMPANY_ID = CCI.COMPANY_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON CEL.CREATOR_ID = OMI.MEMBER_ID_NUM
+						LEFT OUTER JOIN
+						CLIENT_ISSUE_LOG AS CIL ON CEL.EVENT_ID = CIL.EVENT_ID
+					WHERE 1=1 AND CEL.COMPANY_ID = #{hiddenModalPK}
+					) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+		]]>
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+
+
+	<select id="gridClientContactView2" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+					(
+						SELECT 
+							CEL.EVENT_ID, 
+							CEL.CREATOR_ID, 
+							CEL.CREATE_DATETIME, 
+							CEL.EVENT_OWNER, 
+							CEL.CUSTOMER_NAME, 
+							CEL.CUSTOMER_RANK, 
+							CEL.EVENT_DATE, 
+							CEL.EVENT_CATEGORY, 
+							CEL.EVENT_SUBJECT, 
+							CEL.EVENT_CONTENTS, 
+							DATE_FORMAT(CEL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(CEL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+							DATE_FORMAT(CEL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+							OMI.HAN_NAME,
+							OMI.MEMBER_ID_NUM,
+							CCI.COMPANY_ID,
+							CCI.COMPANY_NAME,
+							CIL.ISSUE_ID,
+							CII.CUSTOMER_ID
+					FROM 
+						CLIENT_EVENT_LOG AS CEL		
+						LEFT OUTER JOIN
+						CLIENT_COMPANY_INFO AS CCI ON CEL.COMPANY_ID = CCI.COMPANY_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON CEL.CREATOR_ID = OMI.MEMBER_ID_NUM
+						LEFT OUTER JOIN
+						CLIENT_ISSUE_LOG AS CIL ON CEL.EVENT_ID = CIL.EVENT_ID
+						LEFT OUTER JOIN
+						CLIENT_INDIVIDUAL_INFO AS CII ON CEL.COMPANY_ID = CII.COMPANY_ID
+					WHERE 1=1 AND CII.CUSTOMER_ID = #{hiddenModalCustomerId}
+					) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+		]]>
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!-- 장기프로젝트 관리 -->
+	<select id="projectMGMTDetailGroup" parameterType="hashmap"
+		resultType="hashmap">
+	    <![CDATA[
+	       SELECT 
+					CCI.COMPANY_NAME
+			FROM 
+			PROJECT_MGMT AS PM		
+			LEFT OUTER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON PM.CLIENT_COMPANY_ID = CCI.COMPANY_ID
+			WHERE 1=1
+			GROUP BY CCI.COMPANY_NAME
+		]]>
+	</select>
+
+	<select id="selectProjectMGMTList" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+					TMP_TABLE.*
+				FROM
+				(
+					SELECT 
+						PM.PROJECT_ID, 
+						PM.CREATOR_ID, 
+						PM.CREATE_DATETIME, 
+						PM.PROJECT_SUBJECT, 
+						PM.DETAIL_CONTENTS, 
+						PM.START_DATE, END_DATE, 
+						PM.CLIENT_COMPANY_ID, 
+						PM.CUSTOMER_ID, 
+						CII.CUSTOMER_NAME,
+						CII.POSITION as CUSTOMER_POSITION,
+						PM.CLIENT_PM_ID, 
+						PMCI.CUSTOMER_NAME as CLIENT_PM_NAME,
+						PMCI.POSITION as CLIENT_PM_POSITION,
+						PM.CLIENT_EXEC_PM_ID, 
+						EXPMCI.CUSTOMER_NAME as CLIENT_EXEC_PM_NAME,
+						EXPMCI.POSITION as CLIENT_EXEC_PM_POSITION,
+						PM.OUR_PM_ID,
+						PMMI.MEMBER_POST as OUR_PM_POST,
+						PMMI.HAN_NAME as OUR_PM_NAME,
+						PM.OUR_EXEC_PM_ID,
+						EXPMMI.HAN_NAME as OUR_EXEC_PM_NAME,
+						PM.CLIENT_RELATION_NAMES, 
+						PM.SALES_REPRESENTIVE_ID,
+						SRMI.MEMBER_POST as SALES_REPRESENTIVE_POST,
+						SRMI.HAN_NAME as SALES_REPRESENTIVE_NAME,
+						PM.PARTNER_NAMES, 
+						PM.PARTNER_SALES_REPS, 
+						PM.AUDIT_COMPANY_NAME, 
+						PM.AUDIT_INDIVIDUAL_NAMES, 
+						PM.AUDIT_INDIVIDUAL_CONTACTS, 
+						PM.CONTRACT_AMOUNT_UNIT,
+						PM.CONTRACT_AMOUNT_TOTAL, 
+						PM.CONTRACT_AMOUNT_1Q, 
+						PM.CONTRACT_AMOUNT_2Q, 
+						PM.CONTRACT_AMOUNT_3Q, 
+						PM.CONTRACT_AMOUNT_4Q, 
+						PM.CONTRACT_AMOUNT_NAME_1Q, 
+						PM.CONTRACT_AMOUNT_NAME_2Q, 
+						PM.CONTRACT_AMOUNT_NAME_3Q, 
+						PM.CONTRACT_AMOUNT_NAME_4Q,
+						PM.PROGRESS,
+						DATE_FORMAT(PM.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+						DATE_FORMAT(PM.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+						IFNULL(DATE_FORMAT(PM.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+						
+						MAX(IF(MILESTONE.RANK=1, MILESTONE.ACT_DUE_DATE, "")) AS DUE_DATE_1,
+						MAX(IF(MILESTONE.RANK=2, MILESTONE.ACT_DUE_DATE, "")) AS DUE_DATE_2,
+						MAX(IF(MILESTONE.RANK=3, MILESTONE.ACT_DUE_DATE, "")) AS DUE_DATE_3,
+						MAX(IF(MILESTONE.RANK=4, MILESTONE.ACT_DUE_DATE, "")) AS DUE_DATE_4,
+						MAX(IF(MILESTONE.RANK=5, MILESTONE.ACT_DUE_DATE, "")) AS DUE_DATE_5,
+						MAX(IF(MILESTONE.RANK=1, MILESTONE.ACT_CLOSE_DATE, "")) AS CLOSE_DATE_1,
+						MAX(IF(MILESTONE.RANK=2, MILESTONE.ACT_CLOSE_DATE, "")) AS CLOSE_DATE_2,
+						MAX(IF(MILESTONE.RANK=3, MILESTONE.ACT_CLOSE_DATE, "")) AS CLOSE_DATE_3,
+						MAX(IF(MILESTONE.RANK=4, MILESTONE.ACT_CLOSE_DATE, "")) AS CLOSE_DATE_4,
+						MAX(IF(MILESTONE.RANK=5, MILESTONE.ACT_CLOSE_DATE, "")) AS CLOSE_DATE_5,
+						MAX(IF(MILESTONE.RANK=1, MILESTONE.CATEGORY, "")) AS CONTENTS_1,
+						MAX(IF(MILESTONE.RANK=2, MILESTONE.CATEGORY, "")) AS CONTENTS_2,
+						MAX(IF(MILESTONE.RANK=3, MILESTONE.CATEGORY, "")) AS CONTENTS_3,
+						MAX(IF(MILESTONE.RANK=4, MILESTONE.CATEGORY, "")) AS CONTENTS_4,
+						MAX(IF(MILESTONE.RANK=5, MILESTONE.CATEGORY, "")) AS CONTENTS_5,
+						
+						MAX(IF(PMI.RANK=1, PMI.DUE_DATE, "")) AS ISSUE_DUE_DATE_1,
+						MAX(IF(PMI.RANK=2, PMI.DUE_DATE, "")) AS ISSUE_DUE_DATE_2,
+						MAX(IF(PMI.RANK=3, PMI.DUE_DATE, "")) AS ISSUE_DUE_DATE_3,
+						MAX(IF(PMI.RANK=4, PMI.DUE_DATE, "")) AS ISSUE_DUE_DATE_4,
+						MAX(IF(PMI.RANK=5, PMI.DUE_DATE, "")) AS ISSUE_DUE_DATE_5,
+						MAX(IF(PMI.RANK=1, PMI.ISSUE_CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_1,
+						MAX(IF(PMI.RANK=2, PMI.ISSUE_CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_2,
+						MAX(IF(PMI.RANK=3, PMI.ISSUE_CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_3,
+						MAX(IF(PMI.RANK=4, PMI.ISSUE_CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_4,
+						MAX(IF(PMI.RANK=5, PMI.ISSUE_CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_5,
+						MAX(IF(PMI.RANK=1, PMI.ISSUE_DETAIL, "")) AS ISSUE_CONTENTS_1,
+						MAX(IF(PMI.RANK=2, PMI.ISSUE_DETAIL, "")) AS ISSUE_CONTENTS_2,
+						MAX(IF(PMI.RANK=3, PMI.ISSUE_DETAIL, "")) AS ISSUE_CONTENTS_3,
+						MAX(IF(PMI.RANK=4, PMI.ISSUE_DETAIL, "")) AS ISSUE_CONTENTS_4,
+						MAX(IF(PMI.RANK=5, PMI.ISSUE_DETAIL, "")) AS ISSUE_CONTENTS_5,
+						
+						OMI.HAN_NAME,
+						OMI.MEMBER_ID_NUM,
+						CCI.COMPANY_ID,
+						CCI.COMPANY_NAME,
+						IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT,
+						(
+							SELECT COUNT(*) 
+							FROM COACHING_TALK AS CT 
+							WHERE 1=1 AND CT.CATEGORY='SVPJ' AND PM.PROJECT_ID = CT.ID
+						)AS COACHING_TALK_COUNT,
+						TOMI.TEAM_MEMBER_ID
+					FROM 
+						PROJECT_MGMT AS PM
+						LEFT OUTER JOIN
+		            	(
+		            		SELECT * 
+							FROM (
+								SELECT PROJECT_ID, MILESTONE_ID, CATEGORY, ACT_DUE_DATE, ACT_CLOSE_DATE,
+								IF(@PREV <> PROJECT_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := PROJECT_ID	
+								FROM PROJECT_MGMT_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+								WHERE 1=1
+								ORDER BY PROJECT_ID ASC, MILESTONE_ID ASC
+							 ) AS SUB_MILESTONE 
+							WHERE 1=1
+							AND SUB_MILESTONE.RANK <= 5
+						) AS MILESTONE ON PM.PROJECT_ID = MILESTONE.PROJECT_ID
+						LEFT OUTER JOIN
+		            	(
+		            		SELECT * 
+							FROM (
+								SELECT PROJECT_ID, ISSUE_ID, ISSUE_DETAIL, DUE_DATE, ISSUE_CLOSE_DATE,
+								IF(@PREV <> PROJECT_ID , @CNT := 1, @CNT := @CNT + 1) AS RANK,@PREV := PROJECT_ID	
+								FROM PROJECT_MGMT_ISSUE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+								WHERE 1=1
+								ORDER BY PROJECT_ID ASC, ISSUE_ID DESC
+							) AS SUB_PMI 
+							WHERE 1=1
+							AND SUB_PMI.RANK <= 5
+						) AS PMI ON PM.PROJECT_ID = PMI.PROJECT_ID
+						LEFT OUTER JOIN
+						CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PM.CLIENT_COMPANY_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON PM.CREATOR_ID = OMI.MEMBER_ID_NUM
+						LEFT OUTER JOIN
+			            (
+			            	SELECT COUNT(PROJECT_ID) AS FILE_COUNT, PROJECT_ID
+			            	FROM PROJECT_MGMT_FILE_STORE
+			            	GROUP BY PROJECT_ID
+			            ) AS FC ON FC.PROJECT_ID = PM.PROJECT_ID
+			            LEFT OUTER JOIN
+			            CLIENT_INDIVIDUAL_INFO AS CII ON CII.CUSTOMER_ID = PM.CUSTOMER_ID
+			            LEFT OUTER JOIN
+			            CLIENT_INDIVIDUAL_INFO AS PMCI ON PMCI.CUSTOMER_ID = PM.CLIENT_PM_ID
+			            LEFT OUTER JOIN
+			            CLIENT_INDIVIDUAL_INFO AS EXPMCI ON EXPMCI.CUSTOMER_ID = PM.CLIENT_EXEC_PM_ID
+			            LEFT OUTER JOIN
+			            OUR_MEMBERS_INFO AS PMMI ON PMMI.MEMBER_ID_NUM = PM.OUR_PM_ID
+			            LEFT OUTER JOIN
+			            OUR_MEMBERS_INFO AS EXPMMI ON EXPMMI.MEMBER_ID_NUM = PM.OUR_EXEC_PM_ID
+			            LEFT OUTER JOIN
+			            OUR_MEMBERS_INFO AS SRMI ON SRMI.MEMBER_ID_NUM = PM.SALES_REPRESENTIVE_ID
+			            LEFT OUTER JOIN
+	            		(
+	            			SELECT LOG_ID, GROUP_CONCAT(MEMBER_ID_NUM) AS TEAM_MEMBER_ID FROM COM_MEMBER_LIST 
+							WHERE 1=1
+							GROUP BY LOG_ID
+	            		)AS TOMI ON TOMI.LOG_ID = PM.PROJECT_ID
+					WHERE 1=1
+		]]>
+		<if
+			test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND PM.PROJECT_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND PM.PROJECT_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+
+		<!-- 검색 고객사 -->
+		<if test="searchCompanyName != null and searchCompanyName != '' ">
+			AND CCI.COMPANY_NAME LIKE CONCAT('%', #{searchCompanyName}, '%')
+		</if>
+
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND (
+				PMMI.MEMBER_DIVISION = #{global_member_division} OR EXPMMI.MEMBER_DIVISION =
+				#{global_member_division} OR SRMI.MEMBER_DIVISION =
+				#{global_member_division}
+				OR (#{global_member_id} IN (SELECT SOLVE_OWNER_ID FROM
+				PROJECT_MGMT_ISSUE WHERE 1=1 AND PROJECT_ID = PM.PROJECT_ID))
+				OR TEAM_MEMBER_ID LIKE CONCAT('%', #{global_member_id}, '%')
+				)
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND (
+				PMMI.MEMBER_DIVISION = #{global_member_division} OR EXPMMI.MEMBER_DIVISION =
+				#{global_member_division} OR SRMI.MEMBER_DIVISION =
+				#{global_member_division}
+				OR (#{global_member_id} IN (SELECT SOLVE_OWNER_ID FROM
+				PROJECT_MGMT_ISSUE WHERE 1=1 AND PROJECT_ID = PM.PROJECT_ID))
+				OR TEAM_MEMBER_ID LIKE CONCAT('%', #{global_member_id}, '%')
+				)
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND (
+				PMMI.MEMBER_DIVISION = #{global_member_division} OR EXPMMI.MEMBER_DIVISION =
+				#{global_member_division} OR SRMI.MEMBER_DIVISION =
+				#{global_member_division}
+				OR (#{global_member_id} IN (SELECT SOLVE_OWNER_ID FROM
+				PROJECT_MGMT_ISSUE WHERE 1=1 AND PROJECT_ID = PM.PROJECT_ID))
+				OR TEAM_MEMBER_ID LIKE CONCAT('%', #{global_member_id}, '%')
+				)
+			</when>
+		</choose>
+
+		GROUP BY PM.PROJECT_ID
+
+		) AS TMP_TABLE, (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE 1=1
+
+		<choose>
+			<when test="sortCategory != null and sortCategory != '' ">
+				ORDER BY ${sortCategory}
+			</when>
+			<otherwise>
+				ORDER BY TMP_TABLE.LATELY_UPDATE_DATE DESC
+			</otherwise>
+		</choose>
+
+		<include refid="common.pagingPost2" />
+	</select>
+
+	<select id="selectProjectMGMTDetail" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				PM.PROJECT_ID, 
+				PM.CREATOR_ID, 
+				PM.CREATE_DATETIME, 
+				PM.PROJECT_SUBJECT, 
+				PM.DETAIL_CONTENTS, 
+				PM.START_DATE, END_DATE, 
+				PM.CLIENT_COMPANY_ID, 
+				PM.CUSTOMER_ID, 
+				CII.CUSTOMER_NAME,
+				CII.POSITION as CUSTOMER_POSITION,
+				PM.CLIENT_PM_ID, 
+				PMCI.CUSTOMER_NAME as CLIENT_PM_NAME,
+				PMCI.POSITION as CLIENT_PM_POSITION,
+				PM.CLIENT_EXEC_PM_ID, 
+				EXPMCI.CUSTOMER_NAME as CLIENT_EXEC_PM_NAME,
+				EXPMCI.POSITION as CLIENT_EXEC_PM_POSITION,
+				PM.OUR_PM_ID,
+				PMMI.POSITION_STATUS AS OUR_PM_POSITION_STATUS,
+				PMMI.HAN_NAME as OUR_PM_NAME,
+				PM.OUR_EXEC_PM_ID,
+				EXPMMI.POSITION_STATUS AS OUR_EXEC_PM_POSITION_STATUS,
+				EXPMMI.HAN_NAME as OUR_EXEC_PM_NAME,
+				PM.CLIENT_RELATION_NAMES, 
+				PM.SALES_REPRESENTIVE_ID,
+				SRMI.POSITION_STATUS AS SALES_REPRESENTIVE_POSITION_STATUS,
+				SRMI.HAN_NAME as SALES_REPRESENTIVE_NAME,
+				PM.PARTNER_NAMES, 
+				PM.PARTNER_SALES_REPS, 
+				PM.AUDIT_COMPANY_NAME, 
+				PM.AUDIT_INDIVIDUAL_NAMES, 
+				PM.AUDIT_INDIVIDUAL_CONTACTS, 
+				PM.CONTRACT_AMOUNT_UNIT,
+				PM.CONTRACT_AMOUNT_TOTAL, 
+				PM.CONTRACT_AMOUNT_1Q, 
+				PM.CONTRACT_AMOUNT_2Q, 
+				PM.CONTRACT_AMOUNT_3Q, 
+				PM.CONTRACT_AMOUNT_4Q, 
+				PM.CONTRACT_AMOUNT_NAME_1Q, 
+				PM.CONTRACT_AMOUNT_NAME_2Q, 
+				PM.CONTRACT_AMOUNT_NAME_3Q, 
+				PM.CONTRACT_AMOUNT_NAME_4Q,
+				PM.PROGRESS,
+				DATE_FORMAT(PM.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+				DATE_FORMAT(PM.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+				IFNULL(DATE_FORMAT(PM.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+				PMM.MILESTONE_ID, 
+				PMM.MILESTONE_SEQ,
+				PMM.KEY_MILESTONE,
+				PMM.ACT_CLOSE_DATE,
+				PMI.DUE_DATE,
+				PMI.R_COUNT,
+				PMI.Y_COUNT,
+				PMI.G_COUNT,
+				PMI.ISSUE_STATUS,
+				PMI.TOTAL_COUNT,
+				OMI.HAN_NAME,
+				OMI.MEMBER_ID_NUM,
+				CCI.COMPANY_ID,
+				CCI.COMPANY_NAME,
+				GROUP_CONCAT(TOMI.MEMBER_ID_NUM) AS TEAM_MEMBER_ID,
+				GROUP_CONCAT(TOMI.HAN_NAME) AS TEAM_MEMBER_NAME,
+				IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT,
+				(
+					SELECT COUNT(*) 
+					FROM COACHING_TALK AS CT 
+					WHERE 1=1 AND CT.CATEGORY='SVPJ' AND PM.PROJECT_ID = CT.ID
+				)AS COACHING_TALK_COUNT
+			FROM 
+				PROJECT_MGMT AS PM
+				LEFT OUTER JOIN
+				(	
+					SELECT TMP.*
+					FROM 
+					(
+						SELECT  MILESTONE_ID, MILESTONE_SEQ, KEY_MILESTONE,ACT_DUE_DATE,ACT_CLOSE_DATE,PROJECT_ID,
+									  IF(@PREV <> PROJECT_ID , @CNT := 1, @CNT := @CNT + 1) AS RANK,@PREV := PROJECT_ID
+						FROM PROJECT_MGMT_MILESTONE,(SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT	
+						WHERE 1=1
+						AND ACT_CLOSE_DATE IS NOT NULL
+						AND TRIM(ACT_CLOSE_DATE) <> ''
+						ORDER BY PROJECT_ID,MILESTONE_SEQ ASC
+					) AS TMP
+					WHERE 1=1
+					AND TMP.RANK = 1
+				) AS PMM ON PM.PROJECT_ID = PMM.PROJECT_ID
+				LEFT OUTER JOIN	
+				(
+					SELECT 
+						PROJECT_ID,
+						SUM(R_STATUS) AS R_COUNT,
+						SUM(Y_STATUS) AS Y_COUNT,
+						SUM(G_STATUS) AS G_COUNT,
+						SUM(TOTAL_COUNT) AS TOTAL_COUNT,
+						ISSUE_STATUS,
+						DUE_DATE
+					FROM (
+						SELECT
+									PROJECT_ID,
+									IF(ISSUE_STATUS='R',1,0) AS R_STATUS,
+									IF(ISSUE_STATUS='Y',1,0) AS Y_STATUS,
+									IF(ISSUE_STATUS='G',1,0) AS G_STATUS,
+									1 AS TOTAL_COUNT,
+									ISSUE_STATUS,
+									DUE_DATE
+						FROM PROJECT_MGMT_ISSUE
+					) AS TMP
+					WHERE 1=1
+					GROUP BY TMP.PROJECT_ID
+				) AS PMI ON PM.PROJECT_ID = PMI.PROJECT_ID
+				LEFT OUTER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PM.CLIENT_COMPANY_ID
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI ON PM.CREATOR_ID = OMI.MEMBER_ID_NUM
+				LEFT OUTER JOIN
+	            (
+	            	SELECT COUNT(PROJECT_ID) AS FILE_COUNT, PROJECT_ID
+	            	FROM PROJECT_MGMT_FILE_STORE
+	            	GROUP BY PROJECT_ID
+	            ) AS FC ON FC.PROJECT_ID = PM.PROJECT_ID
+	            LEFT OUTER JOIN
+	            CLIENT_INDIVIDUAL_INFO AS CII ON CII.CUSTOMER_ID = PM.CUSTOMER_ID
+	            LEFT OUTER JOIN
+	            CLIENT_INDIVIDUAL_INFO AS PMCI ON PMCI.CUSTOMER_ID = PM.CLIENT_PM_ID
+	            LEFT OUTER JOIN
+	            CLIENT_INDIVIDUAL_INFO AS EXPMCI ON EXPMCI.CUSTOMER_ID = PM.CLIENT_EXEC_PM_ID
+	            LEFT OUTER JOIN
+	            OUR_MEMBERS_INFO AS PMMI ON PMMI.MEMBER_ID_NUM = PM.OUR_PM_ID
+	            LEFT OUTER JOIN
+	            OUR_MEMBERS_INFO AS EXPMMI ON EXPMMI.MEMBER_ID_NUM = PM.OUR_EXEC_PM_ID
+	            LEFT OUTER JOIN
+	            OUR_MEMBERS_INFO AS SRMI ON SRMI.MEMBER_ID_NUM = PM.SALES_REPRESENTIVE_ID
+	            LEFT OUTER JOIN
+	            COM_MEMBER_LIST AS CML ON CML.LOG_ID = PM.PROJECT_ID
+	            LEFT OUTER JOIN
+	            OUR_MEMBERS_INFO AS TOMI ON TOMI.MEMBER_ID_NUM = CML.MEMBER_ID_NUM
+			WHERE 1=1
+			AND PM.PROJECT_ID = #{pkNo}
+		]]>
+	</select>
+
+	<select id="" parameterType="java.util.List"
+		resultType="hashmap">
+		SELECT
+		FILE_ID,
+		CSAT_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		FILE_NAME,
+		FILE_PATH,
+		FILE_TYPE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		FROM CLIENT_SAT_FILE_STORE
+		<choose>
+			<when test="filePKArray != null and filePKArray != '' ">
+				WHERE CSAT_ID IN(${filePKArray})
+			</when>
+			<otherwise>
+				WHERE CSAT_ID IN('')
+			</otherwise>
+		</choose>
+		<!-- <foreach item="item" index="index" collection="list" open="(" separator="," 
+			close=")"> #{item.BIZ_ID} </foreach> -->
+	</select>
+
+	<select id="selectProjectMGMTFileList"
+		parameterType="java.util.List" resultType="hashmap">
+		SELECT
+		FILE_ID,
+		PROJECT_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		FILE_NAME,
+		FILE_PATH,
+		FILE_TYPE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		FROM PROJECT_MGMT_FILE_STORE
+		WHERE 1=1
+		AND PROJECT_ID = #{pkNo}
+	</select>
+
+	<select id="selectProjectMGMTListCount" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				COUNT(*) AS listCount, GROUP_CONCAT(PM.PROJECT_ID) AS searchPKArray, TOMI.TEAM_MEMBER_ID
+			FROM 
+				PROJECT_MGMT AS PM
+				LEFT OUTER JOIN
+            	(
+            		SELECT * 
+					FROM (
+						SELECT PROJECT_ID, MILESTONE_ID, CATEGORY, ACT_DUE_DATE, ACT_CLOSE_DATE,
+						IF(@PREV <> PROJECT_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := PROJECT_ID	
+						FROM PROJECT_MGMT_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						WHERE 1=1
+						ORDER BY PROJECT_ID ASC, MILESTONE_ID ASC
+					 ) AS SUB_MILESTONE 
+					WHERE 1=1
+					AND SUB_MILESTONE.RANK <= 5
+				) AS MILESTONE ON PM.PROJECT_ID = MILESTONE.PROJECT_ID
+				LEFT OUTER JOIN
+            	(
+            		SELECT * 
+					FROM (
+						SELECT PROJECT_ID, ISSUE_ID, ISSUE_DETAIL, DUE_DATE, ISSUE_CLOSE_DATE,
+						IF(@PREV <> PROJECT_ID , @CNT := 1, @CNT := @CNT + 1) AS RANK,@PREV := PROJECT_ID	
+						FROM PROJECT_MGMT_ISSUE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						WHERE 1=1
+						ORDER BY PROJECT_ID ASC, ISSUE_ID DESC
+					) AS SUB_PMI 
+					WHERE 1=1
+					AND SUB_PMI.RANK <= 5
+				) AS PMI ON PM.PROJECT_ID = PMI.PROJECT_ID
+				LEFT OUTER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PM.CLIENT_COMPANY_ID
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI ON PM.CREATOR_ID = OMI.MEMBER_ID_NUM
+				LEFT OUTER JOIN
+	            (
+	            	SELECT COUNT(PROJECT_ID) AS FILE_COUNT, PROJECT_ID
+	            	FROM PROJECT_MGMT_FILE_STORE
+	            	GROUP BY PROJECT_ID
+	            ) AS FC ON FC.PROJECT_ID = PM.PROJECT_ID
+	            LEFT OUTER JOIN
+	            CLIENT_INDIVIDUAL_INFO AS CII ON CII.CUSTOMER_ID = PM.CUSTOMER_ID
+	            LEFT OUTER JOIN
+	            CLIENT_INDIVIDUAL_INFO AS PMCI ON PMCI.CUSTOMER_ID = PM.CLIENT_PM_ID
+	            LEFT OUTER JOIN
+	            CLIENT_INDIVIDUAL_INFO AS EXPMCI ON EXPMCI.CUSTOMER_ID = PM.CLIENT_EXEC_PM_ID
+	            LEFT OUTER JOIN
+	            OUR_MEMBERS_INFO AS PMMI ON PMMI.MEMBER_ID_NUM = PM.OUR_PM_ID
+	            LEFT OUTER JOIN
+	            OUR_MEMBERS_INFO AS EXPMMI ON EXPMMI.MEMBER_ID_NUM = PM.OUR_EXEC_PM_ID
+	            LEFT OUTER JOIN
+	            OUR_MEMBERS_INFO AS SRMI ON SRMI.MEMBER_ID_NUM = PM.SALES_REPRESENTIVE_ID
+	            LEFT OUTER JOIN
+           		(
+           			SELECT LOG_ID, GROUP_CONCAT(MEMBER_ID_NUM) AS TEAM_MEMBER_ID FROM COM_MEMBER_LIST 
+					WHERE 1=1
+					GROUP BY LOG_ID
+           		)AS TOMI ON TOMI.LOG_ID = PM.PROJECT_ID
+			WHERE 1=1
+		]]>
+		<if
+			test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND PM.PROJECT_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND PM.PROJECT_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+		<!-- 검색 고객사 -->
+		<if test="searchCompanyName != null and searchCompanyName != '' ">
+			AND CCI.COMPANY_NAME LIKE CONCAT('%',
+			#{searchCompanyName}, '%')
+		</if>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND (
+				PMMI.MEMBER_DIVISION = #{global_member_division} OR EXPMMI.MEMBER_DIVISION =
+				#{global_member_division} OR SRMI.MEMBER_DIVISION =
+				#{global_member_division}
+				OR (#{global_member_id} IN (SELECT SOLVE_OWNER_ID FROM
+				PROJECT_MGMT_ISSUE WHERE 1=1 AND PROJECT_ID = PM.PROJECT_ID))
+				OR TEAM_MEMBER_ID LIKE CONCAT('%', #{global_member_id}, '%')
+				)
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND (
+				PMMI.MEMBER_DIVISION = #{global_member_division} OR EXPMMI.MEMBER_DIVISION =
+				#{global_member_division} OR SRMI.MEMBER_DIVISION =
+				#{global_member_division}
+				OR (#{global_member_id} IN (SELECT SOLVE_OWNER_ID FROM
+				PROJECT_MGMT_ISSUE WHERE 1=1 AND PROJECT_ID = PM.PROJECT_ID))
+				OR TEAM_MEMBER_ID LIKE CONCAT('%', #{global_member_id}, '%')
+				)
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND (
+				PMMI.MEMBER_DIVISION = #{global_member_division} OR EXPMMI.MEMBER_DIVISION =
+				#{global_member_division} OR SRMI.MEMBER_DIVISION =
+				#{global_member_division}
+				OR (#{global_member_id} IN (SELECT SOLVE_OWNER_ID FROM
+				PROJECT_MGMT_ISSUE WHERE 1=1 AND PROJECT_ID = PM.PROJECT_ID))
+				OR TEAM_MEMBER_ID LIKE CONCAT('%', #{global_member_id}, '%')
+				)
+			</when>
+		</choose>
+	</select>
+
+	<select id="selectProjectMGMTContractInfo"
+		parameterType="hashmap" resultType="hashmap">
+		SELECT *
+		FROM PROJECT_MGMT_AMOUNT
+		WHERE PROJECT_ID = #{project_id}
+	</select>
+
+	<insert id="insertProjectMGMT" parameterType="hashmap">
+		INSERT INTO PROJECT_MGMT
+		(
+		CREATOR_ID,
+		CREATE_DATETIME,
+		PROJECT_SUBJECT,
+		DETAIL_CONTENTS,
+		START_DATE,
+		END_DATE,
+		CLIENT_COMPANY_ID,
+		CUSTOMER_ID,
+		CLIENT_PM_ID,
+		CLIENT_EXEC_PM_ID,
+		CLIENT_RELATION_NAMES,
+		OUR_PM_ID,
+		OUR_EXEC_PM_ID,
+		SALES_REPRESENTIVE_ID,
+		PARTNER_NAMES,
+		PARTNER_SALES_REPS,
+		AUDIT_COMPANY_NAME,
+		AUDIT_INDIVIDUAL_NAMES,
+		AUDIT_INDIVIDUAL_CONTACTS,
+		<if
+			test=" hiddenModalTotalContractAmount != null and hiddenModalTotalContractAmount != '' ">
+			CONTRACT_AMOUNT_TOTAL,
+		</if>
+		<if
+			test=" hiddenModalProgress != null and hiddenModalProgress != '' ">
+			PROGRESS,
+		</if>
+		CONTRACT_AMOUNT_UNIT
+
+		)
+		VALUES
+		(
+		#{hiddenModalCreatorId},
+		CURRENT_TIMESTAMP,
+		#{textModalSubject},
+		#{textareaModalContents},
+		#{textModalStartDate},
+		#{textModalEndDate},
+		#{hiddenModalCompanyId},
+		#{hiddenModalClientId},
+		#{hiddenModalClientPMId},
+		#{hiddenModalClientEXPMId},
+		#{textModalClientRelationName},
+		#{hiddenModalOurPMId},
+		#{hiddenModalOurEXPMId},
+		#{hiddenModalSalesOwnerId},
+		#{textModalPartnerCompany},
+		#{textModalPartnerSalesOwner},
+		#{textModalAuditCompany},
+		#{textModalAuditIndividualNames},
+		#{textModalAuditIndividualContacts},
+		<if
+			test=" hiddenModalTotalContractAmount != null and hiddenModalTotalContractAmount != '' ">
+			#{hiddenModalTotalContractAmount},
+		</if>
+		<if
+			test=" hiddenModalProgress != null and hiddenModalProgress != '' ">
+			#{hiddenModalProgress},
+		</if>
+		#{selectModalContractAmount}
+		);
+		<selectKey keyProperty="filePK" resultType="Integer"
+			order="AFTER">
+			SELECT LAST_INSERT_ID();
+		</selectKey>
+	</insert>
+
+	<!-- 팀구성 복수 입력 start -->
+	<delete id="deleteTeamMemberList" parameterType="hashmap">
+		DELETE FROM COM_MEMBER_LIST
+		WHERE 1=1
+		<choose>
+			<when test="filePK != null and filePK != '' ">
+				AND LOG_ID = #{filePK}
+			</when>
+			<otherwise>
+				AND LOG_ID=#{hiddenModalPK};
+			</otherwise>
+		</choose>
+	</delete>
+
+	<insert id="insertTeamMemberList" parameterType="hashmap">
+		INSERT INTO COM_MEMBER_LIST
+		(
+		LOG_ID,
+		MEMBER_ID_NUM,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		)
+		VALUES
+		<foreach collection="teamMemberArray" item="item"
+			index="index" separator=",">
+			(
+			<choose>
+				<when test="filePK != null and filePK != '' ">
+					#{filePK},
+				</when>
+				<otherwise>
+					#{hiddenModalPK},
+				</otherwise>
+			</choose>
+			#{item},
+			CURRENT_TIMESTAMP,
+			CURRENT_TIMESTAMP
+			)
+		</foreach>
+	</insert>
+	<!-- 팀구성 복수 입력 end -->
+
+	<insert id="insertProjectMGMTContract" parameterType="hashmap">
+	 	<![CDATA[
+	        INSERT INTO PROJECT_MGMT_AMOUNT
+	        (
+	        	PROJECT_ID, 
+	        	CREATOR_ID, 
+	        	CREATE_DATETIME,
+	        	BASIS_MONTH,
+	        	BASIS_PLAN_REVENUE_AMOUNT,
+	        	BASIS_ACTUAL_REVENUE_AMOUNT
+	        )
+	        VALUES
+	        (
+	        	#{hiddenModalPK}, 
+	        	#{hiddenModalCreatorId}, 
+	        	CURRENT_TIMESTAMP,
+	        	#{ContractDate},
+	        	#{ContractPlanAmount},
+	        	#{ContractActualAmount}
+	        );
+		]]>
+	</insert>
+
+	<update id="updateProjectMGMT" parameterType="hashmap">
+		UPDATE PROJECT_MGMT
+		SET
+		PROJECT_SUBJECT = #{textModalSubject},
+		START_DATE = #{textModalStartDate},
+		END_DATE = #{textModalEndDate},
+		DETAIL_CONTENTS = #{textareaModalContents},
+		CLIENT_COMPANY_ID = #{hiddenModalCompanyId},
+		CUSTOMER_ID = #{hiddenModalClientId},
+		CLIENT_PM_ID = #{hiddenModalClientPMId},
+		CLIENT_EXEC_PM_ID = #{hiddenModalClientEXPMId},
+		CLIENT_RELATION_NAMES = #{textModalClientRelationName},
+		OUR_PM_ID = #{hiddenModalOurPMId},
+		OUR_EXEC_PM_ID = #{hiddenModalOurEXPMId},
+		SALES_REPRESENTIVE_ID = #{hiddenModalSalesOwnerId},
+		PARTNER_NAMES = #{textModalPartnerCompany},
+		PARTNER_SALES_REPS = #{textModalPartnerSalesOwner},
+		AUDIT_COMPANY_NAME = #{textModalAuditCompany},
+		AUDIT_INDIVIDUAL_NAMES = #{textModalAuditIndividualNames},
+		AUDIT_INDIVIDUAL_CONTACTS = #{textModalAuditIndividualContacts},
+		<if
+			test=" hiddenModalTotalContractAmount != null and hiddenModalTotalContractAmount != '' ">
+			CONTRACT_AMOUNT_TOTAL = #{hiddenModalTotalContractAmount},
+		</if>
+		<if
+			test=" hiddenModalProgress != null and hiddenModalProgress != '' ">
+			PROGRESS = #{hiddenModalProgress},
+		</if>
+		CONTRACT_AMOUNT_UNIT = #{selectModalContractAmount}
+		WHERE PROJECT_ID = #{hiddenModalPK};
+	</update>
+
+	<select id="projectMGMTFileList" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		FILE_ID,
+		PROJECT_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		FILE_NAME,
+		FILE_PATH,
+		FILE_TYPE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		FROM PROJECT_MGMT_FILE_STORE
+		<choose>
+			<when test="filePKArray != null and filePKArray != '' ">
+				WHERE PROJECT_ID IN(${filePKArray})
+			</when>
+			<otherwise>
+				WHERE PROJECT_ID IN('')
+			</otherwise>
+		</choose>
+		<!-- <foreach item="item" index="index" collection="list" open="(" separator="," 
+			close=")"> #{item.BIZ_ID} </foreach> -->
+	</select>
+
+	<delete id="deleteProjectMGMT" parameterType="hashmap">
+		DELETE FROM
+		PROJECT_MGMT_FILE_STORE WHERE PROJECT_ID=#{hiddenModalPK};
+		DELETE FROM
+		PROJECT_MGMT_AMOUNT WHERE PROJECT_ID=#{hiddenModalPK};
+		DELETE FROM
+		PROJECT_MGMT_ISSUE WHERE PROJECT_ID=#{hiddenModalPK};
+		DELETE FROM
+		PROJECT_MGMT_MILESTONE WHERE PROJECT_ID=#{hiddenModalPK};
+		DELETE FROM
+		PROJECT_MGMT WHERE PROJECT_ID=#{hiddenModalPK};
+	</delete>
+
+	<delete id="deleteProjectMGMTContractAmount"
+		parameterType="hashmap">
+		DELETE FROM PROJECT_MGMT_AMOUNT WHERE
+		PROJECT_ID=#{hiddenModalPK};
+	</delete>
+
+	<update id="updateProjectMGMTMilestons" parameterType="hashmap">
+		UPDATE PROJECT_MGMT_MILESTONE
+		SET
+		PROJECT_ID = #{hiddenModalPK},
+		CREATOR_ID = #{hiddenModalCreatorId},
+		KEY_MILESTONE = #{keyMilestoneName},
+		ACT_DUE_DATE = #{milesontesDueDate}
+		<choose>
+			<when
+				test="hiddenEndDateCheck != null and hiddenEndDateCheck.equalsIgnoreCase('Y') ">
+				, ACT_CLOSE_DATE = #{milesontesEndDate}
+			</when>
+			<otherwise>
+				, ACT_CLOSE_DATE = null
+			</otherwise>
+		</choose>
+		WHERE 1=1
+		AND PROJECT_ID = #{hiddenModalPK}
+		AND MILESTONE_SEQ =
+		#{keyMilestoneSeq}
+	</update>
+
+	<insert id="insertProjectMGMTMilestons" parameterType="hashmap">
+		INSERT INTO PROJECT_MGMT_MILESTONE
+		(
+		PROJECT_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		KEY_MILESTONE,
+		MILESTONE_SEQ,
+		Category,
+		ACT_ID,
+		ACT_DUE_DATE,
+		ACT_CLOSE_DATE
+		)
+		VALUES
+		(
+		#{hiddenModalPK},
+		#{hiddenModalCreatorId},
+		CURRENT_TIMESTAMP,
+		#{keyMilestoneName},
+		#{keyMilestoneSeq},
+		#{keyMilestoneName},
+		#{hiddenModalCreatorId},
+		#{milesontesDueDate}
+		<choose>
+			<when
+				test="hiddenEndDateCheck != null and hiddenEndDateCheck.equalsIgnoreCase('Y') ">
+				, #{milesontesEndDate}
+			</when>
+			<otherwise>
+				, null
+			</otherwise>
+		</choose>
+		);
+	</insert>
+
+	<select id="selectProjectMGMTMilestons" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT *
+		FROM PROJECT_MGMT_MILESTONE
+		WHERE 1=1
+		AND PROJECT_ID = #{hiddenModalPK}
+		ORDER BY MILESTONE_SEQ ASC;
+	</select>
+	<!-- <select id="gridProjectIssue" parameterType="hashmap" resultType="hashmap"> 
+		SELECT OWP.WINPLAN_ID, OWP.OPPORTUNITY_ID, OWP.CHECKLIST_ID, OWP.CREATOR_ID, 
+		OWP.CREATE_DATETIME, OWP.ITEM_2BE_FIXED, OWP.ACTION_PLAN_NAME, OWP.ACTION_OWNER, 
+		OWP.DUE_DATE, OWP.CLOSE_DATE, OWP.STATUS, OWP.SYS_REGISTER_DATE, OWP.SYS_UPDATE_DATE, 
+		OC.CHECKLIST_NAME, OC.CHECKLIST_SEQ FROM OPPORTUNITY_WIN_PLAN AS OWP INNER 
+		JOIN OPPORTUNITY_CHECKLIST AS OC ON OWP.OPPORTUNITY_ID = OC.OPPORTUNITY_ID 
+		AND OWP.CHECKLIST_ID = OC.CHECKLIST_ID WHERE OWP.OPPORTUNITY_ID = #{hiddenModalPK} 
+		</select> -->
+	<select id="gridProjectIssue" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		PMI.ISSUE_ID,
+		PMI.PROJECT_ID,
+		PMI.ISSUE_DATE,
+		PMI.DUE_DATE,
+		PMI.ISSUE_STATUS,
+		PMI.ISSUE_DETAIL,
+		PMI.SOLVE_PLAN,
+		OMI.HAN_NAME AS SOLVE_OWNER,
+		PMI.SOLVE_OWNER_ID,
+		OMI.POSITION_STATUS AS SOLVE_OWNER_POSITION,
+		PMI.ISSUE_CLOSE_DATE,
+		PMI.SYS_REGISTER_DATE,
+		PMI.SYS_UPDATE_DATE,
+		PMI.CHECKLIST_SEQ,
+		PMI.CHECKLIST_NAME
+		FROM
+		PROJECT_MGMT_ISSUE AS PMI
+		LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI 
+			ON PMI.SOLVE_OWNER_ID = OMI.MEMBER_ID_NUM
+		WHERE PMI.PROJECT_ID = #{hiddenModalPK}
+		ORDER BY PMI.ISSUE_ID
+	</select>
+	<!-- <insert id="insertProjectIssue" parameterType="hashmap"> INSERT INTO 
+		PROJECT_MGMT_ISSUE ( PROJECT_ID, ISSUE_DATE, DUE_DATE, ISSUE_STATUS, ISSUE_DETAIL, 
+		SOLVE_OWNER, ISSUE_CLOSE_DATE, CHECKLIST_SEQ, CHECKLIST_NAME ) VALUES ( #{hiddenModalPK}, 
+		<choose> <when test="ISSUE_DATE != null and ISSUE_DATE != '' "> #{DUE_DATE}, 
+		</when> <otherwise> NULL, </otherwise> </choose> <choose> <when test="DUE_DATE 
+		!= null and DUE_DATE != '' "> #{DUE_DATE}, </when> <otherwise> NULL, </otherwise> 
+		</choose> #{ISSUE_STATUS}, #{ISSUE_DETAIL}, #{SOLVE_OWNER}, <choose> <when 
+		test="ISSUE_CLOSE_DATE != null and ISSUE_CLOSE_DATE != '' "> #{DUE_DATE}, 
+		</when> <otherwise> NULL, </otherwise> </choose> #{CHECKLIST_SEQ}, #{CHECKLIST_NAME} 
+		); </insert> -->
+	<!-- <update id="updateProjectIssue" parameterType="hashmap"> UPDATE PROJECT_MGMT_ISSUE 
+		SET <choose> <when test="ISSUE_DATE != null and ISSUE_DATE != '' "> ISSUE_DATE= 
+		#{ISSUE_DATE}, </when> <otherwise> ISSUE_DATE = NULL, </otherwise> </choose> 
+		<choose> <when test="DUE_DATE != null and DUE_DATE != '' "> DUE_DATE= #{DUE_DATE}, 
+		</when> <otherwise> DUE_DATE = NULL, </otherwise> </choose> ISSUE_STATUS 
+		= #{HIDDEN_STATUS}, ISSUE_DETAIL = #{ISSUE_DETAIL}, SOLVE_OWNER = #{SOLVE_OWNER}, 
+		<choose> <when test="ISSUE_CLOSE_DATE != null and ISSUE_CLOSE_DATE != '' 
+		"> ISSUE_CLOSE_DATE= #{ISSUE_CLOSE_DATE}, </when> <otherwise> ISSUE_CLOSE_DATE 
+		= NULL, </otherwise> </choose> SYS_UPDATE_DATE = CURRENT_TIMESTAMP, CHECKLIST_SEQ 
+		= #{CHECKLIST_SEQ}, CHECKLIST_NAME = #{CHECKLIST_NAME} WHERE 1=1 AND PROJECT_ID 
+		= #{hiddenModalPK} AND ISSUE_ID = #{ISSUE_ID} </update> -->
+	<delete id="deleteProjectIssue" parameterType="hashmap">
+		DELETE FROM
+		PROJECT_MGMT_ISSUE
+		WHERE 1=1
+		AND PROJECT_ID = #{hiddenModalPK}
+		AND
+		ISSUE_ID = #{ISSUE_ID}
+	</delete>
+
+
+	<update id="updateProjectIssue" parameterType="hashmap">
+		UPDATE PROJECT_MGMT_ISSUE
+		SET
+		<choose>
+			<when test="ISSUE_DATE != null and ISSUE_DATE != '' ">
+				ISSUE_DATE= #{ISSUE_DATE},
+			</when>
+			<otherwise>
+				ISSUE_DATE = NULL,
+			</otherwise>
+		</choose>
+		ISSUE_STATUS = #{ISSUE_STATUS},
+		ISSUE_DETAIL = #{ISSUE_DETAIL},
+		SOLVE_PLAN = #{SOLVE_PLAN},
+		SOLVE_OWNER = #{SOLVE_OWNER},
+		SOLVE_OWNER_ID = #{SOLVE_OWNER_ID},
+		<choose>
+			<when test="DUE_DATE != null and DUE_DATE != '' ">
+				DUE_DATE = #{DUE_DATE},
+			</when>
+			<otherwise>
+				DUE_DATE = NULL,
+			</otherwise>
+		</choose>
+		<choose>
+			<when
+				test="ISSUE_CLOSE_DATE != null and ISSUE_CLOSE_DATE != '' ">
+				ISSUE_CLOSE_DATE = #{ISSUE_CLOSE_DATE},
+			</when>
+			<otherwise>
+				ISSUE_CLOSE_DATE = NULL,
+			</otherwise>
+		</choose>
+		SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+		CHECKLIST_SEQ = #{CHECKLIST_SEQ},
+		CHECKLIST_NAME = #{CHECKLIST_NAME}
+		WHERE 1=1
+		AND PROJECT_ID =
+		#{hiddenModalPK}
+		AND ISSUE_ID = #{ISSUE_ID}
+	</update>
+
+	<select id="selectProjectIssue" parameterType="hashmap"
+		resultType="Integer">
+		SELECT COUNT(*)
+		FROM PROJECT_MGMT_ISSUE
+		WHERE PROJECT_ID =
+		#{hiddenModalPK}
+	</select>
+
+	<insert id="insertProjectIssue" parameterType="hashmap">
+		INSERT INTO PROJECT_MGMT_ISSUE
+		(
+
+		PROJECT_ID,
+		<if test="ISSUE_DATE != null and ISSUE_DATE != '' ">
+			ISSUE_DATE,
+		</if>
+		<if test="DUE_DATE != null and DUE_DATE != '' ">
+			DUE_DATE,
+		</if>
+		<if test="ISSUE_CLOSE_DATE != null and ISSUE_CLOSE_DATE != '' ">
+			ISSUE_CLOSE_DATE,
+		</if>
+		ISSUE_STATUS,
+		ISSUE_DETAIL,
+		SOLVE_PLAN,
+		SOLVE_OWNER,
+		SOLVE_OWNER_ID
+		)
+		VALUES
+		(
+		#{hiddenModalPK},
+		<if test="ISSUE_DATE != null and ISSUE_DATE != '' ">
+			#{ISSUE_DATE},
+		</if>
+		<if test="DUE_DATE != null and DUE_DATE != '' ">
+			#{DUE_DATE},
+		</if>
+		<if test="ISSUE_CLOSE_DATE != null and ISSUE_CLOSE_DATE != '' ">
+			#{ISSUE_CLOSE_DATE},
+		</if>
+		#{ISSUE_STATUS},
+		#{ISSUE_DETAIL},
+		#{SOLVE_PLAN},
+		#{SOLVE_OWNER},
+		#{SOLVE_OWNER_ID}
+		);
+	</insert>
+
+
+
+
+
+
+
+
+	<!-- 고객만족도 대시보드 -->
+	<!-- <select id="ClientSatisfactionDashBoardList" parameterType="hashmap" 
+		resultType="hashmap"> -->
+	<select id="selectClientSatisfactionDashBoard"
+		parameterType="hashmap" resultType="hashmap">
+	<![CDATA[ 
+	SELECT
+		CSL.CSAT_ID,
+		CSL.CSAT_SUBJECT,	
+		CSL.CSAT_SURVEY_DATE,
+		OMI.MEMBER_DIVISION AS CSAT_SURVEY_DIVISION,
+		ODI.DIVISION_NAME AS CSAT_SURVEY_DIVISION_NAME,
+		IF(CSAT_VALUE_TOTAL != '', ROUND(CSAT_VALUE_TOTAL/CSAT_TOTAL_COUNT, 1), 0) AS CSAT_AVG_VALUE,
+		IFNULL(CSAT_TOTAL_COUNT,0) AS CSAT_TOTAL_COUNT,
+		IFNULL(CSAT_GREAT_COUNT,0) AS CSAT_GREAT_COUNT,
+		IFNULL(CSAT_NICE_COUNT,0) AS CSAT_NICE_COUNT,
+		IFNULL(CSAT_GOOD_COUNT,0) AS CSAT_GOOD_COUNT,
+		IFNULL(CSAT_BAD_COUNT,0) AS CSAT_BAD_COUNT,
+		IFNULL(CSAT_HATE_COUNT,0) AS CSAT_HATE_COUNT,
+		IFNULL(DIS.TOTAL_COUNT,0) AS TOTAL_ISSUE_COUNT,
+		IFNULL(DIS.ISSUE_STATUS_ING,0) AS ISSUE_STATUS_ING,
+		IFNULL(DIS.ISSUE_STATUS_LATE,0) AS ISSUE_STATUS_LATE,
+		IFNULL(DIS.ISSUE_STATUS_COMPLETE,0) AS ISSUE_STATUS_COMPLETE
+	FROM 
+		CLIENT_SAT_LOG AS CSL
+		LEFT OUTER JOIN 
+		OUR_MEMBERS_INFO AS OMI ON CSL.CSAT_SURVEY_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN 
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		LEFT OUTER JOIN 
+		(
+			SELECT 
+				CSAT_ID,
+				CSAT_VALUE,
+				SUM(IF(CSAT_VALUE='1', 1, 0)) AS CSAT_HATE_COUNT,
+				SUM(IF(CSAT_VALUE='2', 1, 0)) AS CSAT_BAD_COUNT,
+				SUM(IF(CSAT_VALUE='3', 1, 0)) AS CSAT_GOOD_COUNT,
+				SUM(IF(CSAT_VALUE='4', 1, 0)) AS CSAT_NICE_COUNT,
+				SUM(IF(CSAT_VALUE='5', 1, 0)) AS CSAT_GREAT_COUNT,
+				COUNT(CSAT_VALUE) AS CSAT_TOTAL_COUNT,
+				SUM(CSAT_VALUE) AS CSAT_VALUE_TOTAL
+			FROM CLIENT_SATDETAIL_LOG
+			GROUP BY CSAT_ID
+		) AS CSDL ON CSL.CSAT_ID = CSDL.CSAT_ID
+		LEFT OUTER JOIN
+		(
+			SELECT 
+				CSLD.CSAT_ID,
+				COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+				SUM(IF(CIL.DUE_DATE>=DATE_FORMAT(NOW(), '%Y-%m-%d'), 1, 0)) AS ISSUE_STATUS_ING,
+				SUM(IF(CIL.DUE_DATE<DATE_FORMAT(NOW(), '%Y-%m-%d'), 1, 0)) AS ISSUE_STATUS_LATE,
+				SUM(IF(CIL.ISSUE_CLOSE_DATE!=NULL, 1, 0)) AS ISSUE_STATUS_COMPLETE
+			FROM 
+				CLIENT_SATDETAIL_LOG AS CSLD 
+				INNER JOIN
+				CLIENT_ISSUE_LOG AS CIL ON CSLD.CSAT_DETAIL_ID = CIL.CSAT_DETAIL_ID
+			GROUP BY CSLD.CSAT_ID
+		) AS DIS ON DIS.CSAT_ID = CSL.CSAT_ID
+	WHERE 1=1 
+	AND YEAR(CSL.CSAT_SURVEY_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CSL.CSAT_SURVEY_DATE) =  QUARTER(#{searchDate})
+	]]>
+		<choose>
+			<when
+				test="tabFlag == 'clientCompany' or tabFlag == '' or tabFlag == null ">
+				AND CSL.CSAT_CATEGORY = '고객만족'
+			</when>
+			<otherwise>
+				AND CSL.CSAT_CATEGORY = '파트너만족'
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- @explain : 고객만족 -> 고객만족 -> 고객만족도 현황 (년도/분기별) -->
+	<select id="selectClientSatisfactionTotalStatus" parameterType="hashmap"	resultType="hashmap">
+		SELECT
+			IFNULL(COUNT(TB.TOTAL_CNT), 0) AS TOTAL_CNT
+			,IFNULL(ROUND(SUM(TB.SATISFACTION_AVG) / COUNT(TB.TOTAL_CNT), 1), 0) AS SATISFACTION_AVG
+			<!-- ,IFNULL((COUNT(TB.TOTAL_CNT) - COUNT(COMPLETE_CNT)), 0) AS IN_PROGRESS
+			,IFNULL(COUNT(TB.COMPLETE_CNT), 0) AS COMPLETE_CNT -->
+		FROM
+			(
+				SELECT
+				COUNT(CSL.CSAT_ID) AS TOTAL_CNT
+			,(
+					SELECT
+						IFNULL(( SUM(CSDL2.CSAT_VALUE) / COUNT(CSDL2.CSAT_VALUE)),0)
+					FROM CLIENT_SATDETAIL_LOG CSDL2
+					WHERE CSAT_VALUE IS NOT NULL
+					AND CSDL2.CSAT_ID = CSL.CSAT_ID
+					<!-- AND CSDL2.SYS_REGISTER_DATE LIKE CONCAT(YEAR(CURDATE()), '%') -->
+				) AS SATISFACTION_AVG
+					<!-- ,COUNT(
+						CASE WHEN CSL.CSAT_STATUS = 'close'
+						THEN 1
+						END
+				) AS COMPLETE_CNT -->
+				FROM CLIENT_SAT_LOG AS CSL
+				LEFT OUTER JOIN	CLIENT_SATDETAIL_LOG AS CSDL
+					ON CSL.CSAT_ID = CSDL.CSAT_ID
+				LEFT OUTER JOIN	OUR_MEMBERS_INFO AS OMI
+					ON OMI.MEMBER_ID_NUM = CSL.CREATOR_ID
+				LEFT OUTER JOIN	OUR_TEAM_INFO AS OTI
+					ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+				LEFT OUTER JOIN	OUR_DIVISION_INFO AS ODI
+					ON ODI.DIVISION_NO = OTI.DIVISION_NO
+				WHERE CSL.CSAT_CATEGORY = #{satisfactionCategory}
+				<!-- AND CSL.SYS_REGISTER_DATE LIKE CONCAT(YEAR(CURDATE()), '%') -->
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND ODI.DIVISION_NO = #{global_member_division}
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')">
+						AND OTI.TEAM_NO = #{global_member_team}
+					</when>
+					<when test="global_role_code.contains('ROLE_MEMBER')">
+						AND OMI.MEMBER_ID_NUM = #{global_member_id}
+					</when>
+					<otherwise>
+					</otherwise>
+				</choose>
+				<!-- AND YEAR(CSL.SYS_UPDATE_DATE) = YEAR(CURDATE()) -->
+				<!-- year -->
+				<if test="searchYear != null and searchYear != '' ">
+					AND YEAR(CSL.SYS_UPDATE_DATE) = #{searchYear}
+				</if>
+				<!-- quarter -->
+				<if test="searchQuarter != null and searchQuarter != '' ">
+					AND QUARTER(CSL.SYS_UPDATE_DATE) = #{searchQuarter}
+				</if>
+				GROUP BY CSL.CSAT_ID
+		) AS TB
+	</select>
+	
+	<!-- @explain : 고객만족 -> 고객만족 -> 조사현황 (년도/분기별) 팀 리스트 -->
+	<select id="selectClientSatisfactionMasterTeamList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+					ODI.DIVISION_NO AS TARGET_NO,
+					ODI.DIVISION_NAME AS TARGET_NAME
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					OTI.TEAM_NO AS TARGET_NO,
+					OTI.TEAM_NAME AS TARGET_NAME
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+					OMI.MEMBER_ID_NUM AS TARGET_NO,
+					OMI.HAN_NAME AS TARGET_NAME
+				</when>
+				<otherwise>
+					ODI.DIVISION_NO AS TARGET_NO,
+					ODI.DIVISION_NAME AS TARGET_NAME
+				</otherwise>
+			</choose>
+		FROM
+			CLIENT_SAT_LOG AS CSL
+		LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI ON
+			CSL.CREATOR_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN OUR_MEMBERS_INFO AS CSI ON
+			CSL.CSAT_SURVEY_ID = CSI.MEMBER_ID_NUM
+		LEFT OUTER JOIN OUR_TEAM_INFO AS OTI ON
+			OMI.MEMBER_TEAM = OTI.TEAM_NO
+		LEFT OUTER JOIN OUR_DIVISION_INFO AS ODI ON
+			ODI.DIVISION_NO = OTI.DIVISION_NO
+		WHERE
+			CSL.CSAT_CATEGORY = #{satisfactionCategory}		
+		<!-- year -->
+		<if test="searchYear != null and searchYear != '' ">
+			AND YEAR(CSL.SYS_UPDATE_DATE) = #{searchYear}
+		</if>
+		<!-- quarter -->
+		<if test="searchQuarter != null and searchQuarter != '' ">
+			AND QUARTER(CSL.SYS_UPDATE_DATE) = #{searchQuarter}
+		</if>
+		<choose>
+			<when test="selectValue != null and selectValue != '' ">
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+						AND ODI.DIVISION_NO = #{selectValue}
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND OTI.TEAM_NO = #{selectValue}
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')">
+						AND OMI.MEMBER_ID_NUM = #{selectValue}
+					</when>
+					<when test="global_role_code.contains('ROLE_MEMBER')">
+						AND OMI.MEMBER_ID_NUM = #{global_member_id}
+					</when>
+					<otherwise>
+						AND ODI.DIVISION_NO = #{selectValue}
+					</otherwise>
+				</choose>
+			</when>
+			<otherwise>
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+						AND ODI.DIVISION_NO IS NOT NULL
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND OTI.TEAM_NO = #{global_member_team}
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')">
+						AND OMI.MEMBER_ID_NUM = #{global_member_id}
+					</when>
+					<when test="global_role_code.contains('ROLE_MEMBER')">
+						OMI.MEMBER_ID_NUM = #{global_member_id}
+					</when>
+					<otherwise>
+						AND ODI.DIVISION_NO IS NOT NULL
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+		ORDER by TARGET_NO ASC
+	</select>
+	
+	<!-- @explain : 고객만족 -> 고객만족 -> 조사현황 (년도/분기별) -->
+	<select id="selectClientSatisfactionMasterListM" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,
+			TMP_TABLE.*
+		FROM
+		(
+			SELECT
+				CSL.CSAT_ID,
+				CSL.CREATOR_ID,
+				CSL.CREATE_DATETIME,
+				CSL.CSAT_SUBJECT,
+				CSL.CSAT_CATEGORY,
+				<!-- CSL.CSAT_TARGET, -->
+				CSDL.COMPANY_ID AS CSAT_TARGET_ID,
+				CSDL.COMPANY_NAME AS CSAT_TARGET,
+				CSL.CSAT_SURVEY_ID,
+				OTI.TEAM_NAME AS
+				CSAT_SURVEY_TEAM,
+				CSI.HAN_NAME AS CSAT_SURVEY_NAME,
+				CSL.CSAT_SURVEY_DATE,
+				CSL.CSAT_DETAIL,
+				DATE_FORMAT(CSL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE,
+				DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+				DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS
+				LATELY_UPDATE_DATE,
+				IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT,
+				IF(CSAT_VALUE_TOTAL != '', ROUND(CSAT_VALUE_TOTAL/TOTAL_COUNT, 1), 0)
+				AS AVG_CSAT_VALUE,
+				IFNULL(TOTAL_COUNT,0) AS TOTAL_COUNT,
+				IFNULL(GREAT_COUNT,0) AS GREAT_COUNT,
+				IFNULL(NICE_COUNT,0) AS
+				NICE_COUNT,
+				IFNULL(GOOD_COUNT,0) AS GOOD_COUNT,
+				IFNULL(BAD_COUNT,0) AS
+				BAD_COUNT,
+				IFNULL(HATE_COUNT,0) AS HATE_COUNT,
+				OMI.HAN_NAME,
+				IFNULL(ISSUE_COUNT,0) AS ISSUE_COUNT,
+				IFNULL(ISSUE_STATUS_1,0) AS
+				ISSUE_STATUS_1,
+				IFNULL(ISSUE_STATUS_2,0) AS ISSUE_STATUS_2,
+				IFNULL(ISSUE_STATUS_3,0) AS ISSUE_STATUS_3
+			FROM
+			CLIENT_SAT_LOG AS CSL
+			LEFT OUTER JOIN
+				(
+					SELECT COUNT(CSAT_ID) AS FILE_COUNT, CSAT_ID
+					FROM CLIENT_SAT_FILE_STORE
+					GROUP BY CSAT_ID
+				) AS FC ON FC.CSAT_ID = CSL.CSAT_ID
+			LEFT OUTER JOIN	OUR_MEMBERS_INFO AS OMI
+				ON CSL.CREATOR_ID = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN OUR_MEMBERS_INFO AS CSI
+				ON CSL.CSAT_SURVEY_ID = CSI.MEMBER_ID_NUM
+			LEFT OUTER JOIN	OUR_TEAM_INFO AS OTI
+				ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+			LEFT OUTER JOIN	OUR_DIVISION_INFO AS ODI
+				ON ODI.DIVISION_NO = OTI.DIVISION_NO
+			LEFT OUTER JOIN
+				(
+					SELECT
+						CSAT_ID,
+						CSAT_VALUE,
+						SUM(IF(CSAT_VALUE='1', 1, 0)) AS HATE_COUNT,
+						SUM(IF(CSAT_VALUE='2', 1, 0)) AS BAD_COUNT,
+						SUM(IF(CSAT_VALUE='3', 1, 0)) AS GOOD_COUNT,
+						SUM(IF(CSAT_VALUE='4', 1, 0)) AS NICE_COUNT,
+						SUM(IF(CSAT_VALUE='5', 1, 0)) AS GREAT_COUNT,
+						COUNT(CSAT_VALUE) AS TOTAL_COUNT,
+						SUM(CSAT_VALUE) AS CSAT_VALUE_TOTAL,
+						COMPANY_NAME,
+						COMPANY_ID
+					FROM CLIENT_SATDETAIL_LOG
+					GROUP BY CSAT_ID
+				) AS CSDL ON CSL.CSAT_ID = CSDL.CSAT_ID
+			LEFT OUTER JOIN
+				(
+					SELECT
+					CSLD2.CSAT_ID,
+					COUNT(CIL.ISSUE_ID) AS ISSUE_COUNT,
+					SUM(IF(CIL.ISSUE_STATUS='1', 1, 0)) AS ISSUE_STATUS_1,
+					SUM(IF(CIL.ISSUE_STATUS='2', 1, 0)) AS ISSUE_STATUS_2,
+					SUM(IF(CIL.ISSUE_STATUS='3', 1, 0)) AS ISSUE_STATUS_3
+					FROM
+					CLIENT_SATDETAIL_LOG AS CSLD2
+					INNER JOIN
+					CLIENT_ISSUE_LOG AS CIL ON CSLD2.CSAT_DETAIL_ID = CIL.CSAT_DETAIL_ID
+					GROUP BY CSLD2.CSAT_ID
+				) AS DIS ON DIS.CSAT_ID = CSL.CSAT_ID
+			WHERE CSL.CSAT_CATEGORY = #{satisfactionCategory}			
+			<!-- year -->
+			<if test="searchYear != null and searchYear != '' ">
+				AND YEAR(CSL.SYS_UPDATE_DATE) = #{searchYear}
+			</if>
+			<!-- quarter -->
+			<if test="searchQuarter != null and searchQuarter != '' ">
+				AND QUARTER(CSL.SYS_UPDATE_DATE) = #{searchQuarter}
+			</if>
+			<choose>
+				<when test="selectValue != null and selectValue != '' ">
+					<choose>
+						<when test="global_role_code.contains('ROLE_CEO')">
+							AND ODI.DIVISION_NO = #{selectValue}
+						</when>
+						<when test="global_role_code.contains('ROLE_DIVISION')">
+							AND OTI.TEAM_NO = #{selectValue}
+						</when>
+						<when test="global_role_code.contains('ROLE_TEAM')">
+							AND OMI.MEMBER_ID_NUM = #{selectValue}
+						</when>
+						<when test="global_role_code.contains('ROLE_MEMBER')">
+							AND OMI.MEMBER_ID_NUM = #{global_member_id}
+						</when>
+						<otherwise>
+							AND ODI.DIVISION_NO = #{selectValue}
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					<choose>
+						<when test="global_role_code.contains('ROLE_CEO')">
+						</when>
+						<when test="global_role_code.contains('ROLE_DIVISION')">
+							AND OTI.TEAM_NO = #{global_member_team}
+						</when>
+						<when test="global_role_code.contains('ROLE_TEAM')">
+							AND OMI.MEMBER_ID_NUM = #{global_member_id}
+						</when>
+						<when test="global_role_code.contains('ROLE_MEMBER')">
+							AND OMI.MEMBER_ID_NUM = #{global_member_id}
+						</when>
+						<otherwise>
+						</otherwise>
+					</choose>
+				</otherwise>
+			</choose>
+			
+			<!-- ORDER BY CSL.SYS_UPDATE_DATE ASC -->
+			) AS TMP_TABLE, (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE 1=1
+		<!-- ORDER BY ROWNUM DESC -->
+		<choose>
+			<when test="selectSortCategory != null and selectSortCategory != '' ">
+				<choose>
+					<when test="selectSortCategory == 'CSAT_SUBJECT' ">
+						ORDER BY CSAT_SUBJECT ASC
+					</when>
+					<when test="selectSortCategory == 'CSAT_SURVEY_TEAM' ">
+						ORDER BY CSAT_SURVEY_TEAM ASC
+					</when>
+					<when test="selectSortCategory == 'CSAT_SURVEY_NAME' ">
+						ORDER BY CSAT_SURVEY_NAME ASC
+					</when>
+					<when test="selectSortCategory == 'CSAT_SURVEY_DATE' ">
+						ORDER BY CSAT_SURVEY_DATE DESC
+					</when>
+					<!-- <when test="selectSortCategory == 'CSAT_STATUS' ">
+						ORDER BY CSAT_STATUS DESC
+					</when> -->
+					<when test="selectSortCategory == 'AVG_CSAT_VALUE' ">
+						ORDER BY AVG_CSAT_VALUE DESC
+					</when>
+					<when test="selectSortCategory == 'TOTAL_COUNT' ">
+						ORDER BY TOTAL_COUNT DESC
+					</when>
+				</choose>
+			</when>
+			<otherwise>
+				ORDER BY LATELY_UPDATE_DATE DESC
+			</otherwise>
+		</choose>
+	</select>
+</mapper>	

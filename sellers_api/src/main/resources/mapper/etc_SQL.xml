@@ -1,0 +1,1428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="etc">
+	
+	<!-- 고도리 ~ 대시보드 _본부 -->
+	<select id="selectClientGodoryDashBoardDivision" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[ 
+	SELECT 
+		DISTINCT
+		ODI.DIVISION_NO,
+		ODI.DIVISION_NAME,
+		COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+		SUM(CIL.ISSUE_CATEGORY = '1') AS CATEGORY_1,
+		SUM(CIL.ISSUE_CATEGORY = '2') AS CATEGORY_2,
+		SUM(CIL.ISSUE_CATEGORY = '3') AS CATEGORY_3,
+		SUM(CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_1,
+		SUM(CASE WHEN CURRENT_DATE() >  CIL.DUE_DATE AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_2,
+		SUM(CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != '' THEN 1 ELSE 0 END) AS ISSUE_STATUS_3
+	FROM 
+		CLIENT_GODORY_LOG AS CIL
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CIL.SOLVE_OWNER = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+	WHERE 1=1
+	AND YEAR(CIL.SYS_REGISTER_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CIL.SYS_REGISTER_DATE) =  QUARTER(#{searchDate})
+	]]>
+	
+	<choose>
+		<when test="global_role_code.contains('ROLE_CEO')">
+		</when>
+		<when test="global_role_code.contains('ROLE_CFO')">
+		</when>
+		<when test="global_role_code.contains('ROLE_DIVISION')">
+			AND (OMI.MEMBER_DIVISION = #{global_member_division} OR OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division} OR OMI4.MEMBER_DIVISION = #{global_member_division})
+		</when>
+		<when test="global_role_code.contains('ROLE_TEAM')">
+			AND (OMI.MEMBER_DIVISION = #{global_member_division} OR OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division} OR OMI4.MEMBER_DIVISION = #{global_member_division})
+			AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team} OR OMI4.MEMBER_TEAM = #{global_member_team})
+		</when>
+		<when test="global_role_code.contains('ROLE_MEMBER')">
+			AND (OMI.MEMBER_DIVISION = #{global_member_division} OR OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division} OR OMI4.MEMBER_DIVISION = #{global_member_division})
+			AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team} OR OMI4.MEMBER_TEAM = #{global_member_team})
+		</when>
+	</choose>
+	
+	GROUP BY OMI.MEMBER_DIVISION
+	HAVING 1=1
+	</select>
+	
+	<!-- 고도리~ 대시보드 _팀 -->
+	<select id="selectGodoryDashBoardTeam" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[ 
+	SELECT 
+		OMI.MEMBER_DIVISION,
+		OMI.MEMBER_TEAM,
+		OTI.TEAM_NAME,
+		COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+		SUM(CIL.ISSUE_CATEGORY = '1') AS CATEGORY_1,
+		SUM(CIL.ISSUE_CATEGORY = '2') AS CATEGORY_2,
+		SUM(CIL.ISSUE_CATEGORY = '3') AS CATEGORY_3,
+		SUM(CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_1,
+		SUM(CASE WHEN CURRENT_DATE() >  CIL.DUE_DATE AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_2,
+		SUM(CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != '' THEN 1 ELSE 0 END) AS ISSUE_STATUS_3
+	FROM 
+		CLIENT_GODORY_LOG AS CIL
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CIL.SOLVE_OWNER = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI2.MEMBER_TEAM
+	WHERE 1=1
+	AND YEAR(CIL.SYS_REGISTER_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CIL.SYS_REGISTER_DATE) =  QUARTER(#{searchDate})
+	]]>
+	<if test="(global_member_division != null and global_member_division != '') and global_member_division != searchDivision">
+	AND (OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division} OR OMI4.MEMBER_DIVISION = #{global_member_division})
+	</if>
+	GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM
+	HAVING 1=1
+	<choose>
+		<when test="global_role_code.contains('ROLE_CEO')">
+			AND OMI.MEMBER_DIVISION = #{searchDivision}
+		</when>
+		<when test="global_role_code.contains('ROLE_CFO')">
+			AND OMI.MEMBER_DIVISION = #{searchDivision}
+		</when>
+		<when test="global_role_code.contains('ROLE_DIVISION')">
+			AND OMI.MEMBER_DIVISION = #{searchDivision}
+		</when>
+		<when test="global_role_code.contains('ROLE_TEAM')">
+			ORDER BY FIELD(OMI.MEMBER_TEAM, #{global_member_team}) DESC, OMI.MEMBER_DIVISION ASC, OMI.MEMBER_DIVISION ASC 
+			<!-- AND OMI.MEMBER_DIVISION = #{global_member_division}
+			AND OMI.MEMBER_TEAM = #{global_member_team} -->
+		</when>
+	</choose>
+	</select>
+	
+	
+	
+	<!-- 고도리~ 대시보드 _직원 -->
+	<select id="selectGodoryDashBoardMember" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[ 
+	SELECT 
+		OMI.MEMBER_DIVISION,
+		OMI.MEMBER_TEAM,
+		OMI.MEMBER_ID_NUM,
+		OMI2.HAN_NAME,
+		
+		OMI2.POSITION_STATUS,
+		
+		COUNT(CIL.ISSUE_ID) AS TOTAL_COUNT,
+		SUM(CIL.ISSUE_CATEGORY = '1') AS CATEGORY_1,
+		SUM(CIL.ISSUE_CATEGORY = '2') AS CATEGORY_2,
+		SUM(CIL.ISSUE_CATEGORY = '3') AS CATEGORY_3,
+		SUM(CASE WHEN CIL.DUE_DATE >= CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_1,
+		SUM(CASE WHEN CURRENT_DATE() >  CIL.DUE_DATE AND (CIL.ISSUE_CLOSE_DATE IS NULL OR CIL.ISSUE_CLOSE_DATE = '') THEN 1 ELSE 0 END) AS ISSUE_STATUS_2,
+		SUM(CASE WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != '' THEN 1 ELSE 0 END) AS ISSUE_STATUS_3
+	FROM 
+		CLIENT_GODORY_LOG AS CIL
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CIL.SOLVE_OWNER = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+	WHERE 1=1
+	AND YEAR(CIL.SYS_REGISTER_DATE) =  YEAR(#{searchDate})
+	AND QUARTER(CIL.SYS_REGISTER_DATE) =  QUARTER(#{searchDate})
+	]]>
+	<!-- 
+	GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+	HAVING 1=1
+	 -->
+	<if test="(global_member_team != null and global_member_team != '') and (global_member_team != searchTeam)">
+	AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team} OR OMI4.MEMBER_TEAM = #{global_member_team})
+	</if>
+	<choose>
+		<when test="global_role_code.contains('ROLE_CEO')">
+		GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+		HAVING 1=1
+			AND OMI.MEMBER_DIVISION = #{searchDivision}
+			AND OMI.MEMBER_TEAM = #{searchTeam}
+		</when>
+		<when test="global_role_code.contains('ROLE_CFO')">
+		GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+		HAVING 1=1
+			AND OMI.MEMBER_DIVISION = #{searchDivision}
+			AND OMI.MEMBER_TEAM = #{searchTeam}
+		</when>
+		<when test="global_role_code.contains('ROLE_DIVISION')">
+		GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+		HAVING 1=1
+			AND OMI.MEMBER_DIVISION = #{searchDivision}
+			AND OMI.MEMBER_TEAM = #{searchTeam}
+		</when>
+		<when test="global_role_code.contains('ROLE_TEAM')">
+			AND OMI.MEMBER_DIVISION = #{searchDivision}
+			AND OMI.MEMBER_TEAM = #{searchTeam}
+			GROUP BY OMI.MEMBER_ID_NUM
+		</when>
+		<when test="global_role_code.contains('ROLE_MEMBER')">
+			<!-- AND (OMI.MEMBER_ID_NUM = #{global_member_id} OR OMI2.MEMBER_ID_NUM = #{global_member_id} OR OMI3.MEMBER_ID_NUM = #{global_member_id}) -->
+			GROUP BY OMI.HAN_NAME
+			ORDER BY FIELD(OMI.MEMBER_ID_NUM, #{global_member_id}) DESC, FIELD(OMI.MEMBER_TEAM, #{global_member_team}) DESC
+		</when>
+	</choose>
+	</select>
+	
+	<!-- 고도리 카운트 -->
+	<select id="selectGodoryCount" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					COUNT(*) AS listCount, GROUP_CONCAT(TMP.ISSUE_ID) AS searchPKArray
+			FROM 
+				(
+					SELECT 
+						CIL.ISSUE_ID, 
+						CIL.ISSUE_CATEGORY, 
+						CIL.ISSUE_SUBJECT, 
+						CIL.ISSUE_DATE, 
+						CIL.DUE_DATE, 
+						CIL.ISSUE_STATUS,
+						CASE 
+							WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+							THEN '#1ab394'
+							WHEN CIL.DUE_DATE >= CURRENT_DATE()
+							THEN '#ffc000' 
+							WHEN CURRENT_DATE() >  CIL.DUE_DATE
+							THEN '#f20056' 
+						END AS ISSUE_STATUS_TEXT, 
+						CIL.ISSUE_DETAIL, 
+						CIL.SOLVE_OWNER, 
+						CIL.ISSUE_CLOSE_DATE, 
+						CIL.SOLVE_EVIDENCE_YN, 
+						CIL.SOLVE_EVIDENCE_DETAIL, 
+						CIL.SOLVE_PLAN,
+						CIL.CSAT_DETAIL_ID,
+						CIL.ISSUE_CONFIRM_ID,
+						DATE_FORMAT(CIL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+						DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+						DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+						OMI.HAN_NAME,
+						OMI2.HAN_NAME AS SALES_REPRESENTIVE_NAME,
+						OMI3.HAN_NAME AS SOLVE_OWNER_NAME,
+						OMI4.HAN_NAME AS CONFIRM_NAME,
+						
+						CASE 
+							WHEN OHA.STATUS = 'R' THEN '#f20056'
+							WHEN OHA.STATUS = 'Y' THEN '#ffc000'
+							WHEN OHA.STATUS = 'G' THEN '#1ab394'
+							ELSE '-'
+						END AS ISSUE_ACTION_STATUS_TEXT,
+						
+						IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT
+			FROM 
+				CLIENT_GODORY_LOG AS CIL
+				
+	            LEFT OUTER JOIN
+					( 
+					SELECT SUB_OHA.ISSUE_ID,STATUS
+						FROM 
+						(
+							SELECT ISSUE_ID, 
+							CASE 
+								WHEN CLOSE_DATE IS NOT NULL AND CLOSE_DATE != ''
+								THEN 'G'
+								WHEN DUE_DATE >= CURRENT_DATE()
+								THEN 'Y' 
+								WHEN CURRENT_DATE() >  DUE_DATE
+								THEN 'R' 
+							END AS STATUS, 	 			 
+							IF(@PREV <> ISSUE_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := ISSUE_ID						
+							FROM CLIENT_ISSUE_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+							ORDER BY ISSUE_ID,FIELD(STATUS,'R','Y','G')
+						) AS SUB_OHA 
+						WHERE 1=1
+						AND SUB_OHA.RANK = 1 
+	            ) AS OHA ON CIL.ISSUE_ID = OHA.ISSUE_ID
+	            
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI ON CIL.CREATOR_ID = OMI.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI2 ON CIL.SALES_REPRESENTIVE_ID = OMI2.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+				LEFT OUTER JOIN
+				(
+	            	SELECT COUNT(ISSUE_ID) AS FILE_COUNT, ISSUE_ID
+	            	FROM CLIENT_ISSUE_FILE_STORE
+	            	GROUP BY ISSUE_ID
+	            ) AS FC ON FC.ISSUE_ID = CIL.ISSUE_ID
+			WHERE 1=1
+			]]>	
+			<if test="menuFlag != null and menuFlag != '' ">
+			AND CIL.ISSUE_CATEGORY= #{menuFlag}
+			</if>
+			
+			<if test="companyInfoIssue != 'true' ">
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_CFO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					AND (OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division})
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+					AND OMI2.MEMBER_DIVISION = #{global_member_division} 
+					AND OMI2.MEMBER_TEAM = #{global_member_team}
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+					AND OMI2.MEMBER_DIVISION = #{global_member_division} 
+					AND OMI2.MEMBER_TEAM = #{global_member_team} 
+					
+					<!-- 작성자 볼수있게 추가 -->
+					<!-- AND (OMI2.MEMBER_ID_NUM = #{global_member_id} OR OMI3.MEMBER_ID_NUM = #{global_member_id} OR OMI5.MEMBER_ID_NUM=#{global_member_id}) -->
+				</when>
+			</choose>
+			</if>
+<!-- 
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_CFO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					AND (OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division})
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+					AND (OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division})
+					AND (OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team}) 
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+					AND (OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division})
+					AND (OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team})
+					AND (OMI2.MEMBER_ID_NUM = #{global_member_id} OR OMI3.MEMBER_ID_NUM = #{global_member_id})
+				</when>
+			</choose>
+ --> 
+ 			<include refid="clientIssueWhere"/>
+	</select>
+	
+	<sql id="clientIssueWhere">
+		<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+				<choose>
+					<when test="searchPKArray != null and searchPKArray != '' ">
+					AND CIL.ISSUE_ID IN(${searchPKArray})
+					</when>
+					<otherwise>
+					AND CIL.ISSUE_ID IN('')
+					</otherwise>
+				</choose>
+			</if>
+			
+			<if test="searchCSatId != null and searchCSatId != '' ">
+				AND CIL.CSAT_DETAIL_ID IN 
+				(
+				SELECT CSI.CSAT_DETAIL_ID FROM CLIENT_ISSUE_LOG AS CSI
+					WHERE CSI.CSAT_DETAIL_ID IN
+					(
+					SELECT 
+					CSLD.CSAT_DETAIL_ID
+					FROM CLIENT_SAT_LOG AS CSL
+					INNER JOIN
+					CLIENT_SATDETAIL_LOG AS CSLD ON CSLD.CSAT_ID = CSL.CSAT_ID
+					WHERE CSL.CSAT_ID = #{searchCSatId}
+					)
+				)
+			</if>
+			
+			 <!-- 검색 고객사 -->
+			<if test="searchCompanyName != null and searchCompanyName != '' ">
+				AND CCI.COMPANY_NAME LIKE CONCAT('%', #{searchCompanyName}, '%')
+			</if>
+			
+			<!-- 부서 -->
+			<if test="searchDivision != null and searchDivision != '' ">
+				AND OMI2.MEMBER_DIVISION = #{searchDivision}
+			</if>
+			<!-- 팀 -->
+			<if test="searchTeam != null and searchTeam != '' ">
+				AND OMI2.MEMBER_TEAM = #{searchTeam}
+			</if>
+			
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+					<if test="searchTabFlag !=null and searchTabFlag != '' and searchTabFlag == 'individual'">
+						<if test="searchMember != null and searchMember != '' ">
+							<!-- AND OMI2.MEMBER_ID_NUM = #{searchMember} -->
+							AND CIL.SOLVE_OWNER = #{searchMember}
+						</if>
+					</if>
+					<if test="searchTabFlag !=null and searchTabFlag != '' and searchTabFlag == 'companyGroup'">
+					</if>
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+					<if test="searchMember != null and searchMember != '' ">
+						<!-- AND OMI2.MEMBER_ID_NUM = #{searchMember} -->
+						AND CIL.SOLVE_OWNER = #{searchMember}
+					</if>
+				</when>
+			</choose>
+			
+			
+			
+			<!-- 고객사 -->
+			<if test="searchClientCompany != null and searchClientCompany != '' ">
+				<!-- AND OMI2.MEMBER_ID_NUM = #{searchMember} -->
+				AND CCI.COMPANY_ID = #{searchClientCompany}
+			</if>
+			
+			<!-- year -->
+			<if test="searchYear != null and searchYear != '' ">
+				AND YEAR(CIL.SYS_REGISTER_DATE) = #{searchYear}
+			</if>
+			<!-- quarter -->
+			<if test="searchQuarter != null and searchQuarter != '' ">
+				AND QUARTER(CIL.SYS_REGISTER_DATE) = #{searchQuarter}
+			</if>
+			
+			<!-- 진행상황 -->
+			<choose>
+				<when test="searchStatus == '진행중' ">
+					AND CIL.ISSUE_CLOSE_DATE is null AND CIL.DUE_DATE >= CURRENT_DATE()
+				</when>
+				<when test="searchStatus == '지연' ">
+					<!-- AND CURRENT_DATE() >  CIL.DUE_DATE -->
+					AND CIL.ISSUE_CLOSE_DATE is null and CURRENT_DATE() >  CIL.DUE_DATE
+				</when>
+				<when test="searchStatus == '완료' ">
+					AND CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+				</when>
+			</choose>
+			
+				<choose>
+				<when test="sortCategory != null and sortCategory != '' ">
+					ORDER BY ${sortCategory} DESC
+				</when>
+				<otherwise>
+					ORDER BY CIL.SYS_UPDATE_DATE ASC
+				</otherwise>
+			</choose>
+			) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+			WHERE 1=1
+			<if test="searchActionStatus != null and searchActionStatus != '' ">
+				
+				<if test="searchActionStatus == 'actionStatusY' ">
+					AND ISSUE_ACTION_STATUS_TEXT = '#1ab394'
+				</if>
+				<if test="searchActionStatus == 'actionStatusN' ">
+					AND ISSUE_ACTION_STATUS_TEXT = '#ffc000'
+				</if>
+				<if test="searchActionStatus == 'actionStatusX' ">
+					AND ISSUE_ACTION_STATUS_TEXT = '#f20056'
+				</if>
+			</if>
+			<if test="detailSearchStatus != null and detailSearchStatus != '' ">
+				
+				<if test="detailSearchStatus == 'statusY' ">
+					AND ISSUE_STATUS_TEXT = '#1ab394'
+				</if>
+				<if test="detailSearchStatus == 'statusN' ">
+					AND ISSUE_STATUS_TEXT = '#ffc000'
+				</if>
+				<if test="detailSearchStatus == 'statusX' ">
+					AND ISSUE_STATUS_TEXT = '#f20056'
+				</if>
+			</if>
+	</sql>
+	
+	<!-- 고객 고도리 리스트 -->
+	<select id="selectGodoryList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+					TMP.*
+					FROM 
+						(
+							SELECT 
+								CIL.CREATOR_ID,
+								CIL.ISSUE_ID, 
+								CIL.ISSUE_CREATOR, 
+								CIL.SALES_REPRESENTIVE_ID,
+								CIL.ISSUE_CATEGORY,
+								
+								CIL.APPROVAL_YN,
+								
+								CASE CIL.ISSUE_CATEGORY
+									WHEN '1' THEN '고쳐주세요'
+									WHEN '2' THEN '도와주세요'
+									WHEN '3' THEN '이런건어때요'
+								END AS ISSUE_CATEGORY_TEXT,
+								
+								CIL.ISSUE_SUBJECT, 
+								CIL.ISSUE_DATE, 
+								CIL.DUE_DATE, 
+								CIL.ISSUE_STATUS,
+								CASE 
+									WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+									THEN '#1ab394'
+									WHEN CIL.DUE_DATE >= CURRENT_DATE()
+									THEN '#ffc000' 
+									WHEN CURRENT_DATE() >  CIL.DUE_DATE
+									THEN '#f20056' 
+								END AS ISSUE_STATUS_TEXT, 
+								CIL.ISSUE_DETAIL, 
+								CIL.SOLVE_OWNER, 
+								CIL.ISSUE_CLOSE_DATE, 
+								CIL.SOLVE_EVIDENCE_YN, 
+								CIL.SOLVE_EVIDENCE_DETAIL, 
+								CIL.SOLVE_PLAN,
+								CIL.CSAT_DETAIL_ID,
+								CIL.ISSUE_CONFIRM_ID,
+								DATE_FORMAT(CIL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+								DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+								DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+								OMI.HAN_NAME,
+								OMI2.HAN_NAME AS SALES_REPRESENTIVE_NAME,
+								OMI3.HAN_NAME AS SOLVE_OWNER_NAME,
+								OMI4.HAN_NAME AS CONFIRM_NAME,
+								
+								CASE 
+									WHEN OHA.STATUS = 'R' THEN '#f20056'
+									WHEN OHA.STATUS = 'Y' THEN '#ffc000'
+									WHEN OHA.STATUS = 'G' THEN '#1ab394'
+									ELSE '-'
+								END AS ISSUE_ACTION_STATUS_TEXT,
+								
+								IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT,
+								(
+									SELECT COUNT(*) 
+									FROM CLIENT_ISSUE_LOG_COACHING_TALK AS CT 
+									WHERE 1=1 AND CIL.ISSUE_ID = CT.ISSUE_ID
+								)AS COACHING_TALK_COUNT
+					FROM 
+						CLIENT_GODORY_LOG AS CIL		
+						LEFT OUTER JOIN
+							( 
+							SELECT SUB_OHA.ISSUE_ID,STATUS
+								FROM 
+								(
+									SELECT ISSUE_ID, 
+									CASE 
+										WHEN CLOSE_DATE IS NOT NULL AND CLOSE_DATE != ''
+										THEN 'G'
+										WHEN DUE_DATE >= CURRENT_DATE()
+										THEN 'Y' 
+										WHEN CURRENT_DATE() >  DUE_DATE
+										THEN 'R' 
+									END AS STATUS, 			 
+									IF(@PREV <> ISSUE_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := ISSUE_ID						
+									FROM CLIENT_GODORY_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+									ORDER BY ISSUE_ID,FIELD(STATUS,'R','Y','G')
+								) AS SUB_OHA 
+								WHERE 1=1
+								AND SUB_OHA.RANK = 1 
+			            ) AS OHA ON CIL.ISSUE_ID = OHA.ISSUE_ID
+			            
+			            
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON CIL.CREATOR_ID = OMI.MEMBER_ID_NUM
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI2 ON CIL.SALES_REPRESENTIVE_ID = OMI2.MEMBER_ID_NUM
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+						
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI5 ON CIL.CREATOR_ID = OMI5.MEMBER_ID_NUM
+						
+						LEFT OUTER JOIN
+						(
+			            	SELECT COUNT(ISSUE_ID) AS FILE_COUNT, ISSUE_ID
+			            	FROM CLIENT_ISSUE_FILE_STORE
+			            	GROUP BY ISSUE_ID
+			            ) AS FC ON FC.ISSUE_ID = CIL.ISSUE_ID
+					WHERE 1=1
+					
+					
+					
+		]]>			
+						<if test="selectGodoryTerritory !=null and selectGodoryTerritory !='' ">
+							AND CIL.ISSUE_CATEGORY = #{selectGodoryTerritory}
+						</if>
+					
+ 					<choose>
+						<when test="sortCategory != null and sortCategory != '' ">
+							ORDER BY ${sortCategory} DESC
+						</when>
+						<otherwise>
+							ORDER BY CIL.SYS_UPDATE_DATE ASC
+						</otherwise>
+					</choose>
+					) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					
+					
+					<if test="searchActionStatus != null and searchActionStatus != '' ">
+						
+						<if test="searchActionStatus == 'actionStatusY' ">
+							AND ISSUE_ACTION_STATUS_TEXT = '#1ab394'
+						</if>
+						<if test="searchActionStatus == 'actionStatusN' ">
+							AND ISSUE_ACTION_STATUS_TEXT = '#ffc000'
+						</if>
+						<if test="searchActionStatus == 'actionStatusX' ">
+							AND ISSUE_ACTION_STATUS_TEXT = '#f20056'
+						</if>
+					</if>
+					<if test="detailSearchStatus != null and detailSearchStatus != '' ">
+						
+						<if test="detailSearchStatus == 'statusY' ">
+							AND ISSUE_STATUS_TEXT = '#1ab394'
+						</if>
+						<if test="detailSearchStatus == 'statusN' ">
+							AND ISSUE_STATUS_TEXT = '#ffc000'
+						</if>
+						<if test="detailSearchStatus == 'statusX' ">
+							AND ISSUE_STATUS_TEXT = '#f20056'
+						</if>
+					</if>
+					
+					ORDER BY ROWNUM DESC
+					<!-- 
+					<choose>
+						<when test="numberPagingUseYn != null and numberPagingUseYn.equalsIgnoreCase('Y')">
+							<include refid="common.pagingPost2"/>
+						</when>
+						<otherwise>
+							<include refid="common.pagingPost2"/>
+						</otherwise>
+					</choose>
+					 -->
+	</select>
+	
+	<!-- 고도뤼~ 상세보기~ -->
+	<select id="selectGodoryDetail" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CIL.ISSUE_ID, 
+			CIL.ISSUE_CREATOR, 
+			CIL.ISSUE_SUBJECT, 
+			CIL.ISSUE_DATE, 
+			CIL.DUE_DATE, 
+			CIL.ISSUE_STATUS,
+			CIL.ISSUE_CATEGORY,
+			CIL.SALES_REPRESENTIVE_ID,
+			CASE 
+				WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL AND CIL.ISSUE_CLOSE_DATE != ''
+				THEN '#1ab394'
+				WHEN CIL.DUE_DATE >= CURRENT_DATE()
+				THEN '#ffc000' 
+				WHEN CURRENT_DATE() >  CIL.DUE_DATE
+				THEN '#f20056' 
+			END AS ISSUE_STATUS_TEXT, 
+			CIL.ISSUE_DETAIL, 
+			CIL.SOLVE_OWNER, 
+			CIL.ISSUE_CLOSE_DATE, 
+			CIL.SOLVE_EVIDENCE_YN, 
+			CIL.SOLVE_EVIDENCE_DETAIL, 
+			CIL.ISSUE_CONFIRM_ID,
+			CIL.SOLVE_PLAN,
+			
+			CIL.APPROVAL_YN,
+			
+			DATE_FORMAT(CIL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+			DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+			DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+			OMI.HAN_NAME,
+			OMI.MEMBER_ID_NUM,
+			OMI2.HAN_NAME AS SALES_REPRESENTIVE_NAME,
+			OMI3.HAN_NAME AS SOLVE_OWNER_NAME,
+			OMI4.HAN_NAME AS CONFIRM_NAME,
+			CIL.EVENT_ID,
+			IFNULL(FC.FILE_COUNT,0) AS FILE_COUNT
+		FROM 
+			CLIENT_GODORY_LOG AS CIL		
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON CIL.CREATOR_ID = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI2 ON CIL.SALES_REPRESENTIVE_ID = OMI2.MEMBER_ID_NUM
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+	           	SELECT COUNT(ISSUE_ID) AS FILE_COUNT, ISSUE_ID
+	           	FROM CLIENT_ISSUE_FILE_STORE
+	           	GROUP BY ISSUE_ID
+	           ) AS FC ON FC.ISSUE_ID = CIL.ISSUE_ID
+		WHERE 1=1
+		AND CIL.ISSUE_ID = #{pkNo}
+	</select>
+	
+	<select id="selectSolvePlanIssue" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			ACTION_ID, 
+			ISSUE_ID, 
+			SOLVE_PLAN, 
+			SOLVE_OWNER,
+			SOLVE_OWNER_ID,
+			DUE_DATE, 
+			CLOSE_DATE, 
+			
+			CASE 
+				WHEN CLOSE_DATE IS NOT NULL AND CLOSE_DATE != ''
+				THEN 'G'
+				WHEN DUE_DATE >= CURRENT_DATE()
+				THEN 'Y' 
+				WHEN CURRENT_DATE() >  DUE_DATE
+				THEN 'R' 
+			END AS STATUS, 
+			
+			DATE_FORMAT(SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+			<!-- STATUS AS HIDDEN_STATUS -->
+		FROM CLIENT_GODORY_ACTION_PLAN
+		WHERE 1=1
+		AND ISSUE_ID = #{pkNo}
+		ORDER BY SYS_REGISTER_DATE DESC
+	</select>
+	
+	<insert id="insertClientGodory" parameterType="hashmap">
+	 	INSERT INTO CLIENT_GODORY_LOG
+		(
+			CREATOR_ID, 
+			ISSUE_CATEGORY, 
+			ISSUE_SUBJECT,
+			ISSUE_DATE, 
+			DUE_DATE, 
+			ISSUE_DETAIL, 
+			SOLVE_OWNER, 
+			<if test="textModalIssueCloseDate != null and textModalIssueCloseDate != '' ">
+			ISSUE_CLOSE_DATE, 
+			</if>
+			SOLVE_EVIDENCE_YN, 
+			SOLVE_EVIDENCE_DETAIL, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE,
+			 <if test="hiddenModalContactId != null and hiddenModalContactId != '' ">
+			   EVENT_ID,
+			 </if>
+			<if test="hiddenCsatDetailId != null and hiddenCsatDetailId != '' ">
+			   CSAT_DETAIL_ID,
+			 </if>
+			 SOLVE_PLAN,
+			 ISSUE_CONFIRM_ID
+		)
+		VALUES
+		(	
+			#{hiddenModalCreatorId},
+			#{selectModalIssueCategory}, 
+			#{textModalSubject}, 
+			#{textModalIssueDate},
+			#{textModalDueDate}, 
+			#{textareaModalIssueDetail}, 
+			#{hiddenModalSolveOwnerId}, 
+			<if test="textModalIssueCloseDate != null and textModalIssueCloseDate != '' ">
+			#{textModalIssueCloseDate}, 
+			</if>
+			#{selectModalSolveEvidenceYN}, 
+			#{textareaSolveEvidenceDetail}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP, 
+			 <if test="hiddenModalContactId != null and hiddenModalContactId != '' ">
+			   #{hiddenModalContactId},
+			 </if>	
+			 <if test="hiddenCsatDetailId != null and hiddenCsatDetailId != '' ">
+			   #{hiddenCsatDetailId},
+			 </if>
+			 #{textareaModalSolvePlan},
+			 #{hiddenModalIssueConfirmId}
+		 );
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+	       	SELECT LAST_INSERT_ID();
+	   	</selectKey>
+	</insert>
+	
+	<update id="updateClientGodory" parameterType="hashmap">
+		UPDATE CLIENT_GODORY_LOG
+			SET 
+				SALES_REPRESENTIVE_ID=	#{hiddenModalSalesId1}, 
+				ISSUE_CATEGORY=		#{selectGodoryTerritory1}, 
+				ISSUE_SUBJECT=			#{textModalSubject1}, 
+				ISSUE_DATE=				#{textModalIssueDate1},
+				DUE_DATE=					#{textModalDueDate1}, 
+				ISSUE_DETAIL=				#{textareaModalIssueDetail1}, 
+				SOLVE_OWNER=			#{hiddenModalSolveOwnerId1},
+				<choose>
+					<when test="textModalIssueCloseDate1 != null and textModalIssueCloseDate1 != '' ">
+						ISSUE_CLOSE_DATE=	#{textModalIssueCloseDate1},
+					</when>
+					<otherwise>
+						ISSUE_CLOSE_DATE=	NULL,
+					</otherwise>
+				</choose> 
+				SOLVE_EVIDENCE_YN=			#{selectModalSolveEvidenceYN1}, 
+				SOLVE_EVIDENCE_DETAIL=	#{textareaSolveEvidenceDetail1}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP, 
+				SOLVE_PLAN= #{textareaModalSolvePlan1},
+				ISSUE_CONFIRM_ID = #{hiddenModalIssueConfirmId1},
+				APPROVAL_YN = #{selectApprovalYN}
+			WHERE ISSUE_ID=#{hiddenModalPK1};
+	</update>
+	
+	<select id="selectGodoryManager" parameterType="java.util.List" resultType="hashmap">
+		SELECT
+			CA.AUTHORITY_NAME,
+			CAM.AUTHORITY_CODE,
+			CAM.MEMBER_ID_NUM,
+			OMI.HAN_NAME
+		FROM COM_AUTHORITY_MEMBER AS CAM
+		LEFT OUTER JOIN
+			COM_AUTHORITY AS CA ON CAM.AUTHORITY_CODE = CA.AUTHORITY_CODE
+		LEFT OUTER JOIN
+			OUR_MEMBERS_INFO AS OMI ON CAM.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		AND CAM.USE_YN = 'Y'
+		AND CA.AUTHORITY_NAME IN('GODORY_GO','GODORY_DO','GODORY_RY')
+		ORDER BY CAM.AUTHORITY_CODE ASC
+	</select>
+	
+	<insert id="insertClientGodorySolvePlan" parameterType="hashmap">
+		INSERT INTO CLIENT_GODORY_ACTION_PLAN
+		(
+			ISSUE_ID, 
+			SOLVE_PLAN, 
+			SOLVE_OWNER, 
+			SOLVE_OWNER_ID,
+			DUE_DATE, 
+			CLOSE_DATE, 
+			<!-- STATUS,  -->
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{pkNo}, 
+			#{SOLVE_PLAN},
+			#{SOLVE_OWNER},
+			#{SOLVE_OWNER_ID},
+			<choose>
+				<when test="DUE_DATE != null and DUE_DATE != '' ">
+					#{DUE_DATE},
+				</when>
+				<otherwise>
+					NULL,
+				</otherwise>
+			</choose> 
+			<choose>
+				<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+					#{CLOSE_DATE},
+				</when>
+				<otherwise>
+					NULL,
+				</otherwise>
+			</choose>  
+			<!-- #{HIDDEN_STATUS}, --> 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<update id="updateClientGodorySolvePlan" parameterType="hashmap">
+			UPDATE CLIENT_GODORY_ACTION_PLAN
+				SET 
+					<!-- CATEGORY='', --> 
+					SOLVE_PLAN=#{SOLVE_PLAN}, 
+					SOLVE_OWNER=#{SOLVE_OWNER}, 
+					SOLVE_OWNER_ID=#{SOLVE_OWNER_ID},
+					<choose>
+					<when test="DUE_DATE != null and DUE_DATE != '' ">
+						DUE_DATE = #{DUE_DATE}, 
+					</when>
+					<otherwise>
+						DUE_DATE = NULL,
+					</otherwise>
+				</choose> 
+				<choose>
+					<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+						CLOSE_DATE = #{CLOSE_DATE}, 
+					</when>
+					<otherwise>
+						CLOSE_DATE = NULL,
+					</otherwise>
+				</choose> 
+					<!-- STATUS=#{HIDDEN_STATUS}, -->
+					SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+			WHERE ACTION_ID = #{ACTION_ID};
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<select id="gridCeoOnHand" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP_TABLE.*,
+			 CASE 
+		            WHEN TMP_TABLE.STATUS_PREV = 'G' THEN 'green'
+	            	WHEN TMP_TABLE.STATUS_PREV = 'Y' THEN 'yellow'
+	            	WHEN TMP_TABLE.STATUS_PREV = 'R' THEN 'red'
+	            	ELSE 'gray'
+	            END AS STATUS_COLOR_PREV,
+	            CASE 
+	            	WHEN TMP_TABLE.STATUS_ING = 'G' THEN 'green'
+	            	WHEN TMP_TABLE.STATUS_ING = 'Y' THEN 'yellow'
+	            	WHEN TMP_TABLE.STATUS_ING = 'R' THEN 'red'
+	            	ELSE 'gray'
+	            END AS STATUS_COLOR_ING,
+	            CASE 
+	            	WHEN TMP_TABLE.STATUS_NEXT = 'G' THEN 'green'
+	            	WHEN TMP_TABLE.STATUS_NEXT = 'Y' THEN 'yellow'
+	            	WHEN TMP_TABLE.STATUS_NEXT = 'R' THEN 'red'
+	            	ELSE 'gray'
+	             END AS STATUS_COLOR_NEXT
+		FROM 
+			(
+				SELECT 
+					OL.OPPORTUNITY_ID, 
+					OL.EXEC_ID, 
+					OMI2.HAN_NAME AS EXEC_NAME,
+					OL.OWNER_ID,
+					OMI3.HAN_NAME AS OWNER_NAME,
+					OL.IDENTIFIER_ID,
+					OMI4.HAN_NAME AS IDENTIFIER_NAME,
+					OL.CUSTOMER_ID,
+					CII.CUSTOMER_NAME,
+					CII.POSITION AS CUSTOMER_POSITION,
+					OL.SUBJECT, 
+					OL.CONTRACT_AMOUNT, 
+					OL.GP_AMOUNT, 
+					OL.PARTNER_ROLE, 
+					OL.CONTRACT_DATE, 
+					OL.SALES_CYCLE, 
+					OL.FORECAST_YN, 
+					OL.ROUTE, 
+					OL.SALES_PARTNER, 
+					OL.DETAIL_CONENTS, 
+					OL.CURRENT_MILESTONE, 
+					OL.CLOSE_CATEGORY, 
+					OL.CLOSE_DETAIL,
+					OL.CONTRACT_TERM,
+					OL.DISCRIMINATE_VALUE,
+					DATE_FORMAT(OL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(OL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(OL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID_NUM,
+					OMI.MEMBER_TEAM,
+					OMI.MEMBER_DIVISION,
+					OMI2.MEMBER_TEAM AS EXEC_TEAM,
+					CCI.COMPANY_NAME,
+					CCI.COMPANY_ID,
+					SALES_PLAN.REV AS AMOUNT_REV,
+					SALES_PLAN.GP AS AMOUNT_GP,
+					CASE 
+						WHEN OC.STATUS1 = 'G' THEN 'green'
+						WHEN OC.STATUS1 = 'Y' THEN 'yellow'
+						WHEN OC.STATUS1 = 'R' THEN 'red'
+					 	ELSE NULL
+					 END AS STATUS1,
+					CASE 
+						WHEN OC.STATUS2 = 'G' THEN 'green'
+						WHEN OC.STATUS2 = 'Y' THEN 'yellow'
+						WHEN OC.STATUS2 = 'R' THEN 'red'
+					 	ELSE NULL
+					 END AS STATUS2,
+					CASE 
+						WHEN OC.STATUS3 = 'G' THEN 'green'
+						WHEN OC.STATUS3 = 'Y' THEN 'yellow'
+						WHEN OC.STATUS3 = 'R' THEN 'red'
+					 	ELSE NULL
+					 END AS STATUS3,
+					CASE 
+						WHEN OC.STATUS4 = 'G' THEN 'green'
+						WHEN OC.STATUS4 = 'Y' THEN 'yellow'
+						WHEN OC.STATUS4 = 'R' THEN 'red'
+						 	ELSE NULL
+						 END AS STATUS4,
+					MAX(IF(MILESTONE.RANK=1, CLOSE_DATE,NULL)) AS ACT_CLOSE_DATE_NEXT,
+		            MAX(IF(MILESTONE.RANK=2, CLOSE_DATE,NULL)) AS ACT_CLOSE_DATE_ING,
+		            MAX(IF(MILESTONE.RANK=3, CLOSE_DATE,NULL)) AS ACT_CLOSE_DATE_PREV,
+		            MAX(IF(MILESTONE.RANK=1, DUE_DATE,NULL)) AS ACT_DUE_DATE_NEXT,
+		            MAX(IF(MILESTONE.RANK=2, DUE_DATE,NULL)) AS ACT_DUE_DATE_ING,
+		            MAX(IF(MILESTONE.RANK=3, DUE_DATE,NULL)) AS ACT_DUE_DATE_PREV,
+		            MAX(IF(MILESTONE.RANK=1, STATUS,NULL)) AS STATUS_NEXT,
+		            MAX(IF(MILESTONE.RANK=2, STATUS,NULL)) AS STATUS_ING,
+		            MAX(IF(MILESTONE.RANK=3, STATUS,NULL)) AS STATUS_PREV,
+		            MAX(IF(MILESTONE.RANK=1, KEY_MILESTONE,NULL)) AS KEY_MILESTONE_NEXT,
+		            MAX(IF(MILESTONE.RANK=2, KEY_MILESTONE,NULL)) AS KEY_MILESTONE_ING,
+		            MAX(IF(MILESTONE.RANK=3, KEY_MILESTONE,NULL)) AS KEY_MILESTONE_PREV,	 
+					IFNULL(OFS.FILE_COUNT,0) AS FILE_COUNT,
+					(
+						SELECT COUNT(*) 
+						FROM OPPORTUNITY_LOG_COACHING_TALK AS CT 
+						WHERE 1=1 AND OL.OPPORTUNITY_ID = CT.OPPORTUNITY_ID
+					)AS COACHING_TALK_COUNT
+			FROM 
+				CEO_ONHAND_LOG AS OL
+				LEFT OUTER JOIN
+				(
+		               SELECT MILESTONES_SUB4.*
+						   FROM
+						   (
+						         SELECT MILESTONE_ID,OPPORTUNITY_ID, DUE_DATE, CLOSE_DATE, STATUS, KEY_MILESTONE,
+						                             IF(@PREV <> OPPORTUNITY_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := OPPORTUNITY_ID
+						         FROM
+						         (
+						                SELECT MILESTONES_SUB2.* 
+						                FROM
+						                (
+						                       SELECT MILESTONE_ID,OPPORTUNITY_ID, DUE_DATE, CLOSE_DATE, STATUS, KEY_MILESTONE,
+						                             IF(@PREV2 <> OPPORTUNITY_ID, @CNT2 := 1, @CNT2 := @CNT2 + 1) AS RANK, @PREV2 := OPPORTUNITY_ID
+						                        FROM CEO_ONHAND_MILESTONE, (SELECT @PREV2 := NULL) AS PREV, (SELECT @CNT2 := 0) AS CNT
+						                        WHERE 1=1
+						                        AND (CLOSE_DATE IS NULL OR  CLOSE_DATE = '')
+						                       ORDER BY MILESTONE_ID ASC, DUE_DATE  ASC  
+						                ) AS MILESTONES_SUB2
+						                WHERE MILESTONES_SUB2.RANK <= 2
+						                UNION ALL
+						                SELECT MILESTONES_SUB1.* 
+						                FROM
+						                (
+						                       SELECT MILESTONE_ID,OPPORTUNITY_ID, DUE_DATE, CLOSE_DATE, STATUS, KEY_MILESTONE,
+						                             IF(@PREV1 <> OPPORTUNITY_ID, @CNT1 := 1, @CNT1 := @CNT1 + 1) AS RANK, @PREV1 := OPPORTUNITY_ID
+						                        FROM CEO_ONHAND_MILESTONE, (SELECT @PREV1 := NULL) AS PREV, (SELECT @CNT1 := 0) AS CNT
+						                        WHERE 1=1
+						                        AND CLOSE_DATE IS NOT NULL
+						                        AND CLOSE_DATE != ''
+						                       ORDER BY MILESTONE_ID DESC, CLOSE_DATE ASC
+						                ) AS MILESTONES_SUB1
+						                WHERE MILESTONES_SUB1.RANK <= 3
+						         ) AS MILESTONES_SUB3,  (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						         ORDER BY OPPORTUNITY_ID ASC, MILESTONE_ID DESC, DUE_DATE  DESC 
+						   ) AS MILESTONES_SUB4
+						   WHERE RANK <= 3
+				) AS MILESTONE ON OL.OPPORTUNITY_ID = MILESTONE.OPPORTUNITY_ID
+				LEFT OUTER JOIN
+				(
+					SELECT 
+						OPPORTUNITY_ID,
+						MAX(IF(CHECKLIST_SEQ=1,STATUS,NULL)) AS STATUS1,
+						MAX(IF(CHECKLIST_SEQ=2,STATUS,NULL)) AS STATUS2,
+						MAX(IF(CHECKLIST_SEQ=3,STATUS,NULL)) AS STATUS3,
+						MAX(IF(CHECKLIST_SEQ=4,STATUS,NULL)) AS STATUS4
+					FROM OPPORTUNITY_CHECKLIST_OWNER
+					GROUP BY OPPORTUNITY_ID
+				)AS OC ON OL.OPPORTUNITY_ID = OC.OPPORTUNITY_ID
+				LEFT OUTER JOIN
+			    (
+			    	SELECT COUNT(OPPORTUNITY_ID) AS FILE_COUNT, OPPORTUNITY_ID
+			    	FROM OPPORTUNITY_FILE_STORE
+			    	GROUP BY OPPORTUNITY_ID
+			    ) AS OFS ON OL.OPPORTUNITY_ID = OFS.OPPORTUNITY_ID   
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI ON OL.CREATOR_ID = OMI.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI2 ON OL.EXEC_ID = OMI2.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI3 ON OL.OWNER_ID = OMI3.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI4 ON OL.IDENTIFIER_ID = OMI4.MEMBER_ID_NUM
+				LEFT OUTER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID
+				LEFT OUTER JOIN
+				CLIENT_INDIVIDUAL_INFO AS CII ON OL.CUSTOMER_ID = CII.CUSTOMER_ID
+		]]>
+		<choose>
+			<when test="searchProduct != null and searchProduct != '' ">
+				INNER JOIN
+				(
+					SELECT
+						OPPORTUNITY_ID,
+						SUM(IF(QUARTER(BASIS_MONTH)= #{searchSumQuarter} AND DATE_FORMAT(BASIS_MONTH,'%Y') = #{searchSumYear},BASIS_PLAN_GP_AMOUNT,0)) AS GP,
+						SUM(IF(QUARTER(BASIS_MONTH)= #{searchSumQuarter} AND DATE_FORMAT(BASIS_MONTH,'%Y') = #{searchSumYear},BASIS_PLAN_REVENUE_AMOUNT,0)) AS REV
+					FROM
+					OPPORTUNITY_AMOUNT
+					WHERE 1=1
+					AND PRODUCT_NO = #{searchProduct}
+					GROUP BY OPPORTUNITY_ID
+				)AS SALES_PLAN ON OL.OPPORTUNITY_ID = SALES_PLAN.OPPORTUNITY_ID
+			WHERE 1=1
+			</when>
+			<otherwise>
+				LEFT OUTER JOIN
+				(
+					SELECT
+						OPPORTUNITY_ID,
+						SUM(IF(QUARTER(BASIS_MONTH)= #{searchSumQuarter} AND DATE_FORMAT(BASIS_MONTH,'%Y') = #{searchSumYear},BASIS_PLAN_GP_AMOUNT,0)) AS GP,
+						SUM(IF(QUARTER(BASIS_MONTH)= #{searchSumQuarter} AND DATE_FORMAT(BASIS_MONTH,'%Y') = #{searchSumYear},BASIS_PLAN_REVENUE_AMOUNT,0)) AS REV
+					FROM
+					OPPORTUNITY_AMOUNT
+					GROUP BY OPPORTUNITY_ID
+				)AS SALES_PLAN ON OL.OPPORTUNITY_ID = SALES_PLAN.OPPORTUNITY_ID
+			WHERE 1=1
+			</otherwise>
+		</choose>
+		
+		<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+				AND OL.OPPORTUNITY_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+				AND OL.OPPORTUNITY_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+		
+		<!-- 부서 -->
+		<if test="searchDivision != null and searchDivision != '' ">
+			AND (OMI2.MEMBER_DIVISION = #{searchDivision} OR OMI3.MEMBER_DIVISION = #{searchDivision} OR OMI4.MEMBER_DIVISION = #{searchDivision})
+		</if>
+		<!-- 팀 -->
+		<if test="searchTeam != null and searchTeam != '' ">
+			AND (OMI2.MEMBER_TEAM = #{searchTeam} OR OMI3.MEMBER_TEAM = #{searchTeam} OR OMI4.MEMBER_TEAM = #{searchTeam})
+		</if>
+		<!-- 개인 -->
+		<if test="searchMember != null and searchMember != '' ">
+			AND (OMI2.MEMBER_ID_NUM = #{searchMember} OR OMI3.MEMBER_ID_NUM = #{searchMember} OR OMI4.MEMBER_ID_NUM = #{searchMember})
+		</if>
+	    
+		<if test=" searchContractStartDate != null and searchContractStartDate != '' ">
+	      AND OL.CONTRACT_DATE >= #{searchContractStartDate}
+	    </if>
+	    
+		<if test=" searchContractEndDate != null and searchContractEndDate != '' ">
+		 <![CDATA[
+	      AND OL.CONTRACT_DATE <= #{searchContractEndDate}
+	      ]]>	
+	    </if>
+	    
+	    <if test=" companyId != null and companyId != '' ">
+	      AND CCI.COMPANY_ID = #{companyId}
+	    </if>
+	    
+	    <if test=" searchCompany != null and searchCompany != '' ">
+	      AND CCI.COMPANY_NAME LIKE CONCAT('%', #{searchCompany}, '%')
+	    </if>
+	    
+	    <!-- 검색 고객사 그룹 -->
+		<if test="searchCompanyCategory != null and searchCompanyCategory != '' ">
+			AND CCI.SEGMENT_CODE = #{searchCompanyCategory}
+		</if>
+		
+	    <if test=" searchOwner != null and searchOwner != '' ">
+	      AND OMI3.HAN_NAME LIKE CONCAT('%', #{searchOwner}, '%')
+	    </if>
+	    
+	    <if test=" searchForecast != null and searchForecast != '' ">
+	      AND OL.FORECAST_YN = #{searchForecast}
+	    </if>
+	    
+	    <choose>
+	    	<when test=" searchSalesCycle != null and searchSalesCycle != '' ">
+	    			<choose>
+	    				<when test="searchSalesCycle == 1">
+	    					AND OL.SALES_CYCLE != '5'
+	    					AND (OL.CLOSE_CATEGORY IS NULL OR OL.CLOSE_CATEGORY = '1')
+	    				</when>
+	    				<when test="searchSalesCycle == 2">
+	    					AND OL.SALES_CYCLE = '5'
+	    				</when>
+	    				<when test="searchSalesCycle == 3">
+	    					AND OL.SALES_CYCLE != '5'
+	    					AND (OL.CLOSE_CATEGORY = '2' OR OL.CLOSE_CATEGORY = '3')
+	    				</when>
+	    			</choose>
+	    	</when>
+	    	<otherwise>
+	    		AND OL.SALES_CYCLE != '5'
+	    		AND (OL.CLOSE_CATEGORY IS NULL OR OL.CLOSE_CATEGORY = '1')
+	    	</otherwise>
+	    </choose>
+	    
+	    <if test=" searchContractAmount != null and searchContractAmount != '' ">
+	      AND OL.CONTRACT_AMOUNT >= #{searchContractAmount}
+	    </if>
+			GROUP BY OL.OPPORTUNITY_ID
+			<!-- ORDER BY OL.SYS_UPDATE_DATE DESC -->
+			<!-- ORDER BY ABS(DATEDIFF(DATE_FORMAT(NOW(), '%Y-%m-%d'), OL.CONTRACT_DATE)) ASC -->
+			ORDER BY OL.CONTRACT_DATE DESC
+		) AS TMP_TABLE, (SELECT @ROWNUM:=0) AS ROWNUM	
+		WHERE 1=1
+		ORDER by ROWNUM DESC
+	</select>
+	
+	<insert id="insertCeoOnHand" parameterType="hashmap">
+	       INSERT INTO CEO_ONHAND_LOG
+			(
+				CREATOR_ID,
+				EXEC_ID, 
+				SUBJECT, 
+				PARTNER_ROLE, 
+				CONTRACT_DATE, 
+				OWNER_ID, 
+				
+				FORECAST_YN, 
+				ROUTE, 
+				
+				SALES_PARTNER, 
+				DETAIL_CONENTS,
+				CONTRACT_TERM,
+				SALES_CYCLE,
+				IDENTIFIER_ID,
+				DISCRIMINATE_VALUE,
+				ERP_PROJECT_CODE
+			)
+				VALUES
+			(
+				#{hiddenModalCreatorId}, 
+				#{hiddenModalCompanyId}, 
+				#{textModalSubject}, 
+				#{textModalPartnerRole}, 
+				#{textModalContractDate}, 
+				#{hiddenModalOwnerId}, 
+				
+				#{textModalCustomerName}, 
+				
+				#{textModalErpProjectCode}, 
+				
+				#{hiddenModalPartnerId}, 
+				#{textareaModalDetailConents},
+				#{selectModalContractTerm},
+				#{hiddenModalSalesCycle},
+				#{hiddenModalIdentifierId},
+				#{textareaModalDiscriminateValue},
+				#{textModalErpProjectCode}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<update id="updateCeoOnHand" parameterType="hashmap">
+	        UPDATE CEO_ONHAND_LOG
+	        SET 
+	        	EXEC_ID	=           #{hiddenModalCompanyId}, 
+				
+				SUBJECT=                  				#{textModalSubject}, 
+				CONTRACT_DATE=            				#{textModalContractDate}, 
+				OWNER_ID=                				#{hiddenModalOwnerId}, 
+				
+				FORECAST_YN=              				#{textModalCustomerName}, 
+				ROUTE=                    				#{textModalErpProjectCode}, 
+				
+				DETAIL_CONENTS=           				#{textareaModalDetailConents},
+				CONTRACT_TERM = 			#{selectModalContractTerm},
+				IDENTIFIER_ID =  #{hiddenModalIdentifierId},
+				DISCRIMINATE_VALUE = #{textareaModalDiscriminateValue},
+
+				ERP_PROJECT_CODE = #{textModalErpProjectCode},
+				
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+			WHERE OPPORTUNITY_ID=#{hiddenModalPK};
+	</update>
+	
+	<update id="updateCeoOnHandMilestone" parameterType="hashmap">
+		UPDATE CEO_ONHAND_MILESTONE
+			SET
+				KEY_MILESTONE = #{KEY_MILESTONE}, 
+				<choose>
+					<when test="DUE_DATE != null and DUE_DATE != '' ">
+					DUE_DATE = #{DUE_DATE}, 
+					</when>
+					<otherwise>
+					DUE_DATE = NULL, 
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+					CLOSE_DATE = #{CLOSE_DATE}, 
+					</when>
+					<otherwise>
+					CLOSE_DATE = NULL, 
+					</otherwise>
+				</choose>
+				STATUS = #{HIDDEN_STATUS},
+				ACT_ID = #{ACT_ID},
+				ACT_NAME = #{ACT_NAME},
+				SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+		WHERE  1=1
+		AND MILESTONE_ID = #{MILESTONE_ID}
+	</update>
+	
+	<insert id="insertCeoOnhandMilestone" parameterType="hashmap">
+		INSERT INTO CEO_ONHAND_MILESTONE
+		(
+			OPPORTUNITY_ID, 
+			CREATOR_ID, 
+			KEY_MILESTONE, 
+			DUE_DATE, 
+			CLOSE_DATE, 
+			STATUS, 
+			ACT_ID,
+			ACT_NAME
+		)
+		VALUES
+		(
+			#{pkNo}, 
+			#{hiddenModalCreatorId},  
+			#{KEY_MILESTONE}, 
+			<choose>
+				<when test="DUE_DATE != null and DUE_DATE != '' ">
+				 #{DUE_DATE},
+				</when>
+				<otherwise>
+				 NULL,
+				</otherwise>
+			</choose>  
+			<choose>
+				<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+				#{CLOSE_DATE},
+				</when>
+				<otherwise>
+				NULL, 
+				</otherwise>
+			</choose>  
+			#{HIDDEN_STATUS}, 
+			#{ACT_ID},
+			#{ACT_NAME}
+			
+		);
+		
+	</insert>
+	
+	<select id="selectCeoOnHandDetail" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+			OL.OPPORTUNITY_ID, 
+			OL.EXEC_ID, 
+			OMI2.HAN_NAME AS EXEC_NAME,
+			OL.OWNER_ID,
+			OMI3.HAN_NAME AS OWNER_NAME,
+			OL.IDENTIFIER_ID,
+			OMI4.HAN_NAME AS IDENTIFIER_NAME,
+			OL.CUSTOMER_ID,
+			CII.CUSTOMER_NAME,
+			CII.POSITION AS CUSTOMER_POSITION,
+			OL.SUBJECT, 
+			OL.CONTRACT_AMOUNT, 
+			OL.GP_AMOUNT, 
+			OL.PARTNER_ROLE, 
+			OL.CONTRACT_DATE, 
+			OL.SALES_CYCLE, 
+			OL.FORECAST_YN, 
+			OL.ROUTE, 
+			OL.SALES_PARTNER, 
+			OL.DETAIL_CONENTS, 
+			OL.CURRENT_MILESTONE, 
+			OL.CLOSE_CATEGORY, 
+			OL.CLOSE_DETAIL,
+			OL.CONTRACT_TERM,
+			OL.DISCRIMINATE_VALUE,
+			OL.ERP_PROJECT_CODE,
+			DATE_FORMAT(OL.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+			DATE_FORMAT(OL.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+			IFNULL(DATE_FORMAT(OL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+			OMI.HAN_NAME,
+			OMI.MEMBER_ID_NUM,
+			CCI.COMPANY_NAME,
+			CCI.COMPANY_ID,
+			IFNULL(IF(OL_MILE.KEY_MILESTONE IS NOT NULL, CONCAT(OL_MILE.KEY_MILESTONE,"<br />","(",OL_MILE.CLOSE_DATE,")"),""),'-') AS KEY_MILESTONE,
+			OC.STATUS1,
+			OC.STATUS2,
+			OC.STATUS3,
+			OC.STATUS4
+		FROM 
+			CEO_ONHAND_LOG AS OL
+			LEFT OUTER JOIN
+			(
+				SELECT 
+				SUB_TMP1.*
+				FROM
+				(
+					SELECT IF(@PREV <> OPPORTUNITY_ID,@CNT := 1, @CNT := @CNT + 1) AS RANK, OPPORTUNITY_ID, DUE_DATE,KEY_MILESTONE,CLOSE_DATE , @PREV := OPPORTUNITY_ID
+					FROM OPPORTUNITY_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT  
+					WHERE 1=1
+					AND CLOSE_DATE IS NOT NULL
+					ORDER BY OPPORTUNITY_ID ASC, MILESTONE_SEQ DESC
+				) AS SUB_TMP1
+				WHERE 1=1
+				AND RANK = 1
+			) AS OL_MILE ON OL.OPPORTUNITY_ID = OL_MILE.OPPORTUNITY_ID
+			LEFT OUTER JOIN
+			(
+				SELECT 
+					OPPORTUNITY_ID,
+					MAX(IF(CHECKLIST_SEQ=1,STATUS,NULL)) AS STATUS1,
+					MAX(IF(CHECKLIST_SEQ=2,STATUS,NULL)) AS STATUS2,
+					MAX(IF(CHECKLIST_SEQ=3,STATUS,NULL)) AS STATUS3,
+					MAX(IF(CHECKLIST_SEQ=4,STATUS,NULL)) AS STATUS4
+				FROM OPPORTUNITY_CHECKLIST_OWNER
+				GROUP BY OPPORTUNITY_ID
+			)AS OC ON OL.OPPORTUNITY_ID = OC.OPPORTUNITY_ID 
+			LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI ON OL.CREATOR_ID = OMI.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI2 ON OL.EXEC_ID = OMI2.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI3 ON OL.OWNER_ID = OMI3.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI4 ON OL.IDENTIFIER_ID = OMI4.MEMBER_ID_NUM
+				LEFT OUTER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID
+				LEFT OUTER JOIN
+				CLIENT_INDIVIDUAL_INFO AS CII ON OL.CUSTOMER_ID = CII.CUSTOMER_ID
+		WHERE 1=1
+		AND OL.OPPORTUNITY_ID = #{pkNo}
+		]]>
+	</select>
+	
+	<select id="selectCeoOnHandMilestons" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				MILESTONE_ID, 
+				OPPORTUNITY_ID, 
+				CREATOR_ID, 
+				KEY_MILESTONE, 
+				MILESTONE_SEQ, 
+				DUE_DATE, 
+				CLOSE_DATE, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE, 
+				STATUS,
+				ACT_ID,
+				ACT_NAME
+			FROM CEO_ONHAND_MILESTONE, (SELECT @ROWNUM:=0) AS ROWNUM
+			WHERE 1=1
+			AND OPPORTUNITY_ID = #{hiddenModalPK}
+			ORDER BY MILESTONE_ID ASC;
+	</select>
+	
+	<select id="mssqltest" parameterType="hashmap" resultType="hashmap">
+			select lastrun, cpu_busy, io_busy from spt_monitor;
+	</select>
+	
+</mapper>
+	
+	

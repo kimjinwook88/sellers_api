@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>관리자 : 권한관리</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body class="fixed-sidebar">
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header ta-c">
+                        <div class="dropdown profile-element">
+                            <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                            <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                            <a href="#">
+                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                            </a>
+                        </div>
+                        <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                            디유넷
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객사정보</a></li>
+                            <li><a href="#">고객개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객컨택내용</a></li>
+                            <li><a href="#">영업기회</a></li>
+                            <li><a href="#">잠재영업기회</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객이슈</a></li>
+                            <li><a href="#">고객만족도</a></li>
+                            <li><a href="#">서비스프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">파트너사협업</a></li>
+                            <li><a href="#">파트너사정보</a></li>
+                            <li><a href="#">파트너사개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                        <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class=""><a href="#">성과관리</a></li>
+                            <li><a href="#">생산성</a></li>
+                            <li><a href="#">제안서정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">회사/부문별전략</a></li>
+                            <li><a href="#">고객별전략</a></li>
+                            <li><a href="#">전략프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span></a>
+                    </li>
+                    <li class="active">
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">관리자</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">메뉴관리</a></li>
+                            <li class="active"><a href="#">권한관리</a></li>
+                            <li><a href="#">정보관리(직원)</a></li>
+                            <li><a href="#">테리토리관리(직원)</a></li>
+                            <li><a href="#">코드관리</a></li>
+                            <li><a href="#">POI_TEST</a></li>
+                        </ul>
+                    </li>
+                    <li class="special_link">
+                        <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                    </li>
+                </ul>
+                <div class="product-logo text-center">
+                    <img src="../../images/pc/product_logo.png" alt=""/>
+                    <span>Copyright Seller’s Company © 2016</span>
+                </div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="white-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+                   
+                </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                            </a>
+                        </li>
+
+
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-sign-out"></i> 로그아웃
+                            </a>
+                        </li>
+                    </ul>
+
+                </nav>
+            </div>
+
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-12">
+                    <h2>권한관리</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a>관리자</a>
+                        </li>
+                        <li class="active">
+                            <strong>권한관리</strong>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="wrapper wrapper-content  animated fadeInRight">
+                <div class="row">
+                    <div class="ibox">
+                        <div class="ibox-content border_n pd-no">
+                            <div class="clear">
+                                
+                                <div class="mg-b20">
+                                     <ul class="nav nav-tabs">
+                                         <li class="active"><a data-toggle="tab" href="javascript:void(0);" onclick="moveAuthPage('/admin/authManage.do');">권한 추가 및 삭제</a></li>
+                                         <li class=""><a data-toggle="tab" href="javascript:void(0);" onclick="moveAuthPage('/admin/authMemberManage.do');">직원 권한 관리</a></li>
+                                         <li class=""><a data-toggle="tab" href="javascript:void(0);" onclick="moveAuthPage('/admin/authRoleMenu.do');">권한별 메뉴 관리</a></li>
+                                     </ul>
+                                 </div>                                
+
+                                <table class="adminboard_type1 mg-b10">
+                                    <colgroup>
+                                        <col width=""/>
+                                        <col width=""/>
+                                        <col width=""/>
+                                        <col width=""/>
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>권한코드</th>
+                                            <th>권한명</th>
+                                            <th>권한 상세내용</th>
+                                            <th class="end">사용여부</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1000</td>
+                                            <td>ROLE_CEO</td>
+                                            <td>CEO</td>
+                                            <td class="end">Y</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1002</td>
+                                            <td>ROLE_DIVISION</td>
+                                            <td>본부장</td>
+                                            <td class="end">Y</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1003</td>
+                                            <td>ROLE_TEAM</td>
+                                            <td>팀장</td>
+                                            <td class="end">Y</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1004</td>
+                                            <td>ROLE_MEMBER</td>
+                                            <td>직원</td>
+                                            <td class="end">Y</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1005</td>
+                                            <td>ROLE_ADMIN</td>
+                                            <td>관리자</td>
+                                            <td class="end">Y</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="func-top-right fl_r pd-b10">
+                                    <button type="button" class="btn btn-w-m btn-gray mg-r5">신규등록</button>
+                                    <button type="button" class="btn btn-outline btn-gray-outline">저장</button>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

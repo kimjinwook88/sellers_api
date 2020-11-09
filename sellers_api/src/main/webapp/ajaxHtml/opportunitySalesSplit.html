@@ -1,0 +1,22 @@
+<tr>
+   	<td>
+		<ul class="flexdatalist-multiple" name="ulSalesSplitMultiple" style="border: 1px solid rgb(204, 204, 204); border-radius: 4px; background-color: rgb(255, 255, 255); padding:none;">
+            <li class="input-container flexdatalist-multiple-value pos-rel" name="liSalesSplitSeach" style="width: 100%;">
+            <input type="text" class="form-control" name="textSalesSplit" placeholder="검색해 주세요." autocomplete="off" style="width: 100%; text-align:left;" auto-bind="0">
+            <input type="hidden" name="hiddenSalesSplitId" value="">
+            <input type="hidden" name="hiddenSalesSplitName" value="">
+            <div class="autocomplete-suggestions " style="display: none;"></div><div class="autocomplete-suggestions " style="width: 600px; display: none;"></div></li>
+        </ul>	                      
+    </td>
+   	<td>
+		<div class="data_1">
+            <div class="input-group date">
+                <span class="input-group-addon" style="padding:6px 6px;"><i class="fa fa-calendar"></i></span><input type="text"  name="textModalSplitDate" class="form-control" value="" style="border:1px solid #e5e6e7; text-align:left;" placeholder="ex) 1988-11-18">
+            </div>
+        </div>		                      
+    </td>
+	<td><input type="text" name="split_r" onclick="oppSalesPlan.zero(this);" onblur="oppSalesPlan.blur(this);" onkeyup="comma(this);" value="0" style="text-align:right;border:none;"></td>
+	<td><input type="text" name="split_g" onclick="oppSalesPlan.zero(this);" onblur="oppSalesPlan.blur(this);" onkeyup="comma(this);" value="0" style="text-align:right;border:none;"></td>
+	<td style="text-align:center;"><a href="javascript:void(0);" onclick="oppSalesSplit.del(this);"><i class="fa fa-trash-o fa-lg"></i></a></td>
+	<input type="hidden" name="split_id" />
+</tr>

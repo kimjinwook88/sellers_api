@@ -1,0 +1,2481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="calendar">
+	
+	<insert id="addCalendar" parameterType="hashmap">
+	        INSERT INTO CALENDAR_MASTER
+	        (
+	        	MEMBER_ID_NUM,
+	        	<if test="textCalendarName == '나의 캘린더'">
+	        	SYNC_YN,
+	        	CALENDAR_TYPE,
+	        	</if>
+	        	<if test="textCalendarName == 'Office365 캘린더'">
+	        	CALENDAR_TYPE,
+	        	</if>
+	        	<if test="textCalendarName == 'Google 캘린더'">
+	        	CALENDAR_TYPE,
+	        	</if>
+	        	CALENDAR_NAME
+	        )
+			VALUES
+			(
+				#{hiddenModalCreatorId},
+				<if test="textCalendarName == '나의 캘린더'">
+				'Y',
+				'1',
+				</if>
+				<if test="textCalendarName == 'Office365 캘린더'">
+				'2',
+				</if>
+				<if test="textCalendarName == 'Google 캘린더'">
+				'3',
+				</if>
+				#{textCalendarName}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<delete id="deleteCalendar" parameterType="hashmap">
+		DELETE FROM CALENDAR_REPEAT_RULE
+			WHERE EVENT_ID IN (
+			SELECT
+			CE.EVENT_ID
+			FROM CALENDAR_EVENT AS CE
+			WHERE CE.CALENDAR_ID = #{calendarId}
+		);
+		DELETE FROM CALENDAR_INVITE_EVENT WHERE CALENDAR_ID = #{calendarId};
+		DELETE FROM CALENDAR_EVENT WHERE CALENDAR_ID = #{calendarId};
+		DELETE FROM CALENDAR_MASTER WHERE CALENDAR_ID = #{calendarId};
+	</delete>
+	
+	<delete id="deleteShareMember" parameterType="hashmap">
+		DELETE FROM CALENDAR_SHARE WHERE MEMBER_ID_NUM=#{creatorId} AND SHARE_MEMBER_ID=#{SHARE_MEMBER_ID} AND CALENDAR_ID=#{calendarId};
+	</delete>
+
+	<delete id="deleteInviteMemberList" parameterType="hashmap">
+		DELETE FROM CALENDAR_INVITE_EVENT WHERE INVITE_ID=#{invite_id} AND EVENT_ID=#{event_id} AND CALENDAR_ID=#{calendar_id};
+	</delete>
+	
+	<update id="reNameCalendar" parameterType="hashmap">
+	        UPDATE CALENDAR_MASTER 
+	        SET CALENDAR_NAME=#{calendarName}
+			WHERE CALENDAR_ID=#{calendarId};
+	</update>
+	
+	<update id="updateICSdir" parameterType="hashmap">
+	        UPDATE CALENDAR_MASTER 
+	        SET GOOGLE_ICS=#{downURL}
+			WHERE MEMBER_ID_NUM=#{creatorId}
+			AND CALENDAR_NAME = #{CALENDAR_NAME};
+	</update>
+	
+	<select id="getCalendarList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CM.CALENDAR_NAME,
+			CM.CALENDAR_ID,
+			CM.CALENDAR_TYPE,
+			CM.MEMBER_ID_NUM,
+			CM.GOOGLE_ICS,
+			CM.SYNC_YN,
+			OMI.HAN_NAME,
+			OMI.POSITION_STATUS,
+			OMI.EMAIL
+		FROM CALENDAR_MASTER AS CM
+		LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM=CM.MEMBER_ID_NUM
+		<choose>
+			<when test="shareMemberId !=null and shareMemberId != '' ">
+				WHERE CM.MEMBER_ID_NUM = (
+					SELECT 
+						CS.MEMBER_ID_NUM
+					FROM CALENDAR_SHARE AS CS 
+					WHERE CS.MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+					AND CS.SHARE_MEMBER_ID = #{global_member_id}
+					)
+			</when>
+			<otherwise>
+				WHERE CM.MEMBER_ID_NUM =#{MEMBER_ID_NUM}
+			</otherwise>
+		</choose>	
+	</select>
+	
+	<update id="updateCalendar" parameterType="hashmap">
+	        UPDATE CALENDAR_MASTER 
+	        SET MEMBER_ID_NUM=#{creatorId}
+			WHERE MEMBER_ID_NUM=#{creatorId}
+			AND CALENDAR_NAME = #{textCalendarName};
+	</update>
+	
+	<select id="makeICSEventList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				CE.EVENT_ID,
+				CE.CALENDAR_ID, 
+				CASE 
+					WHEN CE.EVENT_CODE = '1' THEN "[고객대면]"
+					WHEN CE.EVENT_CODE = '2' THEN "[대면준비]"
+					WHEN CE.EVENT_CODE = '3' THEN "[내부회의]"
+					WHEN CE.EVENT_CODE = '4' THEN "[교육]"
+					WHEN CE.EVENT_CODE = '5' THEN "[이동시간]"
+					WHEN CE.EVENT_CODE = '6' THEN "[기타]"
+				END AS EVENT_CODE,
+				CE.EVENT_SUBJECT AS title, 
+				CE.EVENT_DETAIL, 
+				CASE
+					WHEN CE.ALLDAY_YN = 'Y' THEN true
+					WHEN CE.ALLDAY_YN = 'N' THEN false
+				END AS allDay,
+				CE.START_DATETIME AS start, 
+				CE.END_DATETIME AS end, 
+				TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP,
+				CE.BEFORE_MOVE_TIME,
+				CE.AFTER_MOVE_TIME, 
+				CE.REPEAT_YN,
+				CRR.RECURRENCE_ID,
+				CRR.RECURRENCE_RULE
+		FROM 
+			CALENDAR_EVENT AS CE LEFT OUTER JOIN CALENDAR_REPEAT_RULE AS CRR on CE.EVENT_ID=CRR.EVENT_ID
+		WHERE 1=1
+		AND CE.MEMBER_ID_NUM=#{hiddenModalCreatorId}
+		]]>	
+		<choose>
+			<when test="calendarId !=null and calendarId != '' ">
+				AND CE.CALENDAR_ID=#{calendarId}
+			</when>
+			<otherwise>
+				AND CE.CALENDAR_ID IN('')
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insertCalendarEvent" parameterType="hashmap">
+	       INSERT INTO CALENDAR_EVENT
+			(
+				CALENDAR_ID,
+				MEMBER_ID_NUM, 
+				EVENT_CODE, 
+				EVENT_SUBJECT, 
+				EVENT_DETAIL, 
+				ALLDAY_YN, 
+				START_DATETIME, 
+				END_DATETIME, 
+				BEFORE_MOVE_TIME,
+				AFTER_MOVE_TIME,
+				REPEAT_YN,
+				LOCATION,
+				SHARE_YN,
+				ALARM_PERIOD, 
+				ALARM_TARGET,
+				ALARM_FLAG,
+				DELETE_YN,
+				RRULE_SYNC_ID,
+				OUTLOOK_ID
+			)
+				VALUES
+			(
+				#{hiddenModalCalendarId},
+				#{hiddenModalCreatorId}, 
+				#{selectModalEventCode}, 
+				#{textModalEventSubject},
+				#{textareaModalEventDetail},
+				#{hiddenModalAllday_YN},
+				<choose>
+				<when test="selectModalStartDateTime == null or selectModalStartDateTime == '' ">
+				#{textModalStartDate},
+				</when>
+				<otherwise>
+				#{textModalStartDate}#{selectModalStartDateTime},
+				</otherwise>
+				</choose>
+				<choose>
+				<when test="selectModalEndDateTime == null or selectModalEndDateTime == '' ">
+				#{hiddenModalEndDate},
+				</when>
+				<otherwise>
+				#{hiddenModalEndDate}#{selectModalEndDateTime},
+				</otherwise>
+				</choose>
+				#{selectModalBeforeMoveTimeMin},
+				#{selectModalAfterMoveTimeMin},
+				#{hiddenModalRepeat_YN},
+				#{textModalEventLocation},
+				#{radioModalShareYN},
+				#{radioModalAlam},
+				#{selectModalAlam},
+				#{alarmFlag},
+				'N',
+				#{rruleSyncID},
+				#{hiddenModalOutlookId}
+			);
+		<selectKey keyProperty="EVENT_ID" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertConviteAgree" parameterType="hashmap">
+	       INSERT INTO CALENDAR_EVENT
+			(
+				CALENDAR_ID,
+				MEMBER_ID_NUM, 
+				EVENT_CODE, 
+				EVENT_SUBJECT, 
+				EVENT_DETAIL, 
+				ALLDAY_YN, 
+				START_DATETIME, 
+				END_DATETIME, 
+				BEFORE_MOVE_TIME,
+				AFTER_MOVE_TIME, 
+				REPEAT_YN,
+				LOCATION,
+				ALARM_PERIOD,
+				ALARM_TARGET,
+				ALARM_FLAG,
+				DELETE_YN,
+				SHARE_YN,
+				INVITE_ID
+			)
+				VALUES
+			(
+				#{CALENDAR_ID},
+				#{MEMBER_ID_NUM}, 
+				#{EVENT_CODE}, 
+				#{EVENT_SUBJECT},
+				#{EVENT_DETAIL},
+				#{ALLDAY_YN},
+				#{START_DATETIME},
+				#{END_DATETIME},
+				#{BEFORE_MOVE_TIME},
+				#{AFTER_MOVE_TIME},
+				#{REPEAT_YN},
+				#{LOCATION},
+				#{ALARM_PERIOD},
+				#{ALARM_TARGET},
+				#{ALARM_FLAG},
+				'N',
+				#{SHARE_YN},
+				#{INVITE_ID}
+			);
+	</insert>
+
+	<select id="selectCalendarEvent" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CE.MEMBER_ID_NUM,
+			CE.EVENT_ID,
+			CE.EVENT_CODE,
+			CE.EVENT_SUBJECT,
+			CE.EVENT_DETAIL,
+			CE.ALLDAY_YN,
+			CE.START_DATETIME,
+			CE.END_DATETIME,
+			CE.BEFORE_MOVE_TIME,
+			CE.AFTER_MOVE_TIME,
+			CE.REPEAT_YN,
+			CE.SYS_REGISTER_DATE,
+			CE.SYS_UPDATE_DATE,
+			CE.LOCATION,
+			CE.ALARM_FLAG,
+			CE.SHARE_YN,
+			CE.RRULE_SYNC_ID,
+			OMI.EMAIL,
+			OMI.MEMBER_ID_NUM,
+			ALARM_PERIOD,
+			ALARM_TARGET,
+			ALARM_FLAG,
+			CE.OUTLOOK_ID
+		FROM CALENDAR_EVENT AS CE
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM=CE.MEMBER_ID_NUM
+		WHERE CE.EVENT_ID = #{hiddenModalEventId}
+	</select>
+
+	<select id="selectCalendarEventRRuleSync" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CE.MEMBER_ID_NUM,
+			CE.EVENT_ID,
+			CE.EVENT_CODE,
+			CE.EVENT_SUBJECT,
+			CE.EVENT_DETAIL,
+			CE.ALLDAY_YN,
+			CE.START_DATETIME,
+			CE.END_DATETIME,
+			CE.BEFORE_MOVE_TIME,
+			CE.AFTER_MOVE_TIME,
+			CE.REPEAT_YN,
+			CE.SYS_REGISTER_DATE,
+			CE.SYS_UPDATE_DATE,
+			CE.LOCATION,
+			CE.ALARM_FLAG,
+			CE.SHARE_YN,
+			OMI.EMAIL,
+			OMI.MEMBER_ID_NUM,
+			ALARM_PERIOD,
+			ALARM_TARGET,
+			ALARM_FLAG
+		FROM CALENDAR_EVENT AS CE
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM=CE.MEMBER_ID_NUM
+		WHERE CE.RRULE_SYNC_ID = #{hiddenModalEventId}
+	</select>
+	
+	<select id="selectCalendarEventDateTime" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+				CE.EVENT_ID,
+				CE.EVENT_CODE,
+				CE.EVENT_SUBJECT,
+				CE.EVENT_DETAIL,
+				CE.ALLDAY_YN,
+				CE.START_DATETIME,
+				CE.END_DATETIME,
+				CE.BEFORE_MOVE_TIME,
+				CE.AFTER_MOVE_TIME,
+				CE.REPEAT_YN,
+				CE.SYS_REGISTER_DATE,
+				CE.SYS_UPDATE_DATE,
+				CE.LOCATION,
+				CE.ALARM_FLAG,
+				CE.SHARE_YN,
+				DATE_FORMAT(CE.START_DATETIME, '%H:%i') AS EVENT_START_TIME,
+				DATE_FORMAT(CE.END_DATETIME, '%H:%i') AS EVENT_END_TIME,
+				OMI.EMAIL,
+				OMI.MEMBER_ID_NUM,
+				ALARM_PERIOD,
+				ALARM_TARGET,
+				ALARM_FLAG
+			FROM CALENDAR_EVENT AS CE
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM=CE.MEMBER_ID_NUM
+			WHERE 1=1 
+			AND CE.START_DATETIME LIKE CONCAT('%', #{textModalStartDate}, '%')
+			AND CE.DELETE_YN = 'N'
+			]]>
+			<if test=" hiddenModalEventId != null and hiddenModalEventId != '' ">
+			AND CE.EVENT_ID != #{hiddenModalEventId} 
+			</if>
+			AND CE.MEMBER_ID_NUM = #{global_member_id}
+	</select>
+	
+	<select id="selectMyCalendarMaster" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CALENDAR_ID
+		FROM CALENDAR_MASTER
+		WHERE MEMBER_ID_NUM = #{hiddenUserId}
+		AND CALENDAR_TYPE = 1;
+	</select>
+	
+	<select id="selectInvitedCalendarMaster" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CALENDAR_ID
+		FROM CALENDAR_MASTER
+		WHERE MEMBER_ID_NUM = #{inviteId}
+		AND CALENDAR_NAME = '나의 캘린더';
+	</select>
+
+	<select id="selectUserName" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			HAN_NAME,
+			POSITION_STATUS
+		FROM OUR_MEMBERS_INFO AS OMI
+		WHERE MEMBER_ID_NUM = #{inviteId}
+	</select>
+
+	<select id="selectCalendarInviteTable" parameterType="hashmap" resultType="hashmap">
+	
+	
+	SELECT 
+			CIE.INVITE_ID,
+			CIE.EVENT_ID,
+			CIE.MEMBER_ID_NUM,
+			CIE.INVITE_YN,
+			CIE.EMAIL,
+			CIE.CALENDAR_ID,
+			CIE.SEND_STATUS_YN,
+			
+			OMI.HAN_NAME,
+			OMI2.HAN_NAME AS SEND_USER_NAME,
+			OMI2.EMAIL AS SEND_USER_EMAIL,
+			
+			CE.EVENT_SUBJECT,
+			CE.START_DATETIME,
+			CE.END_DATETIME,
+			CE.EVENT_CODE,
+		
+			CE2.EVENT_ID AS INVITED_CANCELED_EVENT_ID
+			
+		FROM CALENDAR_INVITE_EVENT AS CIE
+			LEFT OUTER JOIN
+				CALENDAR_EVENT AS CE ON CE.EVENT_ID = CIE.EVENT_ID
+			LEFT OUTER JOIN
+				OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = CIE.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+				OUR_MEMBERS_INFO AS OMI2 ON OMI2.MEMBER_ID_NUM = CE.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+				CALENDAR_EVENT AS CE2 ON CE2.INVITE_ID = CIE.INVITE_ID
+		WHERE 1=1
+			AND CIE.EVENT_ID = #{hiddenModalEventId}
+			AND CIE.SEND_STATUS_YN = 'Y';
+	
+	<!-- 
+		SELECT * 
+			FROM CALENDAR_INVITE_EVENT
+			WHERE 1=1
+			AND EVENT_ID = #{hiddenModalEventId}
+			AND SEND_STATUS_YN = 'Y';
+			 -->
+	</select>
+	
+	<update id="updateCaceledEventSubject" parameterType="hashmap">
+	        UPDATE CALENDAR_EVENT 
+	        SET EVENT_SUBJECT = #{EVENT_SUBJECT}
+			WHERE INVITE_ID=#{INVITE_ID};
+	</update>
+		
+	<update id="updateCalendarEvent" parameterType="hashmap">
+		UPDATE CALENDAR_EVENT
+		SET CALENDAR_ID=#{hiddenModalCalendarId},
+		EVENT_CODE=#{selectModalEventCode},
+		EVENT_SUBJECT=#{textModalEventSubject},
+		EVENT_DETAIL=#{textareaModalEventDetail},
+		LOCATION=#{textModalEventLocation},
+		ALLDAY_YN=#{hiddenModalAllday_YN},
+		START_DATETIME=
+		<choose>
+			<when
+				test="selectModalStartDateTime == null or selectModalStartDateTime == '' ">
+				#{textModalStartDate},
+			</when>
+			<otherwise>
+				#{textModalStartDate}#{selectModalStartDateTime},
+			</otherwise>
+		</choose>
+		END_DATETIME=
+		<choose>
+			<when
+				test="selectModalEndDateTime == null or selectModalEndDateTime == '' ">
+				#{hiddenModalEndDate},
+			</when>
+			<otherwise>
+				#{hiddenModalEndDate}#{selectModalEndDateTime},
+			</otherwise>
+		</choose>
+		BEFORE_MOVE_TIME=#{selectModalBeforeMoveTimeMin},
+		AFTER_MOVE_TIME=#{selectModalAfterMoveTimeMin},
+		REPEAT_YN=#{hiddenModalRepeat_YN},
+		SYS_UPDATE_DATE=CURRENT_TIMESTAMP,
+		ALARM_PERIOD = #{radioModalAlam},
+		ALARM_FLAG = #{alarmFlag},
+		<if test=" outlookId != null and outlookId != '' ">
+			OUTLOOK_ID = #{outlookId},
+		</if>
+		SHARE_YN = #{radioModalShareYN}
+		WHERE 1=1
+		AND EVENT_ID=#{hiddenModalEventId};
+	</update>
+	
+	<update id="updateCalendarRRuleSyncEvent" parameterType="hashmap">
+	        UPDATE CALENDAR_EVENT 
+	        SET CALENDAR_ID=#{hiddenModalCalendarId},
+				EVENT_CODE=#{selectModalEventCode}, 
+				EVENT_SUBJECT=#{textModalEventSubject}, 
+				EVENT_DETAIL=#{textareaModalEventDetail},
+				LOCATION=#{textModalEventLocation},
+				ALLDAY_YN=#{hiddenModalAllday_YN},
+
+				BEFORE_MOVE_TIME=#{selectModalBeforeMoveTimeMin},
+				AFTER_MOVE_TIME=#{selectModalAfterMoveTimeMin},
+				<!-- 
+				REPEAT_YN=#{hiddenModalRepeat_YN},
+				 -->
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP,
+				ALARM_PERIOD = #{radioModalAlam},
+				ALARM_FLAG = #{alarmFlag},
+				SHARE_YN = #{radioModalShareYN}
+			WHERE 1=1
+				AND RRULE_SYNC_ID = #{hiddenModalEventId};
+	</update>
+	
+	<update id="updateCalendarRRuleEvent" parameterType="hashmap">
+	        UPDATE CALENDAR_EVENT 
+	        SET CALENDAR_ID=#{hiddenModalCalendarId},
+				EVENT_CODE=#{selectModalEventCode}, 
+				EVENT_SUBJECT=#{textModalEventSubject}, 
+				EVENT_DETAIL=#{textareaModalEventDetail},
+				LOCATION=#{textModalEventLocation},
+				ALLDAY_YN=#{hiddenModalAllday_YN},
+				
+				
+				START_DATETIME=<choose>
+				
+				<when test="selectModalStartDateTime == null or selectModalStartDateTime == '' ">
+				#{textModalStartDate},
+				</when>
+				<otherwise>
+				#{textModalStartDate}#{selectModalStartDateTime},
+				</otherwise>
+				</choose>
+				
+
+				END_DATETIME=<choose>
+				<when test="selectModalEndDateTime == null or selectModalEndDateTime == '' ">
+				#{hiddenModalEndDate},
+				</when>
+				<otherwise>
+				#{hiddenModalEndDate}#{selectModalEndDateTime},
+				</otherwise>
+				</choose>
+
+				BEFORE_MOVE_TIME=#{selectModalBeforeMoveTimeMin},
+				AFTER_MOVE_TIME=#{selectModalAfterMoveTimeMin},
+				<!-- 
+				REPEAT_YN=#{hiddenModalRepeat_YN},
+				 -->
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP,
+				ALARM_PERIOD = #{radioModalAlam},
+				ALARM_FLAG = #{alarmFlag},
+				SHARE_YN = #{radioModalShareYN},
+				
+				RRULE_SYNC_ID = #{newEventID}
+				
+			WHERE EVENT_ID=#{hiddenModalEventId};
+	</update>
+	
+	<update id="updateCalendarRRuleEvent2" parameterType="hashmap">
+	        UPDATE CALENDAR_EVENT 
+	        SET CALENDAR_ID=#{hiddenModalCalendarId},
+				EVENT_CODE=#{selectModalEventCode}, 
+				EVENT_SUBJECT=#{textModalEventSubject}, 
+				EVENT_DETAIL=#{textareaModalEventDetail},
+				LOCATION=#{textModalEventLocation},
+				ALLDAY_YN=#{hiddenModalAllday_YN},
+
+				BEFORE_MOVE_TIME=#{selectModalBeforeMoveTimeMin},
+				AFTER_MOVE_TIME=#{selectModalAfterMoveTimeMin},
+				<!-- 
+				REPEAT_YN=#{hiddenModalRepeat_YN},
+				 -->
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP,
+				ALARM_PERIOD = #{radioModalAlam},
+				ALARM_FLAG = #{alarmFlag},
+				SHARE_YN = #{radioModalShareYN},
+				
+				RRULE_SYNC_ID = #{newEventID}
+				
+			WHERE EVENT_ID=#{hiddenModalEventId};
+	</update>
+	
+	<update id="updateInvitedCalendarMaster" parameterType="hashmap">
+	        UPDATE CALENDAR_MASTER 
+	        SET CALENDAR_TYPE= '1'
+			WHERE MEMBER_ID_NUM=#{inviteId}
+			AND CALENDAR_NAME='나의 캘린더';
+	</update>
+	
+	<insert id="insertInvitedCalendarMaster" parameterType="hashmap">
+			INSERT INTO CALENDAR_MASTER
+			(
+				MEMBER_ID_NUM,
+				CALENDAR_NAME,
+				CALENDAR_TYPE,
+				SYNC_YN
+			)
+				VALUES
+			(
+				#{inviteId},
+				'나의 캘린더',
+				'1',
+				'N'
+			);
+	</insert>
+	
+	<delete id="deleteCalendarRepeatRule" parameterType="hashmap">
+		DELETE FROM CALENDAR_REPEAT_RULE 
+		WHERE EVENT_ID=#{hiddenModalEventId} 
+		<!-- <if test="hiddenModalSyncFlag != null and hiddenModalSyncFlag != '' and rruleCase == 3">
+			OR EVENT_ID=#{hiddenModalSyncFlag}
+		</if> -->
+	</delete>
+	
+	<delete id="deleteCalendarInviteEvent" parameterType="hashmap">
+		DELETE FROM CALENDAR_INVITE_EVENT WHERE EVENT_ID=#{hiddenModalEventId};
+	</delete>
+	
+	<delete id="deleteCalendarEvent" parameterType="hashmap">
+		DELETE FROM CALENDAR_EVENT WHERE EVENT_ID=#{hiddenModalEventId};
+		<!-- DELETE FROM CALENDAR_EVENT WHERE RRULE_SYNC_ID=#{hiddenModalEventId}; -->
+	</delete>
+	
+	
+	<delete id="deleteCalendarEventRRuleSyncID" parameterType="hashmap">
+		DELETE FROM CALENDAR_EVENT WHERE RRULE_SYNC_ID=#{hiddenModalEventId};
+		DELETE FROM CALENDAR_EVENT WHERE EVENT_ID=#{hiddenModalEventId};
+		DELETE FROM CALENDAR_REPEAT_RULE WHERE EVENT_ID=#{hiddenModalEventId};
+		DELETE FROM CALENDAR_REPEAT_RULE WHERE SYNC_FLAG=#{hiddenModalEventId};
+	</delete>
+	
+	<delete id="deleteCalendarEventRRuleSyncID2" parameterType="hashmap">
+		DELETE FROM CALENDAR_EVENT WHERE EVENT_ID=#{hiddenModalEventId};
+		DELETE FROM CALENDAR_REPEAT_RULE WHERE EVENT_ID=#{hiddenModalEventId};
+		DELETE FROM CALENDAR_REPEAT_RULE WHERE SYNC_FLAG=#{hiddenModalEventId};
+	</delete>
+	
+	
+	<delete id="deleteNotice" parameterType="hashmap">
+		DELETE FROM NOTICE_INFO WHERE EVENT_ID=#{hiddenModalEventId};
+	</delete>
+	
+	<!-- deleteYN -->
+	<update id="deleteCalEvent" parameterType="hashmap">
+		UPDATE CALENDAR_EVENT 
+		SET DELETE_YN='Y' 
+		WHERE 1=1
+		AND EVENT_ID=#{hiddenModalEventId};
+		<!-- <choose>
+			<when test="hiddenModalRruleSyncId !=null and hiddenModalRruleSyncId != '' and rruleCase == 3">
+				AND ( EVENT_ID=#{hiddenModalEventId} OR EVENT_ID=#{hiddenModalRruleSyncId} );
+			</when>
+			<when test="hiddenModalSyncFlag !=null and hiddenModalSyncFlag != '' and rruleCase == 3">
+				AND ( EVENT_ID=#{hiddenModalEventId} OR EVENT_ID=#{hiddenModalSyncFlag} );
+			</when>
+			<otherwise>
+				AND EVENT_ID=#{hiddenModalEventId};
+			</otherwise>
+		</choose> -->
+		
+		DELETE FROM CALENDAR_REPEAT_RULE WHERE EVENT_ID = #{hiddenModalEventId}; 
+		DELETE FROM CALENDAR_EVENT WHERE RRULE_SYNC_ID = #{hiddenModalEventId}; 
+	</update>
+	
+	<!-- 반복일정에 해당되는 event 와 그 범위에 속한 단일일정 모두 삭제 -->
+	<update id="deleteCalEventAndExEvent" parameterType="hashmap">
+		UPDATE CALENDAR_EVENT AS CE
+			SET DELETE_YN='Y' 
+		WHERE 1=1
+		<choose>
+			<when test='hiddenModalExEventYn eq "Y" and rruleCase == 3'>
+				AND (EVENT_ID=#{hiddenModalRruleSyncId} 
+					OR (RRULE_SYNC_ID = #{hiddenModalRruleSyncId} AND (SELECT COUNT(*) FROM CALENDAR_REPEAT_RULE AS CRR WHERE CRR.EVENT_ID = CE.EVENT_ID) = 0));				
+			</when>
+			<when test='hiddenModalExEventYn eq "N" and rruleCase == 3'>
+				AND (EVENT_ID=#{hiddenModalEventId} 
+					OR (RRULE_SYNC_ID = #{hiddenModalEventId} AND (SELECT COUNT(*) FROM CALENDAR_REPEAT_RULE AS CRR WHERE CRR.EVENT_ID = CE.EVENT_ID) = 0));
+			</when>
+			<otherwise>
+				AND EVENT_ID=#{hiddenModalEventId};
+			</otherwise>
+		</choose>
+	</update>
+	
+	<update id="deleteCalRRuleSyncEvent" parameterType="hashmap">
+		UPDATE CALENDAR_EVENT SET DELETE_YN='Y' WHERE EVENT_ID=#{hiddenModalEventId};
+		<!-- DELETE FROM CALENDAR_REPEAT_RULE WHERE EVENT_ID = #{hiddenModalEventId};  -->
+	</update>
+	
+	<select id="calendarEventList" parameterType="hashmap" resultType="hashmap">
+		<choose>
+			<when test="productividyRRuleEvent == null or productividyRRuleEvent == '' ">
+		<![CDATA[
+			SELECT 
+				CE.EVENT_ID,
+				CE.CALENDAR_ID, 
+				CE.MEMBER_ID_NUM,
+				CE.EVENT_CODE,
+				CE.EVENT_SUBJECT AS title, 
+				CE.EVENT_DETAIL, 
+				CASE
+					WHEN CE.ALLDAY_YN = 'Y' THEN true
+					WHEN CE.ALLDAY_YN = 'N' THEN false
+				END AS allDay,
+				CE.START_DATETIME AS start, 
+				CE.END_DATETIME AS end, 
+				TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP,
+				CE.BEFORE_MOVE_TIME,
+				CE.AFTER_MOVE_TIME,
+				'black' as textColor,
+				'white' as backgroundColor,
+				CE.REPEAT_YN,
+				CRR.RECURRENCE_ID,
+				CRR.RECURRENCE_FREQ,
+				CRR.RECURRENCE_INTERVAL,
+				CRR.END_DATE AS RECURRENCE_END_DATE,
+				CRR.RECURRENCE_COUNT,
+				CRR.RECURRENCE_BYWEEKDAY,
+				CRR.RECURRENCE_BYMONTHDAY,
+				CRR.RECURRENCE_RULE,
+				CRR.END_RULE,
+				CRR.EX_DATE,
+				IF(ISNULL(CRR.EX_DATE), 'N', 'Y') AS EX_DATE_YN,
+				CE.LOCATION,
+				CE.SHARE_YN,
+				CE.ALARM_FLAG,
+				CE.ALARM_TARGET,
+				CE.RRULE_SYNC_ID,
+				CASE WHEN NOW() > CE.END_DATETIME THEN 'Y' ELSE 'N' END PAST_YN,
+				DATE_FORMAT(CE.START_DATETIME,'%H:%i') START_TIME,
+				DATE_FORMAT(CE.END_DATETIME,'%H:%i') END_TIME,
+				DATE_FORMAT(CE.START_DATETIME,'%Y%m%d') START_DAY,
+				DATE_FORMAT(CE.END_DATETIME,'%Y%m%d') END_DAY,
+				CE.OUTLOOK_ID,
+				CE.GOOGLE_ID,
+				CRR.SYNC_FLAG,
+				IF(CE.EVENT_ID = CRR.EVENT_ID, 'N', 'Y') AS EX_EVENT_YN
+		FROM 
+			CALENDAR_EVENT AS CE 
+		LEFT OUTER JOIN 
+			CALENDAR_REPEAT_RULE AS CRR ON CRR.EVENT_ID=CE.EVENT_ID
+		WHERE 1=1
+		AND CE.DELETE_YN ='N'
+		AND CE.REPEAT_YN = 'N'
+		AND CE.START_DATETIME > #{startDate}
+		AND CE.END_DATETIME < #{endDate}
+		]]>	
+			<choose>
+				<when test="hiddenModalCreatorId !=null and hiddenModalCreatorId != '' " >
+					AND CE.MEMBER_ID_NUM = #{hiddenModalCreatorId}
+				</when>
+			</choose>
+			<choose>
+				<when test="calendarCheck_id !=null and calendarCheck_id != '' ">
+					AND CE.CALENDAR_ID IN(${calendarCheck_id})
+				</when>
+				<otherwise>
+					<!-- AND CE.CALENDAR_ID IN('') -->
+				</otherwise>
+			</choose>
+			
+			<choose>
+				<when test=" textSearchStartDate != null and textSearchStartDate != '' ">
+					<choose>
+						<when test="textSearchEndDate != null and textSearchEndDate != '' ">
+							AND CE.START_DATETIME between #{textSearchStartDate} and date_add(#{textSearchEndDate}, interval +1 day)
+						</when>
+						<otherwise>
+							AND CE.START_DATETIME >= #{textSearchStartDate}
+						</otherwise>
+					</choose>
+				</when>
+				<when test=" textSearchEndDate != null and textSearchEndDate != '' ">
+					<![CDATA[
+					AND CE.START_DATETIME <= #{textSearchEndDate}
+					]]>
+				</when>
+			</choose>
+			
+			<if test=" textSearch != null and textSearch != '' ">
+				AND (CE.EVENT_SUBJECT LIKE CONCAT('%', #{textSearch}, '%') OR CE.EVENT_DETAIL LIKE CONCAT('%', #{textSearch}, '%'))
+			</if>
+		
+		UNION ALL
+			</when>
+		</choose>
+		
+		<![CDATA[
+			SELECT 
+				CE.EVENT_ID,
+				CE.CALENDAR_ID, 
+				CE.MEMBER_ID_NUM,
+				CE.EVENT_CODE,
+				CE.EVENT_SUBJECT AS title, 
+				CE.EVENT_DETAIL, 
+				CASE
+					WHEN CE.ALLDAY_YN = 'Y' THEN true
+					WHEN CE.ALLDAY_YN = 'N' THEN false
+				END AS allDay,
+				CE.START_DATETIME AS start, 
+				CE.END_DATETIME AS end, 
+				TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP,
+				CE.BEFORE_MOVE_TIME,
+				CE.AFTER_MOVE_TIME,
+				'black' as textColor,
+				'white' as backgroundColor,
+				CE.REPEAT_YN,
+				CRR.RECURRENCE_ID,
+				CRR.RECURRENCE_FREQ,
+				CRR.RECURRENCE_INTERVAL,
+				CRR.END_DATE AS RECURRENCE_END_DATE,
+				CRR.RECURRENCE_COUNT,
+				CRR.RECURRENCE_BYWEEKDAY,
+				CRR.RECURRENCE_BYMONTHDAY,
+				CRR.RECURRENCE_RULE,
+				CRR.END_RULE,
+				CRR.EX_DATE,
+				IF(ISNULL(CRR.EX_DATE), 'N', 'Y') AS EX_DATE_YN,
+				CE.LOCATION,
+				CE.SHARE_YN,
+				CE.ALARM_FLAG,
+				CE.ALARM_TARGET,
+				CE.RRULE_SYNC_ID,
+				CASE WHEN NOW() > CE.END_DATETIME THEN 'Y' ELSE 'N' END PAST_YN,
+				DATE_FORMAT(CE.START_DATETIME,'%H:%i') START_TIME,
+				DATE_FORMAT(CE.END_DATETIME,'%H:%i') END_TIME,
+				DATE_FORMAT(CE.START_DATETIME,'%Y%m%d') START_DAY,
+				DATE_FORMAT(CE.END_DATETIME,'%Y%m%d') END_DAY,
+				CE.OUTLOOK_ID,
+				CE.GOOGLE_ID,
+				CRR.SYNC_FLAG,
+				IF(CE.EVENT_ID = CRR.EVENT_ID, 'N', 'Y') AS EX_EVENT_YN
+		FROM 
+			CALENDAR_EVENT AS CE 
+		LEFT OUTER JOIN 
+			CALENDAR_REPEAT_RULE AS CRR 
+		ON CRR.EVENT_ID=CE.EVENT_ID 
+		OR (CE.RRULE_SYNC_ID = CRR.EVENT_ID 
+					AND (SELECT COUNT(*) FROM CALENDAR_REPEAT_RULE AS CRR WHERE CRR.EVENT_ID = CE.EVENT_ID) = 0)
+		WHERE 1=1
+		AND CE.DELETE_YN ='N'
+		AND CE.REPEAT_YN = 'Y'
+		]]>	
+		<choose>
+			<when test="hiddenModalCreatorId !=null and hiddenModalCreatorId != '' " >
+				AND CE.MEMBER_ID_NUM = #{hiddenModalCreatorId}
+			</when>
+		</choose>
+		<choose>
+			<when test="calendarCheck_id !=null and calendarCheck_id != '' ">
+				AND CE.CALENDAR_ID IN(${calendarCheck_id})
+			</when>
+			<otherwise>
+				<!-- AND CE.CALENDAR_ID IN('') -->
+			</otherwise>
+		</choose>
+		
+		<choose>
+			<when test=" textSearchEndDate != null and textSearchEndDate != '' ">
+				<![CDATA[
+				AND CE.START_DATETIME <= #{textSearchEndDate}
+				]]>
+			</when>
+		</choose>
+		
+		<if test=" textSearch != null and textSearch != '' ">
+			AND (CE.EVENT_SUBJECT LIKE CONCAT('%', #{textSearch}, '%') OR CE.EVENT_DETAIL LIKE CONCAT('%', #{textSearch}, '%'))
+		</if>
+
+	</select>
+	
+	<select id="holidayEventList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				HOLIDAY_TYPE,
+				HOLIDAY_YYYYMMDD AS start,
+				HOLIDAY_NAME AS title,
+				'background' AS rendering,
+				true AS allDay
+			FROM CALENDAR_HOLIDAY 
+			WHERE HOLIDAY_YYYYMMDD LIKE #{thisMonthHoliday_id}
+			]]>	
+	</select>
+	
+	<select id="selectRruleCheck" parameterType="hashmap" resultType="Integer">
+		SELECT COUNT(*) 
+		FROM CALENDAR_REPEAT_RULE
+		WHERE EVENT_ID=#{hiddenModalEventId}
+	</select>
+	
+	<insert id="insertRepeatEvent" parameterType="hashmap">
+			INSERT INTO CALENDAR_REPEAT_RULE
+			(
+				EVENT_ID,
+				RECURRENCE_FREQ,
+				RECURRENCE_INTERVAL,
+				START_DATE,
+				END_DATE,
+				RECURRENCE_COUNT,
+				<if test="hiddenModalRuleByweekday != null and hiddenModalRuleByweekday != ''">
+				RECURRENCE_BYWEEKDAY,
+				</if>
+				<if test="hiddenModalRuleBymonthday != null and hiddenModalRuleBymonthday != ''">
+				RECURRENCE_BYMONTHDAY,
+				</if>
+				RECURRENCE_RULE,
+				END_RULE
+				<if test = "exDate != null and exDate != '' ">
+				,EX_DATE
+				</if>
+				,SYNC_FLAG
+			)
+				VALUES
+			(
+				#{EVENT_ID},
+				#{selectModalFreq},
+				#{selectModalInterval},
+				#{hiddenModalStartRuleDate},
+				<choose>
+				<when test="hiddenModalEndRuleDate == null or hiddenModalEndRuleDate == ''">
+				NULL,
+				</when>
+				<otherwise>
+				#{hiddenModalEndRuleDate},
+				</otherwise>
+				</choose>
+				<choose>
+				<when test="hiddenModalCountNum == null or hiddenModalCountNum == ''">
+				NULL,
+				</when>
+				<otherwise>
+				#{hiddenModalCountNum},
+				</otherwise>
+				</choose>
+				<if test="hiddenModalRuleByweekday != null and hiddenModalRuleByweekday != ''">
+				#{hiddenModalRuleByweekday},
+				</if>
+				<if test="hiddenModalRuleBymonthday != null and hiddenModalRuleBymonthday != ''">
+				#{hiddenModalRuleBymonthday},
+				</if>
+				#{rrule},
+				#{END_RULE}
+				<if test="exDate != null and exDate != ''">
+				,#{exDate}
+				</if>
+				,#{syncFlag}
+			);
+	</insert>
+	
+	<update id="updateRepeatEvent" parameterType="hashmap">
+	        UPDATE CALENDAR_REPEAT_RULE
+	        SET RECURRENCE_FREQ=#{selectModalFreq},
+				RECURRENCE_INTERVAL=#{selectModalInterval},
+				
+				START_DATE=#{hiddenModalStartRuleDate},
+				
+				END_DATE=<choose>
+				<when test="hiddenModalEndRuleDate == null or hiddenModalEndRuleDate == ''">
+				NULL,
+				</when>
+				<otherwise>
+				#{hiddenModalEndRuleDate},
+				</otherwise>
+				</choose>
+				
+				RECURRENCE_COUNT=<choose>
+				<when test="hiddenModalCountNum == null or hiddenModalCountNum == ''">
+				NULL,
+				</when>
+				<otherwise>
+				#{hiddenModalCountNum},
+				</otherwise>
+				</choose>
+				RECURRENCE_BYWEEKDAY=#{hiddenModalRuleByweekday},
+				RECURRENCE_RULE=#{rrule},
+				RECURRENCE_BYMONTHDAY=#{hiddenModalRuleBymonthday},
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+	        WHERE EVENT_ID=#{hiddenModalEventId};
+	</update>
+	
+	<delete id="deleteRepeatEvent" parameterType="hashmap">
+		DELETE FROM CALENDAR_REPEAT_RULE WHERE EVENT_ID=#{hiddenModalEventId};
+	</delete>
+	
+	
+	
+	<!-- test -->
+	<select id="sellersCalendarEvent" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CE.EVENT_SUBJECT,
+			CE.EVENT_DETAIL,
+			CE.ALLDAY_YN,
+			CE.START_DATETIME,
+			CE.SYS_REGISTER_DATE,
+			CE.SYS_UPDATE_DATE,
+			CE.END_DATETIME,
+			CE.BEFORE_MOVE_TIME,
+			CE.AFTER_MOVE_TIME,
+			CE.REPEAT_YN,
+			CRR.RECURRENCE_RULE
+		FROM CALENDAR_EVENT AS CE
+		LEFT OUTER JOIN
+				CALENDAR_REPEAT_RULE AS CRR ON CRR.EVENT_ID = CE.EVENT_ID
+		<!-- WHERE CALENDAR_ID=#{calendar} -->
+		WHERE CALENDAR_ID in (SELECT CALENDAR_ID FROM CALENDAR_MASTER WHERE CALENDAR_NAME='기본 캘린더' AND MEMBER_ID_NUM = #{creatorId}) 
+		AND MEMBER_ID_NUM = #{creatorId}
+	</select>
+	
+	<select id="selectSellersOutlookCalSyncEvent" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CE.EVENT_SUBJECT,
+			CE.EVENT_DETAIL,
+			CE.START_DATETIME,
+			CE.END_DATETIME,
+			CE.OUTLOOK_ID
+		FROM CALENDAR_EVENT AS CE
+		LEFT OUTER JOIN
+				CALENDAR_MASTER AS CM ON CM.CALENDAR_ID = CE.CALENDAR_ID
+		<!-- WHERE CM.SYNC_YN='Y' AND CM.MEMBER_ID_NUM=#{hiddenModalCreatorId}; -->
+		WHERE CM.MEMBER_ID_NUM=#{hiddenModalCreatorId}
+		AND CE.DELETE_YN = 'N'
+	</select>
+	
+	<insert id="insertInviteEvent" parameterType="hashmap">
+		INSERT INTO CALENDAR_INVITE_EVENT
+			(
+				EVENT_ID,
+				MEMBER_ID_NUM,
+				<!-- BASIC_CALENDAR_ID, -->
+				EMAIL,
+				CALENDAR_ID,
+				SEND_STATUS_YN
+			)
+				VALUES
+			(
+				#{EVENT_ID},
+				#{invitedMemberIdNum},
+				<!-- #{inviteMemberCalId}, -->
+				#{invitedMemberEmail},
+				#{selectModalCalendarID},
+				#{SEND_STATUS_YN}
+			);
+	</insert>
+	
+	<select id="selectInviteEvent" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			CIE.MEMBER_ID_NUM,
+			OMI.HAN_NAME,
+			CIE.BASIC_CALENDAR_ID,
+			CIE.EMAIL,
+			CASE 
+				WHEN CIE.INVITE_YN = 'Y' THEN '수락'
+				WHEN CIE.INVITE_YN = 'N' THEN '거절'
+					ELSE '미응답'
+			END AS INVITE_YN,
+			CASE
+				WHEN CIE.SEND_STATUS_YN = 'Y' THEN '발신'
+				WHEN CIE.SEND_STATUS_YN = 'N' THEN '미발신'
+			END AS SEND_STATUS_YN,
+			CASE 
+				WHEN CIE.SYS_REGISTER_DATE != CIE.SYS_UPDATE_DATE THEN CIE.SYS_UPDATE_DATE
+					ELSE NULL
+			END AS SYS_UPDATE_DATE,
+			CIE.SYS_REGISTER_DATE
+		FROM 
+			CALENDAR_INVITE_EVENT AS CIE
+		LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM=CIE.MEMBER_ID_NUM
+		WHERE CIE.EVENT_ID=#{hiddenModalEventId}
+	</select>
+	
+	<update id="updateInviteEvent" parameterType="hashmap">
+        UPDATE CALENDAR_INVITE_EVENT 
+	        SET SEND_STATUS_YN = 'Y'
+			WHERE EVENT_ID= #{hiddenModalEventId} 
+			AND MEMBER_ID_NUM = #{invitedMemberIdNum}
+	</update>
+	
+	<select id="getInviteMemberList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			CIE.INVITE_ID,
+			CE.EVENT_SUBJECT, 
+			CE.EVENT_DETAIL,
+			CE.LOCATION,
+			CE.START_DATETIME,
+			CE.END_DATETIME,
+			CIE.CALENDAR_ID,
+			CE.MEMBER_ID_NUM,
+			OMI.HAN_NAME,
+			OMI.POSITION_STATUS,
+			CIE.BASIC_CALENDAR_ID,
+			CIE.EMAIL,
+			CASE 
+				WHEN CIE.INVITE_YN = 'Y' THEN '수락'
+				WHEN CIE.INVITE_YN = 'N' THEN '거절'
+					ELSE '미응답'
+			END AS INVITE_YN,
+			CASE
+				WHEN CIE.SEND_STATUS_YN = 'Y' THEN '발신'
+				WHEN CIE.SEND_STATUS_YN = 'N' THEN '미발신'
+			END AS SEND_STATUS_YN,
+			CASE 
+				WHEN CIE.SYS_REGISTER_DATE != CIE.SYS_UPDATE_DATE THEN CIE.SYS_UPDATE_DATE
+					ELSE NULL
+			END AS SYS_UPDATE_DATE,
+			CIE.SYS_REGISTER_DATE,
+			
+			CE.BEFORE_MOVE_TIME,
+			CE.AFTER_MOVE_TIME
+		FROM 
+			CALENDAR_INVITE_EVENT AS CIE
+		LEFT OUTER JOIN 
+			CALENDAR_EVENT AS CE ON CE.EVENT_ID=CIE.EVENT_ID
+		LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM=CIE.MEMBER_ID_NUM
+		WHERE CIE.EVENT_ID=#{hiddenModalEventId}
+	</select>
+	
+	<update id="updateCalendarInviteEvent" parameterType="hashmap">
+        UPDATE CALENDAR_INVITE_EVENT 
+	        SET INVITE_YN = #{status}
+			WHERE EVENT_ID= #{hiddenModalEventId} 
+			AND MEMBER_ID_NUM=#{inviteId};
+	</update>
+	
+	<update id="changeOutCalendarSync" parameterType="hashmap">
+        UPDATE CALENDAR_MASTER 
+	        SET SYNC_YN = #{syncYN}
+			WHERE CALENDAR_ID= #{calendarId};
+	</update>
+	
+	
+	<insert id="insertShareCalendar" parameterType="hashmap">
+		INSERT INTO CALENDAR_SHARE
+			(
+				MEMBER_ID_NUM,
+				CALENDAR_ID,
+				SHARE_MEMBER_ID,
+				SHARE_MEMBER_NAME,
+				MEMBER_NAME,
+				CALENDAR_NAME
+				
+			)
+				VALUES
+			(
+				#{creatorId},
+				#{calendarId},
+				#{memberID},
+				(select HAN_NAME from our_members_info where MEMBER_ID_NUM=#{memberID}),
+				(select HAN_NAME from our_members_info where MEMBER_ID_NUM=#{creatorId}),
+				#{calendarName}
+			);
+	</insert>
+	
+	<insert id="insertShareCalendarNotice" parameterType="hashmap">
+		INSERT INTO NOTICE_INFO
+			(
+				MEMBER_ID_NUM,
+				NOTICE_DETAIL,
+				NOTICE_CATEGORY,
+				NOTICE_REDIRECT_URL,
+				EVENT_ID,
+				NOTICE_DEL_YN
+			)
+				VALUES
+			(
+				#{memberID},
+				#{noticeDetail},
+				#{noticeCategory},
+				#{shareURL},
+				#{hiddenModalEventId},
+				'N'
+			);
+	</insert>
+	
+	<insert id="insertNoticeCancelEvent" parameterType="hashmap">
+		INSERT INTO NOTICE_INFO
+			(
+				MEMBER_ID_NUM,
+				NOTICE_DETAIL,
+				NOTICE_CATEGORY,
+				NOTICE_REDIRECT_URL,
+				EVENT_ID,
+				NOTICE_DEL_YN,
+				NOTICE_CODE
+			)
+				VALUES
+			(
+				#{memberID},
+				#{noticeDetail},
+				#{noticeCategory},
+				#{shareURL},
+				#{canceledEventID},
+				'N',
+				#{noticeCode}
+			);
+	</insert>
+	
+	<update id="updateShareCalendar" parameterType="hashmap">
+	        UPDATE CALENDAR_SHARE 
+	        SET 
+	        CALENDAR_ID=#{calendarId},
+	        SHARE_MEMBER_ID=#{memberID}
+			WHERE CALENDAR_ID=#{calendarId}
+			AND SHARE_MEMBER_ID=#{memberID}
+	</update>
+	
+	<select id="selectShareCalendar" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CS.SHARE_MEMBER_ID,
+			OMI.HAN_NAME
+		FROM CALENDAR_SHARE AS CS
+		LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM=CS.SHARE_MEMBER_ID
+		WHERE CALENDAR_ID =#{calendarId}
+	</select>
+	
+	<select id="shareCalendarList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				CE.EVENT_ID,
+				CE.CALENDAR_ID, 
+				CE.EVENT_CODE,
+				CE.EVENT_SUBJECT AS title, 
+				CE.EVENT_DETAIL, 
+				CASE
+					WHEN CE.ALLDAY_YN = 'Y' THEN true
+					WHEN CE.ALLDAY_YN = 'N' THEN false
+				END AS allDay,
+				CE.START_DATETIME AS start, 
+				CE.END_DATETIME AS end, 
+				TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP,
+				CE.BEFORE_MOVE_TIME,
+				CE.AFTER_MOVE_TIME,
+				'black' as textColor,
+				'white' as backgroundColor,
+				CE.REPEAT_YN,
+				CRR.RECURRENCE_ID,
+				CRR.RECURRENCE_FREQ,
+				CRR.RECURRENCE_INTERVAL,
+				CRR.END_DATE AS RECURRENCE_END_DATE,
+				CRR.RECURRENCE_COUNT,
+				CRR.RECURRENCE_BYWEEKDAY,
+				CRR.RECURRENCE_RULE
+		FROM CALENDAR_SHARE AS CS
+		LEFT OUTER JOIN 
+			CALENDAR_EVENT AS CE ON CE.CALENDAR_ID=CS.CALENDAR_ID
+		LEFT OUTER JOIN 
+			CALENDAR_REPEAT_RULE AS CRR ON CRR.EVENT_ID=CE.EVENT_ID
+		WHERE SHARE_MEMBER_ID = #{hiddenModalCreatorId}
+		]]>	
+		<choose>
+			<when test="calendarCheck_id !=null and calendarCheck_id != '' ">
+				AND CE.CALENDAR_ID IN(${calendarCheck_id})
+			</when>
+			<otherwise>
+				AND CE.CALENDAR_ID IN('')
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="getShareCalList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CS.CALENDAR_ID, 
+			CS.CALENDAR_NAME, 
+			CS.MEMBER_ID_NUM, 
+			CS.MEMBER_NAME,
+			OMI.POSITION_STATUS
+		FROM CALENDAR_SHARE AS CS
+		LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM=CS.MEMBER_ID_NUM
+		WHERE SHARE_MEMBER_ID = #{MEMBER_ID_NUM}
+		AND OMI.USE_YN = 'Y'
+	</select>
+	
+	<select id="gridIndividualFaceTime_year" parameterType="hashmap" resultType="hashmap">
+			<![CDATA[
+			SELECT 
+				TMP_TB1.MEMBER_ID_NUM,
+				IF(TMP_TB1.MEMBER_POST IS NULL OR TMP_TB1.MEMBER_POST = '',TMP_TB1.MEMBER_TEAM,TMP_TB1.MEMBER_POST) AS MEMBER_POST,
+				TMP_TB1.MEMBER_TEAM,
+				TMP_TB1.HAN_NAME,
+				TMP_TB1.LAST_BASIS_TIME,	
+				
+				TMP_TB1.LAST_EVENT_1 AS LAST_EVENT_TIME_1,
+                TMP_TB1.LAST_EVENT_2 AS LAST_EVENT_TIME_2,
+                TMP_TB1.LAST_EVENT_3 AS LAST_EVENT_TIME_3,
+                TMP_TB1.LAST_EVENT_4 AS LAST_EVENT_TIME_4,
+                TMP_TB1.LAST_EVENT_5 AS LAST_EVENT_TIME_5,
+                TMP_TB1.LAST_EVENT_6 AS LAST_EVENT_TIME_6,
+                TMP_TB1.LAST_EVENT_7 AS LAST_EVENT_TIME_7,
+                                
+                TMP_TB1.THIS_EVENT_1 AS THIS_EVENT_TIME_1,
+                TMP_TB1.THIS_EVENT_2 AS THIS_EVENT_TIME_2, 
+                TMP_TB1.THIS_EVENT_3 AS THIS_EVENT_TIME_3,
+                TMP_TB1.THIS_EVENT_4 AS THIS_EVENT_TIME_4,
+                TMP_TB1.THIS_EVENT_5 AS THIS_EVENT_TIME_5,
+                TMP_TB1.THIS_EVENT_6 AS THIS_EVENT_TIME_6,
+                TMP_TB1.THIS_EVENT_7 AS THIS_EVENT_TIME_7,
+                
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_7,
+                
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_7,
+                
+				CONCAT(TMP_TB1.LAST_EVENT_1,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_1,
+				CONCAT(TMP_TB1.LAST_EVENT_2,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_2,
+				CONCAT(TMP_TB1.LAST_EVENT_3,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_3,
+				CONCAT(TMP_TB1.LAST_EVENT_4,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_4,
+				CONCAT(TMP_TB1.LAST_EVENT_5,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_5,
+				CONCAT(TMP_TB1.LAST_EVENT_6,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_6,
+				CONCAT(TMP_TB1.LAST_EVENT_7,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS LAST_TOTAL,
+				
+				TMP_TB1.THIS_BASIS_TIME,
+				CONCAT(TMP_TB1.THIS_EVENT_1,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_1,
+				CONCAT(TMP_TB1.THIS_EVENT_2,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_2,
+				CONCAT(TMP_TB1.THIS_EVENT_3,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_3,
+				CONCAT(TMP_TB1.THIS_EVENT_4,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_4,
+				CONCAT(TMP_TB1.THIS_EVENT_5,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_5,
+				CONCAT(TMP_TB1.THIS_EVENT_6,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_6,
+				CONCAT(TMP_TB1.THIS_EVENT_7,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS THIS_TOTAL,
+				
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_1,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_2,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_3,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_4,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_5,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_6,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_7,
+				
+				IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_1,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_2,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_3,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_4,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_5,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_6,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_7,
+				IF((IFNULL(ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_TOTAL,
+				ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1) AS COMPARE_TOTAL
+			FROM
+			]]>
+			(
+				SELECT 
+					OMI.MEMBER_ID_NUM,
+					OMI.MEMBER_POST,
+					OMI.MEMBER_TEAM,
+					OMI.HAN_NAME,
+					 <!-- 지난 --> 
+					SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR), AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME,
+					SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR), AIT.ACTIVITY_CODE_1_TIME,0)) LAST_EVENT_1,
+					SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR), AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2,
+					SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR), AIT.ACTIVITY_CODE_3_TIME,0)) LAST_EVENT_3,
+					SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR), AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4,
+					SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR), AIT.ACTIVITY_CODE_5_TIME,0)) LAST_EVENT_5,
+					SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR), AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6,
+					SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR), AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+					<!--  이번 --> 
+					SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231'), AIT.ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+					SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+					SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+					SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+					SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+					SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+					SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+					SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+				FROM 
+				OUR_MEMBERS_INFO AS OMI 
+				INNER JOIN
+				ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+				WHERE 1=1
+				 <choose>
+					<when test="selectFaceYear != null and selectFaceYear != '' ">
+						AND ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND CONCAT(#{selectFaceYear},'1231')
+					</when>
+					<otherwise>
+						AND ANAL_DATE BETWEEN DATE_SUB(CONCAT(YEAR(NOW()),'0101'),INTERVAL 1 YEAR) AND CONCAT(YEAR(NOW()),'1231')
+					</otherwise>
+				</choose>
+				<if test="selectFacePost != null and selectFacePost != '' ">
+				AND (OMI.MEMBER_POST = #{selectFacePost} OR OMI.MEMBER_TEAM = #{selectFacePost})
+				</if>
+				
+				<!-- 캘린더 현재 나의 ID 넘겨줘서 내 생산성 데이터만 가져오기 -->
+				<if test="hiddenUserID != null and hiddenUserID != '' ">
+				AND OMI.MEMBER_ID_NUM = #{hiddenUserID}
+				</if>
+				
+				GROUP BY OMI.MEMBER_ID_NUM,OMI.MEMBER_POST,OMI.MEMBER_TEAM,OMI.HAN_NAME
+			) AS TMP_TB1 ORDER BY TMP_TB1.MEMBER_POST ASC, TMP_TB1.MEMBER_TEAM ASC;;
+		</select>
+		
+		<select id="gridIndividualFaceTime_month" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				TMP_TB1.MEMBER_ID_NUM,
+				IF(TMP_TB1.MEMBER_POST IS NULL OR TMP_TB1.MEMBER_POST = '',TMP_TB1.MEMBER_TEAM,TMP_TB1.MEMBER_POST) AS MEMBER_POST,
+				TMP_TB1.MEMBER_TEAM,
+				TMP_TB1.HAN_NAME,
+				TMP_TB1.LAST_BASIS_TIME,	
+				
+				TMP_TB1.LAST_EVENT_1 AS LAST_EVENT_TIME_1,
+                TMP_TB1.LAST_EVENT_2 AS LAST_EVENT_TIME_2,
+                TMP_TB1.LAST_EVENT_3 AS LAST_EVENT_TIME_3,
+                TMP_TB1.LAST_EVENT_4 AS LAST_EVENT_TIME_4,
+                TMP_TB1.LAST_EVENT_5 AS LAST_EVENT_TIME_5,
+                TMP_TB1.LAST_EVENT_6 AS LAST_EVENT_TIME_6,
+                TMP_TB1.LAST_EVENT_7 AS LAST_EVENT_TIME_7,
+                                
+                TMP_TB1.THIS_EVENT_1 AS THIS_EVENT_TIME_1,
+                TMP_TB1.THIS_EVENT_2 AS THIS_EVENT_TIME_2, 
+                TMP_TB1.THIS_EVENT_3 AS THIS_EVENT_TIME_3,
+                TMP_TB1.THIS_EVENT_4 AS THIS_EVENT_TIME_4,
+                TMP_TB1.THIS_EVENT_5 AS THIS_EVENT_TIME_5,
+                TMP_TB1.THIS_EVENT_6 AS THIS_EVENT_TIME_6,
+                TMP_TB1.THIS_EVENT_7 AS THIS_EVENT_TIME_7,
+                
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_7,
+                
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_7,
+                
+				CONCAT(TMP_TB1.LAST_EVENT_1,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_1,
+				CONCAT(TMP_TB1.LAST_EVENT_2,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_2,
+				CONCAT(TMP_TB1.LAST_EVENT_3,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_3,
+				CONCAT(TMP_TB1.LAST_EVENT_4,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_4,
+				CONCAT(TMP_TB1.LAST_EVENT_5,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_5,
+				CONCAT(TMP_TB1.LAST_EVENT_6,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_6,
+				CONCAT(TMP_TB1.LAST_EVENT_7,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS LAST_TOTAL,
+				
+				TMP_TB1.THIS_BASIS_TIME,
+				CONCAT(TMP_TB1.THIS_EVENT_1,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_1,
+				CONCAT(TMP_TB1.THIS_EVENT_2,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_2,
+				CONCAT(TMP_TB1.THIS_EVENT_3,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_3,
+				CONCAT(TMP_TB1.THIS_EVENT_4,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_4,
+				CONCAT(TMP_TB1.THIS_EVENT_5,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_5,
+				CONCAT(TMP_TB1.THIS_EVENT_6,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_6,
+				CONCAT(TMP_TB1.THIS_EVENT_7,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS THIS_TOTAL,
+				
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_1,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_2,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_3,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_4,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_5,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_6,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_7,
+				
+				IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_1,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_2,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_3,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_4,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_5,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_6,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_7,
+				IF((IFNULL(ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_TOTAL,
+				ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1) AS COMPARE_TOTAL
+			FROM
+			]]>
+			(
+				SELECT 
+						OMI.MEMBER_ID_NUM,
+						OMI.MEMBER_POST,
+						OMI.MEMBER_TEAM,
+						OMI.HAN_NAME,
+						 <!-- 지난달 --> 
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_1_TIME,0)) LAST_EVENT_1,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_3_TIME,0)) LAST_EVENT_3,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_5_TIME,0)) LAST_EVENT_5,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6,
+						<!-- SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'31'), AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'31'), AIT.ACTIVITY_CODE_8_TIME,0)) LAST_EVENT_8, -->
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+						<!--  이번달 --> 
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'), AIT.ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'), AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'), AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'), AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'), AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'), AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'), AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+						<!-- SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'),INTERVAL 1 month), AIT.ACTIVITY_CODE_8_TIME,0)) THIS_EVENT_8, -->
+						SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31'), AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+				FROM 
+				OUR_MEMBERS_INFO AS OMI 
+				INNER JOIN
+				ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+				WHERE 1=1
+				 <!-- 년 검색 -->
+				<choose>
+					<when test="selectFaceYear != null and selectFaceYear != '' ">
+					AND ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND CONCAT(#{selectFaceYear},'1231')
+						<!-- 월 검색 -->
+						<choose>
+							<when test="selectFaceMonth != null and selectFaceMonth != '' ">
+							AND ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1 month) AND CONCAT(#{selectFaceYear},#{selectFaceMonth},'31')
+							</when>
+							<otherwise>
+							AND ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},MONTH(NOW()),'01'),INTERVAL 1 month) AND CONCAT(#{selectFaceYear},MONTH(NOW()),'31')
+							</otherwise>
+						</choose>	
+					</when>
+					<otherwise>
+					AND ANAL_DATE BETWEEN CONCAT(YEAR(NOW()),'0101') AND CONCAT(YEAR(NOW()),'1231')
+						<!-- 월 검색 -->
+						<choose>
+							<when test="selectFaceMonth != null and selectFaceMonth != '' ">
+							AND ANAL_DATE BETWEEN DATE_SUB(CONCAT(YEAR(NOW()),#{selectFaceMonth},'01'),INTERVAL 1 month) AND CONCAT(YEAR(NOW()),#{selectFaceMonth},'31')
+							</when>
+							<otherwise>
+							AND ANAL_DATE BETWEEN DATE_SUB(CONCAT(YEAR(NOW()),MONTH(NOW()),'01'),INTERVAL 1 month) AND CONCAT(YEAR(NOW()),MONTH(NOW()),'31')
+							</otherwise>
+						</choose>	
+					</otherwise>
+				</choose>
+				<!-- 본부 검색 --> 
+				<if test="selectFacePost != null and selectFacePost != '' ">
+				AND (OMI.MEMBER_POST = #{selectFacePost} OR OMI.MEMBER_TEAM = #{selectFacePost})
+				</if>
+				
+				<!-- 캘린더 현재 나의 ID 넘겨줘서 내 생산성 데이터만 가져오기 -->
+				<if test="hiddenUserID != null and hiddenUserID != '' ">
+				AND OMI.MEMBER_ID_NUM = #{hiddenUserID}
+				</if>
+				
+				GROUP BY OMI.MEMBER_ID_NUM,OMI.MEMBER_POST,OMI.MEMBER_TEAM,OMI.HAN_NAME
+			) AS TMP_TB1 ORDER BY TMP_TB1.MEMBER_POST ASC, TMP_TB1.MEMBER_TEAM ASC;
+
+		</select>
+		
+		<select id="gridIndividualFaceTime_quarter" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				TMP_TB1.MEMBER_ID_NUM,
+				IF(TMP_TB1.MEMBER_POST IS NULL OR TMP_TB1.MEMBER_POST = '',TMP_TB1.MEMBER_TEAM,TMP_TB1.MEMBER_POST) AS MEMBER_POST,
+				TMP_TB1.MEMBER_TEAM,
+				TMP_TB1.HAN_NAME,
+				TMP_TB1.LAST_BASIS_TIME,
+				
+				TMP_TB1.LAST_EVENT_1 AS LAST_EVENT_TIME_1,
+                TMP_TB1.LAST_EVENT_2 AS LAST_EVENT_TIME_2,
+                TMP_TB1.LAST_EVENT_3 AS LAST_EVENT_TIME_3,
+                TMP_TB1.LAST_EVENT_4 AS LAST_EVENT_TIME_4,
+                TMP_TB1.LAST_EVENT_5 AS LAST_EVENT_TIME_5,
+                TMP_TB1.LAST_EVENT_6 AS LAST_EVENT_TIME_6,
+                TMP_TB1.LAST_EVENT_7 AS LAST_EVENT_TIME_7,
+                                
+                TMP_TB1.THIS_EVENT_1 AS THIS_EVENT_TIME_1,
+                TMP_TB1.THIS_EVENT_2 AS THIS_EVENT_TIME_2, 
+                TMP_TB1.THIS_EVENT_3 AS THIS_EVENT_TIME_3,
+                TMP_TB1.THIS_EVENT_4 AS THIS_EVENT_TIME_4,
+                TMP_TB1.THIS_EVENT_5 AS THIS_EVENT_TIME_5,
+                TMP_TB1.THIS_EVENT_6 AS THIS_EVENT_TIME_6,
+                TMP_TB1.THIS_EVENT_7 AS THIS_EVENT_TIME_7,
+                
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_7,
+                
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_7,	
+				CONCAT(TMP_TB1.LAST_EVENT_1,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_1,
+				CONCAT(TMP_TB1.LAST_EVENT_2,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_2,
+				CONCAT(TMP_TB1.LAST_EVENT_3,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_3,
+				CONCAT(TMP_TB1.LAST_EVENT_4,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_4,
+				CONCAT(TMP_TB1.LAST_EVENT_5,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_5,
+				CONCAT(TMP_TB1.LAST_EVENT_6,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_6,
+				CONCAT(TMP_TB1.LAST_EVENT_7,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS LAST_TOTAL,
+				
+				TMP_TB1.THIS_BASIS_TIME,
+				CONCAT(TMP_TB1.THIS_EVENT_1,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_1,
+				CONCAT(TMP_TB1.THIS_EVENT_2,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_2,
+				CONCAT(TMP_TB1.THIS_EVENT_3,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_3,
+				CONCAT(TMP_TB1.THIS_EVENT_4,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_4,
+				CONCAT(TMP_TB1.THIS_EVENT_5,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_5,
+				CONCAT(TMP_TB1.THIS_EVENT_6,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_6,
+				CONCAT(TMP_TB1.THIS_EVENT_7,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS THIS_TOTAL,
+				
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_1,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_2,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_3,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_4,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_5,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_6,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_7,
+				
+				IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_1,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_2,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_3,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_4,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_5,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_6,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_7,
+				IF((IFNULL(ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_TOTAL,
+				ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1) AS COMPARE_TOTAL
+			FROM
+			]]>
+			(
+				SELECT 
+						OMI.MEMBER_ID_NUM,
+						OMI.MEMBER_POST,
+						OMI.MEMBER_TEAM,
+						OMI.HAN_NAME,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(#{quarterDate},INTERVAL 1 QUARTER) AND DATE_SUB(#{quarterDate},INTERVAL 1 DAY), AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(#{quarterDate},INTERVAL 1 QUARTER) AND DATE_SUB(#{quarterDate},INTERVAL 1 DAY), AIT.ACTIVITY_CODE_1_TIME,0)) LAST_EVENT_1,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(#{quarterDate},INTERVAL 1 QUARTER) AND DATE_SUB(#{quarterDate},INTERVAL 1 DAY), AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(#{quarterDate},INTERVAL 1 QUARTER) AND DATE_SUB(#{quarterDate},INTERVAL 1 DAY), AIT.ACTIVITY_CODE_3_TIME,0)) LAST_EVENT_3,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(#{quarterDate},INTERVAL 1 QUARTER) AND DATE_SUB(#{quarterDate},INTERVAL 1 DAY), AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(#{quarterDate},INTERVAL 1 QUARTER) AND DATE_SUB(#{quarterDate},INTERVAL 1 DAY), AIT.ACTIVITY_CODE_5_TIME,0)) LAST_EVENT_5,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(#{quarterDate},INTERVAL 1 QUARTER) AND DATE_SUB(#{quarterDate},INTERVAL 1 DAY), AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6,
+						SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(#{quarterDate},INTERVAL 1 QUARTER) AND DATE_SUB(#{quarterDate},INTERVAL 1 DAY), AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+						
+						SUM(IF(AIT.ANAL_DATE BETWEEN #{quarterDate} AND DATE_SUB(DATE_ADD(#{quarterDate},INTERVAL 3 MONTH),INTERVAL 1 DAY), ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+						SUM(IF(AIT.ANAL_DATE BETWEEN #{quarterDate} AND DATE_SUB(DATE_ADD(#{quarterDate},INTERVAL 3 MONTH),INTERVAL 1 DAY), AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+						SUM(IF(AIT.ANAL_DATE BETWEEN #{quarterDate} AND DATE_SUB(DATE_ADD(#{quarterDate},INTERVAL 3 MONTH),INTERVAL 1 DAY), AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+						SUM(IF(AIT.ANAL_DATE BETWEEN #{quarterDate} AND DATE_SUB(DATE_ADD(#{quarterDate},INTERVAL 3 MONTH),INTERVAL 1 DAY), AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+						SUM(IF(AIT.ANAL_DATE BETWEEN #{quarterDate} AND DATE_SUB(DATE_ADD(#{quarterDate},INTERVAL 3 MONTH),INTERVAL 1 DAY), AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+						SUM(IF(AIT.ANAL_DATE BETWEEN #{quarterDate} AND DATE_SUB(DATE_ADD(#{quarterDate},INTERVAL 3 MONTH),INTERVAL 1 DAY), AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+						SUM(IF(AIT.ANAL_DATE BETWEEN #{quarterDate} AND DATE_SUB(DATE_ADD(#{quarterDate},INTERVAL 3 MONTH),INTERVAL 1 DAY), AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+						SUM(IF(AIT.ANAL_DATE BETWEEN #{quarterDate} AND DATE_SUB(DATE_ADD(#{quarterDate},INTERVAL 3 MONTH),INTERVAL 1 DAY), AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+				FROM 
+				OUR_MEMBERS_INFO AS OMI 
+				INNER JOIN
+				ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+				WHERE 1=1
+				<!-- 본부 검색 --> 
+				<if test="selectFacePost != null and selectFacePost != '' ">
+				AND (OMI.MEMBER_POST = #{selectFacePost} OR OMI.MEMBER_TEAM = #{selectFacePost})
+				</if>
+				
+				<!-- 캘린더 현재 나의 ID 넘겨줘서 내 생산성 데이터만 가져오기 -->
+				<if test="hiddenUserID != null and hiddenUserID != '' ">
+				AND OMI.MEMBER_ID_NUM = #{hiddenUserID}
+				</if>
+				
+				
+				GROUP BY OMI.MEMBER_ID_NUM,OMI.MEMBER_POST,OMI.MEMBER_TEAM,OMI.HAN_NAME
+			) AS TMP_TB1 ORDER BY TMP_TB1.MEMBER_POST ASC, TMP_TB1.MEMBER_TEAM ASC;;
+		</select>
+	
+	
+	
+	<select id="selectDivisionNteamInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT ODI.DIVISION_NAME, OTI.TEAM_NAME
+		FROM OUR_MEMBERS_INFO AS OMI
+		LEFT OUTER JOIN 
+			OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		LEFT OUTER JOIN 
+			OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		WHERE MEMBER_ID_NUM = #{global_member_id}
+	</select>
+	
+	<select id="faceTimeSearchDetailGroup1" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM
+		( 
+			 SELECT YEAR(ANAL_DATE) AS FACE_YEAR
+			 FROM ANAL_INDIVIDUAL_TIME
+			 UNION
+			 SELECT YEAR(NOW()) AS FACE_YEAR
+		) AS FY
+		ORDER BY FY.FACE_YEAR
+	</select>
+		
+	<select id="faceTimeSearchDetailGroup2" parameterType="hashmap" resultType="hashmap">
+			 SELECT MONTH(ANAL_DATE) AS FACE_MONTH
+			 FROM ANAL_INDIVIDUAL_TIME
+			 WHERE 1=1
+			 <choose>
+				<when test="selectFaceYear != null and selectFaceYear != '' ">
+				AND YEAR(ANAL_DATE) = #{selectFaceYear}
+				</when>
+				<otherwise>
+				AND YEAR(ANAL_DATE) = YEAR(NOW())
+				</otherwise>
+			</choose>
+			UNION
+			SELECT MONTH(NOW()) AS FACE_MONTH
+	</select>
+	
+	<select id="faceTimeSearchDetailGroup3" parameterType="hashmap" resultType="hashmap">
+			select ODI.DIVISION_NAME, ODI.DIVISION_TYPE
+				from OUR_DIVISION_INFO AS ODI
+				where ODI.DIVISION_TYPE = 'S'
+				GROUP BY DIVISION_NAME 
+	</select>
+	
+	<select id="faceTimeSearchDetailGroup4" parameterType="hashmap" resultType="hashmap">
+			  SELECT QUARTER(ANAL_DATE) AS FACE_QUARTER
+				 FROM ANAL_INDIVIDUAL_TIME
+				 WHERE 1=1
+				 <choose>
+					<when test="selectFaceYear != null and selectFaceYear != '' ">
+					AND YEAR(ANAL_DATE) = #{selectFaceYear}
+					</when>
+					<otherwise>
+					AND YEAR(ANAL_DATE) = YEAR(NOW())
+					</otherwise>
+				</choose>
+				 UNION
+				 SELECT QUARTER(NOW()) as FACE_YEAR
+	</select>
+	
+	
+	
+	<!-- 
+	<select id="faceTimeSearchDetailGroup5" parameterType="hashmap" resultType="hashmap">
+			 SELECT IF(MEMBER_TEAM IS NULL OR MEMBER_TEAM = '',MEMBER_TEAM,MEMBER_TEAM) AS MEMBER_TEAM 
+			 FROM OUR_MEMBERS_INFO
+			 WHERE MEMBER_DIVISION = #{selectFacePost}
+			 GROUP BY IF(MEMBER_TEAM IS NULL OR MEMBER_TEAM = '',MEMBER_TEAM,MEMBER_TEAM)
+	</select>
+	 -->
+	
+	<select id="faceTimeSearchDetailGroup5" parameterType="hashmap" resultType="hashmap">
+			 SELECT TEAM_NAME from OUR_TEAM_INFO AS OTI
+				INNER JOIN
+					OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OTI.DIVISION_NO
+				WHERE ODI.DIVISION_NAME = #{selectFacePost}
+				GROUP by OTI.TEAM_NAME
+	</select>
+	
+	<!-- 
+	<select id="faceTimeSearchDetailGroup6" parameterType="hashmap" resultType="hashmap">
+			 SELECT IF(HAN_NAME IS NULL OR HAN_NAME = '',HAN_NAME,HAN_NAME) AS HAN_NAME 
+			 FROM OUR_MEMBERS_INFO
+			 WHERE MEMBER_DIVISION = #{selectFacePost} and MEMBER_TEAM= #{selectFaceTeam}
+			 GROUP BY IF(HAN_NAME IS NULL OR HAN_NAME = '',HAN_NAME,HAN_NAME)
+	</select>
+	 -->
+	
+	<select id="faceTimeSearchDetailGroup6" parameterType="hashmap" resultType="hashmap">
+			 SELECT OMI.HAN_NAME
+				FROM OUR_MEMBERS_INFO AS OMI
+				INNER JOIN
+					OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+				INNER JOIN
+					OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+				WHERE ODI.DIVISION_NAME=#{selectFacePost} AND OTI.TEAM_NAME = #{selectFaceTeam}
+				GROUP BY OMI.HAN_NAME
+	</select>
+	
+	<select id="selectEventDetail" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			CE.EVENT_ID,
+			CE.CALENDAR_ID,
+			CE.MEMBER_ID_NUM,
+			CE.EVENT_CODE,
+			CE.EVENT_SUBJECT as title,
+			CE.EVENT_DETAIL,
+			CE.START_DATETIME as start,
+			CE.END_DATETIME as end,
+			CE.ALLDAY_YN,
+			CASE
+				WHEN CE.ALLDAY_YN = 'Y' THEN true
+				WHEN CE.ALLDAY_YN = 'N' THEN false
+			END AS allDay,
+			TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP,
+			CE.REPEAT_YN,
+			CE.BEFORE_MOVE_TIME,
+			CE.AFTER_MOVE_TIME,
+			CE.LOCATION,
+			CE.SHARE_YN,
+			CE.ALARM_PERIOD,
+			CE.ALARM_TARGET,
+			CE.ALARM_FLAG,
+			CRR.RECURRENCE_ID,
+			CRR.RECURRENCE_FREQ,
+			CRR.RECURRENCE_INTERVAL,
+			CRR.END_DATE AS RECURRENCE_END_DATE,
+			CRR.RECURRENCE_COUNT,
+			CRR.RECURRENCE_BYWEEKDAY,
+			CRR.RECURRENCE_RULE,
+			CE.SYS_REGISTER_DATE,
+			CE.SYS_UPDATE_DATE,
+			CE.OUTLOOK_ID
+		FROM 
+			CALENDAR_EVENT AS CE
+		LEFT OUTER JOIN
+			CALENDAR_REPEAT_RULE AS CRR ON CRR.EVENT_ID = CE.EVENT_ID
+		WHERE 1=1
+		AND CE.EVENT_ID = #{eventId}
+	</select>
+	
+	<select id="listRruleCheckDate" parameterType="hashmap" resultType="hashmap">
+	SELECT 
+		CE.EVENT_ID,
+		CE.CALENDAR_ID,
+		CE.EVENT_CODE,
+		CE.START_DATETIME,
+		CE.END_DATETIME,
+		TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIMEDIFF,
+		DATE_FORMAT(CE.START_DATETIME, '%H:%I') AS EVENT_START_TIME,
+		DATE_FORMAT(CE.END_DATETIME, '%H:%I') AS EVENT_END_TIME,
+		CRR.START_DATE,
+		CRR.END_DATE,
+		CRR.RECURRENCE_RULE
+	FROM CALENDAR_EVENT AS CE
+	LEFT JOIN CALENDAR_REPEAT_RULE AS CRR ON CRR.EVENT_ID = CE.EVENT_ID
+	WHERE 1=1
+	AND CE.REPEAT_YN = 'Y'
+	AND CE.DELETE_YN = 'N'
+	AND CE.CALENDAR_ID = #{calendarId}
+	</select>
+	
+	<!-- 캘린더 2.0 -->
+	<insert id="insertCalendarRepeatEvent" parameterType="hashmap">
+       INSERT INTO CALENDAR_EVENT
+		(
+			CALENDAR_ID,
+			MEMBER_ID_NUM, 
+			EVENT_CODE, 
+			EVENT_SUBJECT, 
+			EVENT_DETAIL, 
+			ALLDAY_YN, 
+			START_DATETIME, 
+			END_DATETIME, 
+			BEFORE_MOVE_TIME,
+			AFTER_MOVE_TIME,
+			REPEAT_YN,
+			LOCATION,
+			SHARE_YN,
+			ALARM_PERIOD,
+			ALARM_TARGET,
+			ALARM_FLAG,
+			DELETE_YN,
+			RECURRENCE_ID
+		) VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+		(
+			#{hiddenModalCalendarId},
+			#{hiddenModalCreatorId}, 
+			#{selectModalEventCode}, 
+			#{textModalEventSubject},
+			#{textareaModalEventDetail},
+			#{hiddenModalAllday_YN},
+			<choose>
+			<when test="selectModalStartDateTime == null or selectModalStartDateTime == '' ">
+			#{item.textModalStartDate},
+			</when>
+			<otherwise>
+			#{item.textModalStartDate}#{selectModalStartDateTime},
+			</otherwise>
+			</choose>
+			<choose>
+			<when test="selectModalEndDateTime == null or selectModalEndDateTime == '' ">
+			#{item.hiddenModalEndDate},
+			</when>
+			<otherwise>
+			#{item.hiddenModalEndDate}#{selectModalEndDateTime},
+			</otherwise>
+			</choose>
+			#{selectModalBeforeMoveTimeMin},
+			#{selectModalAfterMoveTimeMin},
+			#{hiddenModalRepeat_YN},
+			#{textModalEventLocation},
+			#{radioModalShareYN},
+			<choose>
+			<when test="radioModalAlam != null and radioModalAlam != ''">
+			#{radioModalAlam},
+			</when>
+			<otherwise>
+			NULL,
+			</otherwise>
+			</choose>
+			#{selectModalAlam},
+			#{alarmFlag},
+			'N',
+			<choose>
+			<when test="RECURRENCE_ID != null and RECURRENCE_ID != '' ">
+			#{RECURRENCE_ID}
+			</when>
+			<otherwise>
+			''
+			</otherwise>
+			</choose>
+		)
+		</foreach>
+		<selectKey keyProperty="EVENT_ID" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertRepeatEvent2" parameterType="hashmap">
+			INSERT INTO CALENDAR_REPEAT_RULE
+			(
+				EVENT_ID,
+				RECURRENCE_FREQ,
+				RECURRENCE_INTERVAL,
+				START_DATE,
+				END_DATE,
+				RECURRENCE_COUNT,
+				<if test="hiddenModalRuleByweekday != null and hiddenModalRuleByweekday != ''">
+				RECURRENCE_BYWEEKDAY,
+				</if>
+				<if test="hiddenModalRuleBymonthday != null and hiddenModalRuleBymonthday != ''">
+				RECURRENCE_BYMONTHDAY,
+				</if>
+				RECURRENCE_RULE
+			)
+				VALUES
+			(
+				#{EVENT_ID},
+				#{selectModalFreq},
+				#{selectModalInterval},
+				#{hiddenModalStartRuleDate},
+				<choose>
+				<when test="hiddenModalEndRuleDate == null or hiddenModalEndRuleDate == ''">
+				NULL,
+				</when>
+				<otherwise>
+				#{hiddenModalEndRuleDate},
+				</otherwise>
+				</choose>
+				<choose>
+				<when test="hiddenModalCountNum == null or hiddenModalCountNum == ''">
+				NULL,
+				</when>
+				<otherwise>
+				#{hiddenModalCountNum},
+				</otherwise>
+				</choose>
+				<if test="hiddenModalRuleByweekday != null and hiddenModalRuleByweekday != ''">
+				#{hiddenModalRuleByweekday},
+				</if>
+				<if test="hiddenModalRuleBymonthday != null and hiddenModalRuleBymonthday != ''">
+				#{hiddenModalRuleBymonthday},
+				</if>
+				#{rrule}
+			);
+			<selectKey keyProperty="RECURRENCE_ID" resultType="Integer" order="AFTER">
+        		SELECT LAST_INSERT_ID();
+    		</selectKey>
+	</insert>
+	
+	<update id="updateCalEventRruleExDate" parameterType="hashmap">
+	        UPDATE CALENDAR_REPEAT_RULE 
+	        <choose>
+	        	<when test='hiddenModalEXDate_YN == "Y"'>
+	        	SET EX_DATE = CONCAT(EX_DATE, #{EX_DATE})
+	        	</when>
+	        	<otherwise>
+	        	SET EX_DATE = #{hiddenModalOrgStartDate}
+	        	</otherwise>
+	        </choose>
+			WHERE EVENT_ID = #{hiddenModalEventId}
+	</update>
+	
+	<update id="updateCalEventRrule" parameterType="hashmap">
+	        UPDATE CALENDAR_REPEAT_RULE 
+	        	SET END_RULE = #{END_RULE},
+	        		END_DATE = #{END_DATE}
+			WHERE EVENT_ID = #{hiddenModalEventId}
+	</update>
+	
+	<select id="calendarEventListMobile" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				CE.EVENT_ID,
+				CE.CALENDAR_ID, 
+				CE.EVENT_CODE,
+				CE.EVENT_SUBJECT AS title, 
+				CE.EVENT_DETAIL,
+				CE.ALLDAY_YN,
+				CASE
+					WHEN CE.ALLDAY_YN = 'Y' THEN true
+					WHEN CE.ALLDAY_YN = 'N' THEN false
+				END AS allDay,
+				CE.START_DATETIME AS start, 
+				CE.END_DATETIME AS end, 
+				TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP,
+				CE.BEFORE_MOVE_TIME,
+				CE.AFTER_MOVE_TIME,
+				'black' as textColor,
+				'white' as backgroundColor,
+				CE.REPEAT_YN,
+				CRR.RECURRENCE_ID,
+				CRR.RECURRENCE_FREQ,
+				CRR.RECURRENCE_INTERVAL,
+				CRR.END_DATE AS RECURRENCE_END_DATE,
+				CRR.RECURRENCE_COUNT,
+				CRR.RECURRENCE_BYWEEKDAY,
+				CRR.RECURRENCE_RULE,
+				CE.LOCATION,
+				CE.SHARE_YN,
+				CASE WHEN NOW() > CE.END_DATETIME THEN 'Y' ELSE 'N' END PAST_YN,
+				DATE_FORMAT(CE.START_DATETIME,'%H:%i') START_TIME,
+				DATE_FORMAT(CE.END_DATETIME,'%H:%i') END_TIME,
+				DATE_FORMAT(CE.START_DATETIME,'%Y%m%d') START_DAY,
+				DATE_FORMAT(CE.END_DATETIME,'%Y%m%d') END_DAY
+				
+				,TIMESTAMPDIFF(DAY, CE.START_DATETIME, CE.END_DATETIME) AS DAY_DIFF
+			FROM CALENDAR_EVENT AS CE 
+			LEFT OUTER JOIN CALENDAR_REPEAT_RULE AS CRR
+				ON CRR.EVENT_ID=CE.EVENT_ID
+			WHERE 1=1
+			AND CE.MEMBER_ID_NUM=#{hiddenModalCreatorId}
+		]]>
+		<if test="startRange !=null and startRange != '' and endRange !=null and endRange != '' ">
+		<![CDATA[
+			AND ( 
+		        CE.START_DATETIME BETWEEN '${startRange}' AND '${endRange}'
+		        OR
+		        CE.END_DATETIME BETWEEN '${startRange}' AND '${endRange}'
+		        OR
+		        ( CE.START_DATETIME <= '${startRange}' AND CE.END_DATETIME >= '${endRange}' )
+	        )
+        ]]>
+        </if>
+		<choose>
+			<when test="calendarCheck_id !=null and calendarCheck_id != '' ">
+				AND CE.CALENDAR_ID IN(${calendarCheck_id})
+			</when>
+			<otherwise>
+				AND CE.CALENDAR_ID IN('')
+			</otherwise>
+		</choose>
+		<choose>
+			<when test=" event_id_list != null and event_id_list != '' ">
+				AND CE.EVENT_ID IN (${event_id_list})
+			</when>
+			<otherwise>
+				AND CE.EVENT_ID IN('')
+			</otherwise>
+		</choose>
+		<![CDATA[
+			AND CE.DELETE_YN = 'N'
+		]]>
+		<if test=" order_by != null and order_by != '' ">
+			ORDER BY CE.START_DATETIME ${order_by}
+		</if>
+	</select>
+	
+	<select id="selectCalendarEventMobile" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			CE.EVENT_ID 
+			,CE.CALENDAR_ID
+			,CE.MEMBER_ID_NUM
+			,CE.EVENT_CODE
+			,CE.EVENT_SUBJECT
+
+			,CE.EVENT_SUBJECT AS title
+
+			,CE.EVENT_DETAIL
+			,CE.ALLDAY_YN
+
+			,CASE
+				WHEN CE.ALLDAY_YN = 'Y' THEN true
+				WHEN CE.ALLDAY_YN = 'N' THEN false
+			END AS allDay
+			
+			,CE.START_DATETIME
+			,CE.END_DATETIME
+
+			,CE.START_DATETIME AS start
+			,CE.END_DATETIME AS end
+			,TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP
+
+			,CE.BEFORE_MOVE_TIME
+			,CE.AFTER_MOVE_TIME
+			,CE.REPEAT_YN
+			,CE.SYS_REGISTER_DATE
+			,CE.SYS_UPDATE_DATE
+			,CE.LOCATION
+			,CE.AFTER_MOVE_TIME
+			,CE.SHARE_YN
+			,CE.ALARM_PERIOD
+			,CE.ALARM_TARGET
+			,CE.ALARM_FLAG
+			,CE.DELETE_YN
+			,CE.INVITE_ID
+			
+			,OMI.EMAIL
+			,OMI.MEMBER_ID_NUM
+			
+			,CASE WHEN NOW() > CE.END_DATETIME THEN 'Y' ELSE 'N' END PAST_YN
+
+			,DATE_FORMAT(CE.START_DATETIME,'%H:%i') START_TIME
+			,DATE_FORMAT(CE.END_DATETIME,'%H:%i') END_TIME
+			,DATE_FORMAT(CE.START_DATETIME,'%Y-%m-%d') START_DAY
+			,DATE_FORMAT(CE.END_DATETIME,'%Y-%m-%d') END_DAY
+			
+			,CRR.RECURRENCE_ID
+
+			,CRR.RECURRENCE_FREQ
+			,CRR.RECURRENCE_INTERVAL
+
+			,CRR.END_DATE AS RECURRENCE_END_DATE
+
+			,CRR.START_DATE
+			,CRR.END_DATE
+			,CRR.RECURRENCE_COUNT
+			,CRR.RECURRENCE_BYWEEKDAY
+			,CRR.RECURRENCE_RULE
+			,CRR.SYS_REGISTER_DATE
+			,CRR.SYS_UPDATE_DATE
+			,CRR.RECURRENCE_BYMONTHDAY
+			,CRR.END_RULE
+			,CRR.EX_DATE
+
+			,IF(ISNULL(CRR.EX_DATE), 'N', 'Y') AS EX_DATE_YN
+			
+			,TIMESTAMPDIFF(DAY, CE.START_DATETIME, CE.END_DATETIME) AS DAY_DIFF
+		FROM CALENDAR_EVENT AS CE
+		LEFT OUTER JOIN CALENDAR_REPEAT_RULE AS CRR
+			ON CRR.EVENT_ID=CE.EVENT_ID
+		LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI
+			ON OMI.MEMBER_ID_NUM=CE.MEMBER_ID_NUM
+		WHERE CE.EVENT_ID = #{hiddenModalEventId}
+	</select>
+	
+	<select id="selectCalendarRepeatRule" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			IFNULL(CRR.EX_DATE, "") AS EX_DATE,
+			IFNULL(CE.EVENT_ID, "") AS EVENT_ID
+		FROM CALENDAR_REPEAT_RULE AS CRR
+		LEFT OUTER JOIN
+			CALENDAR_EVENT AS CE ON CE.RRULE_SYNC_ID = CRR.EVENT_ID
+		WHERE 1=1 
+		<choose>
+			<when test=" hiddenModalRruleId != null and hiddenModalRruleId != '' ">
+				AND CRR.EVENT_ID = #{hiddenModalRruleSyncId}
+			</when>
+			<otherwise>
+				AND CRR.EVENT_ID = #{hiddenModalEventId} 
+			</otherwise>
+		</choose>
+		
+	</select>
+	
+	<select id="selectCalendarRepeatGarbageData" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			RECURRENCE_ID,
+			EVENT_ID,
+			START_DATE,
+			END_DATE,
+			EX_DATE,
+			END_RULE
+		FROM CALENDAR_REPEAT_RULE 
+		WHERE 1=1
+		<choose>
+			<when test=" hiddenModalRruleSyncId != null and hiddenModalRruleSyncId != '' ">
+				AND EVENT_ID = #{hiddenModalRruleSyncId}
+			</when>
+			<otherwise>
+				AND EVENT_ID = #{hiddenModalEventId}
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	<select id="calendarEventListMobile2" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT
+			*
+		FROM
+		(
+			SELECT 
+				CE.EVENT_ID,
+				CE.CALENDAR_ID, 
+				CE.EVENT_CODE,
+				CE.EVENT_SUBJECT AS title, 
+				CE.EVENT_DETAIL, 
+				CASE
+					WHEN CE.ALLDAY_YN = 'Y' THEN true
+					WHEN CE.ALLDAY_YN = 'N' THEN false
+				END AS allDay,
+				CE.START_DATETIME AS start, 
+				CE.END_DATETIME AS end, 
+				TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP,
+				CE.BEFORE_MOVE_TIME,
+				CE.AFTER_MOVE_TIME,
+				'black' as textColor,
+				'white' as backgroundColor,
+				CE.REPEAT_YN,
+				CRR.RECURRENCE_ID,
+				CRR.RECURRENCE_FREQ,
+				CRR.RECURRENCE_INTERVAL,
+				CRR.END_DATE AS RECURRENCE_END_DATE,
+				CRR.RECURRENCE_COUNT,
+				CRR.RECURRENCE_BYWEEKDAY,
+				CRR.RECURRENCE_BYMONTHDAY,
+				CRR.RECURRENCE_RULE,
+				CRR.END_RULE,
+				CRR.EX_DATE,
+				IF(ISNULL(CRR.EX_DATE), 'N', 'Y') AS EX_DATE_YN,
+				CE.LOCATION,
+				CE.SHARE_YN,
+				CE.ALARM_FLAG,
+				CE.ALARM_TARGET,
+				
+				CASE WHEN NOW() > CE.END_DATETIME THEN 'Y' ELSE 'N' END PAST_YN,
+				DATE_FORMAT(CE.START_DATETIME,'%H:%i') START_TIME,
+				DATE_FORMAT(CE.END_DATETIME,'%H:%i') END_TIME,
+				DATE_FORMAT(CE.START_DATETIME,'%Y%m%d') START_DAY,
+				DATE_FORMAT(CE.END_DATETIME,'%Y%m%d') END_DAY
+			FROM CALENDAR_EVENT AS CE 
+			LEFT OUTER JOIN CALENDAR_REPEAT_RULE AS CRR
+				ON CRR.EVENT_ID=CE.EVENT_ID
+			WHERE 1=1
+			AND CE.DELETE_YN ='N'
+			AND CE.REPEAT_YN = 'N'
+		]]>	
+		<choose>
+			<when test="hiddenModalCreatorId !=null and hiddenModalCreatorId != '' " >
+				AND CE.MEMBER_ID_NUM = #{hiddenModalCreatorId}
+			</when>
+		</choose>
+		<choose>
+			<when test="calendarCheck_id !=null and calendarCheck_id != '' ">
+				AND CE.CALENDAR_ID IN(${calendarCheck_id})
+			</when>
+			<otherwise>
+				<!-- AND CE.CALENDAR_ID IN('') -->
+			</otherwise>
+		</choose>
+		
+		<choose>
+			<when test=" textSearchStartDate != null and textSearchStartDate != '' ">
+				<choose>
+					<when test="textSearchEndDate != null and textSearchEndDate != '' ">
+						AND CE.START_DATETIME between #{textSearchStartDate} and date_add(#{textSearchEndDate}, interval +1 day)
+					</when>
+					<otherwise>
+						AND CE.START_DATETIME >= #{textSearchStartDate}
+					</otherwise>
+				</choose>
+			</when>
+			<when test=" textSearchEndDate != null and textSearchEndDate != '' ">
+				<![CDATA[
+				AND CE.START_DATETIME <= #{textSearchEndDate}
+				]]>
+			</when>
+		</choose>
+		
+		<if test=" textSearch != null and textSearch != '' ">
+			AND CE.EVENT_SUBJECT LIKE CONCAT('%', #{textSearch}, '%')
+			OR CE.EVENT_DETAIL LIKE CONCAT('%', #{textSearch}, '%')
+		</if>
+	<![CDATA[
+			UNION ALL
+			SELECT 
+				CE.EVENT_ID,
+				CE.CALENDAR_ID, 
+				CE.EVENT_CODE,
+				CE.EVENT_SUBJECT AS title, 
+				CE.EVENT_DETAIL, 
+				CASE
+					WHEN CE.ALLDAY_YN = 'Y' THEN true
+					WHEN CE.ALLDAY_YN = 'N' THEN false
+				END AS allDay,
+				CE.START_DATETIME AS start, 
+				CE.END_DATETIME AS end, 
+				TIMESTAMPDIFF(MINUTE, CE.START_DATETIME, CE.END_DATETIME) AS TIME_GAP,
+				CE.BEFORE_MOVE_TIME,
+				CE.AFTER_MOVE_TIME,
+				'black' as textColor,
+				'white' as backgroundColor,
+				CE.REPEAT_YN,
+				CRR.RECURRENCE_ID,
+				CRR.RECURRENCE_FREQ,
+				CRR.RECURRENCE_INTERVAL,
+				CRR.END_DATE AS RECURRENCE_END_DATE,
+				CRR.RECURRENCE_COUNT,
+				CRR.RECURRENCE_BYWEEKDAY,
+				CRR.RECURRENCE_BYMONTHDAY,
+				CRR.RECURRENCE_RULE,
+				CRR.END_RULE,
+				CRR.EX_DATE,
+				IF(ISNULL(CRR.EX_DATE), 'N', 'Y') AS EX_DATE_YN,
+				CE.LOCATION,
+				CE.SHARE_YN,
+				CE.ALARM_FLAG,
+				CE.ALARM_TARGET,
+				
+				CASE WHEN NOW() > CE.END_DATETIME THEN 'Y' ELSE 'N' END PAST_YN,
+				DATE_FORMAT(CE.START_DATETIME,'%H:%i') START_TIME,
+				DATE_FORMAT(CE.END_DATETIME,'%H:%i') END_TIME,
+				DATE_FORMAT(CE.START_DATETIME,'%Y%m%d') START_DAY,
+				DATE_FORMAT(CE.END_DATETIME,'%Y%m%d') END_DAY
+			FROM CALENDAR_EVENT AS CE 
+			LEFT OUTER JOIN CALENDAR_REPEAT_RULE AS CRR
+				ON CRR.EVENT_ID=CE.EVENT_ID
+			WHERE 1=1
+			AND CE.DELETE_YN ='N'
+			AND CE.REPEAT_YN = 'Y'
+		]]>
+		<choose>
+			<when test="hiddenModalCreatorId !=null and hiddenModalCreatorId != '' " >
+				AND CE.MEMBER_ID_NUM = #{hiddenModalCreatorId}
+			</when>
+		</choose>
+		<choose>
+			<when test="calendarCheck_id !=null and calendarCheck_id != '' ">
+				AND CE.CALENDAR_ID IN(${calendarCheck_id})
+			</when>
+			<otherwise>
+				<!-- AND CE.CALENDAR_ID IN('') -->
+			</otherwise>
+		</choose>
+		
+		<choose>
+			<when test=" textSearchEndDate != null and textSearchEndDate != '' ">
+				<![CDATA[
+				AND CE.START_DATETIME <= #{textSearchEndDate}
+				]]>
+			</when>
+		</choose>
+		
+		<if test=" textSearch != null and textSearch != '' ">
+			AND CE.EVENT_SUBJECT LIKE CONCAT('%', #{textSearch}, '%')
+			OR CE.EVENT_DETAIL LIKE CONCAT('%', #{textSearch}, '%')
+		</if>
+	<![CDATA[
+		) tbl
+	]]>
+	<if test=" order_by != null and order_by != '' ">
+		ORDER BY tbl.start ${order_by}
+	</if>
+	</select>
+	
+	
+	<update id="upsertGoogleEventId" parameterType="hashmap">
+	        UPDATE CALENDAR_EVENT 
+	        		SET GOOGLE_ID = #{googleEventId}
+			WHERE 1=1
+			AND EVENT_ID = #{EVENT_ID}
+			AND CALENDAR_ID= #{selectModalCalendarID}
+	</update>
+	
+	<select id="selectGoogleId" parameterType="hashmap" resultType="String">
+			SELECT GOOGLE_ID
+			FROM CALENDAR_EVENT
+			WHERE 1=1
+			AND EVENT_ID = #{EVENT_ID}
+	</select>
+	
+	<!-- 반복일정 '향후일정'에 포함되는 row를 찾아 삭제 -->
+	<update id="deleteExDateEvent" parameterType="hashmap">
+		<![CDATA[
+			UPDATE
+				CALENDAR_EVENT AS CE
+			SET
+				CE.DELETE_YN = 'Y'
+			WHERE 1=1			
+				AND CE.START_DATETIME >= #{END_DATE}
+		]]>
+			<choose>
+				<when test="hiddenModalRruleSyncId !=null and hiddenModalRruleSyncId != '' ">
+					AND CE.RRULE_SYNC_ID = #{hiddenModalRruleSyncId}
+				</when>
+				<otherwise>
+					AND CE.RRULE_SYNC_ID = #{hiddenModalEventId}
+				</otherwise>
+			</choose>
+	</update>
+	
+	<!-- 반복일정 '향후일정'에 포함되는 rrule 찾아 삭제 -->
+	<delete id="deleteExDateEventRrule" parameterType="hashmap">
+			DELETE
+				CRR
+			FROM CALENDAR_REPEAT_RULE AS CRR
+			INNER JOIN (SELECT EVENT_ID 
+									FROM CALENDAR_EVENT
+									WHERE 1=1
+									<choose>
+										<when test="hiddenModalRruleSyncId !=null and hiddenModalRruleSyncId != '' ">
+											AND RRULE_SYNC_ID = #{hiddenModalRruleSyncId}
+										</when>
+										<otherwise>
+											AND RRULE_SYNC_ID = #{hiddenModalEventId}
+										</otherwise>
+									</choose>
+		<![CDATA[
+									AND START_DATETIME >= #{END_DATE}) AS CE
+			ON CE.EVENT_ID = CRR.EVENT_ID
+		]]>
+	</delete>	
+	
+	<!-- rruleSyncId 로 본래의 rrule을 찾아 update해준다-->
+	<update id="updateCalEventRruleBySyncId" parameterType="hashmap">
+      UPDATE CALENDAR_REPEAT_RULE 
+      	SET END_RULE = #{END_RULE},
+      			END_DATE = #{END_DATE}
+			WHERE EVENT_ID = #{hiddenModalRruleSyncId}
+			<![CDATA[
+				AND (END_DATE IS NULL OR END_DATE >= #{END_DATE})
+			]]> 
+	</update>
+</mapper>

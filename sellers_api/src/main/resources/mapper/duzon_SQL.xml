@@ -1,0 +1,2265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="duzon">
+	
+	<select id="selectOurMemberInfo" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				IsNULL(CD_DEPT, '') AS CD_DEPT, 				-- 팀
+				IsNULL(NO_EMP, '') AS NO_EMP, 					-- 사번
+				IsNULL(NM_EMP, '') AS	 NM_EMP,				-- 이름
+				IsNULL(NM_DUTY_RANK, '') AS	 NM_DUTY_RANK, 		-- 직위
+				IsNULL(NM_DUTY_STEP, '') AS NM_DUTY_STEP,		-- 직급
+				IsNULL(NM_DUTY_RESP, '') AS NM_DUTY_RESP,		-- 직책
+				IsNULL(NM_DUTY_TYPE, '') AS NM_DUTY_TYPE,		-- 직군
+				IsNULL(NM_JOB_SERIES, '') AS NM_JOB_SERIES,		-- 담당업무
+				CONVERT(CHAR(10), CONVERT(date, DT_ENTER), 23) AS DT_ENTER,		-- 입사일자
+				CASE
+					WHEN DT_RETIRE IS NULL OR DT_RETIRE = '' THEN NULL
+					ELSE CONVERT(CHAR(10), CONVERT(date, DT_RETIRE), 23)
+				END AS DT_RETIRE,											-- 퇴사일자
+				IsNULL(NO_TEL_EMER, null ) AS NO_TEL_EMER,		-- 휴대전화
+				IsNULL(NO_TEL, '') AS NO_TEL,				-- 일반전화
+				IsNULL(NO_EMAIL, '') AS NO_EMAIL,			-- 메일
+				CASE 
+					WHEN (DT_RETIRE IS NULL OR LTRIM(RTRIM(DT_RETIRE)) = '' OR CONVERT(CHAR(8), GETDATE(), 112) <= DT_RETIRE ) THEN 'Y'
+					ELSE 'N'
+				END AS USE_YN,												-- 사용여부
+				CASE
+					WHEN DT_BIRTH IS NULL OR DT_BIRTH = '' THEN NULL
+					ELSE CONVERT(CHAR(10), CONVERT(date, DT_BIRTH), 23)
+				END AS DT_BIRTH,											-- 생년월일
+				IsNULL(NM_DAY, '') AS NM_DAY,							-- 양음여부
+				IsNULL(ADS, '') AS ADS									-- 주소
+			FROM V_HR_HULESRPT
+			WHERE 1=1
+			AND CD_COMPANY = '1000';
+		]]>
+	</select>
+	
+	<insert id="insertOurMemberInfo" parameterType="hashmap">
+			INSERT INTO OUR_MEMBERS_INFO (MEMBER_TEAM, MEMBER_ID_NUM, HAN_NAME, POSITION_STATUS, POSITION_RANK, POSITION_DUTY, POSITION_TYPE, BUSINESS_DUTY, JOIN_DATE, STOP_DATE, CELL_PHONE, PHONE, EMAIL, BIRTHDAY,BIRTHDAY_CATEGORY,ADDRESS, USE_YN)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(#{duzon.CD_DEPT},#{duzon.NO_EMP},#{duzon.NM_EMP},#{duzon.NM_DUTY_RANK},#{duzon.NM_DUTY_STEP},#{duzon.NM_DUTY_RESP},#{duzon.NM_DUTY_TYPE},#{duzon.NM_JOB_SERIES},
+				<choose>
+					<when test="duzon.DT_ENTER != null and duzon.DT_ENTER != '' ">
+						#{duzon.DT_ENTER},
+					</when>
+					<otherwise>
+						NULL,
+					</otherwise>
+				</choose> 
+				<choose>
+					<when test="duzon.DT_RETIRE != null and duzon.DT_RETIRE != '' ">
+						#{duzon.DT_RETIRE},
+					</when>
+					<otherwise>
+						NULL,
+					</otherwise>
+				</choose> 
+				#{duzon.NO_TEL_EMER},#{duzon.NO_TEL},#{duzon.NO_EMAIL},
+				<choose>
+					<when test="duzon.DT_BIRTH != null and duzon.DT_BIRTH != '' ">
+						#{duzon.DT_BIRTH},
+					</when>
+					<otherwise>
+						 NULL,
+					</otherwise>
+				</choose>
+			#{duzon.NM_DAY},#{duzon.ADS},#{duzon.USE_YN})
+			</foreach>
+			<!--  여기서부터 업데이트 문 -->
+			ON DUPLICATE KEY UPDATE 
+				MEMBER_TEAM=VALUES(MEMBER_TEAM),
+				MEMBER_ID_NUM=VALUES(MEMBER_ID_NUM),
+				HAN_NAME=VALUES(HAN_NAME),
+				POSITION_STATUS=VALUES(POSITION_STATUS),
+				POSITION_RANK=VALUES(POSITION_RANK),
+				POSITION_DUTY=VALUES(POSITION_DUTY),
+				POSITION_TYPE=VALUES(POSITION_TYPE),
+				BUSINESS_DUTY=VALUES(BUSINESS_DUTY),
+				JOIN_DATE=VALUES(JOIN_DATE),
+				STOP_DATE=VALUES(STOP_DATE),
+				CELL_PHONE=VALUES(CELL_PHONE),
+				PHONE=VALUES(PHONE),
+				EMAIL=VALUES(EMAIL),
+				BIRTHDAY=VALUES(BIRTHDAY),
+				BIRTHDAY_CATEGORY=VALUES(BIRTHDAY_CATEGORY),
+				ADDRESS=VALUES(ADDRESS),
+				USE_YN=VALUES(USE_YN)
+	</insert>
+	
+	<update id="updateOurMemberInfoTeam" parameterType="hashmap">
+		<![CDATA[
+			UPDATE
+			OUR_DIVISION_INFO AS ODI
+			INNER JOIN
+			OUR_TEAM_INFO AS OTI ON ODI.DIVISION_NO = OTI.DIVISION_NO
+			INNER JOIN
+			OUR_MEMBERS_INFO AS OMI ON OTI.ERP_TEAM_CD = OMI.MEMBER_TEAM
+			SET 
+				OMI.MEMBER_DIVISION = ODI.DIVISION_NO,
+				OMI.MEMBER_TEAM = OTI.TEAM_NO 
+		]]>
+	</update>
+	
+	
+	<insert id="insertOurMemberInfoLogin" parameterType="hashmap">
+		<![CDATA[
+			INSERT INTO OUR_USERS_INFO (MEMBER_ID_NUM, PASSWORD_ENC, LOGIN_TRY_COUNT)
+			SELECT OMI.MEMBER_ID_NUM, #{default_user_pw}, 0
+			FROM OUR_MEMBERS_INFO AS OMI
+			LEFT OUTER JOIN
+			OUR_USERS_INFO AS OUI ON OMI.MEMBER_ID_NUM = OUI.MEMBER_ID_NUM
+			WHERE 1=1
+			AND OMI.USE_YN = 'Y'
+			AND OUI.MEMBER_ID_NUM IS NULL 
+		]]>
+	</insert>
+	
+	<insert id="insertOurMemberInfoAuth" parameterType="hashmap">
+		<!-- 새로운 직원은 기본 1005 권한 부여 -->
+		<![CDATA[
+			INSERT INTO COM_AUTHORITY_MEMBER (MEMBER_ID_NUM, AUTHORITY_CODE,USE_YN)
+			SELECT OMI.MEMBER_ID_NUM,'1005','Y'
+			FROM
+			OUR_MEMBERS_INFO AS OMI
+			LEFT OUTER JOIN
+			COM_AUTHORITY_MEMBER AS CAM ON OMI.MEMBER_ID_NUM = CAM.MEMBER_ID_NUM
+			WHERE 1=1
+			AND OMI.USE_YN = 'Y'
+			AND CAM.MEMBER_ID_NUM IS NULL
+		]]>
+	</insert>
+	
+	
+	<select id="selectOurDivisionInfo" parameterType="hashmap" resultType="hashmap">
+		<!-- ERP의 사원 테이블과 조인하여 사용 중인 부서만 선별 -->
+		<![CDATA[
+		SELECT 
+			IsNULL( VMD.CD_DEPT, '' ) AS CD_DEPT,
+			IsNULL( VMD.NM_DEPT, '' ) AS NM_DEPT,
+			IsNULL( VMD.H_DEPT, '' ) AS H_DEPT
+		FROM 
+			(
+				SELECT CD_DEPT, NM_DEPT, H_DEPT, DT_END
+				FROM V_MA_DEPT 
+				WHERE 1=1
+				AND CD_COMPANY = '1000'
+				AND (DT_END IS NULL OR RTRIM(LTRIM(DT_END)) = '' OR CONVERT(CHAR(8), GETDATE(), 112) <= DT_END)
+			) AS VMD
+			INNER JOIN
+			(
+				SELECT 
+					CASE 
+						WHEN H_DEPT IS NULL THEN CD_DEPT
+						WHEN RTRIM(LTRIM(H_DEPT)) = '' THEN CD_DEPT
+						ELSE H_DEPT
+					END AS CD_DEPT 
+				FROM V_HR_HULESRPT
+				WHERE 1=1
+				AND CD_COMPANY = '1000'
+				AND (DT_RETIRE IS NULL OR RTRIM(LTRIM(DT_RETIRE)) = '' OR CONVERT(CHAR(8), GETDATE(), 112) <= DT_RETIRE) 
+			) AS VHH ON VMD.CD_DEPT = VHH.CD_DEPT 
+		WHERE 1=1
+		AND (VMD.H_DEPT IS NULL OR RTRIM(LTRIM(VMD.H_DEPT)) = '')
+		GROUP BY VMD.CD_DEPT, VMD.NM_DEPT,VMD.H_DEPT;
+		]]>
+	</select>
+	
+	<update id="updateOurDivisionInfo" parameterType="hashmap">
+		UPDATE OUR_DIVISION_INFO
+		SET USE_YN = 'N'
+		WHERE 1=1
+		AND ERP_DIVISION_CD NOT IN 
+		<foreach item="duzon" index="index" collection="list" open="(" separator="," close=")">
+		#{duzon.CD_DEPT}
+		</foreach>
+	</update>
+	
+	<insert id="insertOurDivisionInfo" parameterType="hashmap">
+			INSERT INTO OUR_DIVISION_INFO (DIVISION_NAME, ERP_DIVISION_CD)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(#{duzon.NM_DEPT},#{duzon.CD_DEPT})
+			</foreach>
+			ON DUPLICATE KEY UPDATE DIVISION_NAME=VALUES(DIVISION_NAME), ERP_DIVISION_CD=VALUES(ERP_DIVISION_CD)		
+		
+	</insert>
+			
+	<select id="selectOurTeamInfo" parameterType="hashmap" resultType="hashmap">
+		<!-- 셀러스의 조직도 구조와 ERP의 조직도가 다르기 때문에 2뎁스로 맞춰서 팀 가져옴 -->
+		<![CDATA[
+			SELECT
+				TB.CD_DEPT, 
+				TB.NM_DEPT, 
+				CASE 
+					WHEN (TB.H_DEPT IS NULL OR RTRIM(LTRIM(TB.H_DEPT)) = '') THEN TB.CD_DEPT
+					ELSE TB.H_DEPT
+				END AS H_DEPT,
+				TB.H_NM_DEPT
+			FROM (
+				SELECT 
+					A.CD_DEPT,
+					A.NM_DEPT,
+					CASE 
+						WHEN (B.H_DEPT IS NULL OR RTRIM(LTRIM(B.H_DEPT)) = '') THEN A.H_DEPT
+						ELSE B.H_DEPT
+					END AS H_DEPT,
+					CASE 
+						WHEN (B.H_DEPT IS NULL OR RTRIM(LTRIM(B.H_DEPT)) = '') THEN B.NM_DEPT
+						ELSE C.NM_DEPT
+					END AS H_NM_DEPT
+				FROM 
+					V_MA_DEPT AS A 
+					INNER JOIN 
+					V_MA_DEPT AS B ON A.CD_COMPANY = '1000' AND (CASE WHEN A.H_DEPT IS NULL OR RTRIM(LTRIM(A.H_DEPT)) = '' THEN A.CD_DEPT ELSE A.H_DEPT END) = B.CD_DEPT
+					INNER JOIN
+					V_MA_DEPT AS C ON B.CD_COMPANY = '1000' AND (CASE WHEN B.H_DEPT IS NULL OR RTRIM(LTRIM(B.H_DEPT)) = '' THEN B.CD_DEPT ELSE B.H_DEPT END) = C.CD_DEPT
+					INNER JOIN
+					V_HR_HULESRPT AS VHH ON A.CD_DEPT = VHH.CD_DEPT
+				WHERE 1=1
+				AND VHH.CD_COMPANY = '1000'
+				AND (A.DT_END IS NULL OR RTRIM(LTRIM(A.DT_END)) = '' OR CONVERT(CHAR(8), GETDATE(), 112) <= A.DT_END) 
+				AND (B.DT_END IS NULL OR RTRIM(LTRIM(B.DT_END)) = '' OR CONVERT(CHAR(8), GETDATE(), 112) <= B.DT_END) 
+				AND (C.DT_END IS NULL OR RTRIM(LTRIM(C.DT_END)) = '' OR CONVERT(CHAR(8), GETDATE(), 112) <= C.DT_END) 
+				AND (VHH.DT_RETIRE IS NULL OR RTRIM(LTRIM(VHH.DT_RETIRE)) = '' OR CONVERT(CHAR(8), GETDATE(), 112) <= VHH.DT_RETIRE)
+			) AS TB
+			GROUP BY TB.CD_DEPT, TB.NM_DEPT, TB.H_DEPT, TB.H_NM_DEPT;
+		]]>
+	</select>
+	
+	<update id="updateOurTeamInfo" parameterType="hashmap">
+		UPDATE OUR_TEAM_INFO
+		SET USE_YN = 'N'
+		WHERE 1=1
+		AND ERP_TEAM_CD NOT IN 
+		<foreach item="duzon" index="index" collection="list" open="(" separator="," close=")">
+		#{duzon.CD_DEPT}
+		</foreach>
+	</update>
+	
+	<insert id="insertOurTeamInfo" parameterType="hashmap">
+		INSERT INTO OUR_TEAM_INFO (TEAM_NAME, DIVISION_NO, ERP_TEAM_CD)
+		VALUES
+		<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(#{duzon.NM_DEPT}, #{duzon.H_DEPT} ,#{duzon.CD_DEPT})
+		</foreach>
+		ON DUPLICATE KEY UPDATE TEAM_NAME=VALUES(TEAM_NAME), DIVISION_NO=VALUES(DIVISION_NO), ERP_TEAM_CD = VALUES(ERP_TEAM_CD) 		
+	</insert>
+	
+	<update id="updateOurTeamInfoToDivision" parameterType="hashmap">
+		<!-- ERP코드가 아닌 셀러스의 NO로 유지하기 위해 다시 업데이트 -->
+		UPDATE 
+		OUR_DIVISION_INFO AS ODI
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON ODI.ERP_DIVISION_CD = OTI.DIVISION_NO
+		set OTI.DIVISION_NO = ODI.DIVISION_NO
+		WHERE 1=1
+	</update>
+	
+	<select id="selectSalesGoalInfo" parameterType="hashmap" resultType="hashmap">
+		DECLARE @BASIS_YEAR CHAR(4) = DATEPART(yy, GETDATE())
+		SELECT
+			<!-- CD_COMPANY,
+			IsNULL( H_DEPT,         '' ) AS H_DEPT,
+			IsNULL( CD_DEPT,        '' ) AS CD_DEPT,
+			IsNULL( NM_DEPT,        '' ) AS NM_DEPT,
+			NM_CC,
+			AM_CONTRACT, 
+			AM_PROFIT_SALE, 
+			IsNULL( DC_RMK,         '' ) AS DC_RMK,
+			IsNULL( NM_SO,          '' ) AS NM_SO, -->
+			YYYYMM_GOAL+'01' AS YYYYMM_GOAL,
+			CD_CC,
+			IsNULL( NM_SO,          '' ) AS NM_SO,
+			AM_SALE, 
+			AM_PROFIT
+		FROM NEOE.V_WP_Z_UNIP_SAL_GOAL_REG
+		WHERE 1=1
+		AND CD_COMPANY = '1000'
+		AND YEAR(YYYYMM_GOAL+'01') = @BASIS_YEAR;
+	</select>
+	
+	<insert id="insertSalesGoalInfo" parameterType="hashmap">
+			INSERT INTO ERP_SALES_PLAN(
+				MEMBER_ID_NUM,
+				BASIS_MONTH,
+				BOOKING_TYPE,
+				TARGET_REVENUE_AMOUNT,
+				TARGET_GP_AMOUNT,
+				SYS_REGISTER_DATE,
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.CD_CC},
+				#{duzon.YYYYMM_GOAL},
+				#{duzon.NM_SO},
+				#{duzon.AM_SALE},
+				#{duzon.AM_PROFIT},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+				MEMBER_ID_NUM         = VALUES(MEMBER_ID_NUM),
+				BASIS_MONTH           = VALUES(BASIS_MONTH),
+				BOOKING_TYPE          = VALUES(BOOKING_TYPE),
+				TARGET_REVENUE_AMOUNT = VALUES(TARGET_REVENUE_AMOUNT),
+				TARGET_GP_AMOUNT      = VALUES(TARGET_GP_AMOUNT),
+				SYS_UPDATE_DATE       = CURRENT_TIMESTAMP
+	</insert>
+	
+	<select id="selectCreditRatingStatusInfo" parameterType="hashmap" resultType="hashmap">
+		DECLARE @BASIS_YEAR CHAR(4) = DATEPART(yy, GETDATE())
+		SELECT
+			CD_COMPANY,
+			CD_PARTNER,
+			IsNULL( LN_PARTNER,      '' ) AS LN_PARTNER,
+			IsNULL( NO_COMPANY,      '' ) AS NO_COMPANY,
+			IsNULL( GD_CRDT,         '' ) AS GD_CRDT,
+			AM_CRDT,
+			IsNULL( TP_CRDT_ST,      '' ) AS TP_CRDT_ST,
+			IsNULL( TP_JOB,          '' ) AS TP_JOB,
+			IsNULL( CLS_JOB,         '' ) AS CLS_JOB,
+			IsNULL( DT_OPEN,         NULL ) AS DT_OPEN,
+			AM_CAP,
+			IsNULL( NM_CEO,          '' ) AS NM_CEO,
+			IsNULL( CD_PARTNER_GRP,  '' ) AS CD_PARTNER_GRP,
+			IsNULL( YN_SURETY,       '' ) AS YN_SURETY,
+			IsNULL( YN_BOND,         '' ) AS YN_BOND,
+			IsNULL( YN_BANKBOOK,     '' ) AS YN_BANKBOOK,
+			IsNULL( AUDIT_OPNION,    '' ) AS AUDIT_OPNION,
+			IsNULL( CREDIT_RATING,   '' ) AS CREDIT_RATING,
+			IsNULL( CASH_FLOWS,      '' ) AS CASH_FLOWS,
+			IsNULL( ABT_DEBIT,       '' ) AS ABT_DEBIT,
+			IsNULL( ABT_SAFETY,      '' ) AS ABT_SAFETY,
+			IsNULL( ABT_GROWTH,      '' ) AS ABT_GROWTH,
+			IsNULL( ABT_ACTIVITY,    '' ) AS ABT_ACTIVITY,
+			IsNULL( DC_RMK,          '' ) AS DC_RMK,
+			AM_GRNT,
+			AM_GUARANTEE,
+			IsNULL( DT_GUARANTEE_FR, NULL ) AS DT_GUARANTEE_FR,
+			IsNULL( DT_GUARANTEE_TO, NULL ) AS DT_GUARANTEE_TO,
+			IsNULL( DT_SFC_NEW,      NULL ) AS DT_SFC_NEW,
+			IsNULL( YY_SALE,         NULL ) AS YY_SALE,
+			AM_SALE,
+			AM_PROFIT,
+			@BASIS_YEAR as BASIS_YEAR
+		FROM NEOE.V_WP_SFC_EVA_RPT
+		WHERE 1=1
+		AND CD_COMPANY IS NOT NULL
+		AND CD_PARTNER IS NOT NULL
+		AND LN_PARTNER IS NOT NULL
+		AND NO_COMPANY IS NOT NULL
+		AND GD_CRDT IS NOT NULL
+		AND AM_CRDT IS NOT NULL
+		AND CD_COMPANY = '1000';
+	</select>
+	
+	<insert id="insertCreditRatingStatusInfo" parameterType="hashmap">
+			INSERT INTO ERP_COMPANY_CREDIT_EVAL(
+				COMPANY_CODE, 
+				COMPANY_NAME, 
+				COMPANY_REG_NO, 
+				LOAN_GRADE, 
+				CREDIT_AMOUNT,
+				BUSINESS_STATUS, 
+				BUSINESS_CONDITIONS, 
+				BUSINESS_TYPE, 
+				BUSINESS_DATE, 
+				COMPANY_AMOUNT, 
+				COMPANY_OWNER, 
+				BUSINESS_FORM, 
+				CHECK_1, 
+				CHECK_2, 
+				CHECK_3, 
+				AUDIT_OPINION, 
+				CREDIT_RATING, 
+				CASH_FLOWS, 
+				ABT_DEBIT, 
+				ABT_SAFETY, 
+				ABT_GROWTH, 
+				ABT_ACTIVITY, 
+				DC_RMK, 
+				AM_GRNT, 
+				AM_GUARANTEE, 
+				DT_GUARANTEE_FR, 
+				DT_GUARANTEE_TO, 
+				DT_SFC_NEW, 
+				YY_SALE, 
+				AM_SALE, 
+				AM_PROFIT, 
+				BASIS_YEAR, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.CD_PARTNER},
+				#{duzon.LN_PARTNER},
+				#{duzon.NO_COMPANY},
+				#{duzon.GD_CRDT},
+				#{duzon.AM_CRDT},
+				#{duzon.TP_CRDT_ST},
+				#{duzon.TP_JOB},
+				#{duzon.CLS_JOB},
+				#{duzon.DT_OPEN},
+				#{duzon.AM_CAP},
+				#{duzon.NM_CEO},
+				#{duzon.CD_PARTNER_GRP},
+				#{duzon.YN_SURETY},
+				#{duzon.YN_BOND},
+				#{duzon.YN_BANKBOOK},
+				#{duzon.AUDIT_OPNION},
+				#{duzon.CREDIT_RATING},
+				#{duzon.CASH_FLOWS},
+				#{duzon.ABT_DEBIT},
+				#{duzon.ABT_SAFETY},
+				#{duzon.ABT_GROWTH},
+				#{duzon.ABT_ACTIVITY},
+				#{duzon.DC_RMK},
+				#{duzon.AM_GRNT},
+				#{duzon.AM_GUARANTEE},
+				#{duzon.DT_GUARANTEE_FR},
+				#{duzon.DT_GUARANTEE_TO},
+				#{duzon.DT_SFC_NEW},
+				#{duzon.YY_SALE},
+				#{duzon.AM_SALE},
+				#{duzon.AM_PROFIT},
+				#{duzon.BASIS_YEAR},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+				COMPANY_REG_NO      = VALUES(COMPANY_REG_NO),
+				LOAN_GRADE          = VALUES(LOAN_GRADE),
+				CREDIT_AMOUNT       = VALUES(CREDIT_AMOUNT),
+				BUSINESS_STATUS     = VALUES(BUSINESS_STATUS),
+				BUSINESS_CONDITIONS = VALUES(BUSINESS_CONDITIONS),
+				BUSINESS_TYPE       = VALUES(BUSINESS_TYPE),
+				BUSINESS_DATE       = VALUES(BUSINESS_DATE),
+				COMPANY_AMOUNT      = VALUES(COMPANY_AMOUNT),
+				COMPANY_OWNER       = VALUES(COMPANY_OWNER),
+				BUSINESS_FORM       = VALUES(BUSINESS_FORM),
+				CHECK_1             = VALUES(CHECK_1),
+				CHECK_2             = VALUES(CHECK_2),
+				CHECK_3             = VALUES(CHECK_3),
+				AUDIT_OPINION       = VALUES(AUDIT_OPINION),
+				CREDIT_RATING       = VALUES(CREDIT_RATING),
+				CASH_FLOWS          = VALUES(CASH_FLOWS),
+				ABT_DEBIT           = VALUES(ABT_DEBIT),
+				ABT_SAFETY          = VALUES(ABT_SAFETY),
+				ABT_GROWTH          = VALUES(ABT_GROWTH),
+				ABT_ACTIVITY        = VALUES(ABT_ACTIVITY),
+				DC_RMK              = VALUES(DC_RMK),
+				AM_GRNT             = VALUES(AM_GRNT),
+				AM_GUARANTEE        = VALUES(AM_GUARANTEE),
+				DT_GUARANTEE_FR     = VALUES(DT_GUARANTEE_FR),
+				DT_GUARANTEE_TO     = VALUES(DT_GUARANTEE_TO),
+				DT_SFC_NEW          = VALUES(DT_SFC_NEW),
+				YY_SALE             = VALUES(YY_SALE),
+				AM_SALE             = VALUES(AM_SALE),
+				AM_PROFIT           = VALUES(AM_PROFIT),
+				SYS_UPDATE_DATE     = CURRENT_TIMESTAMP
+	</insert>
+	
+	<select id="selectClientCompanyInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			CD_COMPANY, 														-- 회사코드
+			CD_PARTNER, 														-- 거래처코드
+			LN_PARTNER, 														-- 거래처명
+			IsNULL( NM_CEO,      '' ) AS NM_CEO, 								-- 대표자명
+			IsNULL( NO_TEL,      '' ) AS NO_TEL, 								-- 대표자번호(전화번호)
+			IsNULL( NO_POST1,      '' ) AS NO_POST1, 							-- 본사우편번호
+			IsNULL( DC_ADS1_H+' '+DC_ADS1_D,      '' ) AS POSTAL_ADDRESS,		-- 본사주소
+			IsNULL( DC_ADS1_H,      '' ) AS DC_ADS1_H, 							-- 본사주소(기본)
+			IsNULL( DC_ADS1_D,      '' ) AS DC_ADS1_D, 							-- 본사주소(상세)
+			IsNULL( NO_COMPANY,      '' ) AS NO_COMPANY, 						-- 사업자등록번호
+			IsNULL( TP_JOB,      '' ) AS TP_JOB, 								-- 업태
+			IsNULL( CLS_JOB,      '' ) AS CLS_JOB,								-- 종목
+			IsNULL( CD_CON,      '' ) AS CD_CON,            					-- 휴폐업구분
+			IsNULL( DT_CLOSE,      '' ) AS DT_CLOSE           					-- 폐업일자
+		FROM NEOE.V_MA_Z_UNIP_PARTNER
+		WHERE 1=1
+		AND CD_COMPANY IS NOT NULL
+		AND CD_PARTNER IS NOT NULL
+		AND LN_PARTNER IS NOT NULL
+		AND CD_COMPANY = '1000';
+	</select>
+	
+	<insert id="insertClientCompanyInfo" parameterType="hashmap">
+			INSERT INTO CLIENT_COMPANY_INFO(
+				SEGMENT_CODE, 
+				ERP_REG_CODE, 
+				COMPANY_NAME, 
+				CEO_NAME, 
+				COMPANY_TELNO, 
+				POSTAL_CODE, 
+				POSTAL_ADDRESS, 
+				BUSINESS_NUMBER, 
+				BUSINESS_TYPE, 
+				BUSINESS_SECTOR, 
+				CD_CON, 
+				DT_CLOSE, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE, 
+				CREATOR_ID
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				'ETC',
+				#{duzon.CD_PARTNER},
+				#{duzon.LN_PARTNER},
+				#{duzon.NM_CEO},
+				#{duzon.NO_TEL},
+				#{duzon.NO_POST1},
+				#{duzon.POSTAL_ADDRESS},
+				#{duzon.NO_COMPANY},
+				#{duzon.TP_JOB},
+				#{duzon.CLS_JOB},
+				#{duzon.CD_CON},
+				#{duzon.DT_CLOSE},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP,
+				'admin'
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+				COMPANY_NAME		= VALUES(COMPANY_NAME),
+				CEO_NAME            = VALUES(CEO_NAME),
+				COMPANY_TELNO       = VALUES(COMPANY_TELNO),
+				POSTAL_CODE         = VALUES(POSTAL_CODE),
+				POSTAL_ADDRESS      = VALUES(POSTAL_ADDRESS),
+				BUSINESS_NUMBER     = VALUES(BUSINESS_NUMBER),
+				BUSINESS_TYPE       = VALUES(BUSINESS_TYPE),
+				BUSINESS_SECTOR     = VALUES(BUSINESS_SECTOR),
+				CD_CON				= VALUES(CD_CON),
+				DT_CLOSE			= VALUES(DT_CLOSE),
+				SYS_UPDATE_DATE     = CURRENT_TIMESTAMP,
+				CREATOR_ID			= 'admin'
+	</insert>
+	
+	<!-- 폐휴업 고객사 고객개인 퇴사처리 -->
+	<update id="updateCloseClientIndividualinfo">
+		UPDATE CLIENT_INDIVIDUAL_INFO SET
+			USE_YN = 'N'
+		WHERE COMPANY_ID IN ( SELECT COMPANY_ID FROM CLIENT_COMPANY_INFO WHERE CD_CON = '003' )
+	</update>
+	
+	<select id="selectClientSalesmanInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT  
+			CD_PARTNER,			-- 거래처코드
+	        NO_CUST_EMP,		-- 고객코드
+	        NM_EMP,				-- 고객명
+	        IsNULL( NM_DEPT,      '' ) AS NM_DEPT,				-- 부서명
+	        IsNULL( NM_GRADE,      '' ) AS NM_GRADE,			-- 직급
+	        IsNULL( MOB_COMP_NO+'-'+MOB_EXCH_NO+'-'+MOB_NO,      '' ) AS CELL_PHONE,		-- 핸드폰번호
+	        IsNULL( MOB_COMP_NO,      '' ) AS MOB_COMP_NO,		-- 핸드폰번호(010)
+	        IsNULL( MOB_EXCH_NO,      '' ) AS MOB_EXCH_NO,		-- 핸드폰번호(XXXX)
+	        IsNULL( MOB_NO,      '' ) AS MOB_NO,				-- 핸드폰번호(XXXX)
+	        IsNULL( EMAIL,      '' ) AS EMAIL,					-- EMAIL
+	        IsNULL( TEL_AREA_NO+'-'+TEL_EXCH_NO+'-'+TEL_NO,      '' ) AS PHONE,		-- 전화번호
+	        IsNULL( TEL_AREA_NO,      '' ) AS TEL_AREA_NO,		-- 전화번호(02)
+	        IsNULL( TEL_EXCH_NO,      '' ) AS TEL_EXCH_NO,		-- 전화번호(XXXX)
+	        IsNULL( TEL_NO,      '' ) AS TEL_NO,				-- 전화번호(XXXX)
+	        IsNULL( FAX_AREA_NO+'-'+FAX_EXCH_NO+'-'+FAX_NO,      '' ) AS FAX,		-- 팩스번호
+	        IsNULL( FAX_AREA_NO,      '' ) AS FAX_AREA_NO,		-- 팩스번호(02)
+	        IsNULL( FAX_EXCH_NO,      '' ) AS FAX_EXCH_NO,		-- 팩스번호(XXXX)
+	        IsNULL( FAX_NO,      '' ) AS FAX_NO,				-- 팩스번호(XXXX)
+	        IsNULL( USE_YN,      '' ) AS USE_YN,				-- 사용여부
+	        IsNULL( DC_RMK,      '' ) AS DC_RMK					-- 비고
+		FROM NEOE.V_WP_Z_UNIP_MST_CUST_SALE
+		WHERE 1=1
+		AND CD_PARTNER IS NOT NULL
+		AND NO_CUST_EMP IS NOT NULL
+		AND NM_EMP IS NOT NULL
+		AND CD_COMPANY = '1000';
+	</select>
+	
+	<insert id="insertClientSalesmanInfo" parameterType="hashmap">
+			INSERT INTO ERP_CLIENT_SALESMAN_INFO(
+				COMPANY_CODE, 
+				CLIENT_CODE, 
+				CLIENT_NAME, 
+				DIVISION_NAME, 
+				POSITION_RANK, 
+				CELL_PHONE, 
+				EMAIL, 
+				PHONE, 
+				FAX, 
+				USE_YN, 
+				DC_RMK, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.CD_PARTNER},
+				#{duzon.NO_CUST_EMP},
+				#{duzon.NM_EMP},
+				#{duzon.NM_DEPT},
+				#{duzon.NM_GRADE},
+				#{duzon.CELL_PHONE},
+				#{duzon.EMAIL},
+				#{duzon.PHONE},
+				#{duzon.FAX},
+				#{duzon.USE_YN},
+				#{duzon.DC_RMK},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+				COMPANY_CODE        = VALUES(COMPANY_CODE),
+				CLIENT_NAME         = VALUES(CLIENT_NAME),
+				DIVISION_NAME       = VALUES(DIVISION_NAME),
+				POSITION_RANK       = VALUES(POSITION_RANK),
+				CELL_PHONE          = VALUES(CELL_PHONE),
+				EMAIL               = VALUES(EMAIL),
+				PHONE               = VALUES(PHONE),
+				FAX                 = VALUES(FAX),
+				USE_YN              = VALUES(USE_YN),
+				DC_RMK              = VALUES(DC_RMK),
+				SYS_UPDATE_DATE     = CURRENT_TIMESTAMP
+	</insert>
+	
+	<select id="selectOurProductInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			CD_COMPANY,		-- 회사코드
+			CD_ITEM,		-- 품목
+			NM_ITEM,		-- 품목명
+			CD_PLANT,		-- 공장코드
+			IsNULL( STND_ITEM,      '' ) AS STND_ITEM,		-- 규격
+			IsNULL( YN_USE,      '' ) AS YN_USE			-- 사용유무
+		FROM NEOE.V_MA_Z_UNIP_PITEM
+		WHERE 1=1
+		AND CD_COMPANY IS NOT NULL
+		AND CD_ITEM IS NOT NULL
+		AND NM_ITEM IS NOT NULL
+		AND CD_PLANT IS NOT NULL
+		AND CD_COMPANY = '1000'
+		AND CD_PLANT = '1000';
+	</select>
+	
+	<insert id="insertOurProductInfo" parameterType="hashmap">
+			INSERT INTO OUR_PRODUCT_INFO(
+				PRODUCT_CODE, 
+				PRODUCT_NAME, 
+				WORKS_CODE, 
+				PRODUCT_STANDARD, 
+				USE_YN, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.CD_ITEM},
+				#{duzon.NM_ITEM},
+				#{duzon.CD_PLANT},
+				#{duzon.STND_ITEM},
+				#{duzon.YN_USE},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+				PRODUCT_CODE        = VALUES(PRODUCT_CODE),
+				PRODUCT_NAME        = VALUES(PRODUCT_NAME),
+				WORKS_CODE        	= VALUES(WORKS_CODE),
+				PRODUCT_STANDARD    = VALUES(PRODUCT_STANDARD),
+				USE_YN              = VALUES(USE_YN),
+				SYS_UPDATE_DATE     = CURRENT_TIMESTAMP
+	</insert>
+	
+	<select id="selectProjectComCode" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			CD_COMPANY,	-- 회사코드
+			CD_SYSDEF AS CODE_ID,	-- 코드 (WP_SFA_SOPTY_H.TP_PROJECT 와 조인해서 사용)
+			IsNULL( NM_SYSDEF,      '' ) AS CODE_NAME,	-- 명칭
+			-- IsNULL( CD_FLAG1,      '' ) AS CD_FLAG1,	-- 관련1
+			-- IsNULL( CD_FLAG2,      '' ) AS CD_FLAG2,	-- 관련2
+			-- IsNULL( CD_FLAG3,      '' ) AS CD_FLAG3,	-- 관련3
+			IsNULL( USE_YN,      '' ) AS USE_YN		-- 사용유무
+		FROM NEOE.V_WP_Z_UNIP_FG_PROJECT
+		WHERE 1=1
+		AND CD_COMPANY IS NOT NULL
+		AND CD_SYSDEF IS NOT NULL
+		AND CD_COMPANY = '1000';
+	</select>
+	
+	<insert id="insertProjectComCode" parameterType="hashmap">
+			INSERT INTO COM_CODE(
+				CODE_ID, 
+				PARENT_CODE_ID, 
+				CODE_NAME, 
+				USE_YN, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.CODE_ID},
+				'PROJECT',
+				#{duzon.CODE_NAME},
+				#{duzon.USE_YN},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+				PARENT_CODE_ID      = 'PROJECT',
+				CODE_NAME           = VALUES(CODE_NAME),
+				USE_YN              = VALUES(USE_YN),
+				SYS_UPDATE_DATE     = CURRENT_TIMESTAMP
+	</insert>
+	
+	<select id="selectTPSOComCode" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CD_COMPANY,	-- 회사코드
+			TP_SO AS CODE_ID,		-- 수주형태(엉업구분)		(WP_SFA_SOPTY_H.TO_SO 와 조인해서 사용)
+			IsNULL( NM_SO,      '' ) AS CODE_NAME,		-- 수주형태명
+			IsNULL( YN_USE,      '' ) AS USE_YN		-- 사용유무
+		FROM NEOE.V_WP_Z_UNIP_TPSO
+		WHERE 1=1
+		AND CD_COMPANY IS NOT NULL
+		AND TP_SO IS NOT NULL
+		AND CD_COMPANY = '1000';
+	</select>
+	
+	<insert id="insertTPSOComCode" parameterType="hashmap">
+			INSERT INTO COM_CODE(
+				CODE_ID, 
+				PARENT_CODE_ID, 
+				CODE_NAME, 
+				USE_YN, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.CODE_ID},
+				'TPSO',
+				#{duzon.CODE_NAME},
+				#{duzon.USE_YN},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+				PARENT_CODE_ID      = 'TPSO',
+				CODE_NAME           = VALUES(CODE_NAME),
+				USE_YN              = VALUES(USE_YN),
+				SYS_UPDATE_DATE     = CURRENT_TIMESTAMP
+	</insert>
+	
+	
+	<select id="selectSfaPflsMaster" parameterType="hashmap" resultType="hashmap">
+		<!-- 차수가 제일 높은것만 -->
+		<![CDATA[
+					SELECT TB.*
+						FROM (
+							SELECT 
+								CD_COMPANY
+								,NO_INST                                              -- 손익분석코드                      
+							    ,NO_INST_HST                                          -- 손익분석차수                      
+							    ,NM_INST                                              -- 손익분석명
+								,NO_PROJECT                                           -- 프로젝트코드               
+								,NM_PROJECT											-- 프로젝트명
+							    ,CD_PARTNER                                           -- 매출처코드                 
+							    ,LN_PARTNER                                          -- 매출처명                       
+							    ,CD_PARTNER_END                                       -- END_USER코드                
+							    ,LN_PARTNER_END                  -- END USER명                      
+							    ,TO_SO                                                -- 영업구분(수주유형)                
+								,NO_EMP                                               -- 영업대표사번                  
+							    ,NM_EMP                              -- 영업대표명               
+							    ,TP_PROJECT                                           -- 프로젝트형태                      
+								,DC_RMK                                               -- 프로젝트개요                      
+							    ,YN_LAST                                              -- 최종여부                          
+							    ,STEP_OPTY                                            -- 진행단계    
+							    ,FG_CREDIT_SPECIAL                                    -- 특별여신진행상태                 
+								,FG_GW                                                -- 수주보고서상태                    
+							    ,DT_INST                                              -- 손익작성일               
+							    ,AM_SALE_PLAN					-- 예상수주금액         
+							    ,CD_DEPT 
+							    ,RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+							FROM V_WP_Z_UNIP_SFA_PFLS_MASTER
+							WHERE 1=1
+							AND CD_COMPANY = '1000'
+						) AS TB
+					WHERE 1=1
+					AND TB.RANK = 1
+					ORDER BY TB.NO_INST, TB.NO_INST_HST
+		]]>
+	</select>
+	
+	<select id="selectSfaPflsItem1" parameterType="hashmap" resultType="hashmap">
+		<!-- 차수가 제일 높은것만 -->
+		<![CDATA[
+				SELECT TB.*
+				FROM (
+					SELECT  
+							CD_COMPANY
+							,NO_INST                                  -- 손익분석코드                
+					        ,NO_INST_HST                              -- 손익분석차수                
+					        ,SEQ_ITEM                                 -- 품목순번                
+					        ,CD_PLANT                                 -- 공장코드                
+					        ,CD_ITEM                                  -- 품목코드                
+					        ,NM_ITEM                                  -- 품목명   
+					        ,UM_OPTY                                  -- 단가                
+					        ,QT_OPTY                                  -- 수량            
+					        ,CD_MTN                                  --  프로젝트코드
+					        ,RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+					FROM V_WP_Z_UNIP_SFA_PFLS_ITEM1
+					WHERE 1=1
+					AND CD_COMPANY = '1000'
+				) AS TB
+				WHERE 1=1
+				AND TB.RANK = 1
+				ORDER BY TB.NO_INST, TB.NO_INST_HST, TB.SEQ_ITEM
+		]]>
+	</select>
+	
+	<select id="selectSfaPflsItem2" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		
+				SELECT TB.*
+					FROM (
+						SELECT  
+								CD_COMPANY
+								,NO_INST                                  -- 손익분석코드                
+						        ,NO_INST_HST                              -- 손익분석차수               
+						        ,SEQ_ITEM                                 -- 품목순번                
+						        ,CD_PLANT                                 -- 공장코드                
+						        ,CD_ITEM                                  -- 품목코드                 
+						        ,NM_ITEM                                  -- 품목명                
+								,UM_OPTY                                  -- 단가                
+								,QT_OPTY                                  -- 수량                
+								,CD_PARTNER                               -- 매입처코드        
+						        ,LN_PARTNER                               -- 매입처명
+						        ,CD_MTN                                  --  프로젝트코드
+						         ,CONVERT(CHAR(10), CONVERT(date, DT_PUR_PLAN), 23) AS DT_PUR_PLAN -- 매입예정일
+						        ,RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+						FROM V_WP_Z_UNIP_SFA_PFLS_ITEM2
+						WHERE 1=1
+						AND CD_COMPANY = '1000'
+					) AS TB
+				WHERE 1=1
+				AND TB.RANK = 1
+				ORDER BY TB.NO_INST, TB.NO_INST_HST, TB.SEQ_ITEM
+		]]>
+	</select>
+	
+	<select id="selectSfaPflsBill" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT TB.*
+					FROM (
+				SELECT  
+						CD_COMPANY
+						,NO_INST                                  -- 손익분석코드                
+				        ,NO_INST_HST                              -- 손익분석차수                  
+				        ,SEQ_BILL                                 -- 수금계획순번                
+				        ,CD_PARTNER                               -- 매출처코드                
+				        ,LN_PARTNER                              -- 매출처명                
+				        ,DT_SALES                                 -- 매출일자                
+				        ,DT_BILL                                  -- 수금일자                
+				        ,TP_BILL_COND                             -- 수금조건구분                
+				        ,AM_BILL                                  -- 수금금액         
+				        ,AM_VAT                                   -- 부가세      
+				        ,AMVAT_BILL                               -- 수금합계액             
+				        ,TP_BILL_CONT                             -- 수금내용구분                
+				        ,TP_BILL_FORM                             -- 수금형태구분                
+				        ,DC_RMK                                   -- 비고               
+				        ,NO_PROJECT                                  --  프로젝트코드
+				        ,RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+				FROM V_WP_Z_UNIP_SFA_PFLSH_BILL
+				WHERE 1=1
+				AND CD_COMPANY = '1000'
+			) AS TB
+				WHERE 1=1
+				AND TB.RANK = 1
+				ORDER BY TB.NO_INST, TB.NO_INST_HST, TB.SEQ_BILL
+		]]>
+	</select>
+
+	<select id="selectSfaPflsPay" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT TB.*
+				FROM (
+			SELECT  
+					 CD_COMPANY
+					,NO_INST                                  -- 손익분석코드                
+			        ,NO_INST_HST                              -- 손익분석차수                 
+			        ,SEQ_PAY                                  -- 지급계획순번                
+			        ,CD_PARTNER                               -- 매입처코드                
+			        ,LN_PARTNER                              -- 매입처명                
+			        ,DT_BUY                                   -- 매입일자                
+			        ,DT_PAY                                   -- 지급일자                
+			        ,TP_PAY_COND                              -- 지급조건구분                
+			        ,AM_PAY                                   -- 지급금액       
+			        ,AM_VAT                                   -- 부가세      
+			        ,AMVAT_PAY                                -- 지급합계액                  
+			        ,TP_PAY_CONT                              -- 지급내용구분                
+			        ,TP_PAY_FORM								-- 지급형태구분                
+			        ,DC_RMK                                   -- 비고                
+					,NO_PROJECT								-- 프로젝트코드
+			        ,RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+			FROM V_WP_Z_UNIP_SFA_PFLSH_PAY
+			WHERE 1=1
+			AND CD_COMPANY = '1000'
+			) AS TB
+			WHERE 1=1
+			AND TB.RANK = 1
+			ORDER BY TB.NO_INST, TB.NO_INST_HST, TB.SEQ_PAY
+		]]>
+	</select>
+	
+	<delete id="deletefaPflsAll" parameterType="hashmap">
+		DELETE FROM ERP_SFA_PFLS_MASTER;
+		DELETE FROM ERP_SFA_PFLS_ITEM1;
+		DELETE FROM ERP_SFA_PFLS_ITEM2; 
+		DELETE FROM ERP_SFA_PFLSH_BILL;
+		DELETE FROM ERP_SFA_PFLSH_PAY;
+	</delete>
+	
+	
+	<insert id="insertSfaPflsMaster" parameterType="hashmap">
+		INSERT INTO ERP_SFA_PFLS_MASTER 
+			(
+				NO_INST, 
+				NO_INST_HST, 
+				NM_INST, 
+				NO_PROJECT, 
+				NM_PROJECT, 
+				CD_PARTNER, 
+				LN_PARTNER, 
+				CD_PARTNER_END, 
+				LN_PARTNER_END, 
+				TO_SO, 
+				NO_EMP, 
+				TP_PROJECT, 
+				DC_RMK, 
+				YN_LAST, 
+				STEP_OPTY, 
+				FG_CREDIT_SPECIAL, 
+				FG_GW, 
+				DT_INST, 
+				AM_SALE_PLAN,
+				CD_DEPT
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+				(
+					#{duzon.NO_INST},
+					#{duzon.NO_INST_HST},
+					#{duzon.NM_INST}, 
+					#{duzon.NO_PROJECT}, 
+					#{duzon.NM_PROJECT}, 
+					#{duzon.CD_PARTNER}, 
+					#{duzon.LN_PARTNER}, 
+					#{duzon.CD_PARTNER_END}, 
+					#{duzon.LN_PARTNER_END}, 
+					#{duzon.TO_SO}, 
+					#{duzon.NO_EMP}, 
+					#{duzon.TP_PROJECT}, 
+					#{duzon.DC_RMK}, 
+					#{duzon.YN_LAST}, 
+					#{duzon.STEP_OPTY}, 
+					#{duzon.FG_CREDIT_SPECIAL}, 
+					#{duzon.FG_GW}, 
+					#{duzon.DT_INST}, 
+					#{duzon.AM_SALE_PLAN}, 
+					#{duzon.CD_DEPT}
+				)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+					NO_INST 					= VALUES(NO_INST), 
+					NO_INST_HST 			= VALUES(NO_INST_HST), 
+					NM_INST 					= VALUES(NM_INST),  
+					NO_PROJECT 			= VALUES(NO_PROJECT),
+					NM_PROJECT 			= VALUES(NM_PROJECT),
+					CD_PARTNER 			= VALUES(CD_PARTNER),
+					LN_PARTNER 			= VALUES(LN_PARTNER),
+					CD_PARTNER_END 	= VALUES(CD_PARTNER_END),
+					LN_PARTNER_END 	= VALUES(LN_PARTNER_END),
+					TO_SO 						= VALUES(TO_SO),
+					NO_EMP 					= VALUES(NO_EMP),
+					TP_PROJECT 			= VALUES(TP_PROJECT),
+					DC_RMK 					= VALUES(DC_RMK),
+					YN_LAST 					= VALUES(YN_LAST),
+					STEP_OPTY 				= VALUES(STEP_OPTY),
+					FG_CREDIT_SPECIAL	= VALUES(FG_CREDIT_SPECIAL),
+					FG_GW 					= VALUES(FG_GW),
+					DT_INST 					= VALUES(DT_INST),
+					AM_SALE_PLAN 		= VALUES(AM_SALE_PLAN),
+					CD_DEPT 					= VALUES(CD_DEPT)
+	</insert>
+	
+	<insert id="insertSfaPflsItem1" parameterType="hashmap">
+			INSERT INTO ERP_SFA_PFLS_ITEM1 
+			(
+				NO_INST, 
+				NO_INST_HST, 
+				SEQ_ITEM, 
+				CD_PLANT, 
+				CD_ITEM, 
+				NM_ITEM, 
+				UM_OPTY, 
+				QT_OPTY,
+				NO_PROJECT
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.NO_INST},
+				#{duzon.NO_INST_HST},
+				#{duzon.SEQ_ITEM}, 
+				#{duzon.CD_PLANT}, 
+				#{duzon.CD_ITEM}, 
+				#{duzon.NM_ITEM}, 
+				#{duzon.UM_OPTY}, 
+				#{duzon.QT_OPTY},
+				#{duzon.CD_MTN}
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+				NO_INST 			= VALUES(NO_INST), 
+				NO_INST_HST 	= VALUES(NO_INST_HST), 
+				SEQ_ITEM 		= VALUES(SEQ_ITEM), 
+				CD_PLANT 		= VALUES(CD_PLANT), 
+				CD_ITEM 			= VALUES(CD_ITEM), 
+				NM_ITEM 			= VALUES(NM_ITEM), 
+				UM_OPTY 			= VALUES(UM_OPTY), 
+				QT_OPTY 			= VALUES(QT_OPTY),
+				NO_PROJECT 	= VALUES(NO_PROJECT)
+	</insert>
+	
+	<insert id="insertSfaPflsItem2" parameterType="hashmap">
+			INSERT INTO ERP_SFA_PFLS_ITEM2 
+			(
+				NO_INST, 
+				NO_INST_HST, 
+				SEQ_ITEM, 
+				CD_PLANT, 
+				CD_ITEM, 
+				NM_ITEM, 
+				UM_OPTY, 
+				QT_OPTY, 
+				CD_PARTNER, 
+				LN_PARTNER,
+				NO_PROJECT,
+				ITEM_DATE
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(	
+				#{duzon.NO_INST},
+				#{duzon.NO_INST_HST},
+				#{duzon.SEQ_ITEM}, 
+				#{duzon.CD_PLANT}, 
+				#{duzon.CD_ITEM}, 
+				#{duzon.NM_ITEM}, 
+				#{duzon.UM_OPTY}, 
+				#{duzon.QT_OPTY}, 
+				#{duzon.CD_PARTNER}, 
+				#{duzon.LN_PARTNER},
+				#{duzon.CD_MTN},
+				#{duzon.DT_PUR_PLAN}
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+					NO_INST 			= VALUES(NO_INST), 
+					NO_INST_HST 	= VALUES(NO_INST_HST), 
+					SEQ_ITEM 		= VALUES(SEQ_ITEM),
+					CD_PLANT 		= VALUES(CD_PLANT),
+					CD_ITEM 			= VALUES(CD_ITEM),
+					NM_ITEM 			= VALUES(NM_ITEM),
+					UM_OPTY 			= VALUES(UM_OPTY),
+					QT_OPTY 			= VALUES(QT_OPTY),
+					CD_PARTNER 	= VALUES(CD_PARTNER),
+					LN_PARTNER 	= VALUES(LN_PARTNER),
+					NO_PROJECT 	= VALUES(NO_PROJECT), 
+					ITEM_DATE 	= VALUES(ITEM_DATE) 
+	</insert>
+	
+	<insert id="insertSfaPflsBill" parameterType="hashmap">
+			INSERT INTO ERP_SFA_PFLSH_BILL 
+			(
+				NO_INST, 
+				NO_INST_HST, 
+				SEQ_BILL, 
+				CD_PARTNER, 
+				LN_PARTNER, 
+				DT_SALES, 
+				DT_BILL, 
+				TP_BILL_COND, 
+				AM_BILL, 
+				AM_VAT, 
+				AMVAT_BILL, 
+				TP_BILL_CONT, 
+				TP_BILL_FORM, 
+				DC_RMK,
+				NO_PROJECT
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close=""> 
+			(
+				#{duzon.NO_INST},
+				#{duzon.NO_INST_HST},
+				#{duzon.SEQ_BILL}, 
+				#{duzon.CD_PARTNER}, 
+				#{duzon.LN_PARTNER}, 
+				#{duzon.DT_SALES}, 
+				#{duzon.DT_BILL}, 
+				#{duzon.TP_BILL_COND}, 
+				#{duzon.AM_BILL}, 
+				#{duzon.AM_VAT}, 
+				#{duzon.AMVAT_BILL}, 
+				#{duzon.TP_BILL_CONT}, 
+				#{duzon.TP_BILL_FORM}, 
+				#{duzon.DC_RMK},
+				#{duzon.NO_PROJECT}
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+					NO_INST 			= VALUES(NO_INST),
+					NO_INST_HST 	= VALUES(NO_INST_HST),
+					SEQ_BILL 			= VALUES(SEQ_BILL), 
+					CD_PARTNER 	= VALUES(CD_PARTNER), 
+					LN_PARTNER 	= VALUES(LN_PARTNER), 
+					DT_SALES 		= VALUES(DT_SALES), 
+					DT_BILL 			= VALUES(DT_BILL),
+					TP_BILL_COND = VALUES(TP_BILL_COND), 
+					AM_BILL 			= VALUES(AM_BILL), 
+					AM_VAT 			= VALUES(AM_VAT), 
+					AMVAT_BILL 		= VALUES(AMVAT_BILL), 
+					TP_BILL_CONT 	= VALUES(TP_BILL_CONT), 
+					TP_BILL_FORM 	= VALUES(TP_BILL_FORM), 
+					DC_RMK 			= VALUES(DC_RMK),	 
+					NO_PROJECT 	= VALUES(NO_PROJECT)	 
+	</insert>
+	
+	<insert id="insertSfaPflsPay" parameterType="hashmap">
+			INSERT INTO ERP_SFA_PFLSH_PAY 
+			(
+				NO_INST, 
+				NO_INST_HST, 
+				SEQ_PAY, 
+				CD_PARTNER, 
+				LN_PARTNER, 
+				DT_BUY, 
+				DT_PAY, 
+				TP_PAY_COND, 
+				AM_PAY, 
+				AM_VAT, 
+				AMVAT_PAY, 
+				TP_PAY_CONT, 
+				TP_PAY_FORM, 
+				DC_RMK,
+				NO_PROJECT
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close=""> 
+			(
+				#{duzon.NO_INST},
+				#{duzon.NO_INST_HST},
+				#{duzon.SEQ_PAY}, 
+				#{duzon.CD_PARTNER}, 
+				#{duzon.LN_PARTNER}, 
+				#{duzon.DT_BUY}, 
+				#{duzon.DT_PAY}, 
+				#{duzon.TP_PAY_COND}, 
+				#{duzon.AM_PAY}, 
+				#{duzon.AM_VAT}, 
+				#{duzon.AMVAT_PAY}, 
+				#{duzon.TP_PAY_CONT}, 
+				#{duzon.TP_PAY_FORM}, 
+				#{duzon.DC_RMK},
+				#{duzon.NO_PROJECT}
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+					NO_INST 			= VALUES(NO_INST),
+					NO_INST_HST 	= VALUES(NO_INST_HST),
+					SEQ_PAY 			= VALUES(SEQ_PAY), 
+					CD_PARTNER 	= VALUES(CD_PARTNER), 
+					LN_PARTNER 	= VALUES(LN_PARTNER), 
+					DT_BUY 		= VALUES(DT_BUY), 
+					DT_PAY 			= VALUES(DT_PAY),
+					TP_PAY_COND = VALUES(TP_PAY_COND), 
+					AM_PAY 			= VALUES(AM_PAY), 
+					AM_VAT 			= VALUES(AM_VAT), 
+					AMVAT_PAY 		= VALUES(AMVAT_PAY), 
+					TP_PAY_CONT 	= VALUES(TP_PAY_CONT), 
+					TP_PAY_FORM 	= VALUES(TP_PAY_FORM), 
+					DC_RMK 			= VALUES(DC_RMK),	 
+					NO_PROJECT 	= VALUES(NO_PROJECT)
+	</insert>
+	
+	<update id="updateInstMaster" parameterType="hashmap">
+		<![CDATA[
+			UPDATE
+				OPPORTUNITY_LOG AS OL
+				INNER JOIN
+				ERP_SFA_PFLS_MASTER AS ESPM ON OL.ERP_PROJECT_CODE = ESPM.NO_PROJECT 
+				LEFT OUTER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON ESPM.CD_PARTNER = CCI.ERP_REG_CODE
+				LEFT OUTER JOIN
+				CLIENT_COMPANY_INFO AS CCI2 ON ESPM.CD_PARTNER_END = CCI2.ERP_REG_CODE
+				SET 
+					OL.SUBJECT 		= ESPM.NM_INST, 			-- 제목
+					OL.COMPANY_ID 	= CCI.COMPANY_ID,  		-- 고객사
+					OL.CUSTOMER_ID 	= CCI2.COMPANY_ID, 	-- END_USER 코드
+					OL.CATEGORY_CD 	= ESPM.TO_SO, 			-- 영업구분
+					OL.IDENTIFIER_ID 	= ESPM.NO_EMP, 		-- 영업기회 사원
+					OL.PROJECT_FORM_CD	= ESPM.TP_PROJECT,	-- 프로젝트형태코드
+					OL.PROGRESS_CD		= ESPM.STEP_OPTY,		-- 진행단계
+					OL.ERP_PROJECT_CODE		= ESPM.NO_PROJECT,		-- 프로젝트코드
+					OL.CONTRACT_AMOUNT		= ESPM.AM_SALES_PLAN      -- 수주금액
+			WHERE 1=1
+			AND OL.SALES_CYCLE != '5'
+			AND OL.ERP_PROJECT_CODE IS NOT NULL;
+		]]>
+	</update>
+	
+	<select id="selectInstSales" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				OL.OPPORTUNITY_ID,
+				ESPI.SEQ_NUM, 
+				ESPI.NO_INST, 
+				ESPI.NO_INST_HST, 
+				ESPI.SEQ_ITEM, 
+				ESPI.CD_PLANT, 
+				ESPI.CD_ITEM, 
+				ESPI.NM_ITEM, 
+				ESPI.UM_OPTY, 
+				ESPI.QT_OPTY, 
+				ESPI.NO_PROJECT, 
+				ESPI.SYS_REGISTER_DATE, 
+				ESPI.SYS_UPDATE_DATE
+			FROM
+			OPPORTUNITY_LOG AS OL
+			INNER JOIN
+			ERP_SFA_PFLS_ITEM1 as ESPI on OL.ERP_PROJECT_CODE = ESPI.NO_PROJECT
+		]]>
+	</select>
+	
+	<update id="updateInstSales" parameterType="hashmap">
+			INSERT INTO OPPORTUNITY_SALES_PRODUCT_LIST 
+			(
+				OPPORTUNITY_ID, 
+				PRODUCT_ORDER, 
+				PRODUCT_CD, 
+				PRODUCT_PRICE, 
+				PRODUCT_YN, 
+				PRODUCT_COUNT, 
+				WORKS_CD
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.OPPORTUNITY_ID}, 
+				#{duzon.SEQ_ITEM},
+				#{duzon.CD_ITEM}, 
+				#{duzon.UM_OPTY}, 
+				'Y', 
+				#{duzon.QT_OPTY}, 
+				#{duzon.CD_PLANT}
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+						OPPORTUNITY_ID =      VALUES(OPPORTUNITY_ID), 
+						PRODUCT_ORDER =       VALUES(PRODUCT_ORDER),
+						PRODUCT_CD 		=     	VALUES(PRODUCT_CD), 
+						PRODUCT_PRICE  =      	VALUES(PRODUCT_PRICE), 
+						PRODUCT_YN 		=     		'Y', 
+						PRODUCT_COUNT	=     	VALUES(PRODUCT_COUNT), 
+						WORKS_CD			= 		VALUES(WORKS_CD)
+	</update>
+	
+	<select id="selectInstPurchase" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				OL.OPPORTUNITY_ID,
+				ESPI.SEQ_NUM, 
+				ESPI.NO_INST, 
+				ESPI.NO_INST_HST,
+				ESPI.SEQ_ITEM, 
+				ESPI.CD_PLANT, 
+				ESPI.CD_ITEM, 
+				ESPI.NM_ITEM, 
+				ESPI.UM_OPTY, 
+				ESPI.QT_OPTY, 
+				ESPI.CD_PARTNER, 
+				ESPI.LN_PARTNER, 
+				ESPI.NO_PROJECT,
+				ESPI.ITEM_DATE
+			FROM
+			OPPORTUNITY_LOG AS OL
+			INNER JOIN
+			ERP_SFA_PFLS_ITEM2 as ESPI on OL.ERP_PROJECT_CODE = ESPI.NO_PROJECT
+		]]>
+	</select>
+	
+	<select id="selectDashBoardCheckList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT IVL.AM_IV,
+					ROUND(CASE WHEN ISNULL(P.DT_SO, '') = '' OR P.AM_SO = 0 THEN 0 WHEN ISNULL(IVL.AM_IV, 0) = 0 THEN 0 
+					ELSE ISNULL(IVL.AM_IV,0) - (ISNULL(P.AM_PU, 0) - ISNULL(BKL.BK_PU,0)) * (ISNULL(IVL.AM_IV, 0) / P.AM_SO - ISNULL(BKL.BK_SA,0))
+					END, 1) AM_GP		-- GP 
+					,P.* , IVL.DT_IVL
+			FROM V_MA_Z_UNIP_WEEKRPT3 P
+			LEFT OUTER JOIN V_MA_Z_UNIP_WEEKRPT4 IVL ON P.CD_COMPANY = IVL.CD_COMPANY AND P.CD_OPTY = IVL.CD_OPTY 
+			LEFT OUTER JOIN (
+									SELECT	CD_COMPANY, 
+											NO_PROJECT AS NO_PROJECT,
+											SUM(BK_SA) BK_SA, 
+											SUM(BK_PU) BK_PU 
+									FROM V_MA_Z_UNIP_WEEKRPT5 
+									WHERE CD_COMPANY = '1000' AND YY_PLAN = SUBSTRING(CONVERT(CHAR(10), CONVERT(date, GETDATE()), 112),1,4)-1
+									GROUP BY CD_COMPANY, NO_PROJECT
+							) BKL ON P.CD_COMPANY = BKL.CD_COMPANY AND P.NO_PROJECT = BKL.NO_PROJECT
+			WHERE IVL.DT_IVL <= CONVERT(CHAR(10), CONVERT(date, GETDATE()), 112)
+		]]>
+	</select>
+	
+	
+	<insert id="insertDashBoardCheckList" parameterType="hashmap">
+			INSERT INTO ERP_DASHBOARD_CHECKLIST
+			(
+				DIVISION_NAME, 
+				TEAM_NAME, 
+				OBTAIN_ORDER_TYPE, 
+				PROJECT_ID, 
+				ACCRUE_REV, 
+				ACCRUE_GP, 
+				TCV, 
+				PROJECT_NAME, 
+				COMPANY_NAME,
+				MEMBER_ID_NUM,
+				DT_SO,
+				DT_IVL
+			)	
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.H_NM_DEPT},
+				#{duzon.NM_DEPT},
+				#{duzon.NM_SO}, 
+				#{duzon.NO_PROJECT}, 
+				#{duzon.AM_IV}, 
+				#{duzon.AM_GP}, 
+				#{duzon.AM_SO}, 
+				#{duzon.NM_PROJECT}, 
+				#{duzon.LN_PARTNER}, 
+				#{duzon.NO_EMP}, 
+				DATE_FORMAT(#{duzon.DT_SO}, '%Y-%m-%d'),   
+				DATE_FORMAT(#{duzon.DT_IVL}, '%Y-%m-%d')   
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+					DIVISION_NAME = VALUES(DIVISION_NAME),
+					TEAM_NAME =VALUES(TEAM_NAME),
+					OBTAIN_ORDER_TYPE = VALUES(OBTAIN_ORDER_TYPE),
+					PROJECT_ID = VALUES(PROJECT_ID),
+					ACCRUE_REV = VALUES(ACCRUE_REV),
+					ACCRUE_GP = VALUES(ACCRUE_GP),
+					TCV = VALUES(TCV),
+					PROJECT_NAME = VALUES(PROJECT_NAME),
+					COMPANY_NAME =VALUES(COMPANY_NAME),
+					MEMBER_ID_NUM = VALUES(MEMBER_ID_NUM),
+					DT_SO = VALUES(DT_SO),
+					DT_IVL = VALUES(DT_IVL)
+	</insert>
+	
+	
+	<select id="selectErpSalesActual" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SET ANSI_WARNINGS OFF 
+			SET ARITHIGNORE ON 
+			SET ARITHABORT OFF 
+
+			DECLARE @S_CD_COMPANY NVARCHAR(7), @S_YEAR NVARCHAR(4)
+			SET @S_CD_COMPANY = '1000'
+			SET @S_YEAR		 = YEAR(GETDATE())
+			EXEC UP_SA_Z_UNIP_DEPT_ACHIEVE @V_CD_COMPANY = @S_CD_COMPANY, @V_YEAR = @S_YEAR
+		]]>
+	</select>
+	
+	
+	<insert id="insertErpSalesActual" parameterType="hashmap"> 
+			INSERT INTO ERP_SALES_ACTUAL
+			(
+				FISCAL_YEAR, 
+				ACTUAL_DATE, 
+				HAN_NAME, 
+				MEMBER_ID_NUM, 
+				1Q_ACTUAL_REV_AMOUNT, 
+				1Q_ACTUAL_GP_AMOUNT,
+				2Q_ACTUAL_REV_AMOUNT, 
+				2Q_ACTUAL_GP_AMOUNT, 
+				3Q_ACTUAL_REV_AMOUNT,
+				3Q_ACTUAL_GP_AMOUNT,
+				4Q_ACTUAL_REV_AMOUNT,
+				4Q_ACTUAL_GP_AMOUNT, 
+				1q_actual_pgp_amount 
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				YEAR(CURRENT_DATE), 
+				CURRENT_DATE,
+				#{duzon.NM_KOR},
+				#{duzon.NO_EMP},
+				#{duzon.AM_SALE1},
+				#{duzon.AM_PROFIT1},
+				#{duzon.AM_SALE2},
+				#{duzon.AM_PROFIT2},
+				#{duzon.AM_SALE3},
+				#{duzon.AM_PROFIT3},
+				#{duzon.AM_SALE4},
+				#{duzon.AM_PROFIT4},
+				<!-- #{duzon.GP} -->0
+			)
+			</foreach>
+			ON DUPLICATE KEY UPDATE 
+					1Q_ACTUAL_REV_AMOUNT =    VALUES(1Q_ACTUAL_REV_AMOUNT),
+					1Q_ACTUAL_GP_AMOUNT =    VALUES(1Q_ACTUAL_GP_AMOUNT),
+					2Q_ACTUAL_REV_AMOUNT =    VALUES(2Q_ACTUAL_REV_AMOUNT),
+					2Q_ACTUAL_GP_AMOUNT  =    VALUES(2Q_ACTUAL_GP_AMOUNT),
+					3Q_ACTUAL_REV_AMOUNT =   	VALUES(3Q_ACTUAL_REV_AMOUNT),
+					3Q_ACTUAL_GP_AMOUNT  =    VALUES(3Q_ACTUAL_GP_AMOUNT),
+					4Q_ACTUAL_REV_AMOUNT =   	VALUES(4Q_ACTUAL_REV_AMOUNT),
+					4Q_ACTUAL_GP_AMOUNT =     VALUES(4Q_ACTUAL_GP_AMOUNT),
+					1q_actual_pgp_amount  =   		<!-- VALUES(GP) -->0
+	</insert>
+	
+	
+		<select id="selectErpSalesActualTcv" parameterType="hashmap" resultType="hashmap">
+		<!-- 수주등록 된 사전손익 검색 후 TCV 계산 -->
+		<![CDATA[
+			SET ANSI_WARNINGS OFF 
+			SET ARITHIGNORE ON 
+			SET ARITHABORT OFF
+			
+			SELECT VS.NO_EMP, SUM(VB.AM_BILL) AS TCV
+			FROM
+			(
+				SELECT VZ.NO_PROJECT, VZ.NO_EMP
+				FROM 
+				(
+					SELECT NO_PROJECT
+					FROM V_SA_Z_UNIP_SOMNG
+					WHERE 1=1
+					AND CD_COMPANY = '1000'
+					GROUP BY NO_PROJECT
+				) AS VS
+				INNER JOIN
+				(
+					SELECT *
+					FROM
+					(
+						SELECT NO_PROJECT, NO_EMP ,RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+						FROM V_WP_Z_UNIP_SFA_PFLS_MASTER
+						WHERE 1=1
+						AND CD_COMPANY = '1000'
+						AND FG_GW = '1' 
+					) AS TB
+					WHERE 1=1
+					AND TB.RANK = 1
+				) AS VZ ON VS.NO_PROJECT = VZ.NO_PROJECT
+			) AS VS
+			INNER JOIN
+			(
+				SELECT *
+				FROM(
+					SELECT *, RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+					FROM V_WP_Z_UNIP_SFA_PFLSH_BILL
+					WHERE 1=1
+					AND CD_COMPANY = '1000'
+					AND YEAR(DT_SALES) = YEAR(GETDATE())
+				) AS TB
+				WHERE 1=1
+				AND TB.RANK = 1 
+			) AS VB ON VS.NO_PROJECT = VB.NO_PROJECT
+			WHERE 1=1
+			GROUP BY VS.NO_EMP  
+		]]>
+	</select>
+	
+	
+	<update id="updateErpSalesActualTcv" parameterType="hashmap"> 
+		<foreach item="duzon" index="index" collection="list" open="" separator=";" close="">
+			UPDATE ERP_SALES_ACTUAL
+				SET Y_TCV = #{duzon.TCV}
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{duzon.NO_EMP}
+			AND FISCAL_YEAR = YEAR(CURRENT_DATE)
+			AND ACTUAL_DATE =  CURRENT_DATE
+		</foreach>
+	</update>
+	
+	
+	<select id="selectErpSalesPgp" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SET ANSI_WARNINGS OFF 
+			SET ARITHIGNORE ON 
+			SET ARITHABORT OFF
+			
+			SELECT VS.NO_EMP, SUM((VB.SYS_AM_BILL-(VP.SUM_AM_PAY * (ROUND(VB.SYS_AM_BILL/CONVERT(float,VB.ALL_AM_BILL),2))))) AS PGP
+			FROM 
+			(
+				SELECT VZ.NO_PROJECT, VZ.NO_EMP
+				FROM 
+				(
+					SELECT NO_PROJECT
+					FROM V_SA_Z_UNIP_SOMNG
+					WHERE 1=1
+					AND CD_COMPANY = '1000'
+					GROUP BY NO_PROJECT
+				) AS VS
+				INNER JOIN
+				(
+					SELECT *
+					FROM
+					(
+						SELECT NO_PROJECT, NO_EMP ,RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+						FROM V_WP_Z_UNIP_SFA_PFLS_MASTER
+						WHERE 1=1
+						AND CD_COMPANY = '1000'
+						AND FG_GW = '1'
+					) AS TB
+					WHERE 1=1
+					AND TB.RANK = 1
+				) AS VZ ON VS.NO_PROJECT = VZ.NO_PROJECT
+			) AS VS
+			INNER JOIN
+			(
+				SELECT NO_PROJECT, SUM(CASE WHEN YEAR(DT_SALES) = YEAR(GETDATE()) THEN AM_BILL ELSE 0 END) AS SYS_AM_BILL, SUM(AM_BILL) AS ALL_AM_BILL  
+				FROM(
+					SELECT *, RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+					FROM V_WP_Z_UNIP_SFA_PFLSH_BILL
+					WHERE 1=1
+					AND CD_COMPANY = '1000'
+				) AS TB
+				WHERE 1=1
+				AND TB.RANK = 1 
+				GROUP BY NO_PROJECT
+			) AS VB ON VS.NO_PROJECT = VB.NO_PROJECT
+			LEFT OUTER JOIN
+			(
+				SELECT NO_PROJECT, SUM(AM_PAY) AS SUM_AM_PAY 
+				FROM(
+					SELECT *, RANK() OVER (PARTITION BY NO_INST ORDER BY NO_INST_HST DESC) AS 'RANK'
+					FROM V_WP_Z_UNIP_SFA_PFLSH_PAY
+					WHERE 1=1
+					AND CD_COMPANY = '1000'
+				) AS TB
+				WHERE 1=1
+				AND TB.RANK = 1 
+				GROUP BY NO_PROJECT
+			) AS VP ON VS.NO_PROJECT = VP.NO_PROJECT
+			WHERE 1=1
+			GROUP BY VS.NO_EMP
+		]]>
+	</select>
+	
+	
+	<update id="updateErpSalesPgp" parameterType="hashmap"> 
+		<foreach item="duzon" index="index" collection="list" open="" separator=";" close="">
+			UPDATE ERP_SALES_ACTUAL
+				SET 1q_actual_pgp_amount = #{duzon.PGP}
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{duzon.NO_EMP}
+			AND FISCAL_YEAR = YEAR(CURRENT_DATE)
+			AND ACTUAL_DATE =  CURRENT_DATE
+		</foreach>
+	</update>
+	
+	
+	<update id="updateOppToInst" parameterType="hashmap"> 
+			UPDATE 
+			OPPORTUNITY_LOG AS OPP
+			INNER JOIN
+			ERP_SFA_SOPTY_H AS ESSH ON OPP.ERP_OPP_CD   = ESSH.CD_OPTY
+			INNER JOIN
+			ERP_SFA_PFLS_MASTER AS ESPM ON ESPM.NO_PROJECT = ESSH.NO_PROJECT
+			LEFT OUTER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON ESPM.CD_PARTNER = CCI.ERP_REG_CODE 
+			LEFT OUTER JOIN
+			CLIENT_COMPANY_INFO AS CCI2 ON ESPM.CD_PARTNER_END = CCI2.ERP_REG_CODE
+			SET 
+				OPP.SUBJECT 	= ESPM.NM_INST,
+				OPP.COMPANY_ID	= CCI.COMPANY_ID,
+				OPP.CUSTOMER_ID	= CCI2.COMPANY_ID,
+				OPP.CATEGORY_CD	= ESPM.TO_SO,
+				OPP.IDENTIFIER_ID = ESPM.NO_EMP,
+				OPP.PROJECT_FORM_CD = ESPM.TP_PROJECT,
+				OPP.CONTRACT_AMOUNT	= ESPM.AM_SALE_PLAN,
+				OPP.ERP_PROJECT_CODE =  ESSH.NO_PROJECT
+			WHERE 1=1
+			AND OPP.SALES_CYCLE != '5'
+			AND OPP.ERP_OPP_CD IS NOT NULL;
+	</update>
+	
+	<select id="selectOppToSalesProduct" parameterType="hashmap" resultType="hashmap">
+			SELECT OPP.OPPORTUNITY_ID, ESPI.SEQ_ITEM, ESPI.CD_ITEM, ESPI.UM_OPTY, 0, ESPI.QT_OPTY, ESPI.CD_PLANT
+			FROM
+			OPPORTUNITY_LOG AS OPP
+			INNER JOIN
+			ERP_SFA_PFLS_MASTER AS ESPM ON OPP.ERP_PROJECT_CODE = ESPM.NO_PROJECT
+			INNER JOIN
+			ERP_SFA_PFLS_ITEM1 AS ESPI ON ESPM.NO_PROJECT = ESPI.NO_PROJECT
+			WHERE 1=1
+			AND OPP.SALES_CYCLE != '5'
+			AND OPP.ERP_PROJECT_CODE IS NOT NULL;
+	</select>
+	
+	<update id="updateOppToSalesProduct" parameterType="hashmap">
+			DELETE FROM OPPORTUNITY_SALES_PRODUCT_LIST
+			WHERE 1=1
+			AND OPPORTUNITY_ID IN(
+				SELECT OL.OPPORTUNITY_ID
+				FROM 
+				OPPORTUNITY_LOG AS OL
+				INNER JOIN
+				ERP_SFA_PFLS_MASTER AS ESPM ON OL.ERP_PROJECT_CODE = ESPM.NO_PROJECT
+				WHERE 1=1 
+				AND OL.SALES_CYCLE != '5' 
+				AND OL.ERP_PROJECT_CODE IS NOT NULL
+			);
+			INSERT INTO OPPORTUNITY_SALES_PRODUCT_LIST 
+			(
+				OPPORTUNITY_ID, 
+				PRODUCT_ORDER, 
+				PRODUCT_CD, 
+				PRODUCT_PRICE, 
+				PRODUCT_COUNT, 
+				WORKS_CD
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close=""> 
+			(
+				#{duzon.OPPORTUNITY_ID},
+				#{duzon.SEQ_ITEM},
+				#{duzon.CD_ITEM},
+				#{duzon.UM_OPTY},
+				#{duzon.QT_OPTY},
+				#{duzon.CD_PLANT}
+			)
+			</foreach>
+			<!-- ON DUPLICATE KEY UPDATE 
+					PRODUCT_CD = VALUES(PRODUCT_CD), 
+					PRODUCT_PRICE = VALUES(PRODUCT_PRICE),
+					PRODUCT_COUNT = VALUES(PRODUCT_COUNT),
+					WORKS_CD = VALUES(WORKS_CD) -->
+	</update>
+	
+	<select id="selectOppToPsProduct" parameterType="hashmap" resultType="hashmap">
+			SELECT OPP.OPPORTUNITY_ID, ESPI.SEQ_ITEM, ESPI.CD_ITEM, ESPI.UM_OPTY, ESPI.QT_OPTY, CCI.COMPANY_ID AS CD_PARTNER, ESPI.ITEM_DATE, ESPI.CD_PLANT
+			FROM
+			OPPORTUNITY_LOG AS OPP
+			INNER JOIN
+			ERP_SFA_PFLS_MASTER AS ESPM ON OPP.ERP_PROJECT_CODE = ESPM.NO_PROJECT
+			INNER JOIN
+			ERP_SFA_PFLS_ITEM2 AS ESPI ON ESPM.NO_PROJECT = ESPI.NO_PROJECT
+			LEFT OUTER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON ESPI.CD_PARTNER = CCI.ERP_REG_CODE
+			WHERE 1=1
+			AND OPP.SALES_CYCLE != '5'
+			AND OPP.ERP_PROJECT_CODE IS NOT NULL;
+	</select>
+	
+	<update id="updateOppToPsProduct" parameterType="hashmap">
+			DELETE FROM OPPORTUNITY_PURCHASE_PRODUCT_LIST
+			WHERE 1=1
+			AND OPPORTUNITY_ID IN(
+				SELECT OL.OPPORTUNITY_ID
+				FROM 
+				OPPORTUNITY_LOG AS OL
+				INNER JOIN
+				ERP_SFA_PFLS_MASTER AS ESPM ON OL.ERP_PROJECT_CODE = ESPM.NO_PROJECT
+				WHERE 1=1 
+				AND OL.SALES_CYCLE != '5' 
+				AND OL.ERP_PROJECT_CODE IS NOT NULL
+			);
+			INSERT INTO OPPORTUNITY_PURCHASE_PRODUCT_LIST 
+			(
+				OPPORTUNITY_ID, 
+				PRODUCT_ORDER, 
+				PRODUCT_CD, 
+				PRODUCT_PRICE, 
+				PRODUCT_COUNT, 
+				PURCHASE_ENTER_CD,
+				PURCHASE_DATE, 
+				WORKS_CD
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">  
+			(
+				#{duzon.OPPORTUNITY_ID},
+				#{duzon.SEQ_ITEM},
+				#{duzon.CD_ITEM},
+				#{duzon.UM_OPTY},
+				#{duzon.QT_OPTY},
+				#{duzon.CD_PARTNER},
+				#{duzon.ITEM_DATE},
+				#{duzon.CD_PLANT}
+			)
+			</foreach>
+			<!-- ON DUPLICATE KEY UPDATE 
+					PRODUCT_CD = VALUES(PRODUCT_CD), 
+					PRODUCT_PRICE = VALUES(PRODUCT_PRICE),
+					PRODUCT_COUNT = VALUES(PRODUCT_COUNT),
+					PURCHASE_ENTER_CD = VALUES(PURCHASE_ENTER_CD),
+					WORKS_CD = VALUES(WORKS_CD) -->
+	</update>
+	
+	
+	<select id="selectOppToBill" parameterType="hashmap" resultType="hashmap">
+	<!-- ERP 매출, 수금계획 GP계산  -->
+			SELECT 
+				REV.NO_PROJECT,
+				REV.NM_PROJECT,
+				REV.OPPORTUNITY_ID, 
+				REV.NO_EMP,
+				CONCAT(REV.DT_SALES,'') AS DT_SALES,
+				CONCAT(REV.DT_BILL,'') AS DT_BILL,
+				REV.AM_BILL,
+				GP.GP
+			FROM
+			-- REV
+			(
+			SELECT 
+				ESPM.NO_PROJECT,
+				ESPM.NM_PROJECT,
+				OPP.OPPORTUNITY_ID, 
+				ESPM.NO_EMP,
+				ESPB.DT_SALES,
+				ESPB.DT_BILL,
+				ESPB.AM_BILL
+			FROM
+			OPPORTUNITY_LOG AS OPP
+			INNER JOIN
+			ERP_SFA_PFLS_MASTER AS ESPM ON OPP.ERP_PROJECT_CODE = ESPM.NO_PROJECT
+			LEFT OUTER JOIN
+			ERP_SFA_PFLSH_BILL AS ESPB ON ESPM.NO_PROJECT = ESPB.NO_PROJECT
+			WHERE 1=1
+			AND OPP.SALES_CYCLE != '5'
+			AND OPP.ERP_PROJECT_CODE IS NOT NULL
+			) AS REV
+			LEFT OUTER JOIN
+			(
+			SELECT 
+				ESPM.NO_PROJECT,
+				ROUND((IFNULL(ESPB.AM_BILL,0) - IFNULL(ESPP.AM_PAY,0)) / ESPB.CT,0) AS GP
+			FROM 
+				OPPORTUNITY_LOG AS OPP
+				INNER JOIN
+				ERP_SFA_PFLS_MASTER AS ESPM ON OPP.ERP_PROJECT_CODE = ESPM.NO_PROJECT
+				LEFT OUTER JOIN
+				(
+					SELECT 
+						NO_PROJECT,
+						SUM(AM_BILL) AS AM_BILL,  
+						COUNT(AM_BILL) AS CT
+					FROM ERP_SFA_PFLSH_BILL
+					WHERE 1=1
+					GROUP BY NO_PROJECT
+				)  AS ESPB ON ESPM.NO_PROJECT = ESPB.NO_PROJECT 
+				LEFT OUTER JOIN
+				(
+					SELECT 
+						NO_PROJECT,
+						SUM(AM_PAY) AS AM_PAY  
+					FROM ERP_SFA_PFLSH_PAY
+					WHERE 1=1
+					GROUP BY NO_PROJECT
+				)  AS ESPP ON ESPB.NO_PROJECT  = ESPP.NO_PROJECT
+			WHERE 1=1
+			AND OPP.SALES_CYCLE != '5'
+			AND OPP.ERP_PROJECT_CODE IS NOT NULL
+			) AS GP ON REV.NO_PROJECT = GP.NO_PROJECT
+	</select>
+	
+	<select id="selectOppToPay" parameterType="hashmap" resultType="hashmap">
+			SELECT TB.*
+			FROM (
+				SELECT 
+					OPP.OPPORTUNITY_ID,
+					OPP.ERP_PROJECT_CODE,
+					ESPM.NO_EMP,
+					CASE WHEN ESPB.BASIS_MONTH = ESPP.BASIS_MONTH 
+					THEN 
+						CASE 
+							WHEN RIGHT(ESPB.BASIS_MONTH,1) = 1 THEN CONCAT(LEFT(ESPB.BASIS_MONTH,4),'-01-01')
+							WHEN RIGHT(ESPB.BASIS_MONTH,1) = 2 THEN CONCAT(LEFT(ESPB.BASIS_MONTH,4),'-04-01')
+							WHEN RIGHT(ESPB.BASIS_MONTH,1) = 3 THEN CONCAT(LEFT(ESPB.BASIS_MONTH,4),'-07-01')
+							WHEN RIGHT(ESPB.BASIS_MONTH,1) = 4 THEN CONCAT(LEFT(ESPB.BASIS_MONTH,4),'-10-01')
+						END
+					END AS BASIS_MONTH,
+					CASE WHEN ESPB.BASIS_MONTH = ESPP.BASIS_MONTH THEN ESPB.AM_BILL-ESPP.AM_PAY  ELSE 0 END AS GP
+				FROM OPPORTUNITY_LOG AS OPP
+				INNER JOIN
+				ERP_SFA_PFLS_MASTER AS ESPM ON OPP.ERP_PROJECT_CODE = ESPM.NO_PROJECT
+				LEFT OUTER JOIN
+				(
+					SELECT 
+						NO_PROJECT,
+						CONCAT(YEAR(DT_SALES),QUARTER(DT_SALES)) AS BASIS_MONTH,
+						SUM(AM_BILL) AS AM_BILL
+					FROM ERP_SFA_PFLSH_BILL
+					GROUP BY NO_PROJECT, CONCAT(YEAR(DT_SALES),QUARTER(DT_SALES))
+				) AS ESPB ON ESPM.NO_PROJECT = ESPB.NO_PROJECT
+				LEFT OUTER JOIN
+				(
+					SELECT 
+						NO_PROJECT,
+						CONCAT(YEAR(DT_BUY),QUARTER(DT_BUY)) AS BASIS_MONTH,
+						SUM(AM_PAY) AS AM_PAY
+					FROM ERP_SFA_PFLSH_PAY
+					GROUP BY NO_PROJECT, CONCAT(YEAR(DT_BUY),QUARTER(DT_BUY))
+				) AS ESPP ON ESPM.NO_PROJECT = ESPP.NO_PROJECT
+				WHERE 1=1
+				AND OPP.SALES_CYCLE != '5'
+				AND OPP.ERP_PROJECT_CODE IS NOT NULL
+			) AS TB
+			WHERE 1=1
+			AND BASIS_MONTH IS NOT NULL
+			ORDER BY TB.BASIS_MONTH
+	</select>
+	
+	<update id="updateOppToBill" parameterType="hashmap">
+				DELETE FROM OPPORTUNITY_AMOUNT
+				WHERE 1=1
+				AND OPPORTUNITY_ID IN(
+					SELECT OL.OPPORTUNITY_ID
+					FROM 
+					OPPORTUNITY_LOG AS OL
+					INNER JOIN
+					ERP_SFA_PFLS_MASTER AS ESPM ON OL.ERP_PROJECT_CODE = ESPM.NO_PROJECT
+					WHERE 1=1 
+					AND OL.SALES_CYCLE != '5' 
+					AND OL.ERP_PROJECT_CODE IS NOT NULL
+				);
+				<!-- 수금계획 - 지급계획 계산해서 영업기회 매출계획에 넣기~ --> 
+				INSERT INTO OPPORTUNITY_AMOUNT 
+				(
+					OPPORTUNITY_ID, 
+					CREATOR_ID, 
+					BASIS_MONTH, 
+					BASIS_MONTH_C, 
+					BASIS_PLAN_REVENUE_AMOUNT,   
+					BASIS_PLAN_GP_AMOUNT,   
+					MEMBER_ID_NUM
+				)
+				VALUES
+				<foreach item="duzon" index="index" collection="list" open="" separator="," close="">  
+				(
+					#{duzon.OPPORTUNITY_ID},
+					#{duzon.NO_EMP},
+					#{duzon.DT_SALES},
+					#{duzon.DT_BILL},
+					#{duzon.AM_BILL},
+					#{duzon.GP},
+					#{duzon.NO_EMP}
+				)
+				</foreach>
+	</update>
+	
+	<update id="updateOppToPay" parameterType="hashmap">
+			<!-- 사용안함 2018-05-15 --> 
+				INSERT INTO OPPORTUNITY_AMOUNT 
+				(
+					OPPORTUNITY_ID, 
+					CREATOR_ID, 
+					BASIS_MONTH, 
+					BASIS_PLAN_GP_AMOUNT, 
+					MEMBER_ID_NUM
+				)
+				VALUES
+				<foreach item="duzon" index="index" collection="list" open="" separator="," close="">  
+				(
+					#{duzon.OPPORTUNITY_ID},
+					#{duzon.NO_EMP},
+					#{duzon.BASIS_MONTH},
+					#{duzon.GP},
+					#{duzon.NO_EMP}
+				)
+				</foreach>
+				ON DUPLICATE KEY UPDATE 
+						BASIS_MONTH = VALUES(BASIS_MONTH), 
+						BASIS_PLAN_GP_AMOUNT = VALUES(BASIS_PLAN_GP_AMOUNT)
+	</update>
+	
+	<select id="selectErpOppCode" parameterType="hashmap" resultType="java.lang.String">
+		DECLARE 
+		@P_CD_COMPANY NVARCHAR(7) = '1000', -- 회사코드
+		@P_CD_MODULE NVARCHAR(3) = 'WP',  -- 모듈코드
+		@P_CD_CLASS  NVARCHAR(2) = '04',  -- 항목코드
+		@P_DOCU_YM  NVARCHAR(6) = CONVERT(CHAR(6), GETDATE(), 112), -- 년월
+		@P_NO   NVARCHAR(20)
+		
+		EXEC CP_GETNO @P_CD_COMPANY, @P_CD_MODULE, @P_CD_CLASS, @P_DOCU_YM, @P_NO OUTPUT
+		
+		SELECT @P_NO AS ERP_OPP_CD
+	</select>
+	
+	<select id="selectErpOppActiveCode" parameterType="hashmap" resultType="java.lang.String">
+		DECLARE 
+		@P_CD_COMPANY NVARCHAR(7) = '1000', -- 회사코드
+		@P_CD_MODULE NVARCHAR(3) = 'WP',  -- 모듈코드
+		@P_CD_CLASS  NVARCHAR(2) = '03',  -- 항목코드
+		@P_DOCU_YM  NVARCHAR(6) = CONVERT(CHAR(6), GETDATE(), 112), -- 년월
+		@P_NO   NVARCHAR(20)
+		
+		EXEC CP_GETNO @P_CD_COMPANY, @P_CD_MODULE, @P_CD_CLASS, @P_DOCU_YM, @P_NO OUTPUT
+		
+		SELECT @P_NO AS ERP_OPP_ACTIVE_CD
+	</select>
+	
+	 <select id="callErpOppMaster" parameterType="hashmap" resultType="hashmap">
+	 		DECLARE 
+	 		@UNI_CD_COMPANY NVARCHAR(8) = '1000',
+			@SYS_DATE NVARCHAR(8) = CONVERT(VARCHAR(8),GETDATE(),112),
+			@SELLERS_DC_RMK NVARCHAR(500) = '1. 고객 업무명   :'+#{SUBJECT}+CHAR(13)+CHAR(10) +'2. 고객 요구사항 : '+CHAR(13)+CHAR(10)+'3. WIN 전략      :', 
+			@CONTRACT_DATE NVARCHAR(8) = CONVERT(VARCHAR(10), CONVERT(date, #{CONTRACT_DATE}, 105), 112), 
+			@CONTRACT_ST_DATE NVARCHAR(8) = CONVERT(VARCHAR(10), CONVERT(date, #{CONTRACT_ST_DATE}, 105), 112), 
+			@CONTRACT_ED_DATE NVARCHAR(8) = CONVERT(VARCHAR(10), CONVERT(date, #{CONTRACT_ED_DATE}, 105), 112)
+			 
+			 <!-- @@@@@@@@@@ 마스터 입력 @@@@@@@@@@@ -->
+    		 EXEC UP_WP_Z_UNIP_IFSOPTY_MASTER_I 
+			@P_CD_COMPANY		= @UNI_CD_COMPANY,                            		-- 회사코드
+			@P_CD_OPTY			= #{ERP_OPP_CD},                     		-- 영업기회코드
+			@P_NM_OPTY			= #{SUBJECT},                        		-- 프로젝트명
+			@P_DT_OPTY_ST		= @SYS_DATE,  		-- 등록일자		
+			@P_CD_PARTNER		= #{ERP_COMPANY_ID},                     		-- 매출처 코드		
+			@P_CD_PARTNER_END	= #{ERP_CUSTOMER_ID},                    		-- End User 코드			
+			@P_TO_SO			= #{CATEGORY_CD},                    		-- 영업구분 코드
+			@P_NO_EMP			= #{IDENTIFIER_ID},                  		-- 주영업대표 사번
+			@P_FG_GW			= 2,                                 		-- 발급신청상태				2		미상신
+			@P_DT_OPTY_ED		= @CONTRACT_DATE,                  		-- 영업기회종료일		
+			@P_CONTACT_SALE		= #{TYPE_CD},                        		-- 영업유형 코드			
+			@P_TP_PROJECT  		= #{PROJECT_FORM_CD},                		-- 프로젝트형태 코드			
+			@P_ST_OPTY   		= '0001',                   				-- 영업기회상태				0001	OPEN
+			@P_RATE_SALE_PLAN	= 1,                          				-- 수주확률					1	High
+			@P_DT_SALE_PLAN		= @CONTRACT_DATE,		-- 예상수주일자			
+			@P_AM_SALE_PLAN 	= #{CONTRACT_AMOUNT},		-- 예상수주금액			
+			@P_DT_PJT_PLAN_ST 	= @CONTRACT_ST_DATE,		-- 예상계약기간 시작일			
+			@P_DT_PJT_PLAN_ED	= @CONTRACT_ED_DATE,		-- 예상계약기간 시작일			
+			@P_YN_XLOB			= 'N',		-- X-LOG 여부				N		NO
+			@P_DC_RMK			=  @SELLERS_DC_RMK,		-- 프로젝트개요
+			@P_YN_OMM			= 'N',		-- OMM 등록여부
+			@P_STEP_OPTY		= '0001',	-- 진행단계
+			@P_CD_DEPT			= #{IDEN_ERP_TEAM_CD}; 		-- 영업대표 부서
+			
+			<!-- @@@@@@@@@@ 영업담당 @@@@@@@@@@@ -->
+			EXEC UP_WP_Z_UNIP_IFSOPTY_EMP_I 
+			@P_CD_COMPANY		= @UNI_CD_COMPANY,		-- 회사코드
+			@P_CD_OPTY			= #{ERP_OPP_CD},		-- 영업기회코드
+			@P_SEQ_EMP			= 1,					-- 순번
+			@P_ID_EMP			= #{IDENTIFIER_ID},		-- 영업대표코드
+			@P_RT_SALES			= 100,			-- 매출비율
+			@P_DC_RMK			= ''	,		-- 비고
+			@P_CD_DEPT			=	 #{IDEN_ERP_TEAM_CD};
+
+			<!-- @@@@@@@@@@ 고객관리 @@@@@@@@@@@ -->
+			EXEC UP_WP_Z_UNIP_IFSOPTY_CUSTEMP_I 
+			@P_CD_COMPANY		= @UNI_CD_COMPANY,			-- 회사코드
+			@P_CD_OPTY			= #{ERP_OPP_CD}	,	-- 영업기회코드
+			@P_SEQ_CUST_EMP		= 1,				-- 순번
+			@P_TP_CUST_EMP		= #{ERP_CLIENT_CATEGORY_CD},	-- 고객구분
+			@P_NO_CUST_EMP		= #{ERP_CLIENT_CODE},			-- 고객코드(담당자)
+			@P_CD_PARTNER		= #{ERP_CLIENT_COMPANY_CODE_2};-- 거래처코드			
+			
+			<!-- @@@@@@@@@@ 영업활동 입력 @@@@@@@@@@@ -->
+			EXEC UP_WP_Z_UNIP_IFSOPTY_ACT_I 
+			@P_CD_COMPANY		= @UNI_CD_COMPANY,	-- 회사코드		
+			@P_CD_ACT			= #{ERP_OPP_ACTIVE_CD},	-- 활동코드
+			@P_CLASS_ACT		=  '0001',	-- 활동분류			
+			@P_CD_OPTY			= #{ERP_OPP_CD},	-- 영업기회코드	
+			@P_FG_ACT			= '0001',	-- 활동구분 (사전활동)		
+			@P_ID_INSERT		= #{IDENTIFIER_ID},	-- 활동담당자코드
+			@P_NM_ACT			= #{SUBJECT},	-- 활동명			
+			@P_YN_REPORT		= '6',	-- 보고여부 (수주)		
+			@P_FG_CONTACT		= '0002',	-- 접촉수단 (전화)		
+			@P_TYPE_ACT			= '0002',	-- 활동유형		
+			@P_DT_ACT_ST		= @SYS_DATE,	-- 계획일자		
+			@P_TIME_ACT_ST		= '01',	-- 계획시간		
+			@P_DT_ACT_ED		= @SYS_DATE,	-- 종료일자		
+			@P_TIME_ACT_ED		= '01',	-- 종료시간		
+			@P_LVL_ISSUE		= '30',	-- 이슈등급		
+			@P_YN_ISSUE			= '6',	-- 이슈보고		
+			@P_DC_ACT_ST		= '.',	-- 계획내용		
+			@P_DC_ACT_END		= '.',	-- 종료내용		
+			@P_DC_ISSUE			= '.'	;-- 이슈내용
+			
+			<!-- @@@@@@@@@@ 수주확률 입력 @@@@@@@@@@@ -->
+			EXEC UP_WP_Z_UNIP_IFSOPTY_RIVAL_I 
+			@P_CD_COMPANY		= @UNI_CD_COMPANY,	-- 회사코드		
+			@P_CD_OPTY			= #{ERP_OPP_CD},	-- 영업기회코드	
+			@P_YN_COMP			= 1,	-- 당사여부
+			@P_CD_PARTNER		= '*' ,	-- 거래처코드
+			@P_RT_OFFER			= 1	;-- 수주확률
+			
+			<!-- @@@@@@@@@@ 주요일정 입력 @@@@@@@@@@@ -->
+			EXEC UP_WP_Z_UNIP_IFSOPTY_SCHEDULE_I 
+			@P_CD_COMPANY		= @UNI_CD_COMPANY,	-- 회사코드		
+			@P_CD_OPTY			= #{ERP_OPP_CD},	-- 영업기회코드	
+			@P_SEQ_SCHEDULE		= 1,		-- 순번
+			@P_TP_SCHEDULE		= '96',		-- 구분
+			@P_DT_START			= @CONTRACT_ST_DATE,		-- 시작일
+			@P_DT_END			= @CONTRACT_ED_DATE	;		-- 종료일
+    </select>
+	
+	 <select id="callErpOppProductSales" parameterType="hashmap" resultType="hashmap">
+		 	DECLARE 
+	 		@UNI_CD_COMPANY NVARCHAR(8) = '1000',
+			@SYS_DATE NVARCHAR(8) = CONVERT(VARCHAR(8),GETDATE(),112)
+			
+		 	EXEC UP_WP_Z_UNIP_IFSOPTY_SITEM_I 
+			@P_CD_COMPANY		= @UNI_CD_COMPANY,	-- 회사코드		
+			@P_CD_OPTY			= #{ERP_OPP_CD},	-- 영업기회코드	
+			@P_SEQ_ITEM			= #{PRODUCT_ORDER},	-- 영업담당순번
+			@P_CD_PLANT			= #{WORKS_CD},	-- 공장코드
+			@P_CD_ITEM			= #{PRODUCT_CD}, -- 품목코드
+			@P_CD_EXCH			= '000', -- 환종
+			@P_RT_EXCH			= 1, -- 환율
+			@P_UM_OPTY			= #{PRODUCT_PRICE}, -- 단가
+			-- 대표여부
+			<choose>
+				<when test="PRODUCT_YN.equalsIgnoreCase('1')">
+					@P_FG_MAIN			= '1',
+				</when>
+				<otherwise>
+					@P_FG_MAIN			= '',
+				</otherwise>
+			</choose>
+			@P_QT_OPTY = #{PRODUCT_COUNT} ; --수량
+	 </select>
+	 
+	 <select id="callErpOppProductPs" parameterType="hashmap" resultType="hashmap">
+	 	DECLARE 
+ 		@UNI_CD_COMPANY NVARCHAR(8) = '1000',
+		@SYS_DATE NVARCHAR(8) = CONVERT(VARCHAR(8),GETDATE(),112),
+		@PURCHASE_DATE NVARCHAR(8) = CONVERT(VARCHAR(10), CONVERT(date, #{PURCHASE_DATE}, 105), 112)
+	 	
+	 	EXEC UP_WP_Z_UNIP_IFSOPTY_PITEM_I 
+		@P_CD_COMPANY		= @UNI_CD_COMPANY,	-- 회사코드		
+		@P_CD_OPTY			= #{ERP_OPP_CD},	-- 영업기회코드	
+		@P_SEQ_ITEM			= #{PRODUCT_ORDER},	-- 영업담당순번
+		@P_CD_PLANT			= #{WORKS_CD},	-- 공장코드
+		@P_CD_ITEM			= #{PRODUCT_CD}, -- 품목코드
+		@P_CD_EXCH			= '000', -- 환종
+		@P_RT_EXCH			= 1, -- 환율
+		@P_UM_OPTY			= #{PRODUCT_PRICE}, -- 단가
+		@P_QT_OPTY			= #{PRODUCT_COUNT}, -- 수량
+		@P_CD_PARTNER		= #{ERP_REG_CODE}, -- 매입처코드
+		@P_DT_PUR_PLAN	= @PURCHASE_DATE , -- 매입예정일자
+		@P_CD_PARTNER_END =  #{ERP_CUSTOMER_ID},
+		@P_NO_LINE = #{PRODUCT_ORDER}; -- END USER
+	 </select>
+		
+	<select id="beginTran" parameterType="hashmap" resultType="hashmap">
+	 	BEGIN TRAN
+	 </select>
+	 
+	 <select id="commitTran" parameterType="hashmap" resultType="hashmap">
+	 	COMMIT;
+	 </select> 
+	 
+	 <update id="updateOppNo" parameterType="hashmap">
+	 	UPDATE OPPORTUNITY_LOG
+	 		SET
+	 			 ERP_OPP_CD = #{ERP_OPP_CD},
+	 			 ERP_CHANGE_DATE = CURRENT_TIMESTAMP
+	 	WHERE 1=1
+	 	AND OPPORTUNITY_ID = #{pkNo}
+	 </update>
+	 
+	 
+	  <select id="selectErpSfaSoptyH" parameterType="hashmap" resultType="hashmap">
+	  	<!-- 프로젝트 코드 있는 것만~ -->
+		  	SELECT 
+				ISNULL(CD_COMPANY,'') AS CD_COMPANY, 
+				ISNULL(CD_OPTY,'') AS CD_OPTY, 
+				ISNULL(NM_OPTY,'') AS NM_OPTY, 
+				ISNULL(NO_PROJECT,'') AS NO_PROJECT, 
+				ISNULL(DT_OPTY_ST,'') AS DT_OPTY_ST, 
+				ISNULL(DT_OPTY_ED,'') AS DT_OPTY_ED, 
+				ISNULL(CD_PARTNER,'') AS CD_PARTNER, 
+				ISNULL(CD_PARTNER_END,'') AS CD_PARTNER_END, 
+				ISNULL(CD_DEPT,'') AS CD_DEPT, 
+				ISNULL(NO_EMP,'') AS NO_EMP, 
+				ISNULL(TO_SO,'') AS TO_SO, 
+				ISNULL(STEP_OPTY,'') AS STEP_OPTY, 
+				ISNULL(FG_GW,'') AS FG_GW, 
+				ISNULL(ST_OPTY,'') AS ST_OPTY, 
+				ISNULL(TP_LOSE_CLOSE,'') AS TP_LOSE_CLOSE, 
+				ISNULL(DC_LOSE_CLOSE,'') AS DC_LOSE_CLOSE, 
+				ISNULL(CONTACT_SALE,'') AS CONTACT_SALE, 
+				ISNULL(TP_PROJECT,'') AS TP_PROJECT, 
+				ISNULL(RATE_SALE_PLAN,'') AS RATE_SALE_PLAN, 
+				ISNULL(DT_SALE_PLAN,'') AS DT_SALE_PLAN, 
+				ISNULL(AM_SALE_PLAN,0) AS AM_SALE_PLAN, 
+				ISNULL(DT_PJT_PLAN_ST,'') AS DT_PJT_PLAN_ST, 
+				ISNULL(DT_PJT_PLAN_ED,'') AS DT_PJT_PLAN_ED, 
+				ISNULL(YN_XLOB,'') AS YN_XLOB, 
+				ISNULL(YN_OMM,'') AS YN_OMM, 
+				ISNULL(DC_RMK,'') AS DC_RMK, 
+				ISNULL(ID_INSERT,'') AS ID_INSERT, 
+				ISNULL(DTS_INSERT,'') AS DTS_INSERT, 
+				ISNULL(ID_UPDATE,'') AS ID_UPDATE, 
+				ISNULL(DTS_UPDATE,'') AS DTS_UPDATE, 
+				ISNULL(NO_EMP_PM,'') AS NO_EMP_PM
+			FROM WP_SFA_SOPTY_H
+			WHERE NO_PROJECT IS NOT NULL;
+	 </select> 
+	 
+	 
+	 <insert id="insertErpSfaSoptyH" parameterType="hashmap"> 
+	 	INSERT INTO ERP_SFA_SOPTY_H
+		(
+				CD_COMPANY, 
+				CD_OPTY, 
+				NM_OPTY, 
+				NO_PROJECT, 
+				DT_OPTY_ST, 
+				DT_OPTY_ED, 
+				CD_PARTNER, 
+				CD_PARTNER_END, 
+				CD_DEPT, 
+				NO_EMP, 
+				TO_SO, 
+				STEP_OPTY, 
+				FG_GW, 
+				ST_OPTY, 
+				TP_LOSE_CLOSE, 
+				DC_LOSE_CLOSE, 
+				CONTACT_SALE, 
+				TP_PROJECT, 
+				RATE_SALE_PLAN, 
+				DT_SALE_PLAN, 
+				AM_SALE_PLAN, 
+				DT_PJT_PLAN_ST, 
+				DT_PJT_PLAN_ED, 
+				YN_XLOB, 
+				YN_OMM, 
+				DC_RMK, 
+				ID_INSERT, 
+				DTS_INSERT, 
+				ID_UPDATE, 
+				DTS_UPDATE, 
+				NO_EMP_PM
+			)
+			VALUES
+			<foreach item="duzon" index="index" collection="list" open="" separator="," close="">
+			(
+				#{duzon.CD_COMPANY}, 
+				#{duzon.CD_OPTY}, 
+				#{duzon.NM_OPTY}, 
+				#{duzon.NO_PROJECT}, 
+				#{duzon.DT_OPTY_ST}, 
+				#{duzon.DT_OPTY_ED}, 
+				#{duzon.CD_PARTNER}, 
+				#{duzon.CD_PARTNER_END}, 
+				#{duzon.CD_DEPT},
+				#{duzon.NO_EMP}, 
+				#{duzon.TO_SO}, 
+				#{duzon.STEP_OPTY}, 
+				#{duzon.FG_GW}, 
+				#{duzon.ST_OPTY}, 
+				#{duzon.TP_LOSE_CLOSE}, 
+				#{duzon.DC_LOSE_CLOSE}, 
+				#{duzon.CONTACT_SALE}, 
+				#{duzon.TP_PROJECT}, 
+				#{duzon.RATE_SALE_PLAN}, 
+				#{duzon.DT_SALE_PLAN}, 
+				#{duzon.AM_SALE_PLAN}, 
+				#{duzon.DT_PJT_PLAN_ST}, 
+				#{duzon.DT_PJT_PLAN_ED}, 
+				#{duzon.YN_XLOB}, 
+				#{duzon.YN_OMM}, 
+				#{duzon.DC_RMK}, 
+				#{duzon.ID_INSERT}, 
+				#{duzon.DTS_INSERT}, 
+				#{duzon.ID_UPDATE}, 
+				#{duzon.DTS_UPDATE}, 
+				#{duzon.NO_EMP_PM}
+			)
+	 		</foreach>
+			ON DUPLICATE KEY UPDATE 
+				CD_COMPANY       = VALUES(CD_COMPANY), 
+				CD_OPTY          = VALUES(CD_OPTY), 
+				NM_OPTY          = VALUES(NM_OPTY), 
+				NO_PROJECT       = VALUES(NO_PROJECT), 
+				DT_OPTY_ST       = VALUES(DT_OPTY_ST), 
+				DT_OPTY_ED       = VALUES(DT_OPTY_ED), 
+				CD_PARTNER       = VALUES(CD_PARTNER), 
+				CD_PARTNER_END   = VALUES(CD_PARTNER_END), 
+				CD_DEPT          = VALUES(CD_DEPT), 
+				NO_EMP           = VALUES(NO_EMP), 
+				TO_SO            = VALUES(TO_SO), 
+				STEP_OPTY        = VALUES(STEP_OPTY), 
+				FG_GW            = VALUES(FG_GW), 
+				ST_OPTY          = VALUES(ST_OPTY), 
+				TP_LOSE_CLOSE    = VALUES(TP_LOSE_CLOSE), 
+				DC_LOSE_CLOSE    = VALUES(DC_LOSE_CLOSE), 
+				CONTACT_SALE     = VALUES(CONTACT_SALE), 
+				TP_PROJECT       = VALUES(TP_PROJECT), 
+				RATE_SALE_PLAN   = VALUES(RATE_SALE_PLAN), 
+				DT_SALE_PLAN     = VALUES(DT_SALE_PLAN), 
+				AM_SALE_PLAN     = VALUES(AM_SALE_PLAN), 
+				DT_PJT_PLAN_ST   = VALUES(DT_PJT_PLAN_ST), 
+				DT_PJT_PLAN_ED   = VALUES(DT_PJT_PLAN_ED), 
+				YN_XLOB    = VALUES(YN_XLOB), 
+				YN_OMM    = VALUES(YN_OMM), 
+				DC_RMK  = VALUES(DC_RMK),
+				ID_INSERT  = VALUES(ID_INSERT),
+				DTS_INSERT       = VALUES(DTS_INSERT), 
+				ID_UPDATE        = VALUES(ID_UPDATE), 
+				DTS_UPDATE       = VALUES(DTS_UPDATE), 
+				NO_EMP_PM        = VALUES(NO_EMP_PM)
+	</insert>
+	
+	<select id="searchSalesManInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			ECSI.COMPANY_CODE, 
+			CCI.COMPANY_NAME, 
+			ECSI.CLIENT_CODE, 
+			ECSI.CLIENT_NAME, 
+			ECSI.DIVISION_NAME, 
+			ECSI.POSITION_RANK, 
+			ECSI.CELL_PHONE, 
+			ECSI.EMAIL, 
+			ECSI.PHONE, 
+			ECSI.FAX, 
+			ECSI.USE_YN, 
+			ECSI.DC_RMK, 
+			ECSI.SYS_REGISTER_DATE, 
+			ECSI.SYS_UPDATE_DATE
+		FROM ERP_CLIENT_SALESMAN_INFO AS ECSI
+		LEFT OUTER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON ECSI.COMPANY_CODE = CCI.ERP_REG_CODE
+		WHERE 1=1
+		<!-- 더존 USE_YN 데이터가 이상하게 들어오는 현상때문에 모두 검색으로 변경 -->
+		<!-- AND ECSI.USE_YN = 'Y' -->
+		AND ECSI.CLIENT_NAME LIKE CONCAT('%', #{clientName}, '%')
+	</select>
+	
+</mapper>
+	
+	
+	

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<beans 
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:p="http://www.springframework.org/schema/p"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:ehcache="http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation=
+			"http://www.springframework.org/schema/beans 
+			 http://www.springframework.org/schema/beans/spring-beans.xsd
+             http://www.springframework.org/schema/context 
+ 			 http://www.springframework.org/schema/context/spring-context.xsd
+			 http://www.springframework.org/schema/util 
+			 http://www.springframework.org/schema/util/spring-util.xsd
+			 http://www.springframework.org/schema/aop 
+			 http://www.springframework.org/schema/aop/spring-aop.xsd
+			 http://www.springframework.org/schema/mvc 
+			 http://www.springframework.org/schema/mvc/spring-mvc.xsd
+			 http://www.springframework.org/schema/tx
+			http://www.springframework.org/schema/tx/spring-tx.xsd
+ 			 http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring
+             http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring/ehcache-spring-1.2.xsd
+ 	">
+ 	
+ 	<tx:annotation-driven proxy-target-class="true"/>
+
+	<!-- package 검색 -->
+	<context:component-scan base-package="com" use-default-filters="false">
+		<!-- controller만 검색 -->
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+     
+     <!-- declare ehCache -->
+	 <!-- 
+	 <ehcache:annotation-driven />
+	  
+	  <ehcache:config cache-manager="cacheManager">
+	    <ehcache:evict-expired-elements interval="60" />
+	  </ehcache:config>
+	    
+	  ehCache bean
+	  <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" >
+	    <property name="configLocation"  value="classpath:ehcache.xml"/>
+	  </bean> 
+	   -->
+	   
+	<aop:aspectj-autoproxy/>
+	<bean id="loggerAspect" class="com.uni.sellers.logger.LoggerAspect" />
+	<!-- <mvc:resources mapping="/resources/**" location="/resources/" /> -->
+    
+	<mvc:annotation-driven>
+        <mvc:argument-resolvers>
+        	<!-- parameter map 설정 -->
+            <bean class="com.uni.sellers.datasource.CustomMapArgumentResolver" />
+            <!-- 모바일 분기 -->
+            <bean class="org.springframework.mobile.device.DeviceWebArgumentResolver" />       
+        </mvc:argument-resolvers>
+    </mvc:annotation-driven>
+    
+	<!-- Interceptor 설정 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<mvc:exclude-mapping path="/login*" /> 
+			<mvc:exclude-mapping path="/logout*" /> 
+			<mvc:exclude-mapping path="/api/logintest" /> <!-- RESTful API -->
+			<mvc:exclude-mapping path="/calendar/calendarEventConviteResult.do" />
+				<bean id="commonInterceptor" class="com.uni.sellers.common.CommonInterceptor" /> 
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+	 <!-- 공통 Exception -->
+	 <!-- <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+	   <property name="exceptionMappings"> 
+	   <props>
+	      <prop key="java.lang.Exception">error</prop>
+	   </props>
+	   </property>
+	</bean> -->
+	
+	<!-- properties -->
+	<!-- <util:properties id="config" location="classpath:properties-${server.mode}.xml" /> -->
+	 
+	<bean class="org.springframework.mobile.device.view.LiteDeviceDelegatingViewResolver">
+	    <constructor-arg>
+	        <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<!-- <property name="prefix" value="/WEB-INF/jsp/" /> -->
+				<property name="suffix" value=".jsp" />
+			</bean>
+	    </constructor-arg>
+	    <property name="normalPrefix" value="/WEB-INF/jsp/pc/" />
+	    <property name="mobilePrefix" value="/WEB-INF/jsp/m/" />
+	    <property name="tabletPrefix" value="/WEB-INF/jsp/m/" />
+	    <property name="enableFallback" value="true"/>
+	</bean>
+	
+	<!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.xml.SourceHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.FormHttpMessageConverter"/>
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
+            </list>
+        </property>
+    </bean>  -->
+    
+    <bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="0" />
+    <bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+    	<property name="contentType" value="text/json; charset=UTF-8" />
+    </bean>
+</beans>

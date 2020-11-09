@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Capacity분석</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav metismenu" id="side-menu">
+                <li class="nav-header ta-c">
+                    <div class="dropdown profile-element">
+                        <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                        <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                        <a href="#">
+                            <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                        </a>
+                    </div>
+                    <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                        디유넷
+                    </div>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">고객사정보</a></li>
+                        <li><a href="#">고객개인정보</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">고객컨택내용</a></li>
+                        <li><a href="#">영업기회</a></li>
+                        <li><a href="#">잠재영업기회</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">고객이슈</a></li>
+                        <li><a href="#">고객만족도</a></li>
+                        <li><a href="#">서비스프로젝트</a></li>
+                    </ul>
+                </li>
+                <li class="active">
+                    <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li class="active"><a href="#">파트너사협업</a></li>
+                        <li><a href="#">파트너사정보</a></li>
+                        <li><a href="#">파트너사개인정보</a></li>
+                    </ul>
+                </li>
+                <li class="">
+                    <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li class=""><a href="#">성과관리</a></li>
+                        <li><a href="#">생산성</a></li>
+                        <li><a href="#">제안서정보</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">회사/부문별전략</a></li>
+                        <li><a href="#">고객별전략</a></li>
+                        <li><a href="#">전략프로젝트</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">캘린더</a></li>
+                        <li><a href="#">나의 할 일</a></li>
+                    </ul>
+                </li>
+                <li class="special_link">
+                    <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                </li>
+            </ul>
+            <div class="product-logo text-center">
+                <img src="../../images/pc/product_logo.png" alt=""/>
+                <span>Copyright Seller’s Company © 2016</span>
+            </div>
+        </div>
+    </nav>
+
+        <div id="page-wrapper" class="gray-bg">
+        <div class="row border-bottom">
+        <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+           
+        </div>
+            <ul class="nav navbar-top-links navbar-right">
+                <li>
+                    <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                </li>
+                <li class="">
+                    <a class=" count-info" data-toggle="" href="#">
+                        <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class=" count-info" data-toggle="" href="#">
+                        <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                    </a>
+                </li>
+
+
+                <li>
+                    <a href="#">
+                        <i class="fa fa-sign-out"></i> 로그아웃
+                    </a>
+                </li>
+            </ul>
+
+        </nav>
+        </div>
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-4">
+                    <h2>Capacity분석</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a>영업활동</a>
+                        </li>
+                        <li>
+                            <a>협력회사 관리</a>
+                        </li>
+                        <li class="active">
+                            <strong>Capacity분석</strong>
+                        </li>
+                    </ol>
+                </div>
+                <div class="col-sm-8">
+                    <div class="ibox-content">
+                        <span class="text-muted small pull-right">최근 업데이트: <i class="fa fa-clock-o"></i> 2:10 pm - 12.06.2014</span>
+                    </div>
+                    <div class="search-common">
+                        <div class="select-com fl_l"><!-- <label>항목선택</label> --> <select class="form-control m-b" name="account">
+                            <option>전체</option>
+                            <option>전략분류</option>
+                            <option>제목</option>
+                            <option>작성자</option>
+                        </select></div>
+                        <div class="input-default  fl_l" style="margin:0;">
+                            <input type="text" placeholder="검색어를 입력해주세요 " class="input form-control">
+                            <span class="input-group-btn">
+                                    <button type="button" class="btn btn-seller"> <i class="fa fa-search"></i> 검색하기</button> 
+                                    <a href="#" class="btn btn-search-option">상세검색 <i class="fa fa-chevron-down"></i><i class="fa fa-chevron-up" style="display:none;"></i></a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <div class="wrapper-content search-detail animated fadeInRight collapse">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <h2>상세검색</h2>
+                            <!-- <p>
+                                제안관리 관련 테이블입니다.
+                            </p> -->
+                            <div class="row ibox-content">
+                                <div class="col-sm-12 col-lg-12">
+                                    <div class="col-sm-6 col-md-5 m-b">
+                                        <div class="form-group"><label>회계년도</label> <select class="form-control m-b" name="account">
+                                            <option>전체</option>
+                                            <option>2016년</option>
+                                            <option>2015년</option>
+                                        </select></div>
+                                    </div>
+                                    <div class="col-sm-6 col-md-5 m-b">
+                                        <div class="form-group"><label>View선택</label> <select class="form-control m-b" name="account">
+                                            <option>전체</option>
+                                            <option>산업별</option>
+                                            <option>고객별</option>
+                                        </select></div>
+                                    </div>                                
+                                    <div class="col-sm-12 col-md-2 m-b">
+                                        <label for="result-in-search"> <input type="checkbox" id="result-in-search" class="input v-m" /> 결과내 검색</label><br/>
+                                        <button type="button" class="btn btn-w-m btn-primary btn-seller"><i class="fa fa-search"></i> 상세검색</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="wrapper wrapper-content  animated fadeInRight">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="ibox">
+                        <div class="ibox-content">
+                            <div class="clear">                                
+                                <div class="basic-tab pd-b20">
+                                    <ul>
+                                        <li class="active"><a href="#">1.파트너 현황</a></li>
+                                        <li><a href="#">2.Recruitment</a></li>
+                                        <li><a href="#">3.파트너 스킬 및 교육</a></li>
+                                        <li><a href="#">4.파트너 협업</a></li>
+                                        <li><a href="#">5.협력사 비지니스 현황</a></li>
+                                    </ul>
+                                </div>
+
+                                <h3>파트너 Alignment MAP</h3>
+                                
+                                <div class="pos-rel">
+                                    <div class="func-top-left fl_l">
+                                        <div class="table-menu-wrapper2 fl_l mg-r10 mg-t7 m-b">
+                                            <a href="#" class="table-menu-btn"><i class="fa fa-th-list"></i> 항목보기 설정</a>
+                                            <div class="table-menu table-menu-hidden">
+                                                <ul>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-3" value="co-3" checked="checked"> <label for="toggle-col-3">작성자</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-4" value="co-4" checked="checked"> <label for="toggle-col-4">최종변경일</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-5" value="co-5" checked="checked"> <label for="toggle-col-5">Key Milestones</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-6" value="co-6" checked="checked"> <label for="toggle-col-6">Status</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-7" value="co-7" checked="checked"> <label for="toggle-col-7">첨부</label></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="table-sel-view fl_l">
+                                            <div class="selgrid selgrid1 mg-r5">
+                                                <select class="form-control m-b" name="account">
+                                                    <option>회계년도 선택</option>
+                                                    <option>2016년</option>
+                                                    <option>2015년</option>
+                                                </select>
+                                            </div>
+                                            <div class="selgrid selgrid1 mg-r5">
+                                                <select class="form-control m-b" name="account">
+                                                    <option>보기 선택</option>
+                                                    <option>산업별</option>
+                                                    <option>고객별</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="func-top-right fl_r pd-b20">
+                                        <div class="fl_l template-doc">
+                                            <a href="#"><i class="fa fa-file-text-o fa-lg"></i></a>
+                                            <ul class="template-list off">
+                                                <li><a href="#">템플릿1.ppt</a></li>
+                                                <li><a href="#">템플릿2.doc</a></li>
+                                                <li><a href="#">고객계획서(Heatmap_CoverageModel).xlsx</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="fl_l">
+                                        <!-- 도움말 팝업 버튼 -->
+                                        <a href="#" class="btn-help mg-r5"><i class="fa fa-question fa-lg"></i></a>
+                                        <button type="button" class="btn btn-w-m btn-seller">Map생성</button> <button type="button" class="btn btn-w-m btn-seller">신규등록</button></div>
+                                    </div>
+
+                                    <table id="tech-companies" class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th rowspan="2" id="co-0">No</th>
+                                            <th rowspan="2" id="co-1">고객/산업</th>
+                                            <th colspan="4" id="co-2">IBM H/W</th>
+                                            <th colspan="4" id="co-3">IBM S/W</th>
+                                            <th colspan="4" id="co-4">안철수 연구소</th>
+                                            <th rowspan="2" id="co-5">CRB평가</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Align</th>
+                                            <th>기회</th>
+                                            <th>매출</th>
+                                            <th>Status</th>
+                                            <th>Align</th>
+                                            <th>기회</th>
+                                            <th>매출</th>
+                                            <th>Status</th>
+                                            <th>Align</th>
+                                            <th>기회</th>
+                                            <th>매출</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td headers="co-0">15</td>                                            
+                                            <td headers="co-1"><a href="#" data-toggle="modal" data-target="#myModal1">롯데그룹</a>
+                                                <div class="modal inmodal fade" id="myModal1" tabindex="-1" role="dialog"  aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                                                <h4 class="modal-title">롯데그룹</h4>
+                                                                <small class="font-bold">영업활동 세부 정보입니다.</small>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="row">
+                                                                    <div class="col-lg-12">
+                                                                        <div class="ibox float-e-margins">
+                                                                            <div class="ibox-title">
+                                                                                <h5>Capacity 분석 상세보기(Alignment)</h5>
+                                                                                <div class="ibox-tools">
+                                                                                    <a class="collapse-link">
+                                                                                        <i class="fa fa-chevron-up"></i>
+                                                                                    </a>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="ibox-content">
+                                                                                <form method="get" class="form-horizontal">
+                                                                                    <div class="form-group">
+                                                                                        <div class="col-sm-12 ag_r">작성자 : 홍길동 / 작성일 : 2016-05-10</div>
+                                                                                    </div>
+
+                                                                                    <div class="hr-line-dashed"></div>
+
+                                                                                    <h4 class="hr-line-bottom pd-t10">IBM H/W부문</h4>
+                                                                                    <div class="form-group pos-rel">
+                                                                                        <label class="col-sm-2 control-label" for="date_modified">얼라인된 협력회사 <a href="#" class="btn-company-collaborate-add"> <i class="fa fa-plus va_m"></i> 추가하기</a></label>
+                                                                                        <div class="col-sm-10">
+                                                                                            <div class="company-collaborate"><!-- 현재 등록된 고객사 -->
+                                                                                                <span>삼성증권 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <!-- 협력사 추가 팝업 -->
+                                                                                        <div class="collabotate-add-pop off">
+                                                                                            <div class="pop-header">
+                                                                                                <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                                                                                <strong class="pop-title">협력회사 선택</strong>
+                                                                                            </div>
+                                                                                            <div class="col-sm-12 cont">
+                                                                                                <div class="form-group"><!-- <label class="col-sm-4 control-label">협력사 검색</label> -->
+                                                                                                <div class="col-sm-12">
+                                                                                                    <div class="company-search mg-b5"><!-- 협력사 검색 -->
+                                                                                                        <input type="text" placeholder="협력사 검색" class="form-control fl_l mg-r5">
+                                                                                                        <button type="button" class="btn btn-seller btn-file">검색</button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div class="col-sm-12 company-result mg-b10 "><!-- 검색 결과 노출시 "off" 삭제 -->
+                                                                                                    <strong>[협력사 검색 결과]</strong>
+                                                                                                    <ul class="company-list">
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                    </ul>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <h4 class="hr-line-bottom pd-t40">IBM H/W부문</h4>
+                                                                                    <div class="form-group pos-rel">
+                                                                                        <label class="col-sm-2 control-label" for="date_modified">얼라인된 협력회사 <a href="#" class="btn-company-collaborate-add"> <i class="fa fa-plus va_m"></i> 추가하기</a></label>
+                                                                                        <div class="col-sm-10">
+                                                                                            <div class="company-collaborate"><!-- 현재 등록된 고객사 -->
+                                                                                                <span>삼성증권 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>대우조선 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>LG-CNS <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성자동차 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성전자 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성증권 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>대우조선 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>LG-CNS <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성자동차 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성전자 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <!-- 협력사 추가 팝업 -->
+                                                                                        <div class="collabotate-add-pop off">
+                                                                                            <div class="pop-header">
+                                                                                                <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                                                                                <strong class="pop-title">협력회사 선택</strong>
+                                                                                            </div>
+                                                                                            <div class="col-sm-12 cont">
+                                                                                                <div class="form-group"><!-- <label class="col-sm-4 control-label">협력사 검색</label> -->
+                                                                                                <div class="col-sm-12">
+                                                                                                    <div class="company-search mg-b5"><!-- 협력사 검색 -->
+                                                                                                        <input type="text" placeholder="협력사 검색" class="form-control fl_l mg-r5">
+                                                                                                        <button type="button" class="btn btn-seller btn-file">검색</button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div class="col-sm-12 company-result mg-b10 "><!-- 검색 결과 노출시 "off" 삭제 -->
+                                                                                                    <strong>[협력사 검색 결과]</strong>
+                                                                                                    <ul class="company-list">
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                    </ul>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <h4 class="hr-line-bottom pd-t40">IBM H/W부문</h4>
+                                                                                    <div class="form-group pos-rel">
+                                                                                        <label class="col-sm-2 control-label" for="date_modified">얼라인된 협력회사 <a href="#" class="btn-company-collaborate-add"> <i class="fa fa-plus va_m"></i> 추가하기</a></label>
+                                                                                        <div class="col-sm-10">
+                                                                                            <div class="company-collaborate"><!-- 현재 등록된 고객사 -->
+                                                                                                <span>삼성증권 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>대우조선 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>LG-CNS <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성자동차 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성전자 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성증권 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>대우조선 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>LG-CNS <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성자동차 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성전자 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <!-- 협력사 추가 팝업 -->
+                                                                                        <div class="collabotate-add-pop off">
+                                                                                            <div class="pop-header">
+                                                                                                <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                                                                                <strong class="pop-title">협력회사 선택</strong>
+                                                                                            </div>
+                                                                                            <div class="col-sm-12 cont">
+                                                                                                <div class="form-group"><!-- <label class="col-sm-4 control-label">협력사 검색</label> -->
+                                                                                                <div class="col-sm-12">
+                                                                                                    <div class="company-search mg-b5"><!-- 협력사 검색 -->
+                                                                                                        <input type="text" placeholder="협력사 검색" class="form-control fl_l mg-r5">
+                                                                                                        <button type="button" class="btn btn-seller btn-file">검색</button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div class="col-sm-12 company-result mg-b10 "><!-- 검색 결과 노출시 "off" 삭제 -->
+                                                                                                    <strong>[협력사 검색 결과]</strong>
+                                                                                                    <ul class="company-list">
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                    </ul>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <h4 class="hr-line-bottom pd-t40">IBM S/W부문</h4>
+                                                                                    <div class="form-group pos-rel">
+                                                                                        <label class="col-sm-2 control-label" for="date_modified">얼라인된 협력회사 <a href="#" class="btn-company-collaborate-add"> <i class="fa fa-plus va_m"></i> 추가하기</a></label>
+                                                                                        <div class="col-sm-10">
+                                                                                            <div class="company-collaborate"><!-- 현재 등록된 고객사 -->
+                                                                                                <span>삼성증권 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>대우조선 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>LG <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성자동차 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                                <span>삼성전자 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <!-- 협력사 추가 팝업 -->
+                                                                                        <div class="collabotate-add-pop off">
+                                                                                            <div class="pop-header">
+                                                                                                <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                                                                                <strong class="pop-title">협력회사 선택</strong>
+                                                                                            </div>
+                                                                                            <div class="col-sm-12 cont">
+                                                                                                <div class="form-group"><!-- <label class="col-sm-4 control-label">협력사 검색</label> -->
+                                                                                                <div class="col-sm-12">
+                                                                                                    <div class="company-search mg-b5"><!-- 협력사 검색 -->
+                                                                                                        <input type="text" placeholder="협력사 검색" class="form-control fl_l mg-r5">
+                                                                                                        <button type="button" class="btn btn-seller btn-file">검색</button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div class="col-sm-12 company-result mg-b10 "><!-- 검색 결과 노출시 "off" 삭제 -->
+                                                                                                    <strong>[협력사 검색 결과]</strong>
+                                                                                                    <ul class="company-list">
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                        <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                                                                                                    </ul>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div class="hr-line-dashed"></div>
+
+                                                                                    <p class="text-center">
+                                                                                        <button type="button" class="btn btn-outline btn-primary btn-seller-outline">삭제하기</button>
+                                                                                        <button type="button" class="btn btn-w-m btn-primary btn-seller">저장하기</button>
+                                                                                    </p>
+                                                                                </form>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-5"></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-0">14</td>                                            
+                                            <td headers="co-1"><a href="#" data-toggle="modal" data-target="#myModal1">롯데그룹</a></td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-red"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-5"></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-0">13</td>                                            
+                                            <td headers="co-1"><a href="#" data-toggle="modal" data-target="#myModal1">롯데그룹</a></td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-yellow"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-5"></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-0">12</td>                                            
+                                            <td headers="co-1"><a href="#" data-toggle="modal" data-target="#myModal1">롯데그룹</a></td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-yellow"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-5"></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-0">11</td>                                            
+                                            <td headers="co-1"><a href="#" data-toggle="modal" data-target="#myModal1">롯데그룹</a></td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-yellow"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-5"></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-0">10</td>                                            
+                                            <td headers="co-1"><a href="#" data-toggle="modal" data-target="#myModal1">롯데그룹</a></td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-green"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-2"><span class="statusColor statusColor-yellow"></span></td>
+                                            <td headers="co-2">3</td>
+                                            <td headers="co-2">100</td>
+                                            <td headers="co-2">50</td>
+                                            <td headers="co-5"></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div><!-- 
+                                <p class="text-right">
+                                    <button type="button" class="btn btn-outline btn-primary btn-seller-outline">선택 삭제</button>
+                                    <button type="button" class="btn btn-w-m btn-primary btn-seller">신듀등록</button>
+                                </p> -->
+
+                                <button class="btn btn-block btn-seller"><i class="fa fa-arrow-down"></i> 더 보기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+        </div>
+
+        <!-- Action popup -->
+        <div class="action-pop action ">
+            <div class="pop-header">
+                <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <strong class="pop-title">IBM H/W부문(삼성)</strong>
+            </div>
+            <div class="col-sm-12 cont">
+                <div class="col-sm-12 m-b">
+                    <label class="control-l" for="date_modified">파트너 현황</label>
+                    <select class="form-control" name="account">
+                        <option>unstacking</option>
+                        <option>recruitment</option>
+                        <option>perfect</option>
+                    </select>
+                </div>
+                <div class="col-sm-12 m-b">
+                    <label class="control-label" for="date_modified">결과 및 계획</label>
+                    <div class="input-group" style="width:100%;" ><textarea class="pop-textarea-input" rows="5"></textarea></div>
+                </div>
+                <div class="col-sm-12 m-b ta-c">
+                    <button type="button" class="btn btn-w-m btn-primary btn-seller">저장하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Align popup -->
+        <div class="action-pop align off">
+            <div class="pop-header">
+                <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <strong class="pop-title">IBM H/W부문(삼성)</strong>
+            </div>
+            <div class="col-sm-12 cont">
+                <div class="col-sm-12 m-b">                    
+                    <label class="control-label" for="date_modified">얼라인된 협력회사 <a href="#" class="btn-company-collaborate-add"> <i class="fa fa-plus va_m"></i> 추가하기</a></label>
+                    <div class="">
+                        <div class="company-collaborate"><!-- 현재 등록된 고객사 -->
+                            <span>삼성증권 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>대우조선 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>LG-CNS <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>삼성자동차 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>삼성전자 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>삼성증권 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>대우조선 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>LG-CNS <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>삼성자동차 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                            <span>삼성전자 <a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                        </div>
+                    </div>                  
+                </div>
+                <div class="col-sm-12 ">
+                    <div class="company-search mg-b10"><!-- 협력사 검색 -->
+                        <input type="text" placeholder="협력사 검색" class="form-control fl_l mg-r5">
+                        <button type="button" class="btn btn-seller btn-file">검색</button>
+                    </div>
+                    <div class="company-result mg-b10 "><!-- 검색 결과 노출시 "off" 삭제 -->
+                        <strong>[협력사 검색 결과]</strong>
+                        <ul class="company-list">
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                            <li><span>삼성증권</span> <a href="#"><i class="fa fa-plus va_m"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-sm-12 m-b ta-c">
+                    <button type="button" class="btn btn-w-m btn-primary btn-seller">저장하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 도움말 팝업 -->
+        <div class="help-pop off">
+            <div class="pop-header">
+                <button type="button" class="close"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <strong class="pop-title">도움말</strong>
+            </div>
+            <div class="col-sm-12 cont">
+                <div class="help-cont">
+                    각 페이지별 retwerte도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                    각 페이지별 도움말 내용을 여기에 넣어주세요.<br/>
+                </div>
+                
+
+                <div class="col-sm-12 m-b ta-c">
+                    <button type="button" class="btn btn-w-m btn-primary btn-seller">닫기</button>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

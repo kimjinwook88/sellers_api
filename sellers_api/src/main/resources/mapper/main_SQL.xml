@@ -1,0 +1,1889 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="main">
+
+
+	<!-- 개발 완료후 삭제 소스 시작 -->
+	<select id="selectErrNbugList" parameterType="hashmap" resultType="hashmap">
+	
+		SELECT 
+			EBM.Q_ID,
+			EBM.THE_PERSON_ID_NUM,
+			EBM.SALES_USER_ID_NUM,
+			EBM.MENU_FLAG,
+			EBM.Q_DETAIL,
+			EBM.Q_SEND_DATE,
+			EBM.STATUS,
+			
+			OMI.HAN_NAME,
+			OMI2.HAN_NAME AS THEPERSON_NAME
+			
+		FROM ERR_BUG_MESSAGE AS EBM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = EBM.SALES_USER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON OMI2.MEMBER_ID_NUM = EBM.THE_PERSON_ID_NUM
+		
+		WHERE 1=1
+		
+		<choose>
+			<when test="sender != null and sender.equalsIgnoreCase('Y') ">
+				AND EBM.SALES_USER_ID_NUM = #{member_id_num}
+			</when>
+			<when test="manager != null and manager.equalsIgnoreCase('Y') ">
+				AND EBM.THE_PERSON_ID_NUM = #{member_id_num}
+				<choose>
+					<when test="countFlag != null and countFlag.equalsIgnoreCase('Y') ">
+						AND EBM.STATUS = 'N'
+					</when>
+				</choose>
+			</when>
+			<!-- 
+			<when test="countFlag != null and countFlag.equalsIgnoreCase('Y') ">
+				AND EBM.STATUS = 'N'
+			</when>	
+			 -->		
+		</choose>
+		
+		order by EBM.Q_SEND_DATE DESC
+	</select>
+	
+	<update id="updateErrNbugSuccessStatus" parameterType="hashmap">
+		<if test="qID != null and qID != '' ">
+		UPDATE ERR_BUG_MESSAGE SET STATUS = #{status} WHERE Q_ID =#{qID}
+		</if>
+		<if test="q_Id != null and q_Id != '' ">
+		UPDATE ERR_BUG_MESSAGE SET THE_PERSON_ID_NUM = #{thePersonManagerSelect} WHERE Q_ID = #{q_Id}
+		</if>
+	</update>
+	
+	<delete id="deleteQ" parameterType="hashmap">
+		DELETE FROM ERR_BUG_MESSAGE WHERE 1=1 AND Q_ID =#{qID} AND SALES_USER_ID_NUM = #{member_id_num}
+	</delete>
+	<!-- 개발 완료후 삭제 소스 끝 -->
+	
+	<!-- 디유넷 모바일버전 메인 세팅 -->
+	<select id="selectMainSetUp" parameterType="hashmap" resultType="hashmap">
+		SELECT CMS.MEMBER_ID_NUM, CML.MM_ID, CML.MM_NAME, CMS.MM_SEQ, CMS.USE_YN, CML.SYS_REGISTER_DATE, CML.SYS_UPDATE_DATE
+		FROM 
+		COM_MM_LIST AS CML
+		LEFT OUTER JOIN
+		COM_MM_SETUP AS CMS ON CML.MM_ID = CMS.MM_ID AND CMS.MEMBER_ID_NUM = #{global_member_id}
+		WHERE 1=1
+		ORDER BY CMS.MM_SEQ, CML.MM_ID;
+	</select>
+	
+	<!-- 랜딩페이지 -> 실적현황 그래프 (누적) selextBox option (Member) -->
+	<select id="selectResultGraphOptionMember" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			OTI.TEAM_NO
+			,OTI.TEAM_NAME
+			,OMI.HAN_NAME
+			,OMI.MEMBER_ID_NUM
+		FROM OUR_TEAM_INFO AS OTI
+		INNER JOIN OUR_MEMBERS_INFO AS OMI
+			ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+		WHERE OMI.POSITION_TYPE = '영업직'
+	</select>
+
+	<select id="selectCompanyResult" parameterType="hashmap" resultType="hashmap">
+		<choose>
+			<!-- 년도 -->
+			<when test="searchQuarter > 4"> 
+				SELECT 
+					SUM(IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.4Q_ACTUAL_REV_AMOUNT,0)) AS ACTUAL_REV_AMOUNT,
+					SUM(IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.4Q_ACTUAL_GP_AMOUNT,0)) AS ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(TARGET_REV,0)) AS TARGET_REV,
+					SUM(IFNULL(TARGET_GP,0)) AS TARGET_GP
+				FROM 
+				OUR_MEMBERS_INFO AS OMI  
+				INNER JOIN
+				OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' -- AND OMI.POSITION_TYPE = '영업직'
+				INNER JOIN
+				OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+				LEFT OUTER JOIN
+				(
+					SELECT 
+						MEMBER_ID_NUM,
+						SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+						SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+					FROM ERP_SALES_PLAN
+					WHERE 1=1
+					AND YEAR(BASIS_MONTH) = YEAR(NOW())
+					GROUP BY MEMBER_ID_NUM
+				) AS ESP ON ESP.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM  
+				LEFT OUTER JOIN
+				ERP_SALES_ACTUAL AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+				AND ESA.ACTUAL_DATE = (
+															SELECT MAX(ACTUAL_DATE) 
+															FROM ERP_SALES_ACTUAL
+															WHERE 1=1
+															AND YEAR(ACTUAL_DATE) = YEAR(NOW())
+														)
+			</when>
+			<!-- 분기 -->
+			<otherwise> 
+				SELECT 
+					SUM(
+						CASE 
+							WHEN ${searchQuarter} = 1 THEN IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN ${searchQuarter} = 2 THEN IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN ${searchQuarter} = 3 THEN IFNULL(ESA.3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN ${searchQuarter} = 4 THEN IFNULL(ESA.4Q_ACTUAL_REV_AMOUNT,0)
+						END
+					) AS ACTUAL_REV_AMOUNT,
+					SUM(
+						CASE 
+							WHEN ${searchQuarter} = 1 THEN IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN ${searchQuarter} = 2 THEN IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0) 
+							WHEN ${searchQuarter} = 3 THEN IFNULL(ESA.3Q_ACTUAL_GP_AMOUNT,0) 
+							WHEN ${searchQuarter} = 4 THEN IFNULL(ESA.4Q_ACTUAL_GP_AMOUNT,0) 
+						END
+					) AS ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(TARGET_REV,0)) AS TARGET_REV,
+					SUM(IFNULL(TARGET_GP,0)) AS TARGET_GP
+				FROM 
+				OUR_MEMBERS_INFO AS OMI  
+				INNER JOIN
+				OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' -- AND OMI.POSITION_TYPE = '영업직'
+				INNER JOIN
+				OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+				LEFT OUTER JOIN
+				(
+					SELECT 
+						MEMBER_ID_NUM,
+						SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+						SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+					FROM ERP_SALES_PLAN
+					WHERE 1=1
+					<![CDATA[
+					AND YEAR(BASIS_MONTH) = YEAR(NOW()) AND QUARTER(BASIS_MONTH) = #{searchQuarter}
+					]]>
+					GROUP BY MEMBER_ID_NUM
+				) AS ESP ON ESP.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM  
+				LEFT OUTER JOIN
+				ERP_SALES_ACTUAL AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+				AND ESA.ACTUAL_DATE = (
+															SELECT MAX(ACTUAL_DATE) 
+															FROM ERP_SALES_ACTUAL
+															WHERE 1=1
+															AND YEAR(ACTUAL_DATE) = YEAR(NOW())
+														)
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectTimeLine" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+				EVENT_ID, 
+				CALENDAR_ID, 
+				MEMBER_ID_NUM, 
+				EVENT_CODE, 
+				EVENT_SUBJECT, 
+				EVENT_DETAIL, 
+				ALLDAY_YN, 
+				DATE_FORMAT(START_DATETIME,'%H:%i') AS START_DATETIME, 
+				DATE_FORMAT(END_DATETIME,'%H:%i') AS END_DATETIME,
+				DATE_FORMAT(START_DATETIME,'%Y-%m-%d') AS START_DAY,
+				DATE_FORMAT(END_DATETIME,'%Y-%m-%d') AS END_DAY,
+				END_DATETIME, 
+				BEFORE_MOVE_TIME, 
+				REPEAT_YN, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE, 
+				LOCATION, 
+				AFTER_MOVE_TIME, 
+				SHARE_YN,
+				CASE WHEN NOW() > END_DATETIME THEN 'Y' ELSE 'N' END PAST_YN
+			FROM 
+				CALENDAR_EVENT
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{searchMemberId}
+			AND DELETE_YN ='N'
+			AND DATE_FORMAT(START_DATETIME,'%Y-%m-%d') = #{searchDate}
+			ORDER BY START_DATETIME ASC
+			<if test="deviceCheck == 'mobile' ">
+				LIMIT 0, 5
+			</if>
+	</select>
+	
+	<select id="selectSalesAct" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+				OL.OPPORTUNITY_ID AS PK,
+				OL.SUBJECT AS SUBJECT,
+				CCI.COMPANY_NAME AS COMPANY_NAME,
+				OMI3.HAN_NAME AS SALESMAN_NAME,
+				OMI3.MEMBER_DIVISION,
+				OMI3.MEMBER_TEAM,
+				OMI3.MEMBER_ID_NUM,
+				DATE_FORMAT(OL.SYS_REGISTER_DATE,'%Y-%m-%d') AS SYS_REGISTER_DATE,
+				DATE_FORMAT(OL.SYS_UPDATE_DATE,'%Y-%m-%d') AS SYS_UPDATE_DATE,
+				IFNULL(DATE_FORMAT(OL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+				(
+					SELECT COUNT(*) 
+					FROM COACHING_TALK AS CT 
+					WHERE 1=1 AND CATEGORY = 'OPP' AND OL.OPPORTUNITY_ID = CT.ID
+				)AS COACHING_TALK_COUNT,
+				CASE 
+					WHEN OC.STATUS1 = 'G' THEN 'green'
+					WHEN OC.STATUS1 = 'Y' THEN 'yellow'
+					WHEN OC.STATUS1 = 'R' THEN 'red'
+					WHEN OC.STATUS1 = '' THEN 'gray'
+				ELSE NULL
+				END AS STATUS1,
+				CASE 
+					WHEN OC.STATUS2 = 'G' THEN 'green'
+					WHEN OC.STATUS2 = 'Y' THEN 'yellow'
+					WHEN OC.STATUS2 = 'R' THEN 'red'
+					WHEN OC.STATUS2 = '' THEN 'gray'
+				ELSE NULL
+				END AS STATUS2,
+				CASE 
+					WHEN OC.STATUS3 = 'G' THEN 'green'
+					WHEN OC.STATUS3 = 'Y' THEN 'yellow'
+					WHEN OC.STATUS3 = 'R' THEN 'red'
+					WHEN OC.STATUS3 = '' THEN 'gray'
+				ELSE NULL
+				END AS STATUS3,
+				CASE 
+					WHEN OC.STATUS4 = 'G' THEN 'green'
+					WHEN OC.STATUS4 = 'Y' THEN 'yellow'
+					WHEN OC.STATUS4 = 'R' THEN 'red'
+					WHEN OC.STATUS4 = '' THEN 'gray'
+				ELSE NULL
+				END AS STATUS4
+			FROM 
+			OPPORTUNITY_LOG AS OL
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID
+			INNER JOIN 
+			OUR_MEMBERS_INFO AS OMI2 ON OMI2.MEMBER_ID_NUM = OL.OWNER_ID
+			INNER JOIN 
+			OUR_MEMBERS_INFO AS OMI3 ON OMI3.MEMBER_ID_NUM = OL.IDENTIFIER_ID
+			<!-- 모바일에서만 사용 -->
+			LEFT OUTER JOIN
+			(
+				SELECT 
+					OPPORTUNITY_ID,
+					MAX(IF(CHECKLIST_SEQ=1,STATUS,NULL)) AS STATUS1,
+					MAX(IF(CHECKLIST_SEQ=2,STATUS,NULL)) AS STATUS2,
+					MAX(IF(CHECKLIST_SEQ=3,STATUS,NULL)) AS STATUS3,
+					MAX(IF(CHECKLIST_SEQ=4,STATUS,NULL)) AS STATUS4
+				FROM OPPORTUNITY_CHECKLIST_OWNER
+				GROUP BY OPPORTUNITY_ID
+			)AS OC ON OL.OPPORTUNITY_ID = OC.OPPORTUNITY_ID
+			WHERE 1=1
+			AND OL.TEMP_FLAG = 'N'
+			AND OL.SALES_CYCLE != '4' 
+			AND OL.SALES_CYCLE != '5' 
+			AND (OL.CLOSE_CATEGORY != '3' OR OL.CLOSE_CATEGORY IS NULL)
+			AND OL.SYS_REGISTER_DATE >= (NOW() - INTERVAL 7 day)
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_CFO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					AND (OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division})
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+					AND (OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_division})
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+					AND (OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_division})
+				</when>
+			</choose>
+			<!-- ORDER BY SYS_REGISTER_DATE DESC -->
+			ORDER BY LATELY_UPDATE_DATE DESC
+			<if test="deviceCheck == 'mobile'">
+				LIMIT 0, 5
+			</if>
+	</select>
+	
+	<select id="selectOpportunityGraphData" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			CONCAT(#{searchQuarter}, '분기') AS NOW_QUARTOR
+			,COUNT(
+				CASE WHEN OL.FORECAST_YN = 'IN' 
+				THEN (
+					CASE WHEN OL.SYS_REGISTER_DATE LIKE CONCAT(#{searchYear}, '%') 
+					THEN (
+						CASE WHEN QUARTER(OL.SYS_REGISTER_DATE) = #{searchQuarter}
+						THEN "분기" 
+						END
+					) 
+				END) 
+			END
+			) AS QUARTER_IN
+			,COUNT(
+				CASE WHEN OL.FORECAST_YN = '미처리' 
+				THEN (
+					CASE WHEN OL.SYS_REGISTER_DATE LIKE CONCAT(#{searchYear}, '%') 
+					THEN (
+						CASE WHEN QUARTER(OL.SYS_REGISTER_DATE) = #{searchQuarter}
+						THEN "분기" 
+						END
+					) 
+				END) 
+			END
+			) AS QUARTER_UNTREATED
+			,COUNT(
+				CASE WHEN OL.FORECAST_YN = 'OUT' 
+				THEN (
+					CASE WHEN OL.SYS_REGISTER_DATE LIKE CONCAT(#{searchYear}, '%') 
+					THEN (
+						CASE WHEN QUARTER(OL.SYS_REGISTER_DATE) = #{searchQuarter}
+						THEN "분기" 
+						END
+					) 
+				END) 
+			END
+			) AS QUARTER_OUT
+			
+		FROM  OPPORTUNITY_LOG OL
+		<!-- WHERE CREATOR_ID = #{global_member_id} -->
+	</select>
+	
+	<select id="selectSalesAct2" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			OL.OPPORTUNITY_ID AS PK,
+			OL.SUBJECT AS SUBJECT,
+			CCI.COMPANY_NAME AS COMPANY_NAME,
+			OMI3.HAN_NAME AS SALESMAN_NAME,
+			OMI3.MEMBER_DIVISION,
+			OMI3.MEMBER_TEAM,
+			OMI3.MEMBER_ID_NUM,
+			DATE_FORMAT(OL.SYS_REGISTER_DATE,'%Y-%m-%d') AS SYS_REGISTER_DATE,
+			DATE_FORMAT(OL.SYS_UPDATE_DATE,'%Y-%m-%d') AS SYS_UPDATE_DATE,
+			IFNULL(DATE_FORMAT(OL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+			(
+				SELECT COUNT(*) 
+				FROM COACHING_TALK AS CT 
+				WHERE 1=1 AND CATEGORY = 'OPP' AND OL.OPPORTUNITY_ID = CT.ID
+			)AS COACHING_TALK_COUNT
+		FROM 
+		OPPORTUNITY_LOG AS OL
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID
+		INNER JOIN 
+		OUR_MEMBERS_INFO AS OMI2 ON OMI2.MEMBER_ID_NUM = OL.OWNER_ID
+		INNER JOIN 
+		OUR_MEMBERS_INFO AS OMI3 ON OMI3.MEMBER_ID_NUM = OL.IDENTIFIER_ID
+		WHERE 1=1
+		AND OL.TEMP_FLAG = 'N'
+		AND OL.SALES_CYCLE != '4' 
+		AND OL.SALES_CYCLE != '5'
+		AND (OL.ERP_OPP_CD IS NULL OR OL.ERP_OPP_CD = '')
+		AND (OL.CLOSE_CATEGORY != '3' OR OL.CLOSE_CATEGORY IS NULL)
+		AND OL.OPPORTUNITY_ID NOT IN(
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_LOG
+			WHERE 1=1
+			AND OL.TEMP_FLAG = 'N'
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_PURCHASE_PRODUCT_LIST
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_SALES_PRODUCT_LIST
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_AMOUNT
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_MILESTONE
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_CHECKLIST
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_ACTION_PLAN
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_CHECKLIST_OWNER
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_WIN_PLAN
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+			
+			UNION
+			
+			SELECT OPPORTUNITY_ID
+			FROM OPPORTUNITY_FILE_STORE
+			WHERE 1=1
+			AND SYS_UPDATE_DATE >= (NOW()-INTERVAL 2 WEEK)
+		)
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND (OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division})
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND (OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_division})
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND (OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_division})
+			</when>
+		</choose>
+		<!-- ORDER BY OL.SYS_REGISTER_DATE ASC -->
+		ORDER BY LATELY_UPDATE_DATE DESC
+	</select>
+	
+	
+	<select id="selectHiddenSalesAct" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+				OHL.OPPORTUNITY_HIDDEN_ID AS PK,
+				OHL.SUBJECT AS SUBJECT,
+				CII.CUSTOMER_NAME AS CUSTOMER_NAME,
+				OMI.HAN_NAME AS SALESMAN_NAME,
+				OMI.MEMBER_DIVISION,
+				OMI.MEMBER_TEAM,
+				OMI.MEMBER_ID_NUM,
+				OMI2.MEMBER_DIVISION AS CREATOR_DIVISION,
+				OMI2.MEMBER_TEAM AS CREATOR_TEAM,
+				OMI2.MEMBER_ID_NUM AS CREATOR_ID,
+				DATE_FORMAT(OHL.SYS_REGISTER_DATE,'%Y-%m-%d') AS SYS_REGISTER_DATE,
+				DATE_FORMAT(OHL.SYS_UPDATE_DATE,'%Y-%m-%d') AS SYS_UPDATE_DATE,
+				IFNULL(DATE_FORMAT(OHL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+				OHL.SALES_CHANGE_DATE,
+				(
+					SELECT COUNT(*) 
+					FROM COACHING_TALK AS CT 
+					WHERE 1=1 AND CATEGORY='HOPP' AND OHL.OPPORTUNITY_HIDDEN_ID = CT.ID
+				)AS COACHING_TALK_COUNT
+			FROM 
+			OPPORTUNITY_HIDDEN_LOG AS OHL
+			LEFT OUTER JOIN
+			CLIENT_INDIVIDUAL_INFO AS CII ON OHL.CUSTOMER_ID = CII.CUSTOMER_ID
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = OHL.SALESMAN_ID
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI2 ON OMI2.MEMBER_ID_NUM = OHL.CREATOR_ID
+			LEFT OUTER JOIN
+			OPPORTUNITY_LOG AS OL ON OHL.OPPORTUNITY_HIDDEN_ID = OL.OPPORTUNITY_HIDDEN_ID 
+			WHERE 1=1
+			AND OL.OPPORTUNITY_HIDDEN_ID IS NULL
+			AND OHL.SALES_CHANGE_DATE  >= NOW() -  INTERVAL 1 MONTH 
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_CFO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					AND OMI.MEMBER_DIVISION = #{global_member_division}
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+					AND OMI.MEMBER_TEAM = #{global_member_team}
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+					AND OMI.MEMBER_TEAM = #{global_member_team}
+				</when>
+			</choose>
+			<!-- ORDER BY SYS_REGISTER_DATE DESC -->
+			ORDER BY LATELY_UPDATE_DATE DESC
+	</select>
+	
+	<select id="selectClientIssue" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					CIL.ISSUE_ID AS PK,
+					CIL.ISSUE_SUBJECT AS SUBJECT,
+					CIL.SALES_REPRESENTIVE_ID,
+					CIL.SOLVE_OWNER,
+					GROUP_CONCAT(CCI.COMPANY_ID) AS COMPANY_ID,
+					GROUP_CONCAT(CCI.COMPANY_NAME) AS COMPANY_NAME,
+					GROUP_CONCAT(CII.CUSTOMER_ID) AS CUSTOMER_ID,
+					GROUP_CONCAT(CII.CUSTOMER_NAME) AS CUSTOMER_NAME,					
+					OMI.HAN_NAME AS CREATE_NAME,
+					OMI3.HAN_NAME AS SOLVE_OWNER_NAME,
+					OMI.MEMBER_DIVISION,
+					OMI.MEMBER_TEAM,
+					OMI.MEMBER_ID_NUM,
+					DATE_FORMAT(CIL.SYS_UPDATE_DATE,'%Y-%m-%d') AS SYS_UPDATE_DATE,
+					DATE_FORMAT(CIL.SYS_REGISTER_DATE,'%Y-%m-%d') AS SYS_REGISTER_DATE,
+					IFNULL(DATE_FORMAT(CIL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					CASE 
+						WHEN CIL.DUE_DATE < CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR  CIL.ISSUE_CLOSE_DATE = '') THEN 1
+						ELSE 0
+					END AS OVER_DUE,
+					CIL.DUE_DATE,
+					(
+						SELECT COUNT(*) 
+						FROM COACHING_TALK AS CT 
+						WHERE 1=1 AND CATEGORY='ISSUE' AND CIL.ISSUE_ID = CT.ID
+					)AS COACHING_TALK_COUNT,
+					CASE
+						WHEN CIL.DUE_DATE >= CURRENT_DATE() AND CIL.ISSUE_CLOSE_DATE IS NULL THEN '#ffc000' 
+						WHEN CURRENT_DATE() >  CIL.DUE_DATE AND CIL.ISSUE_CLOSE_DATE IS NULL  THEN '#f20056'
+						WHEN CIL.ISSUE_CLOSE_DATE IS NOT NULL THEN '-'
+					ELSE '-'
+					END STATUS_COLOR
+				FROM 
+					CLIENT_ISSUE_LOG AS CIL
+					INNER JOIN
+					COM_CLIENT_LIST AS CCL ON CCL.LOG_ID = CIL.ISSUE_ID AND CCL.CATEGORY = '2'
+					INNER JOIN
+					CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID 
+					INNER JOIN
+					CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+					LEFT OUTER JOIN
+					OUR_MEMBERS_INFO AS OMI ON CIL.SALES_REPRESENTIVE_ID = OMI.MEMBER_ID_NUM
+					LEFT OUTER JOIN
+					OUR_MEMBERS_INFO AS OMI2 ON CIL.CREATOR_ID = OMI2.MEMBER_ID_NUM
+					LEFT OUTER JOIN
+					OUR_MEMBERS_INFO AS OMI3 ON CIL.SOLVE_OWNER = OMI3.MEMBER_ID_NUM
+					LEFT OUTER JOIN
+					OUR_MEMBERS_INFO AS OMI4 ON CIL.ISSUE_CONFIRM_ID = OMI4.MEMBER_ID_NUM
+					LEFT OUTER JOIN
+					OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+				WHERE 1=1
+				AND CIL.ISSUE_CLOSE_DATE IS NULL
+			]]>
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_CFO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND (OMI.MEMBER_DIVISION = #{global_member_division} OR OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division} OR OMI4.MEMBER_DIVISION = #{global_member_division})
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')">
+						AND (OMI.MEMBER_DIVISION = #{global_member_division} OR OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division} OR OMI4.MEMBER_DIVISION = #{global_member_division})
+						AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team} OR OMI4.MEMBER_TEAM = #{global_member_team})
+					</when>
+					<when test="global_role_code.contains('ROLE_MEMBER')">
+						AND (OMI.MEMBER_DIVISION = #{global_member_division} OR OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division} OR OMI4.MEMBER_DIVISION = #{global_member_division})
+						AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team} OR OMI4.MEMBER_TEAM = #{global_member_team})
+					</when>
+				</choose>
+				GROUP BY CIL.ISSUE_ID
+				<!-- ORDER BY CIL.DUE_DATE ASC -->
+				ORDER BY LATELY_UPDATE_DATE DESC
+				
+				<if test="deviceCheck == 'mobile' ">
+					LIMIT 0, 5
+				</if>
+	</select>
+	
+	<select id="selectTrackingList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			NOTICE_DETAIL,
+			NOTICE_CATEGORY, 
+			NOTICE_REDIRECT_URL, 
+			EVENT_ID, 
+			NOTICE_CODE, 
+			NOTICE_SEND_DATE, 
+			OVER_DUE_FLAG
+			FROM NOTICE_INFO 
+		WHERE 1=1
+		AND MEMBER_ID_NUM = #{searchMemberId}
+		AND NOTICE_CATEGORY = 'TRACKING'
+		ORDER BY OVER_DUE_FLAG DESC
+	</select>
+	
+	
+	
+	
+	<select id="selectNewUpdate" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					CIL.ISSUE_ID AS PK,
+					CIL.ISSUE_SUBJECT AS SUBJECT,
+					CIL.SALES_REPRESENTIVE_ID,
+					CIL.SOLVE_OWNER,
+					GROUP_CONCAT(CCI.COMPANY_ID) AS COMPANY_ID,
+					GROUP_CONCAT(CCI.COMPANY_NAME) AS COMPANY_NAME,
+					GROUP_CONCAT(CII.CUSTOMER_ID) AS CUSTOMER_ID,
+					GROUP_CONCAT(CII.CUSTOMER_NAME) AS CUSTOMER_NAME,					
+					OMI.HAN_NAME AS CREATE_NAME,
+					OMI2.HAN_NAME AS SOLVE_OWNER_NAME,
+					OMI.MEMBER_DIVISION,
+					OMI.MEMBER_TEAM,
+					OMI.MEMBER_ID_NUM,
+					DATE_FORMAT(CIL.SYS_UPDATE_DATE,'%Y-%m-%d') AS SYS_UPDATE_DATE,
+					'고객이슈' AS CODE,
+					CASE 
+						WHEN CIL.DUE_DATE < CURRENT_DATE() AND (CIL.ISSUE_CLOSE_DATE IS NULL OR  CIL.ISSUE_CLOSE_DATE = '') THEN 1
+						ELSE 0
+					END AS OVER_DUE,
+					CIL.DUE_DATE
+				FROM 
+					CLIENT_ISSUE_LOG AS CIL
+					INNER JOIN
+					COM_CLIENT_LIST AS CCL ON CCL.LOG_ID = CIL.ISSUE_ID AND CCL.CATEGORY = '2'
+					INNER JOIN
+					CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID 
+					INNER JOIN
+					CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = CIL.SALES_REPRESENTIVE_ID
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI2 ON OMI2.MEMBER_ID_NUM = CIL.SOLVE_OWNER
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI3 ON OMI3.MEMBER_ID_NUM = CIL.CREATOR_ID
+					LEFT OUTER JOIN
+					OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+					LEFT OUTER JOIN
+					OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+				WHERE 1=1
+				AND CIL.ISSUE_CLOSE_DATE IS NULL
+			]]>
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_CFO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND (OMI.MEMBER_DIVISION = #{global_member_division} OR OMI2.MEMBER_DIVISION = #{global_member_division} OR OMI3.MEMBER_DIVISION = #{global_member_division})
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')">
+						AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team})
+					</when>
+					<when test="global_role_code.contains('ROLE_MEMBER')">
+						AND (OMI.MEMBER_TEAM = #{global_member_team} OR OMI2.MEMBER_TEAM = #{global_member_team} OR OMI3.MEMBER_TEAM = #{global_member_team})
+					</when>
+				</choose>
+				GROUP BY CIL.ISSUE_ID
+				ORDER BY CIL.DUE_DATE ASC
+			
+	</select>
+	
+	<select id="selectResult" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			<choose>
+				<when test="category_main != null and category_main.equalsIgnoreCase('1')"> <!-- 부서별 -->
+					ODI.DIVISION_NAME AS VIEW_NAME,
+					ODI.DIVISION_NO,
+				</when>
+				<when test="category_main != null and category_main.equalsIgnoreCase('2')"> <!-- 개인 -->
+					OMI.HAN_NAME AS VIEW_NAME,
+					OMI.MEMBER_ID_NUM,
+				</when>
+				<otherwise>
+					'회사전체' AS VIEW_NAME,
+				</otherwise>
+			</choose>
+			SUM(
+				CASE 
+					WHEN ${searchQuarter} = 1 THEN IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0)
+					WHEN ${searchQuarter} = 2 THEN IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0)
+					WHEN ${searchQuarter} = 3 THEN IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.3Q_ACTUAL_REV_AMOUNT,0)
+					WHEN ${searchQuarter} = 4 THEN IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.4Q_ACTUAL_REV_AMOUNT,0)
+					ELSE 0
+				END
+			) AS ACTUAL_REV_AMOUNT,
+			SUM(
+				CASE 
+					WHEN ${searchQuarter} = 1 THEN IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0)
+					WHEN ${searchQuarter} = 2 THEN IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0) 
+					WHEN ${searchQuarter} = 3 THEN IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.3Q_ACTUAL_GP_AMOUNT,0) 
+					WHEN ${searchQuarter} = 4 THEN IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.3Q_ACTUAL_GP_AMOUNT,0)+ IFNULL(ESA.4Q_ACTUAL_GP_AMOUNT,0)
+					ELSE 0 
+				END
+			) AS ACTUAL_GP_AMOUNT,
+			SUM(IFNULL(TARGET_REV,0)) AS TARGET_REV,
+			SUM(IFNULL(TARGET_GP,0)) AS TARGET_GP
+		FROM 
+		OUR_MEMBERS_INFO AS OMI  
+		INNER JOIN
+		OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' -- AND OMI.POSITION_TYPE = '영업직'
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+		LEFT OUTER JOIN
+		(
+			SELECT 
+				MEMBER_ID_NUM,
+				SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+				SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+			FROM ERP_SALES_PLAN
+			WHERE 1=1
+			<![CDATA[
+			AND YEAR(BASIS_MONTH) = YEAR(NOW()) AND QUARTER(BASIS_MONTH) <= #{searchQuarter}
+			]]>
+			GROUP BY MEMBER_ID_NUM
+		) AS ESP ON ESP.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM  
+		LEFT OUTER JOIN
+		ERP_SALES_ACTUAL AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+		AND ESA.ACTUAL_DATE = (
+													SELECT MAX(ACTUAL_DATE) 
+													FROM ERP_SALES_ACTUAL
+													WHERE 1=1
+													AND YEAR(ACTUAL_DATE) = YEAR(NOW())
+												)
+		<choose>
+			<when test="category_main != null and category_main.equalsIgnoreCase('1')"> <!-- 부서별 -->
+				GROUP BY ODI.DIVISION_NO
+				HAVING 1=1 
+				AND ODI.DIVISION_NO = #{global_member_division}
+			</when>
+			<when test="category_main != null and category_main.equalsIgnoreCase('2')"> <!-- 개인 -->
+				GROUP BY OMI.MEMBER_ID_NUM
+				HAVING 1=1 
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	<select id="selectResultGraph" parameterType="hashmap" resultType="hashmap">
+	<choose>
+		<!-- 년도 -->
+		<when test="searchQuarter > 4"> 
+			SELECT 
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+				OMI.MEMBER_DIVISION,
+				ODI.DIVISION_NAME AS VIEW_NAME,
+				</when>
+				<when test="global_role_code.contains('ROLE_CFO')">
+				OMI.MEMBER_DIVISION,
+				ODI.DIVISION_NAME AS VIEW_NAME,
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+				OMI.MEMBER_DIVISION,
+				ODI.DIVISION_NAME,
+				OMI.MEMBER_TEAM,
+				OTI.TEAM_NAME AS VIEW_NAME,
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+				OMI.MEMBER_TEAM,
+				OTI.TEAM_NAME,
+				OMI.MEMBER_ID_NUM,
+				OMI.HAN_NAME AS VIEW_NAME,
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+				OMI.MEMBER_ID_NUM,
+				OMI.HAN_NAME AS VIEW_NAME,
+				</when>
+			</choose>
+				SUM(IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(ESA.4Q_ACTUAL_REV_AMOUNT,0)) AS ACTUAL_REV_AMOUNT,
+				SUM(IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(ESA.4Q_ACTUAL_GP_AMOUNT,0)) AS ACTUAL_GP_AMOUNT,
+				SUM(IFNULL(TARGET_REV,0)) AS TARGET_REV,
+				SUM(IFNULL(TARGET_GP,0)) AS TARGET_GP
+			FROM 
+			OUR_MEMBERS_INFO AS OMI  
+			INNER JOIN
+			OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S'  -- AND OMI.POSITION_TYPE = '영업직'
+			INNER JOIN
+			OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+			LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(NOW())
+				GROUP BY MEMBER_ID_NUM
+			) AS ESP ON ESP.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM  
+			LEFT OUTER JOIN
+			ERP_SALES_ACTUAL AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+			AND ESA.ACTUAL_DATE = (
+														SELECT MAX(ACTUAL_DATE) 
+														FROM ERP_SALES_ACTUAL
+														WHERE 1=1
+														AND YEAR(ACTUAL_DATE) = YEAR(NOW())
+													)
+		</when>
+		<!-- 분기 -->
+		<otherwise>
+		SELECT 
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			OMI.MEMBER_DIVISION,
+			ODI.DIVISION_NAME AS VIEW_NAME,
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+			OMI.MEMBER_DIVISION,
+			ODI.DIVISION_NAME AS VIEW_NAME,
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+			OMI.MEMBER_DIVISION,
+			ODI.DIVISION_NAME,
+			OMI.MEMBER_TEAM,
+			OTI.TEAM_NAME AS VIEW_NAME,
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+			OMI.MEMBER_TEAM,
+			OTI.TEAM_NAME,
+			OMI.MEMBER_ID_NUM,
+			OMI.HAN_NAME AS VIEW_NAME,
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+			OMI.MEMBER_ID_NUM,
+			OMI.HAN_NAME AS VIEW_NAME,
+			</when>
+		</choose>
+			SUM(
+				CASE 
+					WHEN ${searchQuarter} = 1 THEN IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0)
+					WHEN ${searchQuarter} = 2 THEN IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0)
+					WHEN ${searchQuarter} = 3 THEN IFNULL(ESA.3Q_ACTUAL_REV_AMOUNT,0)
+					WHEN ${searchQuarter} = 4 THEN IFNULL(ESA.4Q_ACTUAL_REV_AMOUNT,0)
+				END
+			) AS ACTUAL_REV_AMOUNT,
+			SUM(
+				CASE 
+					WHEN ${searchQuarter} = 1 THEN IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0)
+					WHEN ${searchQuarter} = 2 THEN IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0)
+					WHEN ${searchQuarter} = 3 THEN IFNULL(ESA.3Q_ACTUAL_GP_AMOUNT,0)
+					WHEN ${searchQuarter} = 4 THEN IFNULL(ESA.4Q_ACTUAL_GP_AMOUNT,0)
+				END
+			) AS ACTUAL_GP_AMOUNT,
+			SUM(IFNULL(TARGET_REV,0)) AS TARGET_REV,
+			SUM(IFNULL(TARGET_GP,0)) AS TARGET_GP
+		FROM 
+		OUR_MEMBERS_INFO AS OMI  
+		INNER JOIN
+		OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S'  -- AND OMI.POSITION_TYPE = '영업직'
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+		LEFT OUTER JOIN
+		(
+			SELECT 
+				MEMBER_ID_NUM,
+				SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+				SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+			FROM ERP_SALES_PLAN
+			WHERE 1=1
+			<![CDATA[
+			AND YEAR(BASIS_MONTH) = YEAR(NOW()) AND QUARTER(BASIS_MONTH) = ${searchQuarter}
+			]]>
+			GROUP BY MEMBER_ID_NUM
+		) AS ESP ON ESP.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM  
+		LEFT OUTER JOIN
+		ERP_SALES_ACTUAL AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+		AND ESA.ACTUAL_DATE = (
+													SELECT MAX(ACTUAL_DATE) 
+													FROM ERP_SALES_ACTUAL
+													WHERE 1=1
+													AND YEAR(ACTUAL_DATE) = YEAR(NOW())
+												)
+		</otherwise>
+	</choose>
+		
+	<choose>
+		<when test="global_role_code.contains('ROLE_CEO')">
+		GROUP BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME
+		</when>
+		<when test="global_role_code.contains('ROLE_CFO')">
+		GROUP BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME
+		</when>
+		<when test="global_role_code.contains('ROLE_DIVISION')">
+		GROUP BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME
+		HAVING 1=1 
+		AND OMI.MEMBER_DIVISION = #{global_member_division}
+		</when>
+		<when test="global_role_code.contains('ROLE_TEAM')">
+		GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,OMI.HAN_NAME
+		HAVING 1=1 
+		AND OMI.MEMBER_TEAM = #{global_member_team}
+		</when>
+		<when test="global_role_code.contains('ROLE_MEMBER')">
+		GROUP BY OMI.MEMBER_ID_NUM,OMI.HAN_NAME
+		HAVING 1=1 
+		AND OMI.MEMBER_ID_NUM = #{global_member_id}
+		</when>
+	</choose>
+		
+	</select>
+	
+	
+	<select id="selectMyCompanyList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CCI.COMPANY_ID,
+			CCI.COMPANY_NAME,
+			STAM.MEMBER_ID_NUM
+		FROM 
+		SALES_TERRITORY_ALIGN_MAP AS STAM
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON STAM.COMPANY_ID = CCI.COMPANY_ID
+		WHERE 1=1
+		AND STAM.MEMBER_ID_NUM = #{global_member_id}
+	</select>
+	
+	<select id="selectMyCompanyListCount" parameterType="hashmap" resultType="Integer">
+		SELECT 
+			COUNT(CCI.COMPANY_ID) AS COUNT
+		FROM 
+		SALES_TERRITORY_ALIGN_MAP AS STAM
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON STAM.COMPANY_ID = CCI.COMPANY_ID
+		WHERE 1=1
+		AND STAM.MEMBER_ID_NUM = #{global_member_id}
+	</select>
+	
+	<select id="selectContactList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CEL.EVENT_ID,
+			CEL.EVENT_DATE,
+			CEL.EVENT_SUBJECT,
+			CEL.EVENT_CATEGORY,
+			CEL.CREATOR_ID,
+			OMI.HAN_NAME,
+			GROUP_CONCAT(CII.CUSTOMER_NAME) AS CUSTOMER_NAME,
+			(
+				SELECT COUNT(*) 
+				FROM COACHING_TALK AS CT 
+				WHERE 1=1 AND CATEGORY='CONTACT' AND CEL.EVENT_ID = CT.ID
+			)AS COACHING_TALK_COUNT
+		FROM 
+		CLIENT_EVENT_LOG AS CEL
+		INNER JOIN
+		COM_CLIENT_LIST AS CCL ON CCL.LOG_ID = CEL.EVENT_ID AND CCL.CATEGORY = '1'
+		INNER JOIN
+		CLIENT_INDIVIDUAL_INFO AS CII ON CCL.CLIENT_ID = CII.CUSTOMER_ID 
+		INNER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CEL.CREATOR_ID = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		AND CEL.EVENT_DATE  >= NOW() -  INTERVAL 1 MONTH 
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division} 
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND CEL.CREATOR_ID = #{global_member_id} 
+			</when>
+		</choose>
+		GROUP BY CEL.EVENT_ID
+		ORDER BY CEL.EVENT_DATE DESC
+	</select>
+	
+	<select id="selectNewCstmList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CII.CUSTOMER_ID,
+			CII.CUSTOMER_NAME,
+			CCI.COMPANY_ID,
+			CCI.COMPANY_NAME,
+			<if test="BY == 'GROUP' ">
+			COUNT(CCI.COMPANY_ID) AS COUNT,
+			</if>
+			CII.CREATOR_ID,
+			OMI.HAN_NAME,
+			OMI.POSITION_STATUS,
+			OMI.POSITION_RANK,
+			OMI.MEMBER_DIVISION,
+			OMI.MEMBER_TEAM,
+			DATE_FORMAT(CII.SYS_REGISTER_DATE,'%Y-%m-%d') AS SYS_REGISTER_DATE
+		FROM CLIENT_INDIVIDUAL_INFO AS CII
+		LEFT OUTER JOIN 
+			CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON CII.CREATOR_ID = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		AND CII.SYS_REGISTER_DATE >= DATE_ADD(NOW(), INTERVAL -1 MONTH)
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division} 
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND CII.CREATOR_ID = #{global_member_id} 
+			</when>
+		</choose>
+		<if test="SEARCH_ID != null and SEARCH_ID != '' ">
+			AND CCI.COMPANY_ID = #{SEARCH_ID}
+		</if>
+		<if test="NOT_FIRST_SEARCH_ID != null and NOT_FIRST_SEARCH_ID != '' ">
+			AND (CCI.COMPANY_ID != #{NOT_FIRST_SEARCH_ID} AND CCI.COMPANY_ID != #{NOT_SECOND_SEARCH_ID})
+		</if>
+		<choose>
+			<when test="BY == 'GROUP' ">
+			GROUP BY CCI.COMPANY_ID
+			ORDER BY COUNT(CCI.COMPANY_ID) DESC
+			</when>
+			<when test="BY == 'ORDER' ">
+			ORDER BY FIELD(CCI.COMPANY_ID, #{SECOND_COMPANY}, #{FIRST_COMPANY}) DESC
+			</when>
+		</choose>
+	</select>
+	
+	<insert id="insertMainModule" parameterType="hashmap">
+		DELETE FROM COM_MM_SETUP WHERE 1=1 AND MEMBER_ID_NUM = #{member_id_num};
+		INSERT INTO COM_MM_SETUP
+		(
+			MEMBER_ID_NUM, 
+			MM_ID, 
+			MM_SEQ, 
+			USE_YN,
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		<foreach collection="mainMenuList" item="item" index="index" separator=",">
+			(
+				#{member_id_num}, 
+				#{item.mm_id}, 
+				#{item.mm_seq}, 
+				#{item.use_yn}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			)
+	  	</foreach>
+	</insert>
+	
+	<insert id="insertMainMenu" parameterType="hashmap">
+		DELETE FROM COM_MEMU_SETUP WHERE 1=1 AND MEMBER_ID_NUM = #{member_id_num};
+		INSERT INTO COM_MEMU_SETUP
+		(
+			MEMBER_ID_NUM, 
+			MENU_ID, 
+			MENU_SEQ, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		<foreach collection="mainMenuList" item="item" index="index" separator=",">
+			(
+				#{member_id_num}, 
+				#{item.menu_id}, 
+				#{item.menu_seq}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			)
+	  	</foreach>
+	</insert>
+	
+	<select id="selectMainModuleSetUp" parameterType="hashmap" resultType="hashmap">
+		SELECT CMS.MEMBER_ID_NUM, CML.MM_ID, CML.MM_NAME, CMS.MM_SEQ, CMS.USE_YN, CML.SYS_REGISTER_DATE, CML.SYS_UPDATE_DATE
+		FROM 
+		COM_MM_LIST AS CML
+		LEFT OUTER JOIN
+		COM_MM_SETUP AS CMS ON CML.MM_ID = CMS.MM_ID AND CMS.MEMBER_ID_NUM = #{global_member_id}
+		WHERE 1=1
+		AND (
+				CML.MM_AUTH IS NULL OR CML.MM_AUTH = ''
+				<foreach collection="global_role_list" item="item" index="index" separator="">
+				OR CML.MM_AUTH LIKE CONCAT('%', #{item}, '%')
+				</foreach>
+			)
+		AND CML.USE_YN = 'Y'
+		ORDER BY CMS.MM_SEQ IS NULL, CMS.MM_SEQ, CML.MM_ID;
+	</select>
+	
+	<select id="selectMainMenuSetUp" parameterType="hashmap" resultType="hashmap">
+		SELECT CMS.MEMBER_ID_NUM, CM.MENU_ID, CM.MENU_TITLE, CMS.MENU_SEQ, CM.USE_YN, CMS.SYS_REGISTER_DATE
+		FROM 
+		COM_MENU AS CM
+		LEFT OUTER JOIN
+		COM_MEMU_SETUP AS CMS ON CM.MENU_ID = CMS.MENU_ID AND CMS.MEMBER_ID_NUM = #{global_member_id}
+		WHERE 1=1
+		AND CM.MENU_LEVEL = '1'
+		AND CM.USE_YN = 'Y'
+		AND CM.MENU_TITLE != '관리자페이지'
+		ORDER BY CMS.MENU_SEQ, CM.MENU_SEQ, CM.MENU_ID;
+	</select>
+	
+	<select id="selectMemberMenu" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CM.MENU_ID, 
+			CM.MENU_TITLE, 
+			CM.MENU_URL, 
+			CM.MENU_PARENT,
+			COUNT(CM2.MENU_ID) AS CHILDREN_COUNT,
+			CM.MENU_SEQ, 
+			CM.MENU_LEVEL, 
+			CM.MENU_ICON, 
+			CM.USE_YN, 
+			CM.SYS_REGISTER_DATE, 
+			CM.SYS_UPDATE_DATE 
+		FROM COM_MENU AS CM
+		LEFT OUTER JOIN
+		(
+			SELECT 
+			*
+			FROM COM_MENU AS CM2
+			GROUP BY CM2.MENU_ID
+		) AS CM2 ON CM.MENU_ID = CM2.MENU_PARENT
+		LEFT OUTER JOIN
+		COM_MEMU_SETUP AS CMS ON CM.MENU_ID = CMS.MENU_ID AND CMS.MEMBER_ID_NUM = #{global_member_id}
+		WHERE 1=1
+		AND CM.USE_YN = 'Y'
+		GROUP BY CM.MENU_ID
+		ORDER BY MENU_LEVEL ASC, CMS.MENU_SEQ IS null, CMS.MENU_SEQ ASC, CM.MENU_SEQ ASC
+	</select>
+	
+	<select id="selectMemberMobileMenu" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CM.MENU_ID, 
+			CM.MENU_TITLE, 
+			CM.MOBILE_URL, 
+			CM.MENU_PARENT,
+			COUNT(CM2.MENU_ID) AS CHILDREN_COUNT,
+			CM.MENU_SEQ, 
+			CM.MENU_LEVEL, 
+			CM.MENU_ICON, 
+			CM.USE_YN,
+			CM.MOBILE_YN,
+			CM.MOBILE_ICON,
+			CM.SYS_REGISTER_DATE, 
+			CM.SYS_UPDATE_DATE 
+		FROM COM_MENU AS CM
+		LEFT OUTER JOIN
+		(
+			SELECT 
+			*
+			FROM COM_MENU AS CM2
+			WHERE CM2.MOBILE_YN = 'Y'
+			GROUP BY CM2.MENU_ID
+		) AS CM2 ON CM.MENU_ID = CM2.MENU_PARENT
+		LEFT OUTER JOIN
+		COM_MEMU_SETUP AS CMS ON CM.MENU_ID = CMS.MENU_ID AND CMS.MEMBER_ID_NUM = #{global_member_id}
+		WHERE 1=1
+		AND CM.MOBILE_YN = 'Y'
+		GROUP BY CM.MENU_ID
+		ORDER BY MENU_LEVEL ASC, CMS.MENU_SEQ IS null, CMS.MENU_SEQ ASC, CM.MENU_SEQ ASC
+	</select>
+	
+	<select id="selectUserMobileLandingPage" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			MLP.LANDING_PAGE_ID,
+			MLP.MEMBER_ID_NUM,
+			MLP.MENU_ID,
+			MLP.MENU_SEQ,
+			CM.MENU_TITLE,
+			CM.MENU_URL,
+			CM.MENU_ICON,
+			DATE_FORMAT(MLP.SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+			DATE_FORMAT(MLP.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+		FROM COM_USER_MOBILE_LANDING_PAGE AS MLP
+		LEFT OUTER JOIN
+			COM_MENU AS CM ON CM.MENU_ID = MLP.MENU_ID
+		WHERE 1=1
+		AND CM.MOBILE_LANDING_PAGE_USE_YN = 'Y'
+		AND (CM.MENU_PARENT != CM.MENU_ID OR CM.MENU_URL != '#')
+		AND MEMBER_ID_NUM = (
+			SELECT MEMBER_ID_NUM
+			FROM COM_USER_MOBILE_LANDING_PAGE
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{global_member_id}
+			
+			UNION ALL
+			
+			SELECT 'default'
+			FROM COM_USER_MOBILE_LANDING_PAGE
+			WHERE NOT EXISTS (SELECT '' FROM COM_USER_MOBILE_LANDING_PAGE WHERE 1=1 AND MEMBER_ID_NUM = #{global_member_id})
+			ORDER BY FIND_IN_SET(MEMBER_ID_NUM, 'default') ASC LIMIT 1
+			)
+		ORDER BY MLP.MENU_SEQ ASC
+	</select>
+	
+	<select id="selectMobileLandingPageMenuList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			MENU_ID,
+			MENU_TITLE,
+			MENU_URL,
+			MENU_ICON,
+			MOBILE_LANDING_PAGE_USE_YN AS USE_YN,
+			DATE_FORMAT(SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+			DATE_FORMAT(SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+		FROM COM_MENU
+		WHERE 1=1
+		AND MOBILE_LANDING_PAGE_USE_YN = 'Y'
+	</select>
+	
+	<insert id="insertUserMobileLandingPageMenu" parameterType="hashmap">
+		DELETE FROM COM_USER_MOBILE_LANDING_PAGE WHERE 1=1 AND MEMBER_ID_NUM = #{global_member_id};
+		INSERT INTO COM_USER_MOBILE_LANDING_PAGE
+		(
+			MEMBER_ID_NUM, 
+			MENU_ID, 
+			MENU_SEQ, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+				#{global_member_id}, 
+				#{item}, 
+				#{index}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			)
+	  	</foreach>
+	</insert>
+	
+	<select id="selectSalesActBubbleChart" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+				OL.OPPORTUNITY_ID,
+				OL.IDENTIFIER_ID,
+				OMI.HAN_NAME AS IDENTIFIER_NAME,
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+					IFNULL(ODI.DIVISION_NAME, '무소속') AS CATEGORY,
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+					IFNULL(OTI.TEAM_NAME, '무소속') AS CATEGORY,
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM') or global_role_code.contains('ROLE_MEMBER')">
+					OMI.HAN_NAME AS CATEGORY,
+					</when>
+				</choose>
+				OL.CUSTOMER_ID,
+				CCI.COMPANY_NAME AS END_USER,
+				OL.SUBJECT,
+				OL.CONTRACT_AMOUNT,
+				<!-- ROUND(OL.CONTRACT_AMOUNT/1000000,1) AS ROUND_CONTRACT_AMOUNT, -->
+				<![CDATA[
+				CASE
+					WHEN ROUND(OL.CONTRACT_AMOUNT/1000000) >= 3000
+					THEN 2999
+					WHEN ROUND(OL.CONTRACT_AMOUNT/1000000) < 1
+					THEN 1
+					ELSE ROUND(OL.CONTRACT_AMOUNT/1000000)
+				END AS ROUND_CONTRACT_AMOUNT,
+				]]>
+				OL.CONTRACT_DATE,
+				MONTH(OL.CONTRACT_DATE) AS CONTRACT_MONTH,
+				DATE_FORMAT(OL.SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+				DATE_FORMAT(OL.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+			FROM OPPORTUNITY_LOG AS OL
+			LEFT OUTER JOIN
+				OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = OL.IDENTIFIER_ID
+			LEFT OUTER JOIN 
+				CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = OL.CUSTOMER_ID
+			LEFT OUTER JOIN 
+				OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+			LEFT OUTER JOIN 
+				OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+			WHERE 1=1
+			AND OL.TEMP_FLAG = 'N'
+			AND OL.IDENTIFIER_ID != ''
+			<!-- <choose>
+				<when test='searchType == "m" '>
+				AND DATE_FORMAT(#{searchDate}, '%Y-%m') = DATE_FORMAT(OL.CONTRACT_DATE, '%Y-%m')
+				</when>
+				<when test='searchType == "q" '>
+				AND YEAR(#{searchDate}) = YEAR(OL.CONTRACT_DATE) AND QUARTER(#{searchDate}) = QUARTER(OL.CONTRACT_DATE)
+				</when>
+				<otherwise>
+				AND YEAR(#{searchDate}) = YEAR(OL.CONTRACT_DATE)
+				</otherwise>
+			</choose> -->
+			AND YEAR(#{searchDate}) = YEAR(OL.CONTRACT_DATE)
+			
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+				AND ODI.DIVISION_TYPE = 'S'
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OTI.TEAM_TYPE = 'S'
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM') or global_role_code.contains('ROLE_MEMBER')">
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				</when>
+			</choose>
+			
+			ORDER BY CONTRACT_DATE ASC
+		</select>
+		
+		<select id="selectSalesActDonutChart" parameterType="hashmap" resultType="hashmap">
+			select 
+				OMI.MEMBER_DIVISION,
+				ODI.DIVISION_NAME,
+				<if test="selectFacePost != null and selectFacePost != ''">
+				OMI.MEMBER_TEAM,
+				OTI.TEAM_NAME,
+				</if>
+				SUM(IFNULL(ESP.TARGET_REV,0)) as TARGET_TCV,
+				SUM(IFNULL(ESP.TARGET_REV,0)) as TARGET_REV,
+				SUM(IFNULL(ESP.TARGET_AGP,0)) as TARGET_AGP,
+				SUM(IFNULL(ESP.TARGET_AGP,0)) as TARGET_PGP,
+				SUM(IFNULL(ESA.ACTUAL_TCV,0)) as ACTUAL_TCV,
+				SUM(IFNULL(ESA.ACTUAL_REV,0)) as ACTUAL_REV,
+				SUM(IFNULL(ESA.ACTUAL_AGP,0)) as ACTUAL_AGP,
+				SUM(IFNULL(ESA.ACTUAL_PGP,0)) as ACTUAL_PGP
+			FROM 
+				(
+					SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+					FROM OUR_MEMBERS_INFO AS IOMI
+					WHERE 1=1 
+					AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} ) 	
+				) AS OMI 
+				INNER JOIN
+				OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' -- AND OMI.POSITION_TYPE = '영업직' 
+				INNER JOIN
+				OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+				LEFT OUTER JOIN
+				(
+					SELECT
+						MEMBER_ID_NUM,
+						sum(TARGET_REVENUE_AMOUNT) as TARGET_REV,
+						sum(TARGET_GP_AMOUNT) as TARGET_AGP
+					FROM 
+						erp_sales_plan
+					WHERE 1=1
+					AND year(BASIS_MONTH) = year(#{startDate})
+					GROUP BY MEMBER_ID_NUM
+				) AS ESP on ESP.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM -- Target
+				LEFT OUTER JOIN
+				(
+					SELECT
+						MEMBER_ID_NUM,
+						Y_TCV as ACTUAL_TCV,
+						SUM(IFNULL(1Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(4Q_ACTUAL_REV_AMOUNT,0)) AS ACTUAL_REV,
+						SUM(IFNULL(1Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(4Q_ACTUAL_GP_AMOUNT,0)) AS ACTUAL_AGP,
+						1Q_ACTUAL_GP_AMOUNT as ACTUAL_PGP,
+						ACTUAL_DATE
+					FROM
+						erp_sales_actual
+					WHERE 1=1
+					AND ACTUAL_DATE = (
+						select MAX(ACTUAL_DATE)
+						from erp_sales_actual
+						where year(ACTUAL_DATE) = year(#{startDate})
+					)
+					GROUP BY MEMBER_ID_NUM
+				) AS ESA on ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM -- AMOUNT
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+					<choose>
+						<when test="selectFacePost != null and selectFacePost != ''">
+							GROUP BY OMI.MEMBER_DIVISION
+							HAVING 1=1
+							AND OMI.MEMBER_DIVISION = #{selectFacePost}
+						</when>
+						<otherwise>
+						</otherwise>
+					</choose>
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					<choose>
+						<when test="selectFacePost != null and selectFacePost != ''">
+							GROUP BY OMI.MEMBER_DIVISION, OMI.MEMBER_TEAM
+							HAVING 1=1
+							AND OMI.MEMBER_DIVISION = #{global_member_division}
+							AND OMI.MEMBER_TEAM = #{selectFacePost}
+						</when>
+						<otherwise>
+							GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME
+							HAVING 1=1
+							AND OMI.MEMBER_DIVISION = #{global_member_division}
+						</otherwise>
+					</choose>
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM') or global_role_code.contains('ROLE_MEMBER')">
+					GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+ 					HAVING 1=1
+					AND OMI.MEMBER_DIVISION = #{global_member_division}
+					AND OMI.MEMBER_TEAM = #{global_member_team}
+					AND OMI.MEMBER_ID_NUM = #{global_member_id}
+				</when>
+			</choose>	
+	</select>
+	
+	<select id="selectSalesActDonutChart2" parameterType="hashmap" resultType="hashmap">
+		select 
+			OMI.MEMBER_DIVISION,
+			ODI.DIVISION_NAME,
+			<if test="selectFacePost != null and selectFacePost != ''">
+			OMI.MEMBER_TEAM,
+			OTI.TEAM_NAME,
+			</if>
+			SUM(IFNULL(ESPY.TARGET_TCV,0)) as TARGET_TCV,
+			SUM(IFNULL(ESPQ.TARGET_REV,0)) as TARGET_REV,
+			SUM(IFNULL(ESPQ.TARGET_AGP,0)) as TARGET_AGP,
+			SUM(IFNULL(ESPY.TARGET_PGP,0)) as TARGET_PGP,
+			SUM(IFNULL(ESAY.ACTUAL_TCV,0)) as ACTUAL_TCV,
+			SUM(IFNULL(ESAQ.ACTUAL_REV,0)) as ACTUAL_REV,
+			SUM(IFNULL(ESAQ.ACTUAL_AGP,0)) as ACTUAL_AGP,
+			SUM(IFNULL(ESAY.ACTUAL_PGP,0)) as ACTUAL_PGP
+	<![CDATA[
+		FROM 
+			(
+				SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+				FROM OUR_MEMBERS_INFO AS IOMI
+				WHERE 1=1 
+				AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} ) 	
+			) AS OMI 
+			INNER JOIN
+			OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S'
+			INNER JOIN
+			OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+			left outer join
+			(
+				select
+					MEMBER_ID_NUM,
+					sum(TARGET_REVENUE_AMOUNT) as TARGET_TCV,
+					sum(TARGET_GP_AMOUNT) as TARGET_PGP
+				from 
+					erp_sales_plan
+				where 1=1
+				and year(BASIS_MONTH) = year(#{startDate})
+				group by MEMBER_ID_NUM
+			) as ESPY on ESPY.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT
+					MEMBER_ID_NUM,
+					sum(TARGET_REVENUE_AMOUNT) as TARGET_REV,
+					sum(TARGET_GP_AMOUNT) as TARGET_AGP
+				FROM 
+					erp_sales_plan
+				WHERE 1=1
+				AND BASIS_MONTH >= #{startDate}
+				and BASIS_MONTH <= #{endDate}
+				GROUP BY MEMBER_ID_NUM
+			) AS ESPQ on ESPQ.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			left outer join 
+			(
+				select
+					MEMBER_ID_NUM,
+					SUM(
+						CASE 
+							WHEN ${searchQuarter} = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN ${searchQuarter} = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN ${searchQuarter} = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN ${searchQuarter} = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END
+					) AS ACTUAL_REV,
+					SUM(
+						CASE 
+							WHEN ${searchQuarter} = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN ${searchQuarter} = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN ${searchQuarter} = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN ${searchQuarter} = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END
+					) AS ACTUAL_AGP,			
+					ACTUAL_DATE
+				from
+					ERP_SALES_ACTUAL
+				where 1=1
+				and ACTUAL_DATE = (
+					select MAX(ACTUAL_DATE)
+					from erp_sales_actual
+					where 1=1
+				    AND ACTUAL_DATE >= #{startDate}
+					AND ACTUAL_DATE <= #{endDate}
+				)
+				group by MEMBER_ID_NUM
+			) as ESAQ on ESAQ.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			left outer join 
+			(
+				select
+					MEMBER_ID_NUM,	
+					Y_TCV as ACTUAL_TCV,
+					1Q_ACTUAL_GP_AMOUNT as ACTUAL_PGP,
+					ACTUAL_DATE
+				from
+					ERP_SALES_ACTUAL
+				where 1=1
+				and ACTUAL_DATE = (
+					select MAX(ACTUAL_DATE)
+					from erp_sales_actual
+					where 1=1
+				    AND year(ACTUAL_DATE) = year(#{startDate})
+				)
+				group by MEMBER_ID_NUM
+			) as ESAY on ESAY.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+		]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{selectFacePost}
+					</when>
+					<otherwise>
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION, OMI.MEMBER_TEAM
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+						AND OMI.MEMBER_TEAM = #{selectFacePost}
+					</when>
+					<otherwise>
+						GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM') or global_role_code.contains('ROLE_MEMBER')">
+				GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+				HAVING 1=1
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+		</choose>		
+	</select>
+	
+	<!-- REV, GP Forecast -->	
+	<select id="selectForecastDonutChart" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+				OMI.MEMBER_DIVISION,
+				ODI.DIVISION_NAME,
+				<if test="selectFacePost != null and selectFacePost != ''">
+				OMI.MEMBER_TEAM,
+				OTI.TEAM_NAME,
+				</if>
+				IFNULL(SUM(OA.BASIS_PLAN_REVENUE_AMOUNT),0) as PLAN_REV_AMOUNT, 
+				IFNULL(SUM(OA.BASIS_PLAN_GP_AMOUNT),0) as PLAN_GP_AMOUNT
+			FROM 
+				OPPORTUNITY_LOG as OL
+			INNER JOIN
+				OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+			INNER JOIN
+				(
+			        SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+			        FROM OUR_MEMBERS_INFO AS IOMI
+			        WHERE 1=1 
+			        AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} )         -- 파라미터
+				) AS OMI ON OMI.MEMBER_ID_NUM = OA.MEMBER_ID_NUM 
+			INNER JOIN
+				OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' 
+			INNER JOIN
+				OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+			WHERE 1=1
+			AND OL.TEMP_FLAG = 'N'
+			AND OL.FORECAST_YN = 'In' 
+			AND OL.SALES_CYCLE in ('1','2','3') -- 진행중인 영업기회 
+			AND OA.BASIS_MONTH BETWEEN #{startDate} AND #{endDate} -- 파라미터
+		<![CDATA[
+		]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{selectFacePost}
+					</when>
+					<otherwise>
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION, OMI.MEMBER_TEAM
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+						AND OMI.MEMBER_TEAM = #{selectFacePost}
+					</when>
+					<otherwise>
+						GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM') or global_role_code.contains('ROLE_MEMBER')">
+				GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+				HAVING 1=1
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+		</choose>		
+	</select>
+	
+	<!-- TCV, P.GP Forecast -->	
+	<select id="selectForecastDonutChart2" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+				OMI.MEMBER_DIVISION,
+				ODI.DIVISION_NAME,
+				<if test="selectFacePost != null and selectFacePost != ''">
+				OMI.MEMBER_TEAM,
+				OTI.TEAM_NAME,
+				</if>
+				IFNULL(SUM(OA.BASIS_PLAN_REVENUE_AMOUNT),0) as PLAN_TCV_AMOUNT, 
+				IFNULL(SUM(OA.BASIS_PLAN_GP_AMOUNT),0) as PLAN_PGP_AMOUNT
+			FROM 
+				OPPORTUNITY_LOG as OL
+			INNER JOIN
+				OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+			INNER JOIN
+				(
+			        SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+			        FROM OUR_MEMBERS_INFO AS IOMI
+			        WHERE 1=1 
+			        AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} )         -- 파라미터
+				) AS OMI ON OMI.MEMBER_ID_NUM = OA.MEMBER_ID_NUM 
+			INNER JOIN
+				OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' 
+			INNER JOIN
+				OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+			WHERE 1=1
+			AND OL.TEMP_FLAG = 'N'
+			AND OL.FORECAST_YN = 'In' 
+			AND OL.SALES_CYCLE in ('1','2','3') -- 진행중인 영업기회 
+			AND year(OA.BASIS_MONTH) = year(#{startDate}) -- 파라미터
+		<![CDATA[
+		]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{selectFacePost}
+					</when>
+					<otherwise>
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION, OMI.MEMBER_TEAM
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+						AND OMI.MEMBER_TEAM = #{selectFacePost}
+					</when>
+					<otherwise>
+						GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM') or global_role_code.contains('ROLE_MEMBER')">
+				GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+				HAVING 1=1
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+		</choose>		
+	</select>
+	
+	<select id="selectSalesActDonutChartY2Y" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			IFNULL(SUM(ESA.Y_TCV),0) AS TCV,
+			IFNULL(SUM(
+				IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0) + 
+				IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0) + 
+				IFNULL(ESA.3Q_ACTUAL_REV_AMOUNT,0) + 
+				IFNULL(ESA.4Q_ACTUAL_REV_AMOUNT,0)
+			),0) AS REV,
+			IFNULL(SUM(
+				IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0) +
+				IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0) +
+				IFNULL(ESA.3Q_ACTUAL_GP_AMOUNT,0) +
+				IFNULL(ESA.4Q_ACTUAL_GP_AMOUNT,0)
+			),0) AS AGP,
+			IFNULL(SUM(ESA.1Q_ACTUAL_PGP_AMOUNT),0) AS PGP
+		FROM
+			(
+		        SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+		        FROM OUR_MEMBERS_INFO AS IOMI
+		        WHERE 1=1 
+		        AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} )         -- 파라미터
+			) AS OMI
+			INNER JOIN
+			OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' 
+			INNER JOIN
+			OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+			INNER JOIN
+			ERP_SALES_ACTUAL AS ESA ON OMI.MEMBER_ID_NUM = ESA.MEMBER_ID_NUM
+		WHERE 1=1
+		AND ACTUAL_DATE = (
+			SELECT IFNULL(MAX(ACTUAL_DATE),(SELECT MAX(ACTUAL_DATE) FROM ERP_SALES_ACTUAL where 1=1 AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})))
+			FROM ERP_SALES_ACTUAL where 1=1
+			AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+		) 
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{selectFacePost}
+					</when>
+					<otherwise>
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION, OMI.MEMBER_TEAM
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+						AND OMI.MEMBER_TEAM = #{selectFacePost}
+					</when>
+					<otherwise>
+						GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM') or global_role_code.contains('ROLE_MEMBER')">
+				GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+				HAVING 1=1
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+		</choose>
+	</select>
+	
+	<select id="selectSalesActDonutChartY2Y_last" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			IFNULL(SUM(ESA.Y_TCV),0) AS TCV,
+			IFNULL(SUM(
+				IFNULL(ESA.1Q_ACTUAL_REV_AMOUNT,0) + 
+				IFNULL(ESA.2Q_ACTUAL_REV_AMOUNT,0) + 
+				IFNULL(ESA.3Q_ACTUAL_REV_AMOUNT,0) + 
+				IFNULL(ESA.4Q_ACTUAL_REV_AMOUNT,0)
+			),0) AS REV,
+			IFNULL(SUM(
+				IFNULL(ESA.1Q_ACTUAL_GP_AMOUNT,0) +
+				IFNULL(ESA.2Q_ACTUAL_GP_AMOUNT,0) +
+				IFNULL(ESA.3Q_ACTUAL_GP_AMOUNT,0) +
+				IFNULL(ESA.4Q_ACTUAL_GP_AMOUNT,0)
+			),0) AS AGP,
+			IFNULL(SUM(ESA.1Q_ACTUAL_PGP_AMOUNT),0) AS PGP
+		FROM
+			(
+		        SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+		        FROM OUR_MEMBERS_INFO AS IOMI
+		        WHERE 1=1 
+		        AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} )         -- 파라미터
+			) AS OMI
+			INNER JOIN
+			OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' 
+			INNER JOIN
+			OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+			INNER JOIN
+			ERP_SALES_ACTUAL AS ESA ON OMI.MEMBER_ID_NUM = ESA.MEMBER_ID_NUM
+		WHERE 1=1
+		AND ACTUAL_DATE = (
+			SELECT IFNULL(MAX(ACTUAL_DATE),(SELECT MAX(ACTUAL_DATE) FROM ERP_SALES_ACTUAL where 1=1 AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})-1))
+			FROM ERP_SALES_ACTUAL WHERE 1=1
+			AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})-1
+			AND RIGHT(ACTUAL_DATE,5) = RIGHT(CURRENT_DATE,5)
+		) 
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{selectFacePost}
+					</when>
+					<otherwise>
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				<choose>
+					<when test="selectFacePost != null and selectFacePost != ''">
+						GROUP BY OMI.MEMBER_DIVISION, OMI.MEMBER_TEAM
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+						AND OMI.MEMBER_TEAM = #{selectFacePost}
+					</when>
+					<otherwise>
+						GROUP BY OMI.MEMBER_DIVISION
+						HAVING 1=1
+						AND OMI.MEMBER_DIVISION = #{global_member_division}
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM') or global_role_code.contains('ROLE_MEMBER')">
+				GROUP BY OMI.MEMBER_DIVISION,OMI.MEMBER_TEAM,OMI.MEMBER_ID_NUM
+				HAVING 1=1
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+		</choose>
+	</select>
+	
+	
+	<select id="selectSalesDivision" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			DIVISION_NO AS SELECT_NO,
+			DIVISION_NAME AS SELECT_NAME
+		FROM
+			OUR_DIVISION_INFO AS ODI
+		WHERE 1=1
+		AND DIVISION_TYPE = 'S'
+	</select>
+	<select id="selectSalesTeam" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			TEAM_NO AS SELECT_NO,
+			TEAM_NAME AS SELECT_NAME
+		FROM
+			OUR_TEAM_INFO
+		WHERE 1=1
+		AND DIVISION_NO = #{global_member_division}
+		AND TEAM_TYPE = 'S'
+	</select>
+	<select id="selectSalesMember" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			MEMBER_ID AS SELECT_NO,
+			HAN_NAME AS SELECT_NAME
+		FROM
+			OUR_MEMBERS_INFO
+		WHERE 1=1
+		AND MEMBER_TEAM = #{global_member_team}
+	</select>
+	
+</mapper>

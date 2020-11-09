@@ -1,0 +1,20 @@
+<tr name="revTr">
+	<td>
+		<div class="data_1">
+            <div class="input-group date">
+                <span class="input-group-addon" style="padding:6px 6px;"><i class="fa fa-calendar"></i></span><input type="text"  name="textModalSDate" class="form-control" value="" style="border:1px solid #e5e6e7; text-align:left;" placeholder="ex) 1988-11-18">
+            </div>
+        </div>		                      
+    </td>
+   	<td>
+		<div class="data_1">
+            <div class="input-group date">
+                <span class="input-group-addon" style="padding:6px 6px;"><i class="fa fa-calendar"></i></span><input type="text"  name="textModalCDate" class="form-control" value="" style="border:1px solid #e5e6e7; text-align:left;" placeholder="ex) 1988-11-18">
+            </div>
+        </div>		                      
+    </td>
+	<td><input type="text" name="amount_r" onclick="oppSalesPlan.zero(this);" onblur="oppSalesPlan.blur(this);" onkeyup="comma(this);oppSalesPlan.sum();" value="0" style="text-align:right;border:none;"> / <span name="amount_a_r" style="color: green; font-size : 13px;">0</span></td>
+	<td><input type="text" name="amount_g" onclick="oppSalesPlan.zero(this);" onblur="oppSalesPlan.blur(this);" onkeyup="comma(this);oppSalesPlan.sum();" value="0" style="text-align:right;border:none;"> / <span name="amount_a_g" style="color: green; font-size : 13px;">0</span></td>
+	<td style="text-align:center;"><a href="javascript:void(0);" onclick="oppSalesPlan.del(this);"><i class="fa fa-trash-o fa-lg"></i></a></td>
+	<input type="hidden" name="amount_id" />
+</tr>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>관리자 : 테리토리관리(직원)</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body class="fixed-sidebar">
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header ta-c">
+                        <div class="dropdown profile-element">
+                            <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                            <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                            <a href="#">
+                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                            </a>
+                        </div>
+                        <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                            디유넷
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객사정보</a></li>
+                            <li><a href="#">고객개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객컨택내용</a></li>
+                            <li><a href="#">영업기회</a></li>
+                            <li><a href="#">잠재영업기회</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객이슈</a></li>
+                            <li><a href="#">고객만족도</a></li>
+                            <li><a href="#">서비스프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">파트너사협업</a></li>
+                            <li><a href="#">파트너사정보</a></li>
+                            <li><a href="#">파트너사개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                        <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class=""><a href="#">성과관리</a></li>
+                            <li><a href="#">생산성</a></li>
+                            <li><a href="#">제안서정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">회사/부문별전략</a></li>
+                            <li><a href="#">고객별전략</a></li>
+                            <li><a href="#">전략프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span></a>
+                    </li>
+                    <li class="active">
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">관리자</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">메뉴관리</a></li>
+                            <li><a href="#">권한관리</a></li>
+                            <li><a href="#">정보관리(직원)</a></li>
+                            <li class="active"><a href="#">테리토리관리(직원)</a></li>
+                            <li><a href="#">코드관리</a></li>
+                            <li><a href="#">POI_TEST</a></li>
+                        </ul>
+                    </li>
+                    <li class="special_link">
+                        <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                    </li>
+                </ul>
+                <div class="product-logo text-center">
+                    <img src="../../images/pc/product_logo.png" alt=""/>
+                    <span>Copyright Seller’s Company © 2016</span>
+                </div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="white-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+                   
+                </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                            </a>
+                        </li>
+
+
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-sign-out"></i> 로그아웃
+                            </a>
+                        </li>
+                    </ul>
+
+                </nav>
+            </div>
+
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-12">
+                    <h2>테리토리관리(직원)</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a>관리자</a>
+                        </li>
+                        <li class="active">
+                            <strong>테리토리관리(직원)</strong>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="wrapper wrapper-content  animated fadeInRight">
+                <div class="row">
+                    <div class="ibox">
+                        <div class="ibox-content border_n pd-no">
+                            <div class="clear">
+                                
+                                <div class="authority">
+                                
+                                    <div class="col-sm-4">
+
+                                        <h3>권한 설정할 직원 검색</h3>
+
+                                        <div class="mg-l10 mg-r10 authority_search">
+                                            <div class="input-group" style="width:100%;"><input type="text" placeholder="직원명을 입력하세요"  class="input form-control"></div>
+                                        </div>
+
+                                        <div class="mg-l10 mg-r10 member_list">
+                                            <ul>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">안국필</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-4">
+
+                                        <h3>현재 테리토리</h3>
+
+                                        <div class="mg-l10 mg-r10 territory">
+
+                                            <table class="territory_list">
+                                                <colgroup>
+                                                    <col width="150px"/>
+                                                    <col width=""/>
+                                                    <col width="50px"/>
+                                                </colgroup>
+                                                <thead>
+                                                    <tr>
+                                                        <th>고객사ID</th>
+                                                        <th>고객사명</th>
+                                                        <th>삭제</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">P정보통신(주)</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">(주)현대멀티캡용산점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>10007368</td>
+                                                        <td class="ta-l">현대자동차 삼성점</td>
+                                                        <td>
+                                                            <a href="#"><img src="../../images/pc/icon_check_no.png" alt="삭제"/></a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-4">
+
+                                        <h3>산업별 고객사</h3>
+
+                                        <div class="mg-l10 mg-r10">
+                                            <div class="input-group" style="width:100%;">
+                                                <select class="form-control">
+                                                    <option>농업</option>
+                                                    <option>임업</option>
+                                                    <option>어업</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

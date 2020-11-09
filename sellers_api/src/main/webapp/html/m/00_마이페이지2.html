@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi" name="viewport">
+<title>THE Seller's</title>
+<link href="../../css/m/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="white_bg">
+
+<div class="container">
+
+    <header class="header primary_bg ">
+        <hgroup>
+            <h1 class="logo">THE Seller's</h1>
+        </hgroup>
+
+        <a href="#" class="btn_sideMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </a>
+
+        <span class="alarm_count pos_h r10">59</span> <!-- 확인하지 않은 알림 개수 -->
+
+        <div class="sidemenu off">
+            <!-- 사용자 확인 -->
+            <div class="top">
+                <div class="user_photo r60 mg_b10">
+                    <img src="../../images/m/icon_character.svg" />
+                </div>
+                <p class="fc_white user_info">
+                    <span>홍길동님</span><br/>좋은하루 되세요.
+                </p>
+
+                <a href="#" class="btn_sidemenu_close">
+                    <img src="../../images/m/icon_sidemenu_close.svg" alt="사이드 메뉴 닫기"/>
+                </a>
+            </div>
+            <div class="side_gnb">
+                <span class="alarm_count pos_side r10">59</span> <!-- 확인하지 않은 알림 개수 -->
+
+                <a href="#" class="sideTab tab1 active">메뉴</a>
+                <div class="side_cont">
+                    <ul class="gnb">
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_custominfo va_m"></span> 고객사 및 고객개인정보 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객사정보</a>
+                                <a href="">고객개인정보</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_salesAct va_m"></span> 고객영업활동 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객컨텍내용</a>
+                                <a href="">영업기회</a>
+                                <a href="">잠재영업기회</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_cutomgood va_m"></span> 고객만족 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객이슈</a>
+                                <a href="">고객만족도</a>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_partner va_m"></span> 파트너사 협업관리 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">파트너사 협업</a>
+                                <a href="">파트너사정보</a>
+                                <a href="">파트너사개인정보</a>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_paper va_m"></span> 사업전략 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">회사/부문별전략</a>
+                                <a href="">고객별전략</a>
+                                <a href="">고객별전략</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class=""><span class="icon md icon_calendar va_m"></span> 일정관리</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_key va_m"></span> 로그아웃</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_setting va_m"></span> 비밀번호변경</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_desktop va_m"></span> PC화면보기</a>
+                        </li>
+                    </ul>                    
+                </div>
+
+                <a href="#" class="sideTab tab2">알림</a>
+                <div class="side_cont off">
+                    <ul class="news">
+                        <!-- class="cata" 알림구분은 color로 구분함.
+                            .news li .cata.sch {background-color:#666;}  /*일정(캘린더)*/
+                            .news li .cata.issue {background-color:#1ab394;} /* 고객만족 : 고객이슈, 고객만족, 서비스프로젝트*/
+                            .news li .cata.action {background-color:#e7a117;} /*고객영업활동 : 고객컨텍내용, 영업기회, 잠재영업기획*/
+                            .news li .cata.stra {background-color:#15a7e3;} /*사업전략 : 화사부문별전략, 고객별전략, 전략프로젝트*/
+                            .news li .cata.alarm {background-color:#666;}  /*기타 : 고객사/고객개인, 파트너사/파트너사개인, 성과관리*/
+                         -->
+                         <li class="">
+                            <a href="#">
+                                <span class="cata action">영업기회</span>
+                                <span class="subject">한국전자금융 어댑터 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="visited">
+                            <a href="#">
+                                <span class="cata action">영업기회</span>
+                                <span class="subject">한국전자금융 어댑터 </span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="cata action">잠재영업기회</span>
+                                <span class="subject">한국전자금융 어댑터 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="visited"><!-- 방문한 게시물은 "visited" 적용하여 흐리게 보이게 함.-->
+                            <a href="#">
+                                <span class="cata alarm">일정관리</span>
+                                <span class="subject">삼성글로벌</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="">
+                            <a href="#">
+                                <span class="cata sch">일정관리</span>
+                                <span class="subject">삼성글로벌</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="visited">
+                            <a href="#">
+                                <span class="icon_new">new</span> <!-- 확인한 게시물은 new아이콘 삭제-->
+                                <span class="icon lg icon_sch_2"></span> <!-- icon_sch_1~7 : 고객대면, 대면준비, 내부회의, 교육, 기타, 휴가, 이동시간 -->
+                                <span class="time">09:00~10:00</span>
+                                <span class="subject">디자인팀 회의 소집</span>
+                                <span class="ment">캘린더가 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="">
+                            <a href="#">
+                                <span class="icon lg icon_sch_3"></span> <!-- icon_sch_1~7 : 고객대면, 대면준비, 내부회의, 교육, 기타, 휴가, 이동시간 -->
+                                <span class="time">09:00~10:00</span>
+                                <span class="subject">디자인팀 회의 소집</span>
+                                <span class="ment">캘린더가 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="cata issue">고객이슈관리</span>
+                                <span class="subject">한국전자금융 어댑터 기동 에러 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="cata stra">전략프로젝트</span>
+                                <span class="subject">셀러스 프로젝트 !</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="icon_new">new</span>
+                                <span class="cata issue">고객이슈관리</span>
+                                <span class="subject">한국전자금융 어댑터 기동 에러 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="icon_new">new</span>
+                                <span class="cata stra">전략프로젝트</span>
+                                <span class="subject">셀러스 프로젝트 !</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                    </ul>                    
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <article class="landing">
+        <!-- 실적 -->
+        <div class="total_year_result">
+
+            <p class="lang_ti border_no">박형진</p>
+
+            <ul class="tabmenu tabmenu_type3 tab mg_b10">
+                <li><a href="#" class="active">1분기</a></li>
+                <li><a href="#">2분기</a></li>
+                <li><a href="#" class="">3분기</a></li>
+                <li><a href="#">4분기</a></li>
+                <li class="year"><a href="#">2016년</a></li>
+            </ul>
+
+            <div class="cont1 "><!-- 1분기 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">REV</span>
+                            <span class="count">69,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">GP</span>
+                            <span class="count">61,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cont2 off"><!-- 2분기 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">REV</span>
+                            <span class="count">69,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">GP</span>
+                            <span class="count">61,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cont3 off"><!-- 3분기 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">REV</span>
+                            <span class="count">690,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">GP</span>
+                            <span class="count">235,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cont4 off"><!-- 4분기 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">REV</span>
+                            <span class="count">790,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">GP</span>
+                            <span class="count">235,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cont5 off"><!-- 2016년 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">2016년 REV</span>
+                            <span class="count">690,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">2016년 GP</span>
+                            <span class="count">235,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 부서,개인 실적 Progress -->
+            <p class="lang_ti" style="clear:both;">회사전체</p>
+
+            <ul class="tabmenu_type4 mg_b10">
+                <li><a href="#" class="active">1분기</a></li>
+                <li><a href="#">2분기</a></li>
+                <li><a href="#" class="">3분기</a></li>
+                <li><a href="#">4분기</a></li>
+                <li class="year"><a href="#">2016년</a></li>
+            </ul>
+
+            <div class="cont1 "><!-- 1분기 -->
+                <div class="tab-pane active">
+                    <div class="panel-body">
+                        <div class="mg_l10 mg_r10">
+                            <ul class="stat-list">
+                                <li>
+                                    <h2 class="no-margins">
+                                        <span class="small">Target : 
+                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                        </span>
+                                    </h2>
+                                </li>
+                                <li>
+                                    <h2 class="subtitle">
+                                        <span class="sub">REV</span>
+                                        <span class="count">7,055<span class="stat-percent">(110%)</span></span>
+                                    </h2>
+                                    <div class="result_total_track">
+                                        <div class="result_progress">
+                                            <div style="width:110%;" class="bar rev_color"></div>
+                                            <div class="line_100">100%</div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <h2 class="subtitle">
+                                        <span class="sub">GP</span>
+                                        <span class="count">35,028<span class="stat-percent">(50%)</span></span>
+                                    </h2>
+                                    <div class="result_total_track">
+                                        <div class="result_progress">
+                                            <div style="width:50%;" class="bar gp_color"></div>                                                   
+                                            <div class="line_100">100%</div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cont2 off"><!-- 2분기 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">REV</span>
+                            <span class="count">69,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">GP</span>
+                            <span class="count">61,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cont3 off"><!-- 3분기 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">REV</span>
+                            <span class="count">690,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">GP</span>
+                            <span class="count">235,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cont4 off"><!-- 4분기 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">REV</span>
+                            <span class="count">790,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">GP</span>
+                            <span class="count">235,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cont5 off"><!-- 2016년 -->
+                <ul class="stat_list">
+                    <li>
+                        <h2>
+                            <span class="top_count">Target : 20,000(REV), 12,000(GP)</span>
+                        </h2>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">2016년 REV</span>
+                            <span class="count">690,055<span class="stat-percent">(120%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:120%;" class="bar rev_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h2 class="subtitle">
+                            <span class="sub">2016년 GP</span>
+                            <span class="count">235,028<span class="stat-percent">(80%)</span></span>
+                        </h2>
+                        <div class="result_total_track">
+                            <div class="result_progress">
+                                <div style="width:80%;" class="bar gp_color"></div>                                                    
+                                <div class="line_100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!--// 부서,개인 실적 Progress -->
+        </div>
+        <!--// 실적 -->
+
+        <!-- 오늘의 일정 -->
+        <div class="todayList">
+            <div class="box_head">
+                <h3 class="ta_c">2016년 11월 24일</h3>
+                <a href="#" class="btn_sch btn_sch_prev">이전일정</a>
+                <a href="#" class="btn_sch btn_sch_next">다음일정</a>
+            </div>
+
+            <ul class="schedule_list">
+                <li class="">
+                    <p class="pd_t20 pd_b20 ta_c">등록된 일정이 없습니다.</p>
+                </li>
+                <li class="">
+                    <a href="#">
+                        <span class="time">
+                            <span class="va_m">09:00~10:00</span>
+                        </span>
+                        <span class="icon lg icon_sch_1"></span> <!-- icon_sch_1~7 : 고객대면, 대면준비, 내부회의, 교육, 기타, 휴가, 이동시간 -->
+                        <span class="subject">2016년 신사업계획 보고 준비 미팅</span>                    
+                    </a>                    
+                </li>
+
+                <li>
+                    <a href="#">
+                        <span class="time">
+                            <span class="va_m">10:00~11:30</span>
+                        </span>
+                        <span class="icon lg icon_sch_2"></span>
+                        <span class="subject">IBM 대표님 미팅준비</span>                    
+                    </a>                    
+                </li>
+
+                <li>
+                    <a href="#">
+                        <span class="time">
+                            <span class="va_m">15:00~18:00</span>
+                        </span>
+                        <span class="icon lg icon_sch_3"></span>
+                        <span class="subject">사업계획 수정안 관련 내부 회의</span>                    
+                    </a>                    
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="time">
+                            <span class="va_m">10:00~11:30</span>
+                        </span>
+                        <span class="icon lg icon_sch_1"></span>
+                        <span class="subject">IBM 대표님 미팅</span>                    
+                    </a>                    
+                </li>
+
+                <li>
+                    <a href="#">
+                        <span class="time">
+                            <span class="va_m">15:00~18:00</span>
+                        </span>
+                        <span class="icon lg icon_sch_4"></span>
+                        <span class="subject">영업관련 교육참가</span>                    
+                    </a>                    
+                </li>
+            </ul>
+        </div>
+        <!--// 오늘의 일정 -->
+
+        <!-- 나의 진행중인 영업활동 -->
+        <div class="my_act">
+            <div class="box_head">
+                <h3 class="ta_c">영업기회 / 잠재기회<span class="fs14 fc_gray_light">(총 10건)</span></h3>
+            </div>
+
+            <ul class="my_act_list">
+                <li class="">
+                    <p class="pd_t20 pd_b20 ta_c">진행중인 영업활동이 없습니다.</p>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_yellow">영업기회</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_yellow">영업기회</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_green">영업기회</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_yellow">고객이슈</span>
+                        <span class="subject">삼성 고객대응 설문조사</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_green">영업기회</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_green">영업기회</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_gray">잠재영업기회</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!--// 나의 진행중인 영업활동 -->
+
+        <!-- 나의 진행중인 영업활동 -->
+        <div class="my_act">
+            <div class="box_head">
+                <h3 class="ta_c">고객이슈 <span class="fs14 fc_gray_light">(총 5건)</span></h3>
+            </div>
+
+            <ul class="my_act_list">
+                <li class="">
+                    <p class="pd_t20 pd_b20 ta_c">진행중인 고객이슈가 없습니다.</p>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_yellow">고객이슈</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_yellow">고객이슈</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_green">고객이슈</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_yellow">고객이슈</span>
+                        <span class="subject">삼성 고객대응 설문조사</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="statusColor statusColor_green">고객이슈</span>
+                        <span class="subject">제니퍼소프트 하드웨어 구매</span>
+                        <span class="info">영업대표 : 김철중 / 고객 : 임용수 / 2016-11-14</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!--// 나의 진행중인 영업활동 -->
+
+
+    </article>   
+
+</div>
+
+<div class="modal_screen"></div>
+
+
+<script type="text/javascript" src="../../js/m/jquery-1.11.0.js"></script>
+<script type="text/javascript" src="../../js/m/common.js"></script>
+
+</body>
+</html>

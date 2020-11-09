@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<beans xmlns:context="http://www.springframework.org/schema/context" 
+			xmlns:p="http://www.springframework.org/schema/p" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			xmlns="http://www.springframework.org/schema/beans" 
+			xmlns:mvc="http://www.springframework.org/schema/mvc"
+			xmlns:aop="http://www.springframework.org/schema/aop"
+			xmlns:tx="http://www.springframework.org/schema/tx"  
+			xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+			http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+	 
+	 <!-- mysql start -->
+	 <bean id="dataSourceSpied" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <!-- validationQuery:유효 검사용 쿼리( 1개 이상의 row를 반 환하는 쿼리를 넣어주면 된다. ) -->
+		<property name="validationQuery" value="SELECT 1"/>
+		<!-- testWhileIdle:컨넥션이 놀고 있을때 -_-; validationQuery 를 이용해서 유효성 검사를 할지 여부. -->
+        <!-- <property name="testOnBorrow" value="true"/> -->
+		<property name="testWhileIdle" value="true"/>
+		<!-- timeBetweenEvictionRunsMillis:해당 밀리초마다 validationQuery 를 이용하여 유효성 검사 진행 -->
+		<property name="timeBetweenEvictionRunsMillis" value="36000000"/>
+ 
+        <!-- real -->
+        <!-- <property name="url" value="jdbc:mysql://192.168.1.165/sellers_unipoint?allowMultiQueries=true"/>
+ 		<property name="username" value="sellers"/>
+        <property name="password"  value="Sellers123!@#"/> -->
+        
+        <!-- test -->
+        <property name="url" value="jdbc:mysql://192.168.1.165/sellers_test?allowMultiQueries=true"/>
+ 		<property name="username" value="sellers"/>
+        <property name="password"  value="Sellers123!@#"/>
+        
+        <!-- demo -->
+        <!-- <property name="url" value="jdbc:mysql://192.168.0.249/sellers_demo?allowMultiQueries=true"/>
+ 		<property name="username" value="sellers"/>
+        <property name="password"  value="Sellers123!@#"/> -->
+    </bean>
+     
+    <bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+        <constructor-arg ref="dataSourceSpied" />
+        <property name="logFormatter">
+            <bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+                <property name="loggingType" value="MULTI_LINE" />
+                <property name="sqlPrefix" value="SQL   ::: "/>
+            </bean>
+        </property>
+    </bean>
+    
+    <!-- 트랜잭션 설정 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	    
+	<aop:config>
+		<aop:pointcut id="txAdvisePointCut" expression="execution(* com..*Service.*(..))"/>
+		<aop:advisor id="transactionAdvisor" pointcut-ref="txAdvisePointCut" advice-ref="txAdvice"/>
+	</aop:config>
+	
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" rollback-for="Exception"/>
+		</tx:attributes>
+	</tx:advice>
+	<!-- mysql end -->
+	
+	 <!-- mssql start -->
+     <bean id="dataSourceSpied2" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+		
+		<!-- validationQuery:유효 검사용 쿼리( 1개 이상의 row를 반환하는 쿼리를 넣어주면 된다. ) -->
+		<property name="validationQuery" value="SELECT 1"/>
+		<!-- testWhileIdle:컨넥션이 놀고 있을때 -_-; validationQuery 를 이용해서 유효성 검사를 할지 여부. -->
+        <!-- <property name="testOnBorrow" value="true"/> -->
+		<property name="testWhileIdle" value="true"/>
+		<!-- timeBetweenEvictionRunsMillis:해당 밀리초마다 validationQuery 를 이용하여 유효성 검사 진행 -->
+		<property name="timeBetweenEvictionRunsMillis" value="36000000"/>
+		
+		<!-- BasicDataSource클래스 생성 후 최초로 getConnection() 메서드를 호출할 때 커넥션 풀에 채워 넣을 커넥션 개수 -->
+		<property name="initialSize" value="1"/>
+		<!-- minIdle	최소한으로 유지할 커넥션 개수(기본값: 0) -->
+		<property name="minIdle" value="1"/>
+		
+		<!-- real -->
+		<property name="url" value="jdbc:sqlserver://192.168.0.121:1444;databaseName=NEOE" />
+		<!-- local -->
+		<!-- <property name="url" value="jdbc:sqlserver://192.168.0.121:1444;databaseName=NEOE" /> -->
+		<property name="username" value="NEOE" />
+		<property name="password" value="NEOE" />
+	</bean>
+     
+    <bean id="dataSource2" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+        <constructor-arg ref="dataSourceSpied2" />
+        <property name="logFormatter">
+            <bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+                <property name="loggingType" value="MULTI_LINE" />
+                <property name="sqlPrefix" value="SQL   ::: "/>
+            </bean>
+        </property>
+    </bean>
+    
+    <!-- 트랜잭션 설정 -->
+    <bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource2"></property>
+	</bean>
+	    
+	<aop:config>
+		<aop:pointcut id="txAdvisePointCut2" expression="execution(* com..*DuzonService.*(..))"/>
+		<aop:advisor id="transactionAdvisor2" pointcut-ref="txAdvisePointCut2" advice-ref="txAdvice2"/>
+	</aop:config>
+	
+	<tx:advice id="txAdvice2" transaction-manager="transactionManager2">
+		<tx:attributes>
+			<tx:method name="*" propagation="REQUIRED" rollback-for="Exception"/>
+		</tx:attributes>
+	</tx:advice>
+	<!-- mssql end -->
+	
+</beans>

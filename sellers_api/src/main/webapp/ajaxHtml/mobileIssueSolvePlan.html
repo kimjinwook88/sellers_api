@@ -1,0 +1,32 @@
+<li>
+	<div class="h_line"></div>
+	
+	<a href="#" class="icon_delete fl_r mg_b10 mg_t10" onclick="action.actDel(this);">삭제</a>
+	<input type="hidden" name="hiddenActId" value=""/>
+	
+	<div class="form_input mg_b10 mg_t10">
+		<label>해결계획<span style="color:red;">*</span></label>
+		<textarea class="form_control" name="textareaActContents" rows="2" multiline="true" style="min-height:50px;"></textarea>
+	</div>
+	
+	<div class="form_input mg_b10 mg_t10">     
+		<div class="pos-rel">
+			<label>책임자<span style="color:red;">*</span></label>
+	    <input type="text" class="form_control" name="textActMember" placeholder="책임자를 검색해 주세요." autocomplete="off" auto-bind="0" />
+	    <input type="hidden" name="hiddenActMemberId" value="" />
+	    <input type="hidden" name="hiddenActMemberName" value="" />
+    </div>
+ 	</div>
+	
+	<div class="form_input mg_b10">
+		<label>해결목표일<span style="color:red;">*</span></label>
+		<input type="date" placeholder="ex)1988-11-18" class="form_control" name="textModalActPlanDate" style="text-indent:5px;"/>
+	</div>
+	
+	<div class="form_input mg_b10">
+		<label>실제완료일</label>
+		<input type="date" placeholder="ex)1988-11-18" class="form_control" name="textModalActActualDate" style="text-indent:5px;"/>
+	</div>
+			
+	<div class="h_line mg_b10"></div>
+</li>

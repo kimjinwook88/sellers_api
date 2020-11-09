@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi" name="viewport">
+<title>캘린더</title>
+
+<link href="../../css/m/style.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body class="white_bg">
+
+<div class="container_pg">
+
+    <header class="header_schedule primary_bg">
+        <hgroup>
+            <h1 class="sev_ti">캘린더</h1>
+        </hgroup>
+
+        <a href="#" class="btn_sideMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </a>
+        
+        <span class="alarm_count pos_h r10">59</span> <!-- 확인하지 않은 알림 개수 -->
+
+        <div class="sidemenu off">
+            <!-- 사용자 확인 -->
+            <div class="top">
+                <div class="user_photo r60 mg_b10">
+                    <img src="../../images/m/icon_character.svg" />
+                </div>
+                <p class="fc_white user_info">
+                    <span>홍길동님</span><br/>좋은하루 되세요.
+                </p>
+
+                <a href="#" class="btn_sidemenu_close">
+                    <img src="../../images/m/icon_sidemenu_close.svg" alt="사이드 메뉴 닫기"/>
+                </a>
+            </div>
+            <div class="side_gnb">
+                <span class="alarm_count pos_side r10">59</span> <!-- 확인하지 않은 알림 개수 -->
+
+                <a href="#" class="sideTab tab1 active">메뉴</a>
+                <div class="side_cont">
+                    <ul class="gnb">
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_custominfo va_m"></span> 고객사 및 고객개인정보 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객사정보</a>
+                                <a href="">고객개인정보</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_salesAct va_m"></span> 고객영업활동 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객컨텍내용</a>
+                                <a href="">영업기회</a>
+                                <a href="">잠재영업기회</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_cutomgood va_m"></span> 고객만족 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객이슈</a>
+                                <a href="">고객만족도</a>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_partner va_m"></span> 파트너사 협업관리 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">파트너사 협업</a>
+                                <a href="">파트너사정보</a>
+                                <a href="">파트너사개인정보</a>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_paper va_m"></span> 사업전략 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">회사/부문별전략</a>
+                                <a href="">고객별전략</a>
+                                <a href="">고객별전략</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class=""><span class="icon md icon_calendar va_m"></span> 일정관리</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_key va_m"></span> 로그아웃</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_setting va_m"></span> 비밀번호변경</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_desktop va_m"></span> PC화면보기</a>
+                        </li>
+                    </ul>                    
+                </div>
+
+                <a href="#" class="sideTab tab2">알림</a>
+                <div class="side_cont off">
+                    <ul class="news">
+                        <li class="visited">
+                            <a href="#">
+                                <span class="cata">일정관리</span>
+                                <span class="subject">삼성글로벌</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="visited">
+                            <a href="#">
+                                <span class="cata">일정관리</span>
+                                <span class="subject">삼성글로벌</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="">
+                            <a href="#">
+                                <span class="icon_new">new</span> <!-- 확인한 게시물은 new아이콘 삭제-->
+                                <span class="icon lg icon_sch_2"></span> <!-- icon_sch_1~7 : 고객대면, 대면준비, 내부회의, 교육, 기타, 휴가, 이동시간 -->
+                                <span class="time">09:00~10:00</span>
+                                <span class="subject">디자인팀 회의 소집</span>
+                                <span class="ment">캘린더가 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="visited">
+                            <a href="#">
+                                <span class="icon lg icon_sch_3"></span> <!-- icon_sch_1~7 : 고객대면, 대면준비, 내부회의, 교육, 기타, 휴가, 이동시간 -->
+                                <span class="time">09:00~10:00</span>
+                                <span class="subject">디자인팀 회의 소집</span>
+                                <span class="ment">캘린더가 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="cata">고객이슈관리</span>
+                                <span class="subject">한국전자금융 어댑터 기동 에러 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="cata">전략프로젝트</span>
+                                <span class="subject">셀러스 프로젝트 !</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="icon_new">new</span>
+                                <span class="cata">고객이슈관리</span>
+                                <span class="subject">한국전자금융 어댑터 기동 에러 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="icon_new">new</span>
+                                <span class="cata">전략프로젝트</span>
+                                <span class="subject">셀러스 프로젝트 !</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                    </ul>                    
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <article class="schedule_cont mg_b0">
+        <div class="title_pg mg_b20 ta_c">
+            <h2>일정</h2>
+            <a href="#" class="btn_back">back</a>
+        </div>
+
+        <div class="mg_l10 mg_r10">
+
+            <form method="get" class="form-horizontal mg_l10 mg_r10">
+
+                <div class="cont1 pd_b20 "><!-- 이슈기본정보  -->
+
+                    <div class="form_input mg_b20">
+                        <input type="text" placeholder="제목을 입력해주세요" class="form_control schedule_subject" />
+                    </div>
+
+                    <div class="form_input mg_b20">
+                        <label class="fc_gray_light">일정분류</label>
+                        <select class="form_control">
+                            <option>고객대면</option>
+                            <option>대면준비</option>
+                            <option>내부회의</option>
+                            <option>교육</option>
+                            <option>이동시간</option>
+                            <option>공유일정</option>
+                            <option>기타</option>
+                        </select>
+                    </div>
+
+                    <div class="form_input mg_b20">
+                        <label class="fc_gray_light">장소</label>
+                        <input type="text" value="서울역사박물관 앞" class="form_control" />
+                    </div>
+
+                    <div class="h_line pd_t10"></div>
+
+                    <div class="form_input mg_b20">
+                        <label class="fc_gray_light">상세내용</label>
+                        <textarea class="form_control" row="3"></textarea>
+                    </div> 
+
+                    <div class="h_line pd_t10"></div>
+
+                    <div class="form_input">
+                        <label class="fc_gray_light">일정시작</label>
+                        <div class="daytime">
+                            <input type="date" value="2016-08-10" class="form_control" /> <!-- 기본적으로 오늘 날짜 표시 -->
+                            <select class="form_control">
+                                <option>00:00</option>
+                                <option>00:30</option>
+                                <option>01:00</option>
+                                <option>01:30</option>
+                                <option>02:00</option>
+                                <option>02:30</option>
+                                <option>03:00</option>
+                                <option>03:30</option>
+                                <option>04:00</option>
+                                <option>04:30</option>
+                                <option>05:00</option>
+                                <option>05:30</option>
+                                <option>06:00</option>
+                                <option>06:30</option>
+                                <option>07:00</option>
+                                <option>07:30</option>
+                                <option>08:00</option>
+                                <option>08:30</option>
+                                <option selected>09:00</option>
+                                <option>09:30</option>
+                                <option>10:00</option>
+                                <option>10:30</option>
+                                <option>11:00</option>
+                                <option>11:30</option>
+                                <option>12:00</option>
+                                <option>12:30</option>
+                                <option>13:00</option>
+                                <option>13:30</option>
+                                <option>14:00</option>
+                                <option>14:30</option>
+                                <option>15:00</option>
+                                <option>15:30</option>
+                                <option>16:00</option>
+                                <option>16:30</option>
+                                <option>17:00</option>
+                                <option>17:30</option>
+                                <option>18:00</option>
+                                <option>18:30</option>
+                                <option>19:00</option>
+                                <option>19:30</option>
+                                <option>20:00</option>
+                                <option>20:30</option>
+                                <option>21:00</option>
+                                <option>21:30</option>
+                                <option>22:00</option>
+                                <option>22:30</option>
+                                <option>23:00</option>
+                                <option>23:30</option>
+                                <option>24:00</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form_input mg_b20">
+                        <label class="fc_gray_light">일정종료</label>
+                        <div class="daytime">
+                            <input type="date" value="2016-08-10" class="form_control" /> <!-- 기본적으로 오늘 날짜 표시 -->
+                            <select class="form_control">
+                                <option>00:00</option>
+                                <option>00:30</option>
+                                <option>01:00</option>
+                                <option>01:30</option>
+                                <option>02:00</option>
+                                <option>02:30</option>
+                                <option>03:00</option>
+                                <option>03:30</option>
+                                <option>04:00</option>
+                                <option>04:30</option>
+                                <option>05:00</option>
+                                <option>05:30</option>
+                                <option>06:00</option>
+                                <option>06:30</option>
+                                <option>07:00</option>
+                                <option>07:30</option>
+                                <option>08:00</option>
+                                <option>08:30</option>
+                                <option selected>09:00</option>
+                                <option>09:30</option>
+                                <option>10:00</option>
+                                <option>10:30</option>
+                                <option>11:00</option>
+                                <option>11:30</option>
+                                <option>12:00</option>
+                                <option>12:30</option>
+                                <option>13:00</option>
+                                <option>13:30</option>
+                                <option>14:00</option>
+                                <option>14:30</option>
+                                <option>15:00</option>
+                                <option>15:30</option>
+                                <option>16:00</option>
+                                <option>16:30</option>
+                                <option>17:00</option>
+                                <option>17:30</option>
+                                <option>18:00</option>
+                                <option>18:30</option>
+                                <option>19:00</option>
+                                <option>19:30</option>
+                                <option>20:00</option>
+                                <option>20:30</option>
+                                <option>21:00</option>
+                                <option>21:30</option>
+                                <option>22:00</option>
+                                <option>22:30</option>
+                                <option>23:00</option>
+                                <option>23:30</option>
+                                <option>24:00</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="h_line pd_t10"></div>
+
+                    <div class="form_input mg_b20 pos_rel">
+                        <label class="fc_gray_light">옵션선택</label>
+                        <div class="mg_b10">
+                            <label for="f_action1" class="mg_r20"><input type="checkbox" id="f_action1" name="innner" class="option_dayfull va_m"/><span class="va_m">종일</span></label>
+                            <label for="f_action2" class=""><input type="checkbox" id="f_action2" name="innner" class="option_repeat va_m"/><span class="va_m">반복</span></label>
+                        </div>
+
+                        <div class="repeat_option mg_b20 "><!-- 반복일정 설정 -->
+
+                            <div class="mg_b10 repeat_term repeat_day "> <!-- "매일" 선택시 보여질 화면 : 기본 화면 -->
+                                <select class="form_control mg_r10">
+                                    <option selected>매일</option>
+                                    <option>매주</option>
+                                    <option>매월</option>
+                                </select>
+                                <input type="text" value="1" size="2" class="form_control mg_r10" />
+                                <span>일마다</span>
+                            </div>
+
+                            <div class="mg_b10 repeat_term repeat_week "> <!-- "매주" 선택시 보여질 화면 -->
+                                <select class="form_control mg_r10">
+                                    <option>매일</option>
+                                    <option selected>매주</option>
+                                    <option>매월</option>
+                                </select>
+                                <input type="text" value="1" size="2" class="form_control mg_r10" />
+                                <span>주마다</span>
+                                <div class="week_sel">
+                                    <a href="#" class="active">일</a>
+                                    <a href="#" class="">월</a>
+                                    <a href="#" class="">화</a>
+                                    <a href="#" class="">수</a>
+                                    <a href="#" class="">목</a>
+                                    <a href="#" class="">금</a>
+                                    <a href="#" class="">토</a>
+                                </div>
+                            </div>
+
+                            <div class="mg_b10 repeat_term repeat_month off">
+                                <select class="form_control mg_r10"> <!-- "매월" 선택시 보여질 화면 -->
+                                    <option>매일</option>
+                                    <option>매주</option>
+                                    <option selected>매월</option>
+                                </select>
+                                <div class="fl_l">
+                                    <input type="text" value="1" size="2" class="form_control mg_r10" />
+                                    <span>개월마다</span>
+                                    <div class="cboth">
+                                        <select class="form_control mg_r10">
+                                            <option>1일</option>
+                                            <option>2일</option>
+                                            <option>3일</option>
+                                            <option>4일</option>
+                                            <option>5일</option>
+                                            <option>6일</option>
+                                            <option>7일</option>
+                                            <option>8일</option>
+                                            <option>9일</option>
+                                            <option>10일</option>
+                                            <option>11일</option>
+                                            <option>12일</option>
+                                            <option>13일</option>
+                                            <option>14일</option>
+                                            <option>15일</option>
+                                            <option>16일</option>
+                                            <option>17일</option>
+                                            <option>18일</option>
+                                            <option>19일</option>
+                                            <option>20일</option>
+                                            <option>21일</option>
+                                            <option>22일</option>
+                                            <option>23일</option>
+                                            <option>24일</option>
+                                            <option>25일</option>
+                                            <option>26일</option>
+                                            <option>27일</option>
+                                            <option>28일</option>
+                                            <option>29일</option>
+                                            <option>30일</option>
+                                            <option>31일</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="h_line pd_t10"></div>
+
+                            <div class="form_input">
+                                <label class="fc_gray_light">옵션 종료일</label>
+                                <input type="date" value="2016-08-10" class="form_control" /> <!-- 기본적으로 오늘 날짜 표시 -->                                    
+                            </div>
+
+                        </div>
+
+                        <!-- 반복일정 삭제시 알림 팝업 : 2017-07-03 -->
+                        <div class="repeat_del_msg_pop">
+                            <div class="row top"><strong>반복일정 삭제</strong></div>
+
+                            <div class="row mg_b10">이번 일정만 변경하시겠습니까 혹은 반복되는 일정 모두를 변경하시겠습니까?<br/>
+                            아니면 이번 일정과 향후의 반복되는 일정 모두를 변경하시겠습니까?</div>
+
+                            <div class="row mg_b10">
+                                <a href="#">이번 일정만</a>
+                                <span>반복일정의 다른 모든 일정을 그대로 유지합니다.</span>
+                            </div>
+                            <div class="row mg_b10">
+                                <a href="#">향후 모든 일정</a>
+                                <span>이 일정 및 향후 모든 일정이 모두 변경됩니다. 미래 일정에 대한 변경사항이 손실됩니다.</span>
+                            </div>
+                            <div class="row">
+                                <a href="#">모든 일정</a>
+                                <span>반복되는 모든 일정을 변경합니다. 다른 일정에 대한 변경사항이 유지됩니다.</span>
+                            </div>
+                            <div class="bottom">
+                                <a href="#" class="">변경 취소</a>
+                            </div>
+                        </div>
+                        <!--// 반복일정 삭제시 알림 팝업 : 2017-07-03 -->
+
+                    </div>
+
+                    <div class="h_line pd_t10"></div>
+
+                    <div class="form_input mg_b20">
+                        <label class="fc_gray_light">초대옵션</label>
+                        <div class="mg_b10">
+                            <label for="f_invite" class="f_invite"><input type="checkbox" id="f_invite" name="innner" class="va_m"/><span class="va_m">초대</span></label>
+                        </div>
+
+                        <div class="pop_search invite_option mg_b20 off"><!-- 초대옵션 설정 -->
+                            <!-- 직원검색영역 -->
+                            <div class="pop_search_area invite-area">
+                                <a href="#" class="btn-search">직원검색</a>
+                                <div class="list mg_b10">
+                                    <ul class="">
+                                        <li class="value">
+                                            <span class="txt">이명진</span>
+                                            <a href="#" class="remove"><img src="../../images/m/icon_close.svg" /></a>
+                                        </li>
+                                        <li class="value">
+                                            <span class="txt">최불암</span>
+                                            <a href="#" class="remove"><img src="../../images/m/icon_close.svg" /></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <!--// 직원검색영역 -->
+
+                            <!-- 직원선택 팝업 -->
+                            <div class="pop_search_pop invite-member-pop off">
+                                <div class="pop-header">
+                                    <button type="button" class="close"><img src="../../images/m/icon_close_gray.svg" /></button>
+                                    <strong class="pop-title">직원 선택</strong>
+                                </div>
+                                <div class="col-sm-12 cont">
+                                    <div class="form-group pop_search_input">
+                                        <input type="" name="" class="form_control" />
+                                        <a href="">검색</a>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-12 mg-b10 "><!-- 검색 결과 노출시 "off" 삭제 -->
+                                            <ul class="result_list">
+                                                <li><span>김행수</span> <a href="#"><img src="../../images/m/icon_plus.svg" /></a></li>
+                                                <li><span>김종국</span> <a href="#"><img src="../../images/m/icon_plus.svg" /></a></li>
+                                                <li><span>이준기</span> <a href="#"><img src="../../images/m/icon_plus.svg" /></a></li>
+                                                <li><span>이상형</span> <a href="#"><img src="../../images/m/icon_plus.svg" /></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 참석자 리스트 : 초기에는 hidden 처리되면, 검색 후 등록하면 리스트가 display 됨. -->
+                            <div class="invite-area-list ">
+                                <h3 class="ag_c">참석자 리스트</h3>
+                                <table class="basic3">
+                                    <colgroup>
+                                        <col width=""/>
+                                        <col width=""/>
+                                        <col width=""/>
+                                        <col width=""/>
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th>이름</th>
+                                            <th>발신상태</th>
+                                            <th>수락여부</th>
+                                            <th>삭제</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>이상현</td>
+                                            <td>미발신</td>
+                                            <td>수락</td>
+                                            <td>
+                                                <a href="#" class="remove"><img src="../../images/m/icon_close.svg" /></a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>홍길동</td>
+                                            <td>미발신</td>
+                                            <td>수락</td>
+                                            <td>
+                                                <a href="#" class="remove"><img src="../../images/m/icon_close.svg" /></a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>홍길동</td>
+                                            <td>미발신</td>
+                                            <td>수락</td>
+                                            <td>
+                                                <a href="#" class="remove"><img src="../../images/m/icon_close.svg" /></a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>홍길동</td>
+                                            <td>미발신</td>
+                                            <td>수락</td>
+                                            <td>
+                                                <a href="#" class="remove"><img src="../../images/m/icon_close.svg" /></a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h_line pd_t10"></div>
+
+                    <div class="form_input mg_b20">
+                        <label class="fc_gray_light">공개옵션</label>
+                        <div class="mg_b10">
+                            <label for="f_action_share1" class="mg_r20"><input type="radio" id="f_action_share1" name="f_action_share" class="va_m"/><span class="va_m">비공개</span></label>
+                            <label for="f_action_share2" class=""><input type="radio" id="f_action_share2" name="f_action_share" class="va_m"/><span class="va_m">공개</span></label>
+                        </div>
+                    </div>
+
+                    <div class="h_line pd_t10"></div>
+
+                    <div class="form_input mg_b20">
+                        <label class="fc_gray_light">일정알림</label>
+                        <div class="mg_b10">
+                            <select class="form_control mg_r10">
+                                <option>안함</option>
+                                <option>한시간 전</option>
+                                <option>하루 전</option>
+                                <option>일주일 전</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <div class="pg_bottom ta_c">
+            <button type="button" class="btn lg btn-default pd_r15 pd_l15 r3">취소</button>
+            <button type="button" class="btn lg btn-primary pd_r15 pd_l15 r3">저장</button>
+            <button type="button" class="btn lg btn-primary pd_r15 pd_l15 r3">저장하고 메일보내기</button>
+        </div>
+
+    </article>
+
+    <article class="fix_func off">
+        <ul>
+            <li>
+                <a href="" class="active">일</a>
+            </li>
+            <li>
+                <a href="">월</a>
+            </li>
+            <li>
+                <a href="">일정목록</a>
+            </li>
+            <li>
+                <a href="">오늘</a>
+            </li>
+        </ul>
+    </article>
+
+</div>
+
+<div class="modal_screen"></div>
+
+<!-- Mainly scripts -->
+<script src="../../js/m/jquery-1.11.0.js"></script>
+<script src="../../js/m/common.js"></script>
+
+</body>
+</html>

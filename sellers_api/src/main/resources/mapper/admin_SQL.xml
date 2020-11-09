@@ -1,0 +1,945 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="admin">
+	<select id="selelctMenuManageList" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			SELECT 
+				CM.MENU_ID, 
+				CM.MENU_TITLE, 
+				CM.MENU_URL, 
+				CM.MENU_PARENT,
+				COUNT(CM2.MENU_ID) AS CHILDREN_COUNT,
+				CM.MENU_SEQ, 
+				CM.MENU_LEVEL, 
+				CM.MENU_ICON, 
+				CM.USE_YN, 
+				CM.MOBILE_LANDING_PAGE_USE_YN, 
+				CM.SYS_REGISTER_DATE, 
+				CM.SYS_UPDATE_DATE 
+			FROM COM_MENU AS CM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+				*
+				FROM COM_MENU AS CM2
+				GROUP BY CM2.MENU_ID
+			) AS CM2 ON CM.MENU_ID = CM2.MENU_PARENT
+			WHERE 1=1 
+		]]>
+			<if test="use_yn != null and use_yn != '' ">
+			AND CM.USE_YN = #{use_yn}
+			</if>
+			GROUP BY CM.MENU_ID
+			ORDER BY MENU_LEVEL ASC, MENU_SEQ ASC
+	</select>
+	
+	<select id="selectAuthorityAll" parameterType="hashmap" resultType="hashmap">
+	  <![CDATA[
+		SELECT *		
+		FROM 
+			COM_AUTHORITY 
+		WHERE 1=1
+		]]>
+		<if test="use_yn != null and use_yn != '' ">
+			AND USE_YN = #{use_yn}
+		</if>
+	</select>
+	
+	 <insert id="insertMenu" parameterType="hashmap">
+	 	INSERT INTO COM_MENU(
+			MENU_TITLE, 
+			MENU_URL, 
+			<if test = "MENU_PARENT != null and MENU_PARENT != '' ">
+			MENU_PARENT,
+			</if>
+			MENU_SEQ, 
+			MENU_LEVEL,
+			MENU_ICON, 
+			USE_YN, 
+			MOBILE_LANDING_PAGE_USE_YN, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{MENU_TITLE}, 
+			#{MENU_URL},
+			<if test = "MENU_PARENT != null and MENU_PARENT != '' ">
+			#{MENU_PARENT},
+			</if> 
+			#{MENU_SEQ},
+			#{MENU_LEVEL},
+			#{MENU_ICON},
+			#{USE_YN},
+			#{MOBILE_LANDING_PAGE_USE_YN}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	 
+	</insert>
+	
+	<update id="updateMenu" parameterType="hashmap">
+	        UPDATE COM_MENU
+			SET 
+				MENU_TITLE=#{MENU_TITLE}, 
+				MENU_URL=#{MENU_URL},
+				<if test = "MENU_PARENT != null and MENU_PARENT != '' ">
+				MENU_PARENT=#{MENU_PARENT},
+				</if>
+				MENU_SEQ=#{MENU_SEQ}, 
+				MENU_LEVEL=#{MENU_LEVEL}, 
+				MENU_ICON=#{MENU_ICON}, 
+				USE_YN=#{USE_YN}, 
+				MOBILE_LANDING_PAGE_USE_YN=#{MOBILE_LANDING_PAGE_USE_YN}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+			WHERE MENU_ID=#{MENU_ID}
+	</update>
+	
+	<delete id="deleteMenu" parameterType="hashmap">
+		DELETE FROM COM_MENU
+		WHERE 1=1
+		AND MENU_ID = #{MENU_ID}
+	</delete>
+	
+	<delete id="deleteMemberAuth" parameterType="hashmap">
+		DELETE FROM COM_AUTHORITY_MEMBER WHERE MEMBER_ID_NUM=#{member_id_num};
+	</delete>
+	
+	<insert id="insertMemberAuth" parameterType="hashmap">
+		INSERT INTO COM_AUTHORITY_MEMBER
+		(
+			MEMBER_ID_NUM, 
+			AUTHORITY_CODE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE, 
+			USE_YN
+		)
+		VALUES
+		(
+			#{member_id_num}, 
+			#{auth_code}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP, 
+			'Y'
+		);
+		
+	</insert>
+	
+	<select id="selectAuthRoleMenu" parameterType="hashmap" resultType="hashmap">
+		SELECT MENU_ID, MENU_TITLE, MENU_URL, MENU_PARENT, MENU_SEQ, MENU_LEVEL, USE_YN, SYS_REGISTER_DATE, SYS_UPDATE_DATE, MENU_ICON
+		FROM COM_MENU
+		WHERE 1=1
+		AND USE_YN = 'Y'
+		AND FIND_IN_SET(menu_id,
+					(SELECT menu_auth
+					FROM COM_AUTHORITY
+					WHERE 1=1
+					<if test="auth_code != null and auth_code != '' ">
+					AND authority_code = #{auth_code}
+					</if>
+				))
+	</select>
+	
+	<!-- 직원정보 관리 start -->
+	<select id="selelctAllInfoDivisionList" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			SELECT
+				DIVISION_NO,
+				DIVISION_NAME,
+				DIVISION_TYPE,
+				DIVISION_LEADER,
+				USE_YN,
+				SYS_REGISTER_DATE,
+				SYS_UPDATE_DATE,
+				ERP_DIVISION_CD
+			FROM OUR_DIVISION_INFO
+			WHERE 1=1
+		]]>
+			<if test="use_yn != null and use_yn != '' ">
+			AND USE_YN = #{use_yn}
+			</if>
+	</select>
+	
+	<select id="selelctInfoTeamList" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			SELECT
+				TEAM_NO,
+				TEAM_NAME,
+				TEAM_LEADER,
+				DIVISION_NO,
+				TEAM_TYPE,
+				USE_YN,
+				SYS_REGISTER_DATE,
+				SYS_UPDATE_DATE,
+				TEAM_LEADER AS TEAM_LEADER_NO
+			FROM OUR_TEAM_INFO
+			WHERE 1=1
+		]]>
+			<if test="use_yn != null and use_yn != '' ">
+			AND USE_YN = #{use_yn}
+			</if>
+			<if test="divisionNo != null and divisionNo != '' ">
+			AND DIVISION_NO = #{divisionNo}
+			</if>
+	</select>
+	
+	<select id="selelctInfoMemberManageList" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			SELECT
+				MEMBER_ID,
+				MEMBER_DIVISION,
+				MEMBER_TEAM,
+				MEMBER_ID_NUM,
+				HAN_NAME,
+				POSITION_STATUS,
+				POSITION_RANK,
+				POSITION_DUTY,
+				POSITION_TYPE,
+				POSITION_TYPE AS POSITION_TYPE2,
+				BUSINESS_DUTY,
+				JOIN_DATE,
+				STOP_DATE,
+				CELL_PHONE,
+				PHONE,
+				EMAIL,
+				MEMBER_TEAM AS TEAM_VALUE,
+				USE_YN,
+				concat('<option role="option" value="">==선택==</option><option role="option" value="', OTI.DIVISION_TEAM) AS DIVISION_TEAM
+			FROM OUR_MEMBERS_INFO AS OMI
+			LEFT OUTER JOIN 
+			(
+				SELECT 
+				REPLACE(REPLACE(REPLACE(GROUP_CONCAT(TEAM_NO, ':', TEAM_NAME, ';'), ':', '">'), ';,', '</option><option role="option" value="'), ';', '</option>') AS DIVISION_TEAM,
+				DIVISION_NO
+				FROM OUR_TEAM_INFO AS OTI
+				GROUP BY DIVISION_NO
+			) AS OTI ON OTI.DIVISION_NO = OMI.MEMBER_DIVISION
+			WHERE 1=1
+		]]>
+			<if test="use_yn != null and use_yn != '' ">
+			AND USE_YN = #{use_yn}
+			</if>
+			<if test="searchHanName != null and searchHanName != '' ">
+			AND HAN_NAME LIKE CONCAT('%', #{searchHanName}, '%')
+			</if>
+			ORDER BY MEMBER_ID ASC
+	</select>
+	
+	<insert id="insertAuth" parameterType="hashmap">
+		INSERT INTO COM_AUTHORITY
+		(
+			AUTHORITY_CODE, 
+			AUTHORITY_NAME, 
+			AUTHORITY_DETAIL, 
+			USE_YN, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE, 
+			MENU_AUTH
+		)
+		VALUES
+		(
+			#{AUTHORITY_CODE}, 
+			#{AUTHORITY_NAME}, 
+			#{AUTHORITY_DETAIL}, 
+			'Y', 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP, 
+			''
+		);
+	</insert>
+	
+	<update id="updateAuth" parameterType="hashmap">
+		UPDATE COM_AUTHORITY
+		SET 
+			AUTHORITY_CODE=#{AUTHORITY_CODE},
+			AUTHORITY_NAME=#{AUTHORITY_NAME}, 
+			AUTHORITY_DETAIL=#{AUTHORITY_DETAIL}, 
+			USE_YN=#{USE_YN},  
+			SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND AUTHORITY_CODE=#{AUTHORITY_CODE};
+	</update>
+	
+	<insert id="insertInfoMember" parameterType="hashmap">
+	 	INSERT INTO OUR_MEMBERS_INFO(
+			MEMBER_ID_NUM,
+			<if test="MEMBER_DIVISION != null and MEMBER_DIVISION != '' ">
+			MEMBER_DIVISION,
+			</if>
+			<if test="MEMBER_TEAM != null and MEMBER_TEAM != '' ">
+			MEMBER_TEAM, 
+			</if>
+			<if test="JOIN_DATE != null and JOIN_DATE != '' ">
+			JOIN_DATE, 
+			</if>
+			<if test="STOP_DATE != null and STOP_DATE != '' ">
+			STOP_DATE, 
+			</if>
+			HAN_NAME,
+			POSITION_STATUS,
+			POSITION_RANK,
+			POSITION_DUTY,
+			POSITION_TYPE,
+			CELL_PHONE,
+			PHONE,
+			EMAIL,
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{MEMBER_ID_NUM}, 
+			<if test="MEMBER_DIVISION != null and MEMBER_DIVISION != '' ">
+			#{MEMBER_DIVISION},
+			</if>
+			<if test="MEMBER_TEAM != null and MEMBER_TEAM != '' ">
+			#{MEMBER_TEAM},
+			</if>
+			<if test="JOIN_DATE != null and JOIN_DATE != '' ">
+			#{JOIN_DATE}, 
+			</if>
+			<if test="STOP_DATE != null and STOP_DATE != '' ">
+			#{STOP_DATE}, 
+			</if>
+			#{HAN_NAME},
+			#{POSITION_STATUS},
+			#{POSITION_RANK},
+			#{POSITION_DUTY},
+			#{POSITION_TYPE},
+			#{CELL_PHONE},
+			#{PHONE},
+			#{EMAIL},
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	 	<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertInfoUser" parameterType="hashmap">
+		<selectKey resultType="string" keyProperty="MEMBER_ID_NUM" order="BEFORE">
+	        SELECT
+	        	MEMBER_ID_NUM
+	        FROM OUR_MEMBERS_INFO
+	        WHERE 1=1
+	        AND MEMBER_ID = #{filePK}
+	    </selectKey>  
+	 	INSERT INTO OUR_USERS_INFO(
+			MEMBER_ID_NUM,
+			PASSWORD_ENC, 
+			LOGIN_TRY_COUNT,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{MEMBER_ID_NUM}, 
+			#{user_pw},
+			'0',
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<insert id="insertRoleMember" parameterType="hashmap">
+		<selectKey resultType="string" keyProperty="AUTHORITY_CODE" order="BEFORE">
+		    SELECT 
+				AUTHORITY_CODE 
+			FROM COM_AUTHORITY 
+			WHERE 1=1 
+			AND AUTHORITY_NAME = 'ROLE_MEMBER'
+		</selectKey>  
+		INSERT INTO COM_AUTHORITY_MEMBER
+		(
+			MEMBER_ID_NUM,
+			AUTHORITY_CODE,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			USE_YN
+		)
+		VALUES
+		(
+			#{MEMBER_ID_NUM},
+			#{AUTHORITY_CODE},
+			CURRENT_TIMESTAMP,
+			CURRENT_TIMESTAMP,
+			'Y'
+		);
+	</insert>
+	
+	<insert id="insertRoleCRUD" parameterType="hashmap">
+		<selectKey resultType="string" keyProperty="AUTHORITY_CODE" order="BEFORE">
+		    SELECT 
+				AUTHORITY_CODE 
+			FROM COM_AUTHORITY 
+			WHERE 1=1 
+			AND AUTHORITY_NAME = 'ROLE_CRUD'
+		</selectKey> 
+		INSERT INTO COM_AUTHORITY_MEMBER
+		(
+			MEMBER_ID_NUM,
+			AUTHORITY_CODE,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			USE_YN
+		)
+		VALUES
+		(
+			#{MEMBER_ID_NUM},
+			#{AUTHORITY_CODE},
+			CURRENT_TIMESTAMP,
+			CURRENT_TIMESTAMP,
+			'Y'
+		);
+	</insert>
+	
+	<insert id="insertRoleTeam" parameterType="hashmap">
+		<selectKey resultType="string" keyProperty="AUTHORITY_CODE" order="BEFORE">
+		    SELECT 
+				AUTHORITY_CODE 
+			FROM COM_AUTHORITY 
+			WHERE 1=1 
+			AND AUTHORITY_NAME = 'ROLE_TEAM'
+		</selectKey> 
+		INSERT INTO COM_AUTHORITY_MEMBER
+		(
+			MEMBER_ID_NUM,
+			AUTHORITY_CODE,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			USE_YN
+		)
+		VALUES
+		(
+			#{MEMBER_ID_NUM},
+			#{AUTHORITY_CODE},
+			CURRENT_TIMESTAMP,
+			CURRENT_TIMESTAMP,
+			'Y'
+		);
+	</insert>
+	
+	<insert id="insertRoleDivision" parameterType="hashmap">
+		<selectKey resultType="string" keyProperty="AUTHORITY_CODE" order="BEFORE">
+		    SELECT 
+				AUTHORITY_CODE 
+			FROM COM_AUTHORITY 
+			WHERE 1=1 
+			AND AUTHORITY_NAME = 'ROLE_DIVISION'
+		</selectKey> 
+		INSERT INTO COM_AUTHORITY_MEMBER
+		(
+			MEMBER_ID_NUM,
+			AUTHORITY_CODE,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			USE_YN
+		)
+		VALUES
+		(
+			#{MEMBER_ID_NUM},
+			#{AUTHORITY_CODE},
+			CURRENT_TIMESTAMP,
+			CURRENT_TIMESTAMP,
+			'Y'
+		);
+	</insert>
+	
+	<delete id="deleteRoleCRUD" parameterType="hashmap">
+		DELETE FROM COM_AUTHORITY_MEMBER 
+		WHERE MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND AUTHORITY_CODE LIKE (
+		SELECT
+			AUTHORITY_CODE
+		FROM COM_AUTHORITY
+		WHERE 1=1
+		AND AUTHORITY_NAME = 'ROLE_CRUD'
+		);
+	</delete>
+	
+	<delete id="deleteRoleTeam" parameterType="hashmap">
+		DELETE FROM COM_AUTHORITY_MEMBER 
+		WHERE MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND AUTHORITY_CODE LIKE (
+		SELECT
+			AUTHORITY_CODE
+		FROM COM_AUTHORITY
+		WHERE 1=1
+		AND AUTHORITY_NAME = 'ROLE_TEAM'
+		);
+	</delete>
+	
+	<delete id="deleteRoleDivision" parameterType="hashmap">
+		DELETE FROM COM_AUTHORITY_MEMBER 
+		WHERE MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND AUTHORITY_CODE LIKE (
+		SELECT
+			AUTHORITY_CODE
+		FROM COM_AUTHORITY
+		WHERE 1=1
+		AND AUTHORITY_NAME = 'ROLE_DIVISION'
+		);
+	</delete>
+	
+	<update id="updateRoleMenu" parameterType="hashmap">
+		UPDATE COM_AUTHORITY
+		SET MENU_AUTH=#{menu_list}
+		WHERE AUTHORITY_CODE=#{auth_code};
+	</update>
+	
+	<update id="updateInfoMember" parameterType="hashmap">
+	        UPDATE OUR_MEMBERS_INFO
+			SET 
+				MEMBER_ID_NUM=#{MEMBER_ID_NUM}, 
+				<choose>
+					<when test="MEMBER_DIVISION != null and MEMBER_DIVISION != '' ">
+					MEMBER_DIVISION=#{MEMBER_DIVISION},
+					</when>
+					<otherwise>
+					MEMBER_DIVISION=NULL,
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="MEMBER_TEAM != null and MEMBER_TEAM != '' ">
+					MEMBER_TEAM=#{MEMBER_TEAM},
+					</when>
+					<otherwise>
+					MEMBER_TEAM=NULL,
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="JOIN_DATE != null and JOIN_DATE != '' ">
+					JOIN_DATE=#{JOIN_DATE},
+					</when>
+					<otherwise>
+					JOIN_DATE=NULL,
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="STOP_DATE != null and STOP_DATE != '' ">
+					STOP_DATE=#{STOP_DATE},
+					</when>
+					<otherwise>
+					STOP_DATE=NULL,
+					</otherwise>
+				</choose>
+				HAN_NAME=#{HAN_NAME},
+				POSITION_STATUS=#{POSITION_STATUS},
+				POSITION_RANK=#{POSITION_RANK},
+				POSITION_DUTY=#{POSITION_DUTY},
+				POSITION_TYPE=#{POSITION_TYPE},
+				CELL_PHONE=#{CELL_PHONE},
+				PHONE=#{PHONE},
+				EMAIL=#{EMAIL},
+				USE_YN = #{USE_YN},
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+			WHERE MEMBER_ID=#{MEMBER_ID}
+	</update>
+	<!-- 직원정보 관리 end -->
+	
+	
+	<!-- 고객사 테레토리 관리 start -->
+	<select id="selectIndustrySegmentAll" parameterType="hashmap" resultType="hashmap">
+	  <![CDATA[
+		SELECT *		
+		FROM 
+			CODE_INDUSTRY_SEGMENT 
+		WHERE 1=1
+		]]>
+		<if test="SEGMENT_CODE != null and SEGMENT_CODE != '' ">
+		AND SEGMENT_CODE = #{SEGMENT_CODE}
+		</if>
+	</select>
+	
+	<select id="selectTerritoryMemberList" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			SELECT
+				ST_ALIGN_ID,
+				MEMBER_ID_NUM,
+				STAM.COMPANY_ID,
+				GRANTOR_MEMBER_ID_NUM,
+				CCI.COMPANY_NAME,
+				STAM.SYS_UPDATE_DATE
+			FROM SALES_TERRITORY_ALIGN_MAP AS STAM
+			LEFT OUTER JOIN 
+				CLIENT_COMPANY_INFO AS CCI ON STAM.COMPANY_ID = CCI.COMPANY_ID
+			WHERE 1=1
+		]]>
+			<if test="MEMBER_ID_NUM != null and MEMBER_ID_NUM != '' ">
+			AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+			</if>
+	</select>
+	
+	<select id="selectIndustrySegmentList" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			SELECT
+				*
+			FROM CLIENT_COMPANY_INFO AS CCI
+			WHERE 1=1
+		]]>
+			<if test="SEGMENT_CODE != null and SEGMENT_CODE != '' ">
+			AND SEGMENT_CODE = #{SEGMENT_CODE}
+			</if>
+			<if test="member_id_num != null and member_id_num != '' ">
+			AND COMPANY_ID NOT IN (
+				SELECT 
+					COMPANY_ID
+				FROM  SALES_TERRITORY_ALIGN_MAP
+				WHERE MEMBER_ID_NUM = #{member_id_num}
+			)
+			</if>
+	</select>
+	
+	<select id="selectMemberTerritoryArrayList" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			SELECT
+				COMPANY_ID
+			FROM SALES_TERRITORY_ALIGN_MAP
+			WHERE 1=1
+		]]>
+			<if test="member_id_num != null and member_id_num != '' ">
+			AND MEMBER_ID_NUM = #{member_id_num}
+			</if>
+	</select>
+	
+	<insert id="insertMemberTerritory" parameterType="hashmap">
+		INSERT INTO SALES_TERRITORY_ALIGN_MAP
+		(
+			MEMBER_ID_NUM, 
+			COMPANY_ID, 
+			GRANTOR_MEMBER_ID_NUM,
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{member_id_num}, 
+			#{company_id}, 
+			#{creator_id},
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+		
+	</insert>
+	
+	<delete id="deleteMemberTerritory" parameterType="hashmap">
+		DELETE FROM SALES_TERRITORY_ALIGN_MAP 
+		WHERE ST_ALIGN_ID = #{st_align_id};
+	</delete>
+	<!-- 직원별 고객사 테레토리 관리 end -->
+	
+	
+	
+	<!-- 산업코드 관리 start -->
+	<insert id="insertIndustrySegment" parameterType="hashmap">
+		INSERT INTO CODE_INDUSTRY_SEGMENT
+		(
+			SEGMENT_CODE, 
+			SEGMENT_HAN_NAME, 
+			SEGMENT_ENG_NAME, 
+			USE_YN, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{SEGMENT_CODE}, 
+			#{SEGMENT_HAN_NAME}, 
+			#{SEGMENT_ENG_NAME}, 
+			'Y', 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<update id="updateIndustrySegment" parameterType="hashmap">
+		UPDATE CODE_INDUSTRY_SEGMENT
+		SET 
+			SEGMENT_CODE=#{SEGMENT_CODE},
+			SEGMENT_HAN_NAME=#{SEGMENT_HAN_NAME}, 
+			SEGMENT_ENG_NAME=#{SEGMENT_ENG_NAME}, 
+			USE_YN=#{USE_YN},  
+			SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND SEGMENT_CODE=#{SEGMENT_CODE};
+	</update>
+	<!-- 산업코드 관리 end -->
+	
+	<!-- 협력사분류 코드 관리 start -->
+	<select id="selectPartnerSegmentAll" parameterType="hashmap" resultType="hashmap">
+	  <![CDATA[
+		SELECT PARTNER_CODE, PARTNER_LEVEL, PARTNER_DETAIL, SYS_REGISTER_DATE, SYS_UPDATE_DATE, USE_YN, PARTNER_CODE AS PARTNER_CODE_NAME
+		FROM 
+			CODE_PARTNER_SEGMENT 
+		WHERE 1=1
+		]]>
+		<if test="PARTNER_CODE != null and PARTNER_CODE != '' ">
+		AND PARTNER_CODE = #{PARTNER_CODE}
+		</if>
+	</select>
+	
+	<insert id="insertPartnerSegment" parameterType="hashmap">
+		INSERT INTO CODE_PARTNER_SEGMENT
+		(
+			PARTNER_CODE, 
+			PARTNER_LEVEL, 
+			PARTNER_DETAIL, 
+			USE_YN, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{PARTNER_CODE_NAME}, 
+			#{PARTNER_LEVEL}, 
+			#{PARTNER_DETAIL}, 
+			'Y', 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<update id="updatePartnerSegment" parameterType="hashmap">
+		UPDATE CODE_PARTNER_SEGMENT
+		SET 
+			PARTNER_CODE=#{PARTNER_CODE_NAME},
+			PARTNER_LEVEL=#{PARTNER_LEVEL}, 
+			PARTNER_DETAIL=#{PARTNER_DETAIL}, 
+			USE_YN=#{USE_YN},  
+			SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND PARTNER_CODE=#{PARTNER_CODE};
+	</update>
+	
+	<delete id="deletePartnerSegment" parameterType="hashmap">
+		DELETE FROM CODE_PARTNER_SEGMENT
+		WHERE 1=1
+		AND PARTNER_CODE = #{PARTNER_CODE}
+	</delete>
+	<!-- 협력사분류 코드 관리 end -->
+	
+	<!-- 벤더솔루션분류 코드 관리 start -->
+	<select id="selectVendorSolutionAreaAll" parameterType="hashmap" resultType="hashmap">
+	  <![CDATA[
+		SELECT *		
+		FROM 
+			VENDOR_SOLUTION_AREA 
+		WHERE 1=1
+		]]>
+	</select>
+	
+	<insert id="insertVendorSolutionArea" parameterType="hashmap">
+		INSERT INTO VENDOR_SOLUTION_AREA
+		(
+			PRODUCT_VENDOR, 
+			PRODUCT_GROUP, 
+			SOLUTION_AREA, 
+			USE_YN, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{PRODUCT_VENDOR}, 
+			#{PRODUCT_GROUP}, 
+			#{SOLUTION_AREA}, 
+			'Y', 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<update id="updateVendorSolutionArea" parameterType="hashmap">
+		UPDATE VENDOR_SOLUTION_AREA
+		SET 
+			PRODUCT_VENDOR=#{PRODUCT_VENDOR},
+			PRODUCT_GROUP=#{PRODUCT_GROUP}, 
+			SOLUTION_AREA=#{SOLUTION_AREA}, 
+			USE_YN=#{USE_YN},  
+			SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND SOLUTION_ID=#{SOLUTION_ID};
+	</update>
+	<!-- 벤더솔루션분류 코드 관리 end -->
+	
+	
+	<!-- 제품분류 코드 관리 start -->
+	<select id="selectOurProductInfoAll" parameterType="hashmap" resultType="hashmap">
+	  <![CDATA[
+		SELECT *		
+		FROM 
+			OUR_PRODUCT_INFO 
+		WHERE 1=1
+		]]>
+		<if test="PRODUCT_NO != null and PRODUCT_NO != '' ">
+		AND PRODUCT_NO = #{PRODUCT_NO}
+		</if>
+		ORDER BY PRODUCT, PRODUCT_CODE
+	</select>
+	
+	<insert id="insertOurProductInfo" parameterType="hashmap">
+		INSERT INTO OUR_PRODUCT_INFO
+		(
+			PRODUCT_CODE,
+			PRODUCT,
+			PRODUCT_NAME, 
+			WORKS_CODE,
+			PRODUCT_STANDARD,
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE, 
+			USE_YN
+		)
+		VALUES
+		(
+			#{PRODUCT_CODE},
+			#{PRODUCT},
+			#{PRODUCT_NAME},
+			#{WORKS_CODE},
+			#{PRODUCT_STANDARD}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP,
+			'Y'
+		);
+	</insert>
+	
+	<update id="updateOurProductInfo" parameterType="hashmap">
+		UPDATE OUR_PRODUCT_INFO
+		SET 
+			PRODUCT_CODE		= #{PRODUCT_CODE},
+			PRODUCT				= #{PRODUCT},
+			PRODUCT_NAME		= #{PRODUCT_NAME},
+			WORKS_CODE			= #{WORKS_CODE},
+			PRODUCT_STANDARD	= #{PRODUCT_STANDARD},
+			USE_YN				= #{USE_YN},  
+			SYS_UPDATE_DATE		= CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND PRODUCT_NO			= #{PRODUCT_NO};
+	</update>
+	
+	<update id="deleteOurProductInfo" parameterType="hashmap">
+		DELETE FROM OUR_PRODUCT_INFO WHERE PRODUCT_NO = #{PRODUCT_NO}
+	</update>
+	<!-- 제품분류 코드 관리 end -->
+	
+	
+	<!-- 직원 Target -->
+	<select id="selectMemberTarget" parameterType="hashmap" resultType="hashmap">
+			SELECT	
+				OMI.MEMBER_ID_NUM,
+				OMI.HAN_NAME,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 1,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_1,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 1,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_1,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 2,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_2,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 2,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_2,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 3,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_3,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 3,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_3,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 4,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_4,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 4,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_4,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 5,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_5,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 5,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_5,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 6,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_6,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 6,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_6,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 7,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_7,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 7,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_7,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 8,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_8,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 8,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_8,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 9,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_9,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 9,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_9,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 10,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_10,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 10,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_10,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 11,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_11,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 11,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_11,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 12,ESPL.TARGET_REV_AMOUNT,0)) AS TARGET_REV_12,
+				SUM(IF(MONTH(ESPL.BASIS_DATE) = 12,ESPL.TARGET_GP_AMOUNT,0)) AS TARGET_GP_12
+		FROM
+			OUR_MEMBERS_INFO AS OMI
+			LEFT OUTER JOIN
+			ERP_SALES_PLAN  AS ESPL ON OMI.MEMBER_ID_NUM = ESPL.MEMBER_ID_NUM AND OMI.USE_YN = 'Y' AND YEAR(ESPL.BASIS_DATE) = #{searchTargetYear}
+		WHERE 1=1
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO') or global_role_code.contains('ROLE_ADMIN') or global_role_code.contains('ROLE_CRUD')">
+			</when>
+			<otherwise>
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</otherwise>
+		</choose>
+	
+		GROUP BY OMI.MEMBER_ID_NUM,OMI.HAN_NAME
+		ORDER BY OMI.MEMBER_ID_NUM
+	</select>
+	
+	
+	<insert id="updateMemberTarget" parameterType="hashmap">
+		<selectKey resultType="Integer" keyProperty="PERF_TARGET_ID" order="BEFORE">
+	     		SELECT IF(COUNT(PERF_TARGET_ID)=0,0,PERF_TARGET_ID) AS PERF_TARGET_ID FROM ERP_SALES_PLAN WHERE 1=1 AND MEMBER_ID_NUM = #{MEMBER_ID_NUM} AND YEAR(BASIS_DATE) = #{searchTargetYear} AND MONTH(BASIS_DATE) = #{MONTH}
+	    </selectKey>
+		<choose>
+	    	<when test="PERF_TARGET_ID != 0">
+	    		UPDATE ERP_SALES_PLAN
+				SET 
+					TARGET_REV_AMOUNT=#{TARGET_REV}, 
+					TARGET_GP_AMOUNT=#{TARGET_GP}, 
+					SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+				WHERE 1=1
+				AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+				AND YEAR(BASIS_DATE) = #{searchTargetYear} 
+				AND MONTH(BASIS_DATE) = #{MONTH} 
+				AND PERF_TARGET_ID = #{PERF_TARGET_ID}
+	    	</when>
+	    	<otherwise>
+	    		INSERT INTO ERP_SALES_PLAN
+				(
+					MEMBER_ID_NUM, 
+					BASIS_DATE, 
+					TARGET_REV_AMOUNT, 
+					TARGET_GP_AMOUNT, 
+					SYS_REGISTER_DATE, 
+					SYS_UPDATE_DATE
+				)
+				VALUES
+				(
+					#{MEMBER_ID_NUM}, 
+					CONCAT(#{searchTargetYear},'-',#{MONTH},'-',01), 
+					#{TARGET_REV}, 
+					#{TARGET_GP}, 
+					CURRENT_TIMESTAMP, 
+					CURRENT_TIMESTAMP
+				);
+	    	</otherwise>
+	    </choose>
+	</insert>
+	
+	<insert id="insertTeamInfo" parameterType="hashmap">
+		INSERT INTO OUR_TEAM_INFO
+		(
+			TEAM_NAME, 
+			TEAM_LEADER, 
+			USE_YN, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{TEAM_NAME}, 
+			#{TEAM_LEADER_NO}, 
+			#{USE_YN}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<update id="updateTeamInfo" parameterType="hashmap">
+		UPDATE OUR_TEAM_INFO
+		SET 
+			TEAM_NAME=#{TEAM_NAME}, 
+			TEAM_LEADER=#{TEAM_LEADER_NO}, 
+			USE_YN=#{USE_YN}, 
+			SYS_UPDATE_DATE=CURRENT_TIMESTAMP 
+		WHERE 1=1
+		AND TEAM_NO = #{TEAM_NO}
+	</update>
+	
+	
+</mapper>

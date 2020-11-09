@@ -1,0 +1,25 @@
+							<tr>
+							  <td>
+							  	<input type="checkbox" name="sales_product_mainChk" value="0"/>
+							  </td>
+		                      <td>
+		                      		<ul class="flexdatalist-multiple" style="border: 1px solid rgb(204, 204, 204); border-radius: 4px; background-color: rgb(255, 255, 255); padding:none;">
+		                                <li class="input-container flexdatalist-multiple-value pos-rel" name="liSalesProductSeach" style="width: 100%;">
+		                                <input type="text" class="form-control" name="textSalesProductSeach" placeholder="품목코드 또는 품목명을 검색해 주세요." autocomplete="off" style="width: 100%;" auto-bind="0">
+		                                <input type="hidden" name="hiddenSalesProductCode" value=""/>
+		                            	<input type="hidden" name="hiddenSalesWorksCode" value=""/>
+		                                <div class="autocomplete-suggestions "></div></li>
+		                            </ul>
+							  </td>
+		                      <td><span name="spanSales"></span></td>
+		                      <td>
+								<input type="text" style="text-align: right;" onclick="oppProduct.zero(this);" onblur="oppProduct.blur(this);oppProduct.salesCount(this);" onkeyup="commonCheck.onlyInteger(this);" class="form-control" name="sales_product_count" value="0" maxlength="5">		                      
+		                      </td>
+		                      <td>
+		                      	<input type="text" style="text-align: right;" onclick="oppProduct.zero(this);" onblur="oppProduct.blur(this);oppProduct.salesPrice(this);" onkeyup="commonCheck.onlyRealNumber(this);" class="form-control" name="sales_product_price" value="0">
+		                      </td>
+		                      <td>
+		                      	<input type="text" style="text-align: right;" onclick="oppProduct.zero(this);" onblur="oppProduct.blur(this);oppProduct.salesTotal(this);" onkeyup="commonCheck.onlyRealNumber(this);" class="form-control" name="sales_product_total" value="0">
+		                      </td>
+		                      <td><a href="javascript:void(0);" onClick="oppProduct.salesDel(this);"><i class="fa fa-trash-o fa-lg"></i></a></td>
+		                    </tr>

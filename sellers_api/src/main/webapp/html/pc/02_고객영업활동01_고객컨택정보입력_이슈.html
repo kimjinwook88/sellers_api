@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>고객컨택정보입력 - 이슈</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+    <nav class="navbar-default navbar-static-side" role="navigation">
+        <div class="sidebar-collapse">
+            <ul class="nav metismenu" id="side-menu">
+                <li class="nav-header ta-c">
+                    <div class="dropdown profile-element">
+                        <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                        <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                        <a href="#">
+                            <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                        </a>
+                    </div>
+                    <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                        디유넷
+                    </div>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">고객사정보</a></li>
+                        <li><a href="#">고객개인정보</a></li>
+                        <li><a href="#">고객컨택내용조회</a></li>
+                    </ul>
+                </li>
+                <li class="active">
+                    <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li class="active"><a href="#">고객컨택내용입력</a></li>
+                        <li><a href="#">영업기회</a></li>
+                        <li><a href="#">잠재영업기회</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">고객이슈</a></li>
+                        <li><a href="#">고객만족도</a></li>
+                        <li><a href="#">서비스프로젝트</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">파트너사협업</a></li>
+                        <li><a href="#">파트너사정보</a></li>
+                        <li><a href="#">파트너사개인정보</a></li>
+                    </ul>
+                </li>
+                <li class="">
+                    <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li class=""><a href="#">성과관리</a></li>
+                        <li><a href="#">생산성</a></li>
+                        <li><a href="#">제안서정보</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">회사/부문별전략</a></li>
+                        <li><a href="#">고객별전략</a></li>
+                        <li><a href="#">전략프로젝트</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span><span class="fa arrow"></span></a>
+                    <ul class="nav nav-second-level collapse">
+                        <li><a href="#">캘린더</a></li>
+                        <li><a href="#">나의 할 일</a></li>
+                    </ul>
+                </li>
+                <li class="special_link">
+                    <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                </li>
+            </ul>
+            <div class="product-logo text-center">
+                <img src="../../images/pc/product_logo.png" alt=""/>
+                <span>Copyright Seller’s Company © 2016</span>
+            </div>
+        </div>
+    </nav>
+
+        <div id="page-wrapper" class="white-bg">
+        <div class="row border-bottom">
+        <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+           
+        </div>
+            <ul class="nav navbar-top-links navbar-right">
+                <li>
+                    <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                </li>
+                <li class="">
+                    <a class=" count-info" data-toggle="" href="#">
+                        <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class=" count-info" data-toggle="" href="#">
+                        <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                    </a>
+                </li>
+
+
+                <li>
+                    <a href="#">
+                        <i class="fa fa-sign-out"></i> 로그아웃
+                    </a>
+                </li>
+            </ul>
+
+        </nav>
+        </div>
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-4">
+                    <h2>고객컨택내용 입력</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a>고객영업활동</a>
+                        </li>
+                        <li class="active">
+                            <strong>고객컨택내용 입력</strong>
+                        </li>
+                    </ol>
+                </div>
+                <div class="col-sm-8">
+                    <div class="time-update">
+                        <span class="text-muted small pull-right">최근 업데이트: <i class="fa fa-clock-o"></i> 2:10 pm - 12.06.2014</span>
+                    </div>
+                    <div class="search-common">
+                        <div class="input-default" style="margin:0;">
+                            <span class="input-group-btn">
+                                    <a href="#" class="btn btn-search-option"><i class="fa fa-search"></i> 검색</a>
+                            </span>
+
+                            <div class="search-detail off">
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>고객명</label> <select class="form-control" name="account">
+                                        <option>고객명을 선택해주세요</option>
+                                        <option>김고객</option>
+                                        <option>홍길동</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>회사명</label> <select class="form-control" name="account">
+                                        <option>회사를 선택해주세요</option>
+                                        <option>삼성</option>
+                                        <option>LG</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">메일주소</label>
+                                    <div class="input-group" style="width:100%;" ><input type="text" placeholder="" class="input form-control"></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>작성자</label> <select class="form-control" name="account">
+                                        <option>작성자를 선택해주세요</option>
+                                        <option>관리자</option>
+                                        <option>영업사원1</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">최종변경일</label>
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="03/04/2016">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 m-b">                                    
+                                    <label class="control-label" for="date_modified">기간설정</label>
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="시작일">
+                                        </div>
+                                    </div>
+                                
+                                    <div style="padding:0px 5px; text-align:center; font-size:18px;">~</div>                                 
+                                
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="종료일">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">전체</label>
+                                    <div class="input-group" style="width:100%;" ><input type="text" placeholder="" class="input form-control"></div>
+                                </div>
+                                <div class="col-sm-12 ag_r">
+                                    <label for="result-in-search" class="mg-r10"> <input type="checkbox" id="result-in-search" class="input v-m" /> 결과내 검색</label>
+                                    <button type="button" class="btn btn-w-m btn-primary btn-seller"><i class="fa fa-search"></i> 상세검색</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        <div class="wrapper wrapper-content  animated fadeInRight">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="ibox">
+                        <div class="ibox-content border_n">
+                            <div class="clear">
+                                <div class="pos-rel">
+
+                                    <div class="mg-b30">
+                                        <ul class="nav nav-tabs pgtop-tabs">
+                                            <li class=""><a data-toggle="tab" href="#tab2-1">컨텍정보</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab2-2">잠재영업기회</a></li>
+                                            <li class="active"><a data-toggle="tab" href="#tab2-2">이슈</a></li>
+                                        </ul>
+                                    </div>
+
+                                    
+                                    <div class="custom-info-grid">
+
+                                        <div class="custom-info-grid-l">
+                                            
+                                            <div class="ibox-content border_n">
+                                                <form method="get" class="form-horizontal">
+
+                                                    <div class="form-group"><label class="col-sm-4 control-label">고객사</label>
+                                                        <div class="col-sm-8 pos-rel">
+                                                            <input type="text" placeholder="고객사 검색" class="form-control" />
+                                                            <!-- 관련 고객사를 선택하면 위의 input이 사라지고 아래의  "company-search"이 나타납니다. -->
+                                                            <!-- 고객사를 삭제하면 input이 노촐되고,  "company-search"은 사라집니다. -->
+                                                            <div class="company-search off">
+                                                                <div class="company-current">
+                                                                    <span>삼성증권<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="autocomplete-suggestions off">
+                                                                <ul class="word_list">
+                                                                    <li>
+                                                                        <a href="#">삼성</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성물산</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성전자</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성건설</a>
+                                                                    </li>
+                                                                </ul>
+                                                                <div class="word_blank">
+                                                                    <span class="ment">등록된 고객사가 아닙니다.</span>
+                                                                    <a href="#" class="">고객사 등록</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="hr-line-dashed"></div>
+
+                                                    <div class="form-group"><label class="col-sm-4 control-label">고객사 ID</label>
+                                                        <div class="col-sm-8">
+                                                            <input type="text" disabled class="form-control" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="hr-line-dashed"></div>
+
+                                                    <div class="form-group"><label class="col-sm-4 control-label">고객명</label>
+                                                        <div class="col-sm-8 pos-rel">
+                                                            <input type="text" placeholder="고객명 검색" class="form-control" />
+                                                            <!-- 관련 고객사를 선택하면 위의 input이 사라지고 아래의  "company-search"이 나타납니다. -->
+                                                            <!-- 고객사를 삭제하면 input이 노촐되고,  "company-search"은 사라집니다. -->
+                                                            <div class="company-search off">
+                                                                <div class="company-current">
+                                                                    <span>이진영<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="autocomplete-suggestions off">
+                                                                <ul class="word_list">
+                                                                    <li>
+                                                                        <a href="#">삼성</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성물산</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성전자</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성건설</a>
+                                                                    </li>
+                                                                </ul>
+                                                                <div class="word_blank">
+                                                                    <span class="ment">등록된 고객사가 아닙니다.</span>
+                                                                    <a href="#" class="">고객사 등록</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="hr-line-dashed"></div>
+
+                                                    <div class="form-group"><label class="col-sm-4 control-label">고객직급</label>
+                                                        <div class="col-sm-8"><input type="text" class="form-control" /></div>
+                                                    </div>
+
+                                                    <div class="hr-line-dashed"></div>
+
+                                                    <div class="form-group"><label class="col-sm-4 control-label">영업대표</label>
+                                                        <div class="col-sm-8 pos-rel">
+                                                            <input type="text" placeholder="영업대표 검색" class="form-control" />
+                                                            <!-- 관련 고객사를 선택하면 위의 input이 사라지고 아래의  "company-search"이 나타납니다. -->
+                                                            <!-- 고객사를 삭제하면 input이 노촐되고,  "company-search"은 사라집니다. -->
+                                                            <div class="company-search off">
+                                                                <div class="company-current">
+                                                                    <span>이진영<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="autocomplete-suggestions off">
+                                                                <ul class="word_list">
+                                                                    <li>
+                                                                        <a href="#">삼성</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성물산</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성전자</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="#">삼성건설</a>
+                                                                    </li>
+                                                                </ul>
+                                                                <div class="word_blank">
+                                                                    <span class="ment">등록된 고객사가 아닙니다.</span>
+                                                                    <a href="#" class="">고객사 등록</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>                                                    
+                                                </form>
+                                            </div>
+
+                                        </div>
+                                        
+                                        <div class="custom-info-grid-r">
+                                            
+                                            <div class="ibox-content border_n">
+                                                <div class="col-md-12 col-lg-12">
+
+                                                    <form method="get" class="form-horizontal">
+
+                                                        <div class="form-group"><label class="col-lg-2 control-label">이슈 제목</label>
+                                                            <div class="col-lg-10"><input type="text" class="form-control" /></div>
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div>
+
+                                                        <div class="form-group"><label class="col-lg-2 control-label">이슈내용</label>
+                                                            <div class="col-lg-10"><textarea class="pop-textarea-input" rows="5"></textarea></div>
+                                                        </div>    
+
+                                                        <div class="hr-line-dashed"></div>
+
+                                                        <div class="form-group"><label class="col-lg-2 control-label">이슈제기자</label>
+                                                            <div class="col-lg-4"><input type="text" class="form-control" /></div>
+
+                                                            <label class="col-lg-2 control-label" for="date_modified">이슈발생일자</label>
+                                                            <div class="col-lg-4">
+                                                                <div id="data_1">
+                                                                    <div class="input-group date">
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="06/30/2016">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div>
+
+                                                        <div class="form-group"><label class="col-lg-2 control-label">이슈종류</label>
+                                                            <div class="col-lg-4">
+                                                                <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                                    <select class="form-control" name="account">
+                                                                    <option>항목을 선택하세요</option>
+                                                                    <option>제품</option>
+                                                                    <option>서비스</option>
+                                                                    <option>지원</option>
+                                                                </select></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div>
+
+                                                    </form>
+                                                </div>
+
+                                                <div class="col-md-12 col-12-6">
+
+                                                    <form method="get" class="form-horizontal">
+                                                        <div class="form-group"><label class="col-lg-2 control-label">해결책임자</label>
+                                                            <div class="col-lg-4"><input type="text" class="form-control" /></div>
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div>
+
+                                                        <div class="form-group">
+                                                            <label class="col-lg-2 control-label" for="date_modified">해결목표기한</label>
+                                                            <div class="col-lg-4">
+                                                                <div id="data_1">
+                                                                    <div class="input-group date">
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="06/30/2016">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <label class="col-lg-2 control-label" for="date_modified">이슈해결일자</label>
+
+                                                            <div class="col-lg-4">
+                                                                <div id="data_1">
+                                                                    <div class="input-group date">
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="06/30/2016">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div>
+
+                                                        <div class="form-group"><label class="col-lg-2 control-label">해결계획(Plan)</label>
+                                                            <div class="col-lg-10"><textarea class="pop-textarea-input" rows="5"></textarea></div>
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div>                                                         
+
+                                                        <div class="form-group"><label class="col-lg-2 control-label"> 이슈해결(증빙내용)</label>
+                                                            <div class="col-lg-10"><textarea class="pop-textarea-input" rows="5"></textarea></div>
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div> 
+
+                                                        <div class="form-group"><label class="col-lg-2 control-label">이슈 상태</label>
+                                                            <div class="col-lg-4">
+                                                                <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                                    <select class="form-control" name="account">
+                                                                    <option>상태를 선택하세요</option>
+                                                                    <option>발생</option>
+                                                                    <option>진행중</option>
+                                                                    <option>완료</option>
+                                                                </select></div>
+                                                            </div>
+                                                            <label class="col-lg-2 control-label">이슈해결 증빙여부</label>
+                                                            <div class="col-lg-4">
+                                                                <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                                    <select class="form-control" name="account">
+                                                                    <option>증빙 여부를 선택하세요</option>
+                                                                    <option>Yes</option>
+                                                                    <option>No</option>
+                                                                </select></div>
+                                                            </div>                                                
+                                                        </div>
+
+                                                        <div class="hr-line-dashed"></div>                                                             
+
+                                                        <div class="form-group"><label class="col-lg-2 control-label">파일첨부</label>
+                                                            <div class="col-lg-10">
+                                                                <div class="input-default pop-file">
+                                                                    <div class="file-dragdrap-area">
+                                                                        <div class="fileUpload btn btn-seller">
+                                                                            <span>파일찾기</span>
+                                                                            <input type="file" class="upload" />
+                                                                        </div>
+                                                                        <div class="file-in-list">
+                                                                            <!-- 선택된 파일이 없는 경우 아래 멘트 노출 -->
+                                                                            <span class="blank-ment">선택된 파일이 없습니다</span>
+
+                                                                            <!-- 선택된 파일이 있으면 아래 리스트 노촐되고, 위 "blank-ment"는 hidden 처리함 -->
+                                                                            <!-- <span><a href="#"><i class="fa fa-file-powerpoint-o fa-lg"></i> 영업1팀1분기전략사업제안서.ppt</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                                            <span><a href="#"><i class="fa fa-file-word-o fa-lg"></i> 영업1팀1분기전략사업제안서.word</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                                            <span><a href="#"><i class="fa fa-file-pdf-o fa-lg"></i> 영업1팀1분기전략사업제안서.pdf</a> <a href="#"><i class="fa fa-times-circle"></i></a></span> -->
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                </div>
+                                                            </div>
+                                                        </div>                                                    
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="cboth col-lg-12">
+                                        <div class="hr-line-bottom"></div>
+                                        <p class="text-center">
+                                            <button type="button" class="btn btn-outline btn-seller-outline">삭제하기</button>
+                                            <button type="button" class="btn btn-w-m btn-seller">저장하기</button>
+                                        </p>
+                                    </div>
+
+                                </div>                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+        </div>
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

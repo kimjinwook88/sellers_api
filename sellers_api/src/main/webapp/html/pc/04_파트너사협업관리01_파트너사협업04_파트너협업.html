@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>파트너 협업</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header ta-c">
+                        <div class="dropdown profile-element">
+                            <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                            <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                            <a href="#">
+                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                            </a>
+                        </div>
+                        <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                            디유넷
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객사정보</a></li>
+                            <li><a href="#">고객개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객컨택내용</a></li>
+                            <li><a href="#">영업기회</a></li>
+                            <li><a href="#">잠재영업기회</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객이슈</a></li>
+                            <li><a href="#">고객만족도</a></li>
+                            <li><a href="#">서비스프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li class="active">
+                        <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class="active"><a href="#">파트너사협업</a></li>
+                            <li><a href="#">파트너사정보</a></li>
+                            <li><a href="#">파트너사개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                        <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class=""><a href="#">성과관리</a></li>
+                            <li><a href="#">생산성</a></li>
+                            <li><a href="#">제안서정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">회사/부문별전략</a></li>
+                            <li><a href="#">고객별전략</a></li>
+                            <li><a href="#">전략프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">캘린더</a></li>
+                            <li><a href="#">나의 할 일</a></li>
+                        </ul>
+                    </li>
+                    <li class="special_link">
+                        <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                    </li>
+                </ul>
+                <div class="product-logo text-center">
+                    <img src="../../images/pc/product_logo.png" alt=""/>
+                    <span>Copyright Seller’s Company © 2016</span>
+                </div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="white-bg">
+        <div class="row border-bottom">
+        <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+           
+        </div>
+            <ul class="nav navbar-top-links navbar-right">
+                <li>
+                    <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                </li>
+                <li class="">
+                    <a class=" count-info" data-toggle="" href="#">
+                        <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class=" count-info" data-toggle="" href="#">
+                        <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                    </a>
+                </li>
+
+
+                <li>
+                    <a href="#">
+                        <i class="fa fa-sign-out"></i> 로그아웃
+                    </a>
+                </li>
+            </ul>
+
+        </nav>
+        </div>
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-12">
+                    <h2>파트너 협업</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a>영업활동</a>
+                        </li>
+                        <li>
+                            <a>협력회사 관리</a>
+                        </li>
+                        <li class="active">
+                            <strong>파트너 협업</strong>
+                        </li>
+                    </ol>
+                </div>
+                <div class="col-sm-8 off">
+                    <div class="time-update">
+                        <span class="text-muted small pull-right">최근 업데이트: <i class="fa fa-clock-o"></i> 2:10 pm - 12.06.2014</span>
+                    </div>                    
+                </div>
+            </div>
+        
+        <div class="wrapper wrapper-content  animated fadeInRight">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="ibox">
+                        <div class="ibox-content border_n">
+                            <div class="clear">
+                                <div class="basic-tab pd-b20">
+                                    <ul>
+                                        <li><a href="#">1.파트너 현황</a></li>
+                                        <li><a href="#">2.Recruitment</a></li>
+                                        <li><a href="#">3.파트너 스킬 및 교육</a></li>
+                                        <li class="active"><a href="#">4.파트너 협업</a></li>
+                                        <li><a href="#">5.협력사 비지니스 현황</a></li>
+                                    </ul>
+                                </div>
+
+                                <h3>파트너 협업</h3>
+
+                                <div class="pos-rel">
+                                    <div class="func-top-left fl_l">
+                                        <div class="table-menu-wrapper2 fl_l mg-r10 mg-t7 m-b">
+                                            <a href="#" class="table-menu-btn"><i class="fa fa-th-list"></i> 항목보기 설정</a>
+                                            <div class="table-menu table-menu-hidden">
+                                                <ul>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-3" value="co-3" checked="checked"> <label for="toggle-col-3">영업대표</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-4" value="co-4" checked="checked"> <label for="toggle-col-4">BP직원</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-5" value="co-5" checked="checked"> <label for="toggle-col-5">Cadence</label></li>
+                                                    <li><input type="checkbox" name="toggle-cols" id="toggle-col-6" value="co-6" checked="checked"> <label for="toggle-col-6">월별체크</label></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="table-sel-view fl_l">
+                                            <div class="selgrid selgrid1 mg-r5">
+                                                <select class="form-control m-b" name="account">
+                                                    <option>회계년도 선택</option>
+                                                    <option>2016년</option>
+                                                    <option>2015년</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="fl_r pd-b20">
+                                        <button type="button" class="btn btn-w-m btn-seller">신규등록</button>
+                                    </div>
+
+                                    <table id="tech-companies" class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th id="co-0">파트너사</th>
+                                                <th id="co-1">사업부</th>
+                                                <th id="co-2">영업대표</th>
+                                                <th id="co-3">BP직원</th>
+                                                <th id="co-4">주기</th>
+                                                <th id="co-5">type</th>
+                                                <th id="co-6">1월</th>
+                                                <th id="co-6">2월</th>
+                                                <th id="co-6">3월</th>
+                                                <th id="co-6">4월</th>
+                                                <th id="co-6">5월</th>
+                                                <th id="co-6">6월</th>
+                                                <th id="co-6">7월</th>
+                                                <th id="co-6">8월</th>
+                                                <th id="co-6">9월</th>
+                                                <th id="co-6">10월</th>
+                                                <th id="co-6">11월</th>
+                                                <th id="co-6">12월</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td rowspan="3" headers="co-0">삼성sds</td>                                            
+                                            <td headers="co-1">s/w사업부</td>
+                                            <td headers="co-2">김길동</td>
+                                            <td headers="co-3">홍나경</td>
+                                            <td headers="co-4">Weekly</td>
+                                            <td headers="co-5">Tell</td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">Month</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">Weekoy</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td rowspan="3" headers="co-0">LG-CNS</td>                                            
+                                            <td headers="co-1">s/w사업부</td>
+                                            <td headers="co-2">김길동</td>
+                                            <td headers="co-3">홍나경</td>
+                                            <td headers="co-4">Weekly</td>
+                                            <td headers="co-5">Tell</td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>                                            
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">Month</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">Weekoy</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check_no.png" alt=""/>
+                                            </td>
+                                            <td headers="co-6">
+                                                <img src="../../images/pc/icon_check.png" alt=""/>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div><br/><br/><br/><br/></div>
+
+                                    <table id="tech-companies" class="table table-bordered off">
+                                        <thead>
+                                        <tr>
+                                            <th rowspan="2" id="co-0">No</th>
+                                            <th rowspan="2" id="co-1">파트너사명</th>
+                                            <th rowspan="2" id="co-2">사업부명</th>
+                                            <th rowspan="2" id="co-3">영업대표</th>
+                                            <th rowspan="2" id="co-4">BP직원</th>
+                                            <th colspan="2" id="co-5">cadence</th>
+                                            <th colspan="5" id="co-6">1월</th>
+                                            <th colspan="4" id="co-6">2월</th>
+                                            <th colspan="5" id="co-6">3월</th>
+                                        </tr>
+                                        <tr>
+                                            <th id="co-5">주기</th>
+                                            <th id="co-5">type</th>
+                                            <th id="co-6">1주</th>
+                                            <th id="co-6">2주</th>
+                                            <th id="co-6">3주</th>
+                                            <th id="co-6">4주</th>
+                                            <th id="co-6">5주</th>
+                                            <th id="co-6">1주</th>
+                                            <th id="co-6">2주</th>
+                                            <th id="co-6">3주</th>
+                                            <th id="co-6">4주</th>
+                                            <th id="co-6">1주</th>
+                                            <th id="co-6">2주</th>
+                                            <th id="co-6">3주</th>
+                                            <th id="co-6">4주</th>
+                                            <th id="co-6">5주</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td rowspan="3" headers="co-0">15</td>                                            
+                                            <td rowspan="3" headers="co-1">삼성sds</td>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">주간</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                        </tr>
+                                        <tr data-toggle="modal" data-target="#myModal1" style="cursor:pointer;">
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">월간</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">월간</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                        </tr>
+                                        <tr>
+                                            <td rowspan="3" headers="co-0">14</td>                                            
+                                            <td rowspan="3" headers="co-1">LG-CNS</td>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">월간</td>
+                                            <td headers="co-5">Mail</td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">주간</td>
+                                            <td headers="co-5">Mail</td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">주간</td>
+                                            <td headers="co-5">Tell</td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                        </tr>
+                                        <tr>
+                                            <td rowspan="3" headers="co-0">13</td>                                            
+                                            <td rowspan="3" headers="co-1">대우정보</td>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">주간</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">월간</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                        </tr>
+                                        <tr>
+                                            <td headers="co-2">s/w사업부</td>
+                                            <td headers="co-3">김길동</td>
+                                            <td headers="co-4">홍나경</td>
+                                            <td headers="co-5">주간</td>
+                                            <td headers="co-5">Face</td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check_no.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                            <td headers="co-6"><img src="../../images/pc/icon_check.png" alt=""/></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+                                </div><!-- 
+                                <p class="text-right">
+                                    <button type="button" class="btn btn-outline btn-primary btn-seller-outline">선택 삭제</button>
+                                    <button type="button" class="btn btn-w-m btn-primary btn-seller">신듀등록</button>
+                                </p> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+        </div>
+
+<!-- 상세보기 -->
+<div class="modal inmodal fade" id="myModal1" tabindex="-1" role="dialog"  aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Cadence History 관리</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox">
+                            <div class="ibox-content border_n ofHidden"><!-- ofHidden 는 반드시 넣어주세요 -->
+                                <div class="col-lg-12 m-b">
+                                    <div class="form-group">
+                                        <div class="ag_r">작성자 : 홍길동 / 작성일 : 2016-05-10</div>
+                                    </div>
+                                </div>
+
+                                <form method="get" class="form-horizontal">
+                                    <div class="form-group"><label class="col-sm-2 control-label">파트너사</label>
+                                        <div class="col-sm-4"><input type="text" class="form-control" /></div>
+                                        <label class="col-sm-2 control-label">사업부서</label>
+                                        <div class="col-sm-4"><input type="text" class="form-control" /></div>
+                                    </div>
+                                    <div class="hr-line-dashed"></div>                                                  
+                                    <div class="form-group"><label class="col-sm-2 control-label">영업대표</label>
+                                        <div class="col-sm-4"><input type="text" class="form-control" /></div>
+                                        <label class="col-sm-2 control-label">BP직원</label>
+                                        <div class="col-sm-4"><input type="text" class="form-control" /></div>
+                                    </div>
+                                    <div class="hr-line-dashed"></div>                                                  
+                                    <div class="form-group"><label class="col-sm-2 control-label">Cadence 주기</label>
+                                        <div class="col-sm-4">
+                                            <label class="" style="margin-right:30px"> <input type="radio" value="option1" id="optionsRadios1" name="optionsRadios"> <span class="va-m">Monthly</span></label>
+                                            <label> <input type="radio" checked="" value="option2" id="optionsRadios2" name="optionsRadios"> <span class="va-m">Weekly</span></label>
+                                        </div>
+                                        <label class="col-sm-2 control-label">Cadence Type</label>
+                                        <div class="col-sm-4">
+                                            <label class="" style="margin-right:20px"> <input type="radio" checked="" id="optionsRadios3" name="optionsRadios2"> <span class="va-m">Face</span></label>
+                                            <label  style="margin-right:20px"> <input type="radio" id="optionsRadios4" name="optionsRadios2"> <span class="va-m">Telephone</span></label>
+                                            <label> <input type="radio" id="optionsRadios5" name="optionsRadios2"> <span class="va-m">email</span></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="hr-line-bottom"></div>                                                                                    
+
+                                    <div class="form-group">
+                                        <p class="text-center mg-b30">
+                                            <button type="button" class="btn btn-w-m btn-seller mg-r10">기본정보 저장</button>
+                                        </p>
+                                    </div>
+                                </form>
+
+                                <!-- TabMenu -->
+                                <div class="tab-area">
+
+                                    <!-- tab-menu -->
+                                    <ul class="tabmenu-type">
+                                        <li><a href="#" class="sel">Cadence History 업데이트</a></li>
+                                        <li><a href="#" class="">Cadence 신규등록</a></li>
+                                    </ul>
+                                    <!--// tab-menu -->
+
+                                    <!-- tab-cont -->
+
+                                    <!-- Cadence History 업데이트 -->
+                                    <div class="sub_cont scont1 ">
+                                        <!-- <h3>Cadence History 업데이트</h3> -->
+
+                                        <!-- <div class="hr-line-bottom"></div> -->
+
+                                        <div class="form-group"><label class="col-sm-12 control-label pd-t10">Cadence 이력</label>
+                                            <div class="col-sm-4">
+                                                <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                    <select class="form-control cadence-history-list">
+                                                    <option>2016년 07월 25일</option>
+                                                    <option>2016년 07월 15일</option>
+                                                    <option>2016년 07월 05일</option>
+                                                    <option>2016년 06월 25일</option>
+                                                    <option>2016년 06월 15일</option>
+                                                    <option>2016년 06월 05일</option>
+                                                    <option>2016년 05월 25일</option>
+                                                    <option>2016년 05월 15일</option>
+                                                </select></div>
+                                            </div>       
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+                                        
+                                        <div class="form-group"><label class="col-sm-12 control-label pd-t10">회의내용</label>
+                                            <div class="col-sm-12"><textarea class="pop-textarea-input" rows="5"></textarea></div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group"><label class="col-sm-12 control-label pd-t10">Action Plan</label>
+                                            <div class="col-sm-12">
+                                            <table id="" class="table table-bordered">
+                                                <colgroup>
+                                                    <col width=""/>
+                                                    <col width="15%"/>
+                                                    <col width="15%"/>
+                                                    <col width="15%"/>
+                                                    <col width=""/>
+                                                </colgroup>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Action</th>
+                                                        <th>담당자</th>
+                                                        <th>해결목표일</th>
+                                                        <th>실제완료일</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>일정/예산</td>
+                                                        <td>김정훈</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>2016-05-10</td>
+                                                        <td class="cell-status cell-statusColor-yellow"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>일정/예산</td>
+                                                        <td>김정훈</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>2016-05-10</td>
+                                                        <td class="cell-status cell-statusColor-green"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>일정/예산</td>
+                                                        <td>김정훈</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>2016-05-10</td>
+                                                        <td class="cell-status cell-statusColor-green"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>일정/예산</td>
+                                                        <td>김정훈</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>2016-05-10</td>
+                                                        <td class="cell-status cell-statusColor-green"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <p class="text-center pd-t10">
+                                                <a href="" class="btn-row-add" name="buttonSaleAddRow" onclick="">+ Action Plan 추가</a>
+                                            </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group"><!-- <label class="col-sm-2 control-label pd-t10">회의록</label> -->
+                                            <div class="col-sm-12">
+                                                <div class="input-default pop-file">
+                                                    <div class="file-dragdrap-area">
+                                                        <div class="fileUpload btn btn-gray mg-no">
+                                                            <span>회의록 첨부</span>
+                                                            <input type="file" class="upload" />
+                                                        </div>
+                                                        <div class="file-in-list">
+                                                            <!-- 선택된 파일이 없는 경우 아래 멘트 노출 -->
+                                                            <!-- <span class="blank-ment">선택된 파일이 없습니다</span> -->
+
+                                                            <!-- 선택된 파일이 있으면 아래 리스트 노촐되고, 위 "blank-ment"는 hidden 처리함 -->
+                                                            <span><a href="#"><i class="fa fa-file-pdf-o fa-lg"></i> 20160725회의록.doc</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="text-center pd-t20">
+                                            <button type="button" class="btn btn-outline btn-seller-outline mg-r10">Cadence 변경내용 저장</button>
+                                            <button type="button" class="btn btn-w-m btn-seller btn-cadence-app">Cadence 신규등록</button>
+                                        </p>
+                                        
+                                    </div>
+                                    <!--// Cadence History 업데이트 -->
+
+
+                                    <!-- Cadence 신규등록 -->
+                                    <div class="sub_cont scont2 off">
+                                        <!-- <h3>Cadence 신규등록</h3>
+
+                                        <div class="hr-line-bottom"></div> -->
+
+                                        <div class="form-group"><label class="col-sm-12 control-label pd-t10">실행일자</label>
+                                            <div class="col-sm-4">
+                                                <div id="data_1">
+                                                    <div class="input-group date">
+                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="03/04/2016">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group"><label class="col-sm-12 control-label pd-t10">실행내용</label>
+                                            <div class="col-sm-12"><textarea class="pop-textarea-input" rows="6"></textarea></div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group"><label class="col-sm-12 control-label pd-t10 ">Action Plan</label>
+                                            <div class="col-sm-12">
+                                            <table id="" class="table table-bordered">
+                                                <colgroup>
+                                                    <col width=""/>
+                                                    <col width="15%"/>
+                                                    <col width="15%"/>
+                                                    <col width="15%"/>
+                                                    <col width=""/>
+                                                </colgroup>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Action</th>
+                                                        <th>담당자</th>
+                                                        <th>해결목표일</th>
+                                                        <th>실제완료일</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>일정/예산</td>
+                                                        <td>김정훈</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>2016-05-10</td>
+                                                        <td class="cell-status cell-statusColor-yellow"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>일정/예산</td>
+                                                        <td>김정훈</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>2016-05-10</td>
+                                                        <td class="cell-status cell-statusColor-green"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>일정/예산</td>
+                                                        <td>김정훈</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>2016-05-10</td>
+                                                        <td class="cell-status cell-statusColor-green"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>일정/예산</td>
+                                                        <td>김정훈</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>2016-05-10</td>
+                                                        <td class="cell-status cell-statusColor-green"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <p class="text-center pd-t10">
+                                                <a href="" class="btn-row-add" name="buttonSaleAddRow" onclick="">+ Action Plan 추가</a>
+                                            </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group"><label class="col-sm-2 control-label pd-t10">회의록</label>
+                                            <div class="col-sm-10 mg-b8">
+                                                <div class="input-default pop-file">
+                                                    <div class="file-dragdrap-area">
+                                                        <div class="fileUpload btn btn-gray mg-no">
+                                                            <span>파일첨부</span>
+                                                            <input type="file" class="upload" />
+                                                        </div>
+                                                        <div class="file-in-list">
+                                                            <!-- 선택된 파일이 없는 경우 아래 멘트 노출 -->
+                                                            <!-- <span class="blank-ment">선택된 파일이 없습니다</span> -->
+
+                                                            <!-- 선택된 파일이 있으면 아래 리스트 노촐되고, 위 "blank-ment"는 hidden 처리함 -->
+                                                            <span><a href="#"><i class="fa fa-file-pdf-o fa-lg"></i> 20160725회의록.doc</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="text-center pd-t20">
+                                            <button type="button" class="btn btn-w-m btn-seller btn-cadence-app">Cadence 저장</button>
+                                        </p>
+                                    </div>
+                                    <!--// Cadence 신규등록 -->
+
+                                   
+                                    <!--// tab-cont -->
+
+                                </div>
+                                <!--// TabMenu -->
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+            </div> -->
+        </div>
+    </div>
+</div>
+<!-- // 상세보기 -->
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<script src="/js/pc/moment/moment.js"></script>
+<script type="text/javascript">
+
+var currentDate = moment().format('YYYYMMDDHHmm');
+
+if(currentDate > "202002191259"){
+	location.href = location.origin+"/THE_Sellers.apk";
+}else{
+	alert("APK 파일 준비중 입니다.");
+	history.back();
+}
+</script>

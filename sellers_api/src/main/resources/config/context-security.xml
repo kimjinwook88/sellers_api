@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+  xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security.xsd">
+ 
+  <http pattern="/font-awesome/**" security="none"/> 
+  <http pattern="/fonts/**" security="none"/>
+  <http pattern="/images/**" security="none"/>
+  <http pattern="/other/**" security="none"/>
+  <http pattern="/font/**" security="none"/>
+  <http pattern="/img/**" security="none"/> 
+  <http pattern="/jqgrid/**" security="none"/> 
+  <http pattern="/css/**" security="none"/> 
+  <http pattern="/js/**" security="none"/> 
+  <http pattern="/favicon.ico" security="none" />
+   
+  <http auto-config="true">
+  	<csrf disabled="true"/>
+  	 <!-- 접근권한 없을 시 페이지 -->
+  	<access-denied-handler error-page="/common/accessDenied.do"/>
+  	  
+  	<!-- 공통 -->
+  	<intercept-url pattern="/login.do" access="anonymous" />
+  	<intercept-url pattern="/loginFail.do" access="anonymous" />
+  	<intercept-url pattern="/calendar/calendarEventConviteResult.do" access="anonymous" />
+  	<intercept-url pattern="/**" access="anonymous" />
+  	
+  	<custom-filter before="FORM_LOGIN_FILTER" ref="authenticationFilterAnotherParam"/>
+  	
+  	<!-- 
+  		CEO [ROLE_CEO] [1000] 
+  		CFO [ROLE_CFO] [1001]
+  		본부장 [ROLE_DIVISION] [1002]
+  		팀장 [ROLE_TEAM] [1003]
+  		직원 [ROLE_MEMBER] [1004]
+  	-->
+  	
+  	<!-- 접근페이지 관리 -->
+  	<!-- <intercept-url pattern="/bizStrategy/listBizStrategy.do" access="ROLE_CEO,ROLE_CFO,ROLE_DIVISION" />
+  	<intercept-url pattern="/bizStrategy/viewBizStrategyProjectPlan.do" access="ROLE_CEO,ROLE_CFO,ROLE_DIVISION" />
+  	<intercept-url pattern="/**" access="ROLE_CEO,ROLE_CFO,ROLE_DIVISION,ROLE_TEAM,ROLE_MEMBER" /> -->
+  	
+  <!-- FORM_LOGIN_FILTER 등록하면서 주석처리  -->
+  <form-login
+        login-page="/login.do"
+    />
+    <!-- <logout logout-success-url="/logout.do" /> -->
+    <logout success-handler-ref="logoutHandler" invalidate-session="false"/>
+    <session-management>
+        <!-- <concurrency-control max-sessions="1"  expired-url="/loginDuplicate.do"/> -->
+        <!-- <concurrency-control max-sessions="1"  error-if-maximum-exceeded="true" expired-url="/loginDuplicate.do"/> -->
+    </session-management>
+    
+    <!-- 권한별 접근 가능 URL -->
+    <custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="filterSecurityInterceptor"/>
+    <!-- ajax 세션 관리 -->  
+    <!-- <custom-filter after="EXCEPTION_TRANSLATION_FILTER" ref="ajaxSessionTimeoutFilter"/> -->
+  </http>
+  	
+  <beans:bean id="authenticationFilterAnotherParam" class="com.uni.sellers.security.AuthenticationFilterAnotherParam" />
+  	
+  	<!-- 로그인 성공 후 Handler -->
+    <beans:bean id="customAuthenticationSuccessHandler" class="com.uni.sellers.security.CustomAuthenticationSuccessHandler">
+	    <beans:property name="targetUrlParameter" value="loginRedirect" />
+	    <beans:property name="useReferer" value="false" />
+	    <beans:property name="defaultUrl" value="/main/index.do" />
+	</beans:bean>
+
+	<!-- 로그인 처리 클래스 -->
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="CustomAuthenticationProvider"/>
+    </authentication-manager>
+    <beans:bean class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler"/>
+    <beans:bean class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+    <beans:bean id="CustomAuthenticationProvider" class="com.uni.sellers.security.CustomAuthenticationProvider"/>
+    
+    <!-- 권한별 접근 가능 URL -->
+    <beans:bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor"> 
+	    <beans:property name="authenticationManager" ref="org.springframework.security.authenticationManager" />
+    	<beans:property name="accessDecisionManager" ref="accessDecisionManager" /> 
+	    <beans:property name="securityMetadataSource" ref="reloadableFilterInvocationSecurityMetadataSource" />
+	</beans:bean>
+	
+	<!-- 이게 뭔지 모르겠음 -->
+	<beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+	    <beans:constructor-arg>
+	        <beans:list>
+	            <beans:bean class="org.springframework.security.access.vote.RoleVoter">
+	                <beans:property name="rolePrefix" value="" />
+	            </beans:bean>
+	        </beans:list>
+	    </beans:constructor-arg>
+	    <beans:property name="allowIfAllAbstainDecisions" value="false" />
+	</beans:bean>
+
+    <beans:bean id="securedObjectService" class="com.uni.sellers.security.SecuredObjectService" />
+	
+	<!-- reload시 바로 반영 될수 있도록 해주는 class -->
+	<beans:bean id="reloadableFilterInvocationSecurityMetadataSource" class="com.uni.sellers.security.ReloadableFilterInvocationSecurityMetadataSource">
+	     <beans:constructor-arg ref="requestMap" />
+	     <beans:property name="securedObjectService" ref="securedObjectService" /> 
+	</beans:bean>
+	
+	<beans:bean id="requestMap" class="com.uni.sellers.security.UrlResourcesMapFactoryBean" init-method="init">
+    	<beans:property name="securedObjectService" ref="securedObjectService" />
+	</beans:bean>
+	<!--//권한별 접근 가능 URL -->
+	
+	<!-- ajax 세션 관리 -->
+	<!-- <beans:bean id="ajaxSessionTimeoutFilter" class="com.uni.sellers.security.AjaxSessionTimeoutFilter">
+		<beans:property name="ajaxHeader" value="AJAX" />
+	</beans:bean> -->
+
+	<!-- 로그아웃 핸들러 -->
+	<beans:bean id="logoutHandler" class="com.uni.sellers.security.CustomLogoutHandler" />
+	
+</beans:beans>

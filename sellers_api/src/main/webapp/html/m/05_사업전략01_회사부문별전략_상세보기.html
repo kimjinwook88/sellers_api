@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi" name="viewport">
+<title>회사/부문별 전략</title>
+
+<link href="../../css/m/style.css" rel="stylesheet">
+
+</head>
+
+<body class="white_bg" onload="tabmenuLiWidth();">
+
+<div class="container_pg">
+
+    <header class="header primary_bg">
+        <hgroup>
+            <h1 class="logo">THE Seller's</h1>
+        </hgroup>
+
+        <a href="#" class="btn_sideMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </a>
+
+        <span class="alarm_count pos_h r10">59</span> <!-- 확인하지 않은 알림 개수 -->
+
+        <div class="sidemenu off">
+            <!-- 사용자 확인 -->
+            <div class="top">
+                <div class="user_photo r60 mg_b10">
+                    <img src="../../images/m/icon_character.svg" />
+                </div>
+                <p class="fc_white user_info">
+                    <span>홍길동님</span><br/>좋은하루 되세요.
+                </p>
+
+                <a href="#" class="btn_sidemenu_close">
+                    <img src="../../images/m/icon_sidemenu_close.svg" alt="사이드 메뉴 닫기"/>
+                </a>
+            </div>
+            <div class="side_gnb">
+                <span class="alarm_count pos_side r10">59</span> <!-- 확인하지 않은 알림 개수 -->
+
+                <a href="#" class="sideTab tab1 active">메뉴</a>
+                <div class="side_cont">
+                    <ul class="gnb">
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_custominfo va_m"></span> 고객사 및 고객개인정보 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객사정보</a>
+                                <a href="">고객개인정보</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_salesAct va_m"></span> 고객영업활동 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객컨텍내용</a>
+                                <a href="">영업기회</a>
+                                <a href="">잠재영업기회</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_cutomgood va_m"></span> 고객만족 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">고객이슈</a>
+                                <a href="">고객만족도</a>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_partner va_m"></span> 파트너사 협업관리 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">파트너사 협업</a>
+                                <a href="">파트너사정보</a>
+                                <a href="">파트너사개인정보</a>
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class="btn_one"><span class="icon md icon_paper va_m"></span> 사업전략 <img src="../../images/m/icon_gnb_arrow_left.svg"/> <img src="../../images/m/icon_gnb_arrow_down.svg" class="off"/></a>
+                            <div class="sub off">
+                                <a href="">회사/부문별전략</a>
+                                <a href="">고객별전략</a>
+                                <a href="">고객별전략</a>                                
+                            </div>
+                        </li>
+                        <li>
+                            <a href="#" class=""><span class="icon md icon_calendar va_m"></span> 일정관리</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_key va_m"></span> 로그아웃</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_setting va_m"></span> 비밀번호변경</a>
+                        </li>
+                        <li class="func_menu">
+                            <a href="#" class=""><span class="icon md icon_desktop va_m"></span> PC화면보기</a>
+                        </li>
+                    </ul>                    
+                </div>
+
+                <a href="#" class="sideTab tab2">알림</a>
+                <div class="side_cont off">
+                    <ul class="news">
+                        <!-- class="cata" 알림구분은 color로 구분함.
+                            .news li .cata.sch {background-color:#666;}  /*일정(캘린더)*/
+                            .news li .cata.issue {background-color:#1ab394;} /* 고객만족 : 고객이슈, 고객만족, 서비스프로젝트*/
+                            .news li .cata.action {background-color:#e7a117;} /*고객영업활동 : 고객컨텍내용, 영업기회, 잠재영업기획*/
+                            .news li .cata.stra {background-color:#15a7e3;} /*사업전략 : 화사부문별전략, 고객별전략, 전략프로젝트*/
+                            .news li .cata.alarm {background-color:#666;}  /*기타 : 고객사/고객개인, 파트너사/파트너사개인, 성과관리*/
+                         -->
+                         <li class="">
+                            <a href="#">
+                                <span class="cata action">영업기회</span>
+                                <span class="subject">한국전자금융 어댑터 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="visited">
+                            <a href="#">
+                                <span class="cata action">영업기회</span>
+                                <span class="subject">한국전자금융 어댑터 </span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="cata action">잠재영업기회</span>
+                                <span class="subject">한국전자금융 어댑터 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="visited"><!-- 방문한 게시물은 "visited" 적용하여 흐리게 보이게 함.-->
+                            <a href="#">
+                                <span class="cata alarm">일정관리</span>
+                                <span class="subject">삼성글로벌</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="">
+                            <a href="#">
+                                <span class="cata sch">일정관리</span>
+                                <span class="subject">삼성글로벌</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="visited">
+                            <a href="#">
+                                <span class="icon_new">new</span> <!-- 확인한 게시물은 new아이콘 삭제-->
+                                <span class="icon lg icon_sch_2"></span> <!-- icon_sch_1~7 : 고객대면, 대면준비, 내부회의, 교육, 기타, 휴가, 이동시간 -->
+                                <span class="time">09:00~10:00</span>
+                                <span class="subject">디자인팀 회의 소집</span>
+                                <span class="ment">캘린더가 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li class="">
+                            <a href="#">
+                                <span class="icon lg icon_sch_3"></span> <!-- icon_sch_1~7 : 고객대면, 대면준비, 내부회의, 교육, 기타, 휴가, 이동시간 -->
+                                <span class="time">09:00~10:00</span>
+                                <span class="subject">디자인팀 회의 소집</span>
+                                <span class="ment">캘린더가 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 09:00 ~ 12:00</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="cata issue">고객이슈관리</span>
+                                <span class="subject">한국전자금융 어댑터 기동 에러 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="cata stra">전략프로젝트</span>
+                                <span class="subject">셀러스 프로젝트 !</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="icon_new">new</span>
+                                <span class="cata issue">고객이슈관리</span>
+                                <span class="subject">한국전자금융 어댑터 기동 에러 분석</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="icon_new">new</span>
+                                <span class="cata stra">전략프로젝트</span>
+                                <span class="subject">셀러스 프로젝트 !</span>
+                                <span class="ment">게시물이 업데이트 됐습니다.</span><br/>
+                                <span class="date">2016-08-17 14:28:59</span>
+                            </a>
+                            <a href="#" class="btn_list_delete"><img src="../../images/m/btn_delete.svg"></a>
+                        </li>
+                    </ul>                    
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- location -->
+    <div class="location">
+        <a href="#" class="home"><img src="../../images/m/icon_home.svg" /></a>
+        <img src="../../images/m/icon_arrow_gray.svg"/>
+        <a href="">사업전략</a> 
+        <img src="../../images/m/icon_arrow_gray.svg"/>
+        <span>회사/부문별 전략</span>
+    </div>
+
+    <article class="">
+        <div class="title_pg">
+            <h2 class="">2016 연구소 business plan 수립</h2>
+            <a href="#" class="btn_back">back</a>
+        </div>
+
+        <div class="author">
+            <span>이기섭(2016-08-10)</span>
+        </div>
+
+        <ul class="tabmenu tabmenu_type2 mg_b20">
+            <li><a href="#" class="active">기본정보</a></li>
+            <li><a href="#">key Milestones</a></li>
+            <li><a href="#">이슈</a></li>
+        </ul>
+
+        <!-- 위의 탭 클릭시 아래의 cont1, cont2, cont3 가  하나씩 보여지도록 해주세요 -->
+
+        <div class="pg_cont">
+            <!-- 기본정보 -->
+            <div class="cont1 ">
+
+                <div class="view_cata b_line">
+                    <div class="ti fl_l">
+                        <span class="bullet dot"></span> 카테고리
+                    </div>
+                    <div class="cont fl_l">본부전략</div>
+                </div>
+
+                <div class="view_cata b_line">
+                    <div class="ti fl_l">
+                        <span class="bullet dot"></span> 검토주기
+                    </div>
+                    <div class="cont fl_l">분기 1회</div>
+                </div>
+
+                <div class="view_cata b_line">
+                    <div class="ti fl_l">
+                        <span class="bullet dot"></span> 책임리더
+                    </div>
+                    <div class="cont fl_l">이상현 부장 <a href="tel:02-6380-7242" class="btn_phone_go"><img src="../../images/m/icon_phone.png" alt="전화걸기"/></a>
+                    <!-- 전화번호 클릭시 전화걸기 실행 됨  --></div>
+                </div>
+
+                <div class="view_cata_full">
+                    <div class="ti mg_b5">
+                        <span class="bullet dot"></span> 주요내용
+                    </div>
+                    <div class="cboth cont_box">이슈가 발생했습니다. <br/>관심을 가져주세요<br/>이슈가 발생했습니다. <br/>관심을 가져주세요</div>
+                </div>
+
+                <div class="view_cata_full">
+                    <div class="ti mg_b5">
+                        <span class="bullet dot"></span> 첨부파일
+                    </div>
+                    <div class="cboth cont_box">
+                        <ul class="file_list">
+                            <li><a href="">3s.doc </a></li>
+                            <li><a href="">이슈관리템플릿.exel</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <!--// 기본정보 -->
+
+
+            <!-- keymilestones_list -->
+            <div class="cont2 ">
+
+                <div class="view_cata_full">
+                    <div class="ti mg_b5">
+                        <span class="bullet dot"></span> key Milestones
+                    </div>
+                    <div class="cboth keymilestones_list">
+                        <ul>
+                            <li>
+                                <div class="top">
+                                    <span class="title">셀러스 영업활동 이슈 회의</span>
+                                    <span class="status_lec statusColor_green"></span>
+                                </div>
+                                <div class="cont">
+                                    <span class="fc_gray_light">책임담당자 : </span> <span class="fc_black">심윤영</span> <a href="tel:02-6380-7242" class="btn_phone_go"><img src="../../images/m/icon_phone.png" alt="전화걸기"/></a><br/>
+                                    <span class="fc_gray_light">목표일 : </span> <span class="fc_black">2016-08-10</span> / 
+                                    <span class="fc_gray_light">완료일 : </span> <span class="fc_black">2016-08-10</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="top">
+                                    <span class="title">캘린더 적용 회의</span>
+                                    <span class="status_lec statusColor_red"></span>
+                                </div>
+                                <div class="cont">
+                                    <span class="fc_gray_light">책임담당자 : </span> <span class="fc_black">심윤영</span> <a href="tel:02-6380-7242" class="btn_phone_go"><img src="../../images/m/icon_phone.png" alt="전화걸기"/></a><br/>
+                                    <span class="fc_gray_light">목표일 : </span> <span class="fc_black">2016-08-10</span> / 
+                                    <span class="fc_gray_light">완료일 : </span> <span class="fc_black">2016-08-10</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="top">
+                                    <span class="title">셀러스 영업활동 이슈 회의</span>
+                                    <span class="status_lec statusColor_yellow"></span>
+                                </div>
+                                <div class="cont">
+                                    <span class="fc_gray_light">책임담당자 : </span> <span class="fc_black">심윤영</span> <a href="tel:02-6380-7242" class="btn_phone_go"><img src="../../images/m/icon_phone.png" alt="전화걸기"/></a><br/>
+                                    <span class="fc_gray_light">목표일 : </span> <span class="fc_black">2016-08-10</span> / 
+                                    <span class="fc_gray_light">완료일 : </span> <span class="fc_black">2016-08-10</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <!--// keymilestones_list -->
+
+            <!-- 이슈 -->
+            <div class="cont3 ">
+
+                <div class="view_cata_full">
+                    <div class="ti mg_b5">
+                        <span class="bullet dot"></span> 이슈
+                    </div>
+                    <div class="cboth issue_list">
+                        <ul>
+                            <li>
+                                <div class="top top2">
+                                    <span class="cata r2">이슈영역</span> <span class="cata2 r2">이슈항목</span>
+                                    <span class="title">RFP일정확인RFP일정확인 RFP일정확인RFP일정확인 RFP일정확인 RFP일정확인RFP일정확인RFP일정확인</span>
+                                    <span class="status_lec statusColor_green"></span>
+                                </div>
+                                <div class="cont">
+                                    <span class="fc_gray_light">책임 담당자 : </span> <span class="fc_black">이영업</span> <a href="tel:02-6380-7242" class="btn_phone_go"><img src="../../images/m/icon_phone.png" alt="전화걸기"/></a><br/>
+                                    <span class="fc_gray_light">목표일 : </span> <span class="fc_black">2016-08-10</span> / 
+                                    <span class="fc_gray_light">완료일 : </span> <span class="fc_black">2016-08-10</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="top top2">
+                                    <span class="cata r2">일정관리</span> <span class="cata2 r2">과업초과</span>
+                                    <span class="title">RFP일정확인RFP일정확인 RFP일정확인RFP일정확인 RFP일정확인 RFP일정확인RFP일정확인RFP일정확인</span>
+                                    <span class="status_lec statusColor_yellow"></span>
+                                </div>
+                                <div class="cont">
+                                    <span class="fc_gray_light">책임 담당자 : </span> <span class="fc_black">이영업</span> <a href="tel:02-6380-7242" class="btn_phone_go"><img src="../../images/m/icon_phone.png" alt="전화걸기"/></a><br/>
+                                    <span class="fc_gray_light">목표일 : </span> <span class="fc_black">2016-08-10</span> / 
+                                    <span class="fc_gray_light">완료일 : </span> <span class="fc_black">2016-08-10</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="top top2">
+                                    <span class="cata r2">솔루션</span> <span class="cata2 r2">도입가격</span>
+                                    <span class="title">RFP일정확인RFP일정확인 RFP일정확인RFP일정확인 RFP일정확인 RFP일정확인RFP일정확인RFP일정확인</span>
+                                    <span class="status_lec statusColor_green"></span>
+                                </div>
+                                <div class="cont">
+                                    <span class="fc_gray_light">책임 담당자 : </span> <span class="fc_black">이영업</span> <a href="tel:02-6380-7242" class="btn_phone_go"><img src="../../images/m/icon_phone.png" alt="전화걸기"/></a><br/>
+                                    <span class="fc_gray_light">목표일 : </span> <span class="fc_black">2016-08-10</span> / 
+                                    <span class="fc_gray_light">완료일 : </span> <span class="fc_black">2016-08-10</span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="top top2">
+                                    <span class="cata r2">솔루션</span> <span class="cata2 r2">업체선정</span>
+                                    <span class="title">RFP일정확인RFP일정확인 RFP일정확인RFP일정확인 RFP일정확인 RFP일정확인RFP일정확인RFP일정확인</span>
+                                    <span class="status_lec statusColor_red"></span>
+                                </div>
+                                <div class="cont">
+                                    <span class="fc_gray_light">책임 담당자 : </span> <span class="fc_black">이영업</span><br/>
+                                    <span class="fc_gray_light">목표일 : </span> <span class="fc_black">2016-08-10</span> / 
+                                    <span class="fc_gray_light">완료일 : </span> <span class="fc_black">2016-08-10</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <!--// 이슈 -->
+        </div>
+
+        <div class="pg_bottom_func">
+            <ul>
+                <li><a href="" class=""> <img src="../../images/m/icon_list.png" /> <span>목록</span></a></li>
+                <li><a href="" class=""> <img src="../../images/m/icon_edit.png" /> <span>수정</span></a></li>
+            </ul>
+        </div>
+
+    </article>   
+
+</div>
+
+
+<div class="modal_screen"></div>
+
+<!-- Mainly scripts -->
+<script src="../../js/m/jquery-1.11.0.js"></script>
+<script src="../../js/m/common.js"></script>
+
+</body>
+</html>

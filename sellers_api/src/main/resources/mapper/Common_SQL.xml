@@ -1,0 +1,1259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="common">
+
+	<!-- 모바일 고객영업활동 -> 영업기회 -> 팀이름 리스트 -->
+	<select id="selectNameList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			'' AS TARGET_NO,
+			'전체' AS TARGET_NAME
+		UNION
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO') or global_role_code.contains('ROLE_ADMIN')">
+				SELECT
+					ODI.DIVISION_NO AS TARGET_NO,
+					ODI.DIVISION_NAME AS TARGET_NAME
+				FROM
+					OUR_DIVISION_INFO AS ODI
+				WHERE 1=1
+				AND ODI.DIVISION_TYPE = 'S'
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				SELECT
+					OTI.TEAM_NO AS TARGET_NO,
+					OTI.TEAM_NAME AS TARGET_NAME
+				FROM
+					OUR_TEAM_INFO AS OTI
+				WHERE 1=1
+				AND OTI.TEAM_TYPE = 'S'
+				AND OTI.DIVISION_NO = #{global_member_division}
+			</when>
+			<otherwise>
+				SELECT
+					OMI.MEMBER_ID_NUM AS TARGET_NO,
+					OMI.HAN_NAME AS TARGET_NAME
+				FROM
+					OUR_MEMBERS_INFO AS OMI
+				WHERE 1=1
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+			</otherwise>
+		</choose>
+
+	</select>
+
+	<select id="selectNameList2" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			<choose>
+				<when test="global_role_code.contains('CEO')">
+					<choose>
+						<when test="global_division_type == null or global_division_type == '' ">
+							(
+								CASE WHEN OTI.TEAM_NAME = 'CEO' 
+								THEN '임원'
+								ELSE OTI.TEAM_NAME 
+								END
+							) AS TARGET_NAME	
+							,OTI.TEAM_NO AS TARGET_NO
+						</when>
+						<otherwise>
+							ODI.DIVISION_NAME AS TARGET_NAME,
+							ODI.DIVISION_NO AS TARGET_NO
+						</otherwise>
+					</choose>
+				</when>
+				<when test="global_role_code.contains('DIVISION')">
+					OTI.TEAM_NAME AS TARGET_NAME,
+					OTI.TEAM_NO AS TARGET_NO
+				</when>
+				<when test="global_role_code.contains('TEAM')">
+					OMI.HAN_NAME AS TARGET_NAME
+					,OMI.MEMBER_ID_NUM AS TARGET_NO
+				</when>
+				<otherwise>
+					<choose>
+						<when test="global_division_type == null or global_division_type == '' ">
+							(
+								CASE WHEN OTI.TEAM_NAME = 'CEO' 
+								THEN '임원'
+								ELSE OTI.TEAM_NAME 
+								END
+							) AS TARGET_NAME	
+							,OTI.TEAM_NO AS TARGET_NO
+						</when>
+						<otherwise>
+							ODI.DIVISION_NAME AS TARGET_NAME,
+							ODI.DIVISION_NO AS TARGET_NO
+						</otherwise>
+					</choose>
+				</otherwise>
+			</choose>
+		FROM OUR_MEMBERS_INFO AS OMI
+		LEFT OUTER JOIN
+			OUR_TEAM_INFO AS OTI
+			ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		LEFT OUTER JOIN
+			OUR_DIVISION_INFO AS ODI
+			ON OTI.DIVISION_NO = ODI.DIVISION_NO
+		LEFT OUTER JOIN
+			COM_AUTHORITY_MEMBER AS CAM
+			ON CAM.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+		WHERE CAM.MEMBER_ID_NUM IN (
+			SELECT OMI2.MEMBER_ID_NUM FROM OUR_MEMBERS_INFO AS OMI2
+			WHERE OMI.USE_YN = 'Y'
+			<choose>
+				<when test="global_role_code.contains('CEO')">
+					<choose>
+						<when test="global_division_type == null or global_division_type == '' ">
+							AND (OMI2.POSITION_TYPE IN ('영업직'))
+						</when>
+						<otherwise>
+							AND (OMI2.POSITION_TYPE IN ('영업직'))
+						</otherwise>
+					</choose>
+				</when>
+				<when test="global_role_code.contains('DIVISION')">
+					AND (OMI2.POSITION_TYPE IN ('영업직'))
+				</when>
+				<when test="global_role_code.contains('TEAM')"> 
+					AND (OMI2.POSITION_TYPE IN ('영업직'))
+				</when>
+				<when test="global_role_code.contains('MEMBER')">
+				
+				</when>
+				<otherwise>
+					<choose>
+						<when test="global_division_type == null or global_division_type == '' ">
+							AND (OMI2.POSITION_TYPE IN ('영업직'))
+						</when>
+						<otherwise>
+							AND (OMI2.POSITION_TYPE IN ('영업직'))
+						</otherwise>
+					</choose>
+				</otherwise>
+			</choose>
+		)
+		AND OMI.MEMBER_TEAM IS NOT NULL
+		<choose>
+			<when test="global_role_code.contains('CEO')">
+				<choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						AND ODI.DIVISION_NO = #{global_member_division}
+						GROUP BY TEAM_NO, TARGET_NAME
+					</when>
+					<otherwise>
+						GROUP BY TARGET_NO, TARGET_NAME
+					</otherwise>
+				</choose>
+			</when>
+			<when test="global_role_code.contains('DIVISION')">
+				AND ODI.DIVISION_NO = #{global_member_division}
+				GROUP BY TARGET_NO, TARGET_NAME
+			</when>
+			<when test="global_role_code.contains('TEAM')">
+				AND OTI.TEAM_NO = #{global_member_team}
+				OR OMI.MEMBER_ID_NUM = #{global_member_id}
+				GROUP BY TARGET_NO, TARGET_NAME
+			</when>
+			<otherwise>
+				<choose>
+					<when test="global_division_type == null or global_division_type == '' ">
+						AND ODI.DIVISION_NO = #{global_member_division}
+						GROUP BY TARGET_NO, TARGET_NAME
+					</when>
+					<otherwise>
+						GROUP BY TARGET_NO, TARGET_NAME
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+	</select>
+
+	<insert id="insertSendQ" parameterType="hashmap">
+		INSERT INTO ERR_BUG_MESSAGE
+		(
+			THE_PERSON_ID_NUM, 
+			SALES_USER_ID_NUM, 
+			MENU_FLAG, 
+			Q_DETAIL, 
+			Q_SEND_DATE
+		)
+		VALUES
+		(
+			#{thePersonSelect}, 
+			#{member_id_num}, 
+			#{menuSelect}, 
+			#{theTextArea}, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<select id="selectProductividyRRuleEvent" parameterType="hashmap" resultType="hashmap">
+		SELECT * 
+		FROM ANAL_INDIVIDUAL_TIME AS AIT
+		LEFT OUTER JOIN
+		CALENDAR_EVENT AS CE ON CE.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		WHERE 1=1
+		AND CE.EVENT_ID = #{rruleEventID}
+		AND AIT.ANAL_DATE = #{date}
+	</select>
+	
+	<select id="selectLoginProccess" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+		SELECT 
+			OUI.MEMBER_ID_NUM, 
+			OUI.PASSWORD_ENC, 
+			OUI.LOGIN_TRY_COUNT, 
+			OUI.SYS_REGISTER_DATE AS OUI_SYS_REGISTER_DATE, 
+			OUI.SYS_UPDATE_DATE AS OUI_SYS_UPDATE_DATE,
+			OMI.MEMBER_ID, 
+			OMI.MEMBER_DIVISION, 
+			OMI.MEMBER_POST, 
+			OMI.MEMBER_TEAM, 
+			OMI.HAN_NAME, 
+			OMI.POSITION_STATUS, 
+			OMI.POSITION_RANK, 
+			OMI.POSITION_DUTY, 
+			OMI.POSITION_TYPE, 
+			OMI.BUSINESS_DUTY, 
+			OMI.JOIN_DATE, 
+			OMI.STOP_DATE, 
+			OMI.CELL_PHONE, 
+			OMI.PHONE, 
+			OMI.EMAIL,
+			OMI.COMPANY_CD,  
+			substring_index(OMI.EMAIL, '@', 1) as PROFILE_PHOTO, 
+			OMI.FRIENDSHIP_COMPANY, 
+			OMI.FRIENDSHIP_CUSTOMER, 
+			OMI.PERSONAL_PHOTO, 
+			OMI.PHOTO_TYPE, 
+			OMI.SYS_REGISTER_DATE AS OMI_SYS_REGISTER_DATE, 
+			OMI.SYS_UPDATE_DATE AS OMI_SYS_UPDATE_DATE,
+			OMI.USE_YN,
+			ODI.DIVISION_NAME,
+			OTI.TEAM_NAME
+			]]>
+			<if test='mobile_yn == "Y" ' >
+			,MDK.DEVICE_KEY
+			</if>
+		<![CDATA[
+		FROM 
+			OUR_USERS_INFO AS OUI 
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON OUI.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+			LEFT OUTER JOIN
+			OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		]]>
+			<if test='mobile_yn == "Y" ' >
+			LEFT OUTER JOIN
+			OUR_USER_MOBILE_DEVICE_KEY AS MDK ON MDK.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			</if>
+		<![CDATA[
+		WHERE 1=1
+		AND OUI.MEMBER_ID_NUM = #{member_id_num}
+	    ]]>
+	    <!-- AND OMI.COMPANY_CD = #{company_cd} -->
+	    <if test='mobile_yn == "Y" ' >
+	    ORDER BY MDK.SYS_UPDATE_DATE DESC LIMIT 1
+	    </if>
+	</select>
+	
+	<select id="selectAuthority" parameterType="hashmap" resultType="hashmap">
+	  <![CDATA[
+		SELECT 
+			CAM.MEMBER_ID_NUM,
+			CA.AUTHORITY_CODE,
+			CA.AUTHORITY_DETAIL,
+			CA.AUTHORITY_NAME
+		FROM 
+			COM_AUTHORITY AS CA	
+			INNER JOIN
+			COM_AUTHORITY_MEMBER AS CAM ON CA.AUTHORITY_CODE = CAM.AUTHORITY_CODE
+		WHERE 1=1
+		AND CAM.MEMBER_ID_NUM  = #{MEMBER_ID_NUM}
+		]]>
+	</select>
+	
+	<select id="selectMenu" parameterType="hashmap" resultType="String">
+		<![CDATA[
+			SELECT 
+				MENU_ID, 
+				MENU_TITLE, 
+				MENU_URL, 
+				MENU_PARENT, 
+				MENU_SEQ, 
+				MENU_LEVEL, 
+				USE_YN, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			FROM COM_MENU;
+		]]>
+	</select>
+	
+	<select id="selectLatelyUpdate" parameterType="hashmap" resultType="String">
+		<![CDATA[
+			SELECT SYS_UPDATE_DATE
+			FROM ${latelyUpdateTable}
+			ORDER BY SYS_UPDATE_DATE DESC
+			LIMIT 0,1	
+		]]>
+	</select>
+	
+	<select id="selectCompanyGroup" resultType="hashmap">
+			SELECT COMPANY_ID, SEGMENT_CODE, COMPANY_NAME, CEO_NAME, COMPANY_TELNO, POSTAL_CODE, POSTAL_ADDRESS, BUSINESS_NUMBER, BUSINESS_TYPE, BUSINESS_SECTOR, COMPANY_STATUS, SYS_REGISTER_DATE, SYS_UPDATE_DATE
+			FROM CLIENT_COMPANY_INFO
+			<!-- 임시로 하나만 -->
+			WHERE COMPANY_ID = 10000001;
+	</select>
+	
+	<select id="selectFileInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	        SELECT *
+			FROM ${fileTableName}
+			WHERE FILE_ID = #{fileId}
+	    ]]>
+	</select>
+	
+	<select id="searchCompanyInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	    SELECT 
+			COMPANY_ID, 
+			SEGMENT_CODE, 
+			ERP_REG_CODE, 
+			COMPANY_NAME, 
+			CEO_NAME, 
+			COMPANY_TELNO, 
+			POSTAL_CODE, 
+			POSTAL_ADDRESS, 
+			BUSINESS_NUMBER, 
+			BUSINESS_TYPE, 
+			BUSINESS_SECTOR, 
+			COMPANY_STATUS, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		FROM CLIENT_COMPANY_INFO
+		WHERE 1=1
+		AND IFNULL(CD_CON,'') != '003'
+		AND COMPANY_NAME  LIKE CONCAT('%', #{companyName}, '%')
+	    ]]>
+	</select>
+	
+	<select id="searchCustomerInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	     SELECT 
+			CII.CUSTOMER_ID, 
+			CII.COMPANY_ID, 
+			CII.CUSTOMER_NAME, 
+			CCI.COMPANY_NAME, 
+			CII.DIVISION, POST, 
+			CII.TEAM, 
+			CII.`POSITION`, 
+			CII.DUTY, 
+			CII.CELL_PHONE, 
+			CII.PHONE, EMAIL, 
+			CII.ADDRESS, 
+			CII.FRIENDSHIP_INFO, 
+			CII.INFO_SOURCE 
+		FROM CLIENT_INDIVIDUAL_INFO AS CII
+		LEFT OUTER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = CII.COMPANY_ID
+		WHERE 1=1
+		AND CII.USE_YN = 'Y'
+	    ]]>
+		<if test="companyId != null and companyId != '' ">
+		AND CII.COMPANY_ID = #{companyId}
+		</if>
+		AND CII.CUSTOMER_NAME  LIKE CONCAT('%', #{customerName}, '%')
+	</select>
+	
+	
+	<select id="searchClientInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	     SELECT 
+			CII.CUSTOMER_ID, 
+			CII.COMPANY_ID, 
+			CII.CUSTOMER_NAME, 
+			CII.DIVISION, POST, 
+			CII.TEAM, 
+			`POSITION`, 
+			CII.DUTY, 
+			CII.CELL_PHONE, 
+			CII.PHONE, EMAIL, 
+			CII.ADDRESS, 
+			CII.FRIENDSHIP_INFO, 
+			CII.INFO_SOURCE,
+			CII.ERP_CLIENT_CODE,
+			CCI.COMPANY_NAME 
+		FROM 
+			CLIENT_INDIVIDUAL_INFO AS CII
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON CII.COMPANY_ID = CCI.COMPANY_ID
+		WHERE 1=1
+		AND CII.USE_YN = 'Y'
+	    ]]>
+		AND CII.CUSTOMER_NAME  LIKE CONCAT('%', #{clientName}, '%')
+	</select>
+	
+	<select id="searchMemberInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	     SELECT 
+			OMI.MEMBER_ID, 
+			OMI.MEMBER_DIVISION, 
+			OMI.MEMBER_POST, 
+			OMI.MEMBER_TEAM,
+			IFNULL(OTI.TEAM_NAME,'') AS TEAM_NAME,
+			OMI.MEMBER_ID_NUM, 
+			OMI.HAN_NAME, 
+			IFNULL(OMI.POSITION_STATUS,'') AS POSITION_STATUS, 
+			OMI.POSITION_RANK, 
+			OMI.POSITION_DUTY, 
+			OMI.POSITION_TYPE, 
+			OMI.BUSINESS_DUTY, 
+			OMI.JOIN_DATE, 
+			OMI.STOP_DATE, 
+			OMI.CELL_PHONE, 
+			OMI.PHONE, 
+			OMI.EMAIL 
+		FROM OUR_MEMBERS_INFO AS OMI
+		LEFT OUTER JOIN
+		OUR_TEAM_INFO AS OTI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+		WHERE 1=1
+		AND OMI.USE_YN = 'Y'
+		AND OMI.HAN_NAME LIKE CONCAT('%', #{memberName}, '%')
+	    ]]>
+	</select>
+	
+	<select id="searchMemberInfo2" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	     SELECT 
+			MEMBER_ID, 
+			MEMBER_DIVISION, 
+			MEMBER_POST, 
+			MEMBER_TEAM, 
+			MEMBER_ID_NUM, 
+			HAN_NAME, 
+			POSITION_STATUS, 
+			POSITION_RANK, 
+			POSITION_DUTY, 
+			POSITION_TYPE, 
+			BUSINESS_DUTY, 
+			JOIN_DATE, 
+			STOP_DATE, 
+			CELL_PHONE, 
+			PHONE, 
+			EMAIL 
+		FROM OUR_MEMBERS_INFO
+		WHERE 1=1
+		AND MEMBER_ID_NUM = #{member_id_num}
+	    ]]>
+	</select>
+	
+	<select id="searchCalendarMemberInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	     SELECT 
+			OMI.MEMBER_ID, 
+			OMI.MEMBER_DIVISION, 
+			OMI.MEMBER_POST, 
+			OMI.MEMBER_TEAM, 
+			OMI.MEMBER_ID_NUM, 
+			OMI.HAN_NAME, 
+			OMI.POSITION_STATUS, 
+			OMI.POSITION_RANK, 
+			OMI.POSITION_DUTY, 
+			OMI.POSITION_TYPE, 
+			OMI.BUSINESS_DUTY, 
+			OMI.JOIN_DATE, 
+			OMI.STOP_DATE, 
+			OMI.CELL_PHONE, 
+			OMI.PHONE, 
+			OMI.EMAIL, 
+			CM.CALENDAR_ID,
+			CM.CALENDAR_NAME
+		FROM OUR_MEMBERS_INFO AS OMI
+		LEFT OUTER JOIN 
+				CALENDAR_MASTER AS CM ON CM.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+		WHERE 1=1
+		AND HAN_NAME LIKE CONCAT('%', #{memberName}, '%')
+		AND CM.CALENDAR_NAME = '나의 캘린더'
+	    ]]>
+	</select>
+	
+	<select id="selectInviteMemberInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	     SELECT 
+			OMI.MEMBER_ID, 
+			OMI.MEMBER_DIVISION, 
+			OMI.MEMBER_POST, 
+			OMI.MEMBER_TEAM, 
+			OMI.MEMBER_ID_NUM, 
+			OMI.HAN_NAME, 
+			OMI.POSITION_STATUS, 
+			OMI.POSITION_RANK, 
+			OMI.POSITION_DUTY, 
+			OMI.POSITION_TYPE, 
+			OMI.BUSINESS_DUTY, 
+			OMI.JOIN_DATE, 
+			OMI.STOP_DATE, 
+			OMI.CELL_PHONE, 
+			OMI.PHONE, 
+			OMI.EMAIL
+		FROM OUR_MEMBERS_INFO AS OMI
+		LEFT OUTER JOIN 
+				CALENDAR_MASTER AS CM ON CM.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+		WHERE 1=1
+		AND OMI.USE_YN = 'Y'
+		AND HAN_NAME LIKE CONCAT('%', #{memberName}, '%')
+	    ]]>
+	</select>
+	
+	<select id="searchPartnerInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+    	SELECT 
+    		PARTNER_ID, 
+    		PARTNER_CODE, 
+    		COMPANY_NAME, 
+    		CEO_NAME, 
+    		COMPANY_TELNO, 
+    		POSTAL_CODE, 
+    		POSTAL_ADDRESS, 
+    		BUSINESS_NUMBER, 
+    		BUSINESS_TYPE, 
+    		BUSINESS_SECTOR, 
+    		COMPANY_STATUS, 
+    		SYS_REGISTER_DATE, 
+    		SYS_UPDATE_DATE, 
+    		company_enname
+		FROM PARTNER_COMPANY_INFO
+		WHERE 1=1
+		AND COMPANY_NAME  LIKE CONCAT('%', #{companyName}, '%')
+	    ]]>
+	</select>
+	
+	<select id="searchPartnerMemberInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	    	SELECT 
+				PARTNER_INDIVIDUAL_ID, 
+				PARTNER_ID, 
+				PARTNER_PERSONAL_NAME, 
+				DIVISION, POST, 
+				TEAM, 
+				POSITION, 
+				SKILL_TYPE, 
+				DUTY, 
+				CELL_PHONE, 
+				PHONE, 
+				EMAIL, 
+				FRIENDSHIP_COMPANY, 
+				FRIENDSHIP_CUSTOMER, 
+				PERSONAL_INFO, 
+				PERSONAL_PHOTO, 
+				PHOTO_TYPE, 
+				FRIENDSHIP_INFO, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE, 
+				CREATOR_ID
+			FROM PARTNER_INDIVIDUAL_INFO
+			WHERE 1=1
+			AND PARTNER_PERSONAL_NAME  LIKE CONCAT('%', #{partner_personal_name}, '%')
+	    ]]>
+	</select>
+	
+	<select id="selectPartnerInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	   		 SELECT 
+	    		PARTNER_ID, 
+	    		PARTNER_CODE, 
+	    		COMPANY_NAME, 
+	    		CEO_NAME, 
+	    		COMPANY_TELNO, 
+	    		POSTAL_CODE, 
+	    		POSTAL_ADDRESS, 
+	    		BUSINESS_NUMBER, 
+	    		BUSINESS_TYPE, 
+	    		BUSINESS_SECTOR, 
+	    		COMPANY_STATUS, 
+	    		SYS_REGISTER_DATE, 
+	    		SYS_UPDATE_DATE, 
+	    		company_enname
+			FROM PARTNER_COMPANY_INFO
+			WHERE 1=1
+	    ]]>
+	    <choose>
+			<when test="partnerArray != null and partnerArray != '' ">
+			AND PARTNER_ID IN(${partnerArray})
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectNoticeCount" parameterType="hashmap" resultType="Integer">
+	    <![CDATA[
+	   		SELECT COUNT(NOTICE_ID) AS NOTICECOUNT
+			FROM NOTICE_INFO
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{global_member_id}
+			AND NOTICE_CONFIRM_YN = 'N'
+			AND NOTICE_DEL_YN != 'Y'
+	    ]]>
+	</select>
+	
+	<select id="selectNoticeDetail" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	   		SELECT 
+	   			@ROWNUM := @ROWNUM + 1 AS ROWNUM,
+	   			NOTICE_ID, 
+	   			MEMBER_ID_NUM, 
+	   			NOTICE_DETAIL, 
+	   			NOTICE_CONFIRM_YN, 
+	   			NOTICE_CONFIRM_DATE, 
+	   			NOTICE_SEND_DATE,
+	   			NOTICE_CATEGORY,
+	   			NOTICE_REDIRECT_URL,
+	   			EVENT_ID,
+	   			NOTICE_CODE,
+	   			NOTICE_DEL_YN,
+	   			OVER_DUE_FLAG
+			FROM NOTICE_INFO, (SELECT @ROWNUM := 0) AS ROWNUM
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{global_member_id}
+			AND NOTICE_DEL_YN = 'N'
+			ORDER BY NOTICE_SEND_DATE DESC
+	    ]]>
+	</select>
+	
+	<select id="selectCalendarShareTable" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	   		SELECT 
+	   			*
+			FROM CALENDAR_SHARE
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{fromMemberIdNum}
+			AND SHARE_MEMBER_ID = #{toMemberIdNum}
+	    ]]>
+	</select>
+	
+	<select id="searchClientMaster" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	   		SELECT 
+				ECSI.COMPANY_CODE, 
+				ECSI.CLIENT_CODE, 
+				ECSI.CLIENT_NAME, 
+				ECSI.DIVISION_NAME, 
+				ECSI.POSITION_RANK, 
+				ECSI.CELL_PHONE, 
+				ECSI.EMAIL, 
+				ECSI.PHONE, 
+				ECSI.FAX, 
+				ECSI.USE_YN, 
+				ECSI.DC_RMK, 
+				ECSI.SYS_REGISTER_DATE, 
+				ECSI.SYS_UPDATE_DATE,
+				CCI.COMPANY_NAME
+			FROM 
+			ERP_CLIENT_SALESMAN_INFO AS ECSI
+			LEFT OUTER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON ECSI.COMPANY_CODE = CCI.ERP_REG_CODE 
+			WHERE 1=1
+	    ]]>
+	    	<if test="client_name != null and client_name != '' ">
+			AND ECSI.CLIENT_NAME  LIKE CONCAT('%', #{client_name}, '%') 
+			</if>
+	</select>
+	
+	
+	<select id="selectRolesAndUrl" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	   		SELECT CA.AUTHORITY_CODE, CA.AUTHORITY_NAME, CM.MENU_ID, CM.MENU_TITLE, CM.MENU_URL
+			FROM
+			COM_AUTHORITY AS CA 
+			CROSS JOIN
+			COM_MENU AS CM ON FIND_IN_SET(CM.MENU_ID,CA.MENU_AUTH)
+	    ]]>
+	</select>
+	
+	<update id="updateNoticeConfirm" parameterType="hashmap">
+   	UPDATE NOTICE_INFO
+      SET 
+      <choose>
+				<when test="noticeDel != null and noticeDel != '' ">
+				NOTICE_DEL_YN = "Y",
+				</when>
+			</choose>
+	    NOTICE_CONFIRM_YN = 'Y',
+	    NOTICE_CONFIRM_DATE = CURRENT_TIMESTAMP
+		WHERE 1=1
+			AND MEMBER_ID_NUM = #{global_member_id} AND NOTICE_ID =#{noticeId}
+    </update>
+	
+	<update id="updateProductividyRRuleEvent" parameterType="hashmap">
+    	UPDATE ANAL_INDIVIDUAL_TIME SET 
+			ACTIVITY_CODE_1_TIME = #{activityCode_1},
+			ACTIVITY_CODE_2_TIME = #{activityCode_2},
+			ACTIVITY_CODE_3_TIME = #{activityCode_3},
+			ACTIVITY_CODE_4_TIME = #{activityCode_4},
+			ACTIVITY_CODE_5_TIME = #{activityCode_5},
+			ACTIVITY_CODE_6_TIME = #{activityCode_6},
+			ACTIVITY_CODE_7_TIME = #{activityCode_7}
+			WHERE 1=1 
+		AND ANAL_TIME_ID = #{analTimeID}
+    </update>
+    
+	<insert id="insertEmailShareLog" parameterType="hashmap">
+		INSERT INTO COM_EMAIL_SHARE_LOG
+		(
+			REFERENCE_ID, 
+			REFERENCE_TABLE_NAME, 
+			FROM_MEMBER_ID, 
+			TO_MEMBER_ID, 
+			SYS_REGISTER_DATE
+		)
+		VALUES
+		(
+			#{reference_id}, 
+			#{reference_table_name}, 
+			#{from_member_id}, 
+			#{to_member_id}, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<insert id="insertFile" parameterType="hashmap">
+	    <![CDATA[
+		    INSERT INTO ${fileTableName}
+			(
+				${fileColumnName}, 
+				CREATOR_ID, 
+				CREATE_DATETIME, 
+				FILE_NAME, 
+				FILE_PATH, 
+				FILE_TYPE
+			)
+			VALUES
+			(
+				#{filePK}, 
+				#{creatorId}, 
+				CURRENT_TIMESTAMP,
+				#{originalFileName}, 
+				#{filePath}, 
+				#{originalFileExtension}
+			);
+	    ]]>
+	</insert>
+		
+	<delete id="deleteFile" parameterType="hashmap">
+		<![CDATA[
+		    DELETE
+			FROM
+			${fileTableName}
+			WHERE FILE_ID = #{fileId};
+	    ]]>
+	    
+	</delete>
+		
+	<delete id="deleteNoticeDetail" parameterType="hashmap">
+	    UPDATE NOTICE_INFO
+	    SET
+	    NOTICE_DEL_YN = 'Y'
+	    WHERE NOTICE_ID = #{noticeID};
+	</delete>
+	
+	<delete id="deletePhoto" parameterType="hashmap">
+		<![CDATA[
+		    DELETE
+			FROM
+			${fileTableName}
+			WHERE ${fileColumnName} = 
+	    ]]>
+	    <choose>
+	    	<when test="fileTableName == 'CLIENT_COMPANY_INFO_FILE_STORE' ">
+		    #{COMPANY_ID}
+		    AND FILE_PATH LIKE 'organizationChart/%';
+		    </when>
+		    <when test="fileTableName == 'PARTNER_COMPANY_INFO_FILE_STORE' ">
+		    #{PARTNER_ID}
+		    AND FILE_PATH LIKE 'organizationChart/%';
+		    </when>
+		    <when test="fileTableName == 'CLIENT_INDIVIDUAL_PHOTO_STORE' ">
+		    #{CUSTOMER_ID}
+		    AND FILE_PATH LIKE '${imageType}/%';
+		    </when>
+		    <when test="fileTableName == 'PARTNER_INDIVIDUAL_PHOTO_STORE' ">
+		    #{PARTNER_INDIVIDUAL_ID}
+		    AND FILE_PATH LIKE '${imageType}/%';
+		    </when>
+		    <otherwise>
+		    NULL;
+		    </otherwise>
+	    </choose>
+	</delete>
+	
+	 <update id="callFaceTime" statementType="CALLABLE" parameterType="String">
+        {  
+        	call GEN_TIMECODE_STATICS_BYDAILY(#{currentDate})
+        };
+    </update>
+    
+	 <update id="callOpportunity" statementType="CALLABLE" parameterType="String">
+        {  
+        	call GEN_OPPORTUNITY_HISTORY_BYWEEKLY
+        };
+    </update>
+    
+    <update id="updateFile" parameterType="hashmap">
+    	<![CDATA[
+    	UPDATE ${fileTableName}
+	        SET 
+		    ${fileColumnName}	 = #{filePK}, 
+			SYS_UPDATE_DATE		 = CURRENT_TIMESTAMP, 
+			FILE_NAME			 = #{originalFileName}, 
+			FILE_PATH			 = #{filePath}, 
+			FILE_TYPE			 = #{originalFileExtension}
+		WHERE CREATOR_ID = #{creatorId}
+	    ]]>
+    </update>
+    
+    
+    <!-- 패스워드 변경 -->
+    <update id="updatePassword" parameterType="hashmap">
+    	<![CDATA[
+    	UPDATE OUR_USERS_INFO
+	        SET PASSWORD_ENC = #{changePassword}
+	    WHERE MEMBER_ID_NUM = #{global_member_id}
+	    ]]>
+    </update>
+    
+    <!-- 캘린더 미리알림 관련 -->
+    <select id="selectCalendarAlarmInfo" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	   		SELECT EVENT_ID, MEMBER_ID_NUM, EVENT_SUBJECT, START_DATETIME, ALARM_PERIOD , ALARM_FLAG, EVENT_CODE
+	   		FROM CALENDAR_EVENT 
+	   		WHERE MEMBER_ID_NUM= #{member_id_num};
+	    ]]>
+	</select>
+    
+    <insert id="insertNotice" parameterType="hashmap">
+		INSERT INTO NOTICE_INFO
+			(
+				MEMBER_ID_NUM,
+				NOTICE_DETAIL,
+				NOTICE_CATEGORY,
+				NOTICE_REDIRECT_URL,
+				EVENT_ID,
+				NOTICE_CODE,
+				NOTICE_DEL_YN
+			)
+				VALUES
+			(
+				#{MEMBER_ID_NUM},
+				#{NOTICE_DETAIL},
+				#{NOTICE_CATEGORY},
+				#{NOTICE_REDIRECT_URL},
+				#{EVENT_ID},
+				#{NOTICE_CODE},
+				"N"
+			);
+	</insert>
+	
+	
+    <insert id="insertShareCalendarNotice" parameterType="hashmap">
+		INSERT INTO NOTICE_INFO
+			(
+				MEMBER_ID_NUM,
+				NOTICE_DETAIL,
+				NOTICE_CATEGORY,
+				NOTICE_REDIRECT_URL,
+				EVENT_ID,
+				NOTICE_CODE,
+				NOTICE_DEL_YN
+			)
+				VALUES
+			(
+				#{memberID},
+				#{noticeDetail},
+				#{noticeCategory},
+				#{shareURL},
+				#{event_id},
+				#{NOTICE_CODE},
+				"N"
+			);
+	</insert>
+    
+    <update id="updateNotice" parameterType="hashmap">
+    	<![CDATA[
+    	UPDATE NOTICE_INFO 
+    		SET EVENT_ID=#{event_id}
+    		WHERE MEMBER_ID_NUM=#{memberID} AND EVENT_ID=#{event_id}
+	    ]]>
+    </update>
+    
+    <select id="selectProductList" parameterType="hashmap" resultType="hashmap">
+    	SELECT 
+    		PRODUCT_NO, 
+    		PRODUCT_NAME, 
+    		SYS_REGISTER_DATE, 
+    		SYS_UPDATE_DATE, 
+    		USE_YN
+		FROM 
+		OUR_PRODUCT_INFO
+		WHERE 1=1
+		<if test="use_yn != null and user_yn != '' ">
+		AND USE_YN = #{use_yn}
+		</if>
+    </select>
+    
+    <!-- page -->	
+	<sql id="pagingPre">
+	    <![CDATA[
+	     SELECT LIST.*
+		 FROM (
+	    ]]>
+	</sql>
+	 
+	 <!-- page -->
+	<sql id="pagingPost">
+	    <![CDATA[
+	        ) AS LIST
+			WHERE 1=1
+			AND LIST.ROWNUM BETWEEN #{pageStart} AND #{pageEnd}
+	    ]]>
+	</sql>
+	
+	<!-- page -->
+	<sql id="pagingPost2">
+	    <![CDATA[
+	      LIMIT ${pageStart}, ${rowCount}
+	    ]]>
+	</sql>
+	
+	<sql id="pagingPost3">
+	    <![CDATA[
+	      LIMIT 0, ${rowCount}
+	    ]]>
+	</sql>
+	
+	<insert id="insertCoachingTalk" parameterType="hashmap">
+		INSERT INTO COACHING_TALK
+			(
+				CATEGORY,
+				ID,
+				COACHING_TALK_DETAIL,
+				MEMBER_ID_NUM,
+				SYS_REGISTER_DATE,
+				SYS_UPDATE_DATE,
+				DELETE_YN
+			)
+				VALUES
+			(
+				#{category},
+				#{dataId},
+				#{coachingTalk},
+				#{global_member_id},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP,
+				'N'
+			);
+	</insert>
+	
+	<select id="selectCoachingTalk" parameterType="hashmap" resultType="hashmap">
+    	<![CDATA[
+    	SELECT 
+    		CT.COACHING_TALK_ID, 
+    		CT.CATEGORY,
+    		CT.ID, 
+    		CT.COACHING_TALK_DETAIL, 
+    		REPLACE(CT.COACHING_TALK_DETAIL, '\n', '<br>') AS RE_COACHING_TALK_DETAIL,
+    		CT.MEMBER_ID_NUM,
+    		OMI.HAN_NAME,
+    		OMI.POSITION_STATUS,
+    		OTI.TEAM_NAME,
+    		ODI.DIVISION_NAME,
+    		DATE_FORMAT(CT.SYS_REGISTER_DATE, "%Y년 %c월 %e일") AS CREATED_DATE,
+    		DATE_FORMAT(CT.SYS_REGISTER_DATE, "%H:%i") AS CREATED_TIME,
+    		CT.SYS_REGISTER_DATE,
+    		CT.SYS_UPDATE_DATE,
+    		CT.DELETE_YN
+		FROM 
+		COACHING_TALK AS CT
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON CT.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_TEAM_INFO AS OTI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+		LEFT OUTER JOIN
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		WHERE 1=1
+		AND CT.CATEGORY = #{category}
+		AND CT.ID = #{dataId}
+		]]>
+		<if test="delete_yn != null and delete_yn != '' ">
+			AND DELETE_YN = #{delete_yn}
+		</if>
+		ORDER BY CT.SYS_REGISTER_DATE DESC
+    </select>
+	
+	<insert id="insertLoginHistory" parameterType="hashmap">
+		INSERT INTO COM_LOGIN_HISTORY
+		(
+			MEMBER_ID_NUM, 
+			LOGIN_CATEGORY, 
+			LOGIN_BROWSER, 
+			LOGIN_IP, 
+			LOGIN_START_DATE
+		)
+		VALUES
+		(
+			#{member_id_num}, 
+			#{login_category}, 
+			#{login_browser}, 
+			#{login_ip}, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<update id="updateLogoutHistory" parameterType="hashmap">
+		UPDATE COM_LOGIN_HISTORY
+		SET LOGIN_END_DATE = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND MEMBER_ID_NUM = #{member_id_num}
+		AND LOGIN_HISTORY_ID = (
+			SELECT *
+			FROM
+			(
+				SELECT MAX(LOGIN_HISTORY_ID)
+				FROM COM_LOGIN_HISTORY
+				WHERE 1=1
+				AND MEMBER_ID_NUM = #{member_id_num}
+			) AS TB
+		)
+	</update>
+	
+	<insert id="insertPageContatct" parameterType="hashmap">
+		INSERT INTO COM_ACCESS_HISTORY
+		(
+			MEMBER_ID_NUM, 
+			ACCESS_URL, 
+			SYS_REGISTER_DATE 
+		)
+		VALUES
+		(
+			#{member_id_num}, 
+			#{page_url}, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	 <update id="callErpDashboardCheckList" parameterType="hashmap">
+	 <![CDATA[
+       UPDATE	
+		(
+			SELECT
+				IF(@REV_TMP IS NULL OR @PREV != OL.OPPORTUNITY_ID , @REV_TMP := EDC.ACCRUE_REV, @REV_TMP := @REV_TMP) AS TMP1,
+				IF(@GP_TMP IS NULL OR @PREV != OL.OPPORTUNITY_ID , @GP_TMP := EDC.ACCRUE_GP, @GP_TMP := @GP_TMP) AS TMP2,
+				OL.OPPORTUNITY_ID,
+				OA.AMOUNT_ID,
+				EDC.ACCRUE_REV,
+				EDC.ACCRUE_GP,
+				OA.BASIS_PLAN_REVENUE_AMOUNT,
+				OA.BASIS_PLAN_GP_AMOUNT,
+				OA.BASIS_MONTH,
+				CASE 
+					WHEN @REV_TMP = 0 THEN 0
+					WHEN @REV_TMP >= OA.BASIS_PLAN_REVENUE_AMOUNT THEN OA.BASIS_PLAN_REVENUE_AMOUNT
+					WHEN @REV_TMP < OA.BASIS_PLAN_REVENUE_AMOUNT THEN @REV_TMP
+				END AS REV_TMP1,
+				IF(@REV_TMP >= OA.BASIS_PLAN_REVENUE_AMOUNT,@REV_TMP := @REV_TMP - OA.BASIS_PLAN_REVENUE_AMOUNT,@REV_TMP := 0) AS REV_TMP2,
+				CASE 
+					WHEN @GP_TMP = 0 THEN 0
+					WHEN @GP_TMP >= OA.BASIS_PLAN_GP_AMOUNT THEN OA.BASIS_PLAN_GP_AMOUNT
+					WHEN @GP_TMP < OA.BASIS_PLAN_GP_AMOUNT THEN @GP_TMP
+				END AS GP_TMP1,
+				IF(@GP_TMP >= OA.BASIS_PLAN_GP_AMOUNT,@GP_TMP := @GP_TMP - OA.BASIS_PLAN_GP_AMOUNT,@GP_TMP := 0) AS GP_TMP2,
+				@PREV := OL.OPPORTUNITY_ID
+			FROM 
+			OPPORTUNITY_LOG AS OL 
+			INNER JOIN
+			OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+			INNER JOIN
+			ERP_DASHBOARD_CHECKLIST AS EDC ON OL.ERP_PROJECT_CODE = EDC.PROJECT_ID,(SELECT @REV_TMP := NULL) AS R, (SELECT @GP_TMP := NULL) AS G
+			WHERE 1=1
+			AND OL.SALES_CYCLE != '5'
+			ORDER BY OL.OPPORTUNITY_ID, OA.BASIS_MONTH ASC
+		) AS A
+		INNER JOIN
+		OPPORTUNITY_AMOUNT AS B ON A.AMOUNT_ID = B.AMOUNT_ID
+		SET 
+			B.ERP_REV = A.REV_TMP1,
+			B.ERP_GP = A.GP_TMP1;
+	]]>
+    </update>
+    
+	 <update id="callUpdateOpportunitySalesCycle" statementType="CALLABLE" parameterType="String">
+        {  
+        	call update_opportunity_salescycle
+        };
+    </update>
+	
+	<select id="select1" parameterType="hashmap" resultType="hashmap">
+		SELECT 1
+	</select>
+	
+	<select id="reloadFile" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		    SELECT
+		    *
+			FROM
+			${fileTableName}
+			WHERE ${findCloumnName} = #{hiddenModalPK};
+	    ]]>
+	</select>
+	
+	
+	<select id="searchProductInfo" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		SELECT A.*
+		FROM (    
+		    SELECT 
+		    	PRODUCT_NO, 
+		    	PRODUCT_CODE, 
+		    	PRODUCT_NAME, 
+		    	WORKS_CODE, 
+		    	PRODUCT_STANDARD, 
+		    	USE_YN, 
+		    	SYS_REGISTER_DATE, 
+		    	SYS_UPDATE_DATE
+			FROM OUR_PRODUCT_INFO
+			WHERE 1=1
+	    ]]>
+			<if test="searchProduct != null and searchProduct != '' ">
+			AND ( PRODUCT_CODE  LIKE CONCAT('%', #{searchProduct}, '%') OR PRODUCT_NAME  LIKE CONCAT('%', #{searchProduct}, '%') ) 
+			</if>
+			) B INNER JOIN OUR_PRODUCT_INFO AS A ON A.PRODUCT_NO = B.PRODUCT_NO
+	</select>
+	
+	
+	<select id="selectCode_project" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT COM_CODE_ID, CODE_ID, PARENT_CODE_ID, CODE_NAME
+			FROM COM_CODE
+			WHERE 1=1
+			AND USE_YN = 'Y'
+			AND PARENT_CODE_ID = 'PROJECT'
+		]]>
+	</select>
+	
+	<select id="selectCode_tpso" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT COM_CODE_ID, CODE_ID, PARENT_CODE_ID, CODE_NAME
+		FROM COM_CODE
+		WHERE 1=1
+		AND USE_YN = 'Y'
+		AND PARENT_CODE_ID = 'TPSO'
+		AND CODE_NAME NOT LIKE '%사용금지%'
+		]]>
+	</select>
+	
+	<select id="selectUserPageRowCount" parameterType="hashmap" resultType="integer">
+	<![CDATA[
+		SELECT PAGE_ROWCOUNT FROM COM_USER_PAGE 
+		WHERE 1=1
+		AND MEMBER_ID_NUM IN ('default',#{global_member_id})
+		AND CATEGORY IN ('0',#{category})
+		ORDER BY FIND_IN_SET(MEMBER_ID_NUM, 'default') ASC LIMIT 1
+	]]>
+	</select>
+	
+	<select id="selectMemberFaceTime" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			ANAL_TIME_ID, 
+			MEMBER_ID_NUM, 
+			DATE_FORMAT(ANAL_DATE, '%Y-%m-%d') AS ANAL_DATE, 
+			ANAL_BASIS_TIME, 
+			ACTIVITY_CODE_1_TIME, 
+			ACTIVITY_CODE_2_TIME, 
+			ACTIVITY_CODE_3_TIME, 
+			ACTIVITY_CODE_4_TIME, 
+			ACTIVITY_CODE_5_TIME, 
+			ACTIVITY_CODE_6_TIME, 
+			ACTIVITY_CODE_7_TIME, 
+			ACTIVITY_CODE_8_TIME,
+			ACTIVITY_CODE_9_TIME,
+			DATE_FORMAT(SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+			DATE_FORMAT(SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE
+		FROM ANAL_INDIVIDUAL_TIME
+		WHERE 1=1
+		AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND ANAL_DATE = #{ANAL_DATE}
+	]]>
+	</select>
+	
+	<update id="updateMemberFaceTime" parameterType="hashmap">
+    	UPDATE ANAL_INDIVIDUAL_TIME
+	        SET 
+			    ACTIVITY_CODE_1_TIME = #{ACTIVITY_CODE_1_TIME},
+			    SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+		WHERE 1=1
+			AND MEMBER_ID_NUM = #{MEMBER_ID_NUM} AND ANAL_DATE =#{ANAL_DATE}
+    </update>
+    
+    <insert id="insertMemberFaceTime" parameterType="hashmap">
+		INSERT INTO ANAL_INDIVIDUAL_TIME
+		(
+			MEMBER_ID_NUM, 
+			ANAL_DATE, 
+			ANAL_BASIS_TIME, 
+			ACTIVITY_CODE_1_TIME, 
+			ACTIVITY_CODE_2_TIME, 
+			ACTIVITY_CODE_3_TIME, 
+			ACTIVITY_CODE_4_TIME, 
+			ACTIVITY_CODE_5_TIME, 
+			ACTIVITY_CODE_6_TIME, 
+			ACTIVITY_CODE_7_TIME, 
+			ACTIVITY_CODE_8_TIME,
+			ACTIVITY_CODE_9_TIME,
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{MEMBER_ID_NUM}, 
+			#{ANAL_DATE}, 
+			8,
+			#{ACTIVITY_CODE_1_TIME}, 
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			CURRENT_TIMESTAMP,
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<!-- 최영완 -->
+	<delete id="deleteLogOutToken" parameterType="hashmap">
+		DELETE FROM our_user_mobile_device_key
+		WHERE 1=1 
+		AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND DEVICE_KEY = #{userToken}	
+	</delete>
+	
+	<!-- 현재 url 로 메뉴 정보 조회 -->
+	<select id="selectMenuSub" resultType="hashmap">
+		SELECT 
+			CMS.MENU_ID,
+			CM.MENU_TITLE
+		FROM COM_MENU_SUB AS CMS
+		INNER JOIN COM_MENU AS CM 
+		 ON CM.MENU_ID = CMS.MENU_ID
+		WHERE CMS.MENU_SUB_URL = #{currentUrl}	
+	</select>
+	
+</mapper>

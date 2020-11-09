@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>고객개인정보</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body class="fixed-sidebar no-skin-config full-height-layout">
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header ta-c">
+                        <div class="dropdown profile-element">
+                            <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                            <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                            <a href="#">
+                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                            </a>
+                        </div>
+                        <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                            디유넷
+                        </div>
+                    </li>
+                    <li class="active">
+                        <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객사정보</a></li>
+                            <li class="active"><a href="#">고객개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객컨택내용</a></li>
+                            <li><a href="#">영업기회</a></li>
+                            <li><a href="#">잠재영업기회</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객이슈</a></li>
+                            <li><a href="#">고객만족도</a></li>
+                            <li><a href="#">서비스프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">파트너사협업</a></li>
+                            <li><a href="#">파트너사정보</a></li>
+                            <li><a href="#">파트너사개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                        <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class=""><a href="#">성과관리</a></li>
+                            <li><a href="#">생산성</a></li>
+                            <li><a href="#">제안서정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">회사/부문별전략</a></li>
+                            <li><a href="#">고객별전략</a></li>
+                            <li><a href="#">전략프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">캘린더</a></li>
+                            <li><a href="#">나의 할 일</a></li>
+                        </ul>
+                    </li>
+                    <li class="special_link">
+                        <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                    </li>
+                </ul>
+                <div class="product-logo text-center">
+                    <img src="../../images/pc/product_logo.png" alt=""/>
+                    <span>Copyright Seller’s Company © 2016</span>
+                </div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="white-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+                       
+                    </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                            </a>
+                        </li>
+
+
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-sign-out"></i> 로그아웃
+                            </a>
+                        </li>
+                    </ul>
+
+                </nav>
+            </div>
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-4">
+                    <h2>고객개인정보</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a><a>고객사 및 고객개인정보</a></a>
+                        </li>
+                        <li class="active">
+                            <strong>고객개인정보</strong>
+                        </li>
+                    </ol>
+                </div>
+                <div class="col-sm-8">
+                    <div class="time-update">
+                        <span class="text-muted small pull-right">최근 업데이트: <i class="fa fa-clock-o"></i> 2:10 pm - 12.06.2014</span>
+                    </div>
+                    <div class="search-common">
+                        <div class="input-default" style="margin:0;">
+                            <span class="input-group-btn">
+                                    <a href="#" class="btn btn-search-option"><i class="fa fa-search"></i> 검색</a>
+                            </span>
+
+                            <div class="search-detail collapse">
+                                <div class="singleSearch">
+                                    <input type="text" placeholder="고객명 또는 고객사를 입력해주세요" class="input form-control">
+                                    <button type="button" class="btn btn-w-s btn-seller"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상세보기 영역:start -->
+            <div class="fh-breadcrumb">
+
+                <div class="fh-column">
+                    <div class="full-height-scroll">
+                        <div class="left-custom-search">
+                            <input type="text" placeholder="검색어를 입력해주세요" class="input form-control fl_l" />
+                            <button type="button" class="btn btn-w-s btn-seller"><i class="fa fa-search"></i></button>
+                        </div>
+                        <ul class="list-group elements-list">
+                            <li class="list-group-item active">
+                                <a data-toggle="tab" href="#tab-1">                                    
+                                    <strong class="custom-name">황선홍</strong> <span class="custom-level">이사</span>
+                                    <div class="small m-t-xs">
+                                        SK텔레콤(주) / 영업1팀
+                                    </div>
+                                    <small class="text-muted">ID : FD27367687</small>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#tab-2">
+                                    <strong class="custom-name">이상현</strong> <span class="custom-level">부장</span>
+                                    <div class="small m-t-xs">
+                                        (주)디유넷 / 디자인팀
+                                    </div>
+                                    <small class="text-muted">ID : FD27367687</small>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#tab-1">
+                                    <strong class="custom-name">홍길동</strong> <span class="custom-level">대리</span>
+                                    <div class="small m-t-xs">
+                                        SK텔레콤(주) / 영업2팀
+                                    </div>
+                                    <small class="text-muted">ID : FD27367687</small>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#tab-2">
+                                    <strong class="custom-name">김진욱</strong> <span class="custom-level">이사</span>
+                                    <div class="small m-t-xs">
+                                        SK텔레콤(주) / 영업1팀
+                                    </div>
+                                    <small class="text-muted">ID : FD27367687</small>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#tab-1">
+                                    <strong class="custom-name">이상현</strong> <span class="custom-level">부장</span>
+                                    <div class="small m-t-xs">
+                                        (주)디유넷 / 디자인팀
+                                    </div>
+                                    <small class="text-muted">ID : FD27367687</small>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#tab-2">                                    
+                                    <strong class="custom-name">홍길동</strong> <span class="custom-level">대리</span>
+                                    <div class="small m-t-xs">
+                                        SK텔레콤(주) / 영업2팀
+                                    </div>
+                                </a>
+                                <small class="text-muted">ID : FD27367687</small>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="full-height">
+                    <div class="full-height-scroll white-bg border-left">
+
+                        <div class="element-detail-box">
+
+                            <div class="tab-content">
+                                <div id="tab-1" class="tab-pane active">
+                                    <div class="pull-right">
+                                        <button class="btn btn-white btn-sm" data-toggle="modal" data-target="#myModal3"><i class="fa fa-plus"></i> 고객 영업활동 추가</button>
+                                        <button class="btn btn-white btn-sm" data-toggle="modal" data-target="#myModal1"><i class="fa fa-plus"></i> 고객추가</button>
+                                    </div>
+
+                                    <h1>
+                                        <span class="custom_picture va_m">
+                                            <img src="../../images/pc/namecard4.png" alt=""/>
+                                        </span>
+                                        <span class="va_m">황선홍 이사</span>
+                                        <button class="btn btn-white btn-sm" data-toggle="modal" data-target="#myModal2"><i class="fa fa-edit"></i>  정보수정</button>
+                                    </h1>
+
+                                    <div class="tabs-container mg-b30">
+
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a data-toggle="tab" href="#tab2-1">기본정보</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab2-2">소속 고객정보</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab2-3">진행중인 영업활동</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab2-4">영업성과</a></li>
+                                            <li class=""><a data-toggle="tab" href="#tab2-5">최근 컨택 History</a></li>
+                                        </ul>
+
+                                        <div class="tab-content">
+                                            <div  id="tab2-1" class="tab-pane active">
+
+                                                <h2>기본정보</h2>
+
+                                                <div class="custom-basic">
+                                                    
+                                                    <div class="view_pg_type1">
+
+                                                        <div class="form-group topline pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r"><span>고객명</span></label>
+                                                            <div class="col-sm-4">황선홍 이사</div>
+                                                            <label class="col-sm-2 control-label ag_r"><span>생년월일</span></label>
+                                                            <div class="col-sm-4">2000-01-01</div>                                                                        
+                                                        </div>                                                                                                                
+
+                                                        <div class="form-group pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r"><span>휴대전화</span></label>
+                                                            <div class="col-sm-4">010-1234-5678</div>
+                                                            <label class="col-sm-2 control-label ag_r"><span>이메일</span></label>
+                                                            <div class="col-sm-4">hong@gmail.com</div>
+                                                        </div>
+                                                        
+                                                        <div class="form-group pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r"><span>고객사명</span></label>
+                                                            <div class="col-sm-4">삼성증권</div>
+                                                            <label class="col-sm-2 control-label ag_r"><span>고객사ID</span></label>
+                                                            <div class="col-sm-4">SAF09i08</div>
+                                                        </div>
+                                                        
+                                                        <div class="form-group pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r"><span>직책</span></label>
+                                                            <div class="col-sm-4">팀장</div>
+                                                            <label class="col-sm-2 control-label ag_r"><span>담당업무</span></label>
+                                                            <div class="col-sm-4">UI/UX, Html</div>                                                            
+                                                        </div>
+
+                                                        <div class="form-group pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r"><span>직장전화</span></label>
+                                                            <div class="col-sm-4">02-3564-5682</div>
+                                                            <label class="col-sm-2 control-label ag_r"><span>주소</span></label>
+                                                            <div class="col-sm-4">서울시 서대문구 충정로 3가 동아일보사건물 8층</div>
+                                                        </div>
+
+                                                        <!-- <div class="form-group pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r"><span>명함</span></label>
+                                                            <div class="col-sm-4"><a href="">명함보기</a></div>
+                                                        </div> -->
+
+                                                        <div class="pd-t30">
+                                                            <h3>소속정보</h3>
+                                                        </div>
+
+                                                        <div class="form-group topline pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r"><span>소속본부</span></label>
+                                                            <div class="col-sm-4">IT 서비스 사업본부</div>
+                                                            <label class="col-sm-2 control-label ag_r"><span>소속부서</span></label>
+                                                            <div class="col-sm-4">사업본부2</div>
+                                                        </div>
+                                                        
+                                                        <div class="form-group pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r"><span>소속팀</span></label>
+                                                            <div class="col-sm-4">영업마케팅1팀</div>
+                                                            <label class="col-sm-2 control-label ag_r"><span>이전 영업사원</span></label>
+                                                            <div class="col-sm-4">기술연구소 기술연구소 R&D팀 장성훈 대리</div>
+                                                        </div>
+                                                        
+
+                                                        <div class="pd-t40">
+                                                            <h3>보고라인</h3>
+                                                        </div>
+
+                                                        <div class="form-group pd-t10">
+                                                            <label class="col-sm-2 control-label ag_r">1단계</label>
+                                                            <div class="col-sm-2">본부장 이수만 전무</div>
+                                                            <label class="col-sm-2 control-label ag_r">2단계</label>
+                                                            <div class="col-sm-2">원빈 이사</div>
+                                                            <label class="col-sm-2 control-label ag_r">3단계</label>
+                                                            <div class="col-sm-2">박효신 부장</div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                
+                                            </div>
+
+                                            <div id="tab2-2" class="tab-pane ">
+                                                <h2>SK텔레콤(주) 소속 고객정보</h2>
+
+                                                <table class="basic4_list mg-b30">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>고객명</th>
+                                                        <th>소속본부</th>
+                                                        <th>직급</th>
+                                                        <th>휴대전화</th>
+                                                        <th>메일주소</th>
+                                                        <th>작성자</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>2</td>
+                                                        <td>김고객</td>
+                                                        <td>구매본부</td>
+                                                        <td>이사</td>
+                                                        <td>02-1234-5678</td>
+                                                        <td>000asdf@naver.com</td>
+                                                        <td>관리자</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td>홍길동</td>
+                                                        <td>구매본부</td>
+                                                        <td>이사</td>
+                                                        <td>02-1234-5678</td>
+                                                        <td>000asdf@naver.com</td>
+                                                        <td>관리자</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div id="tab2-3" class="tab-pane ">
+                                                <h2>진행중인 영업활동</h2>
+
+                                                <h3>영업기회</h3>
+
+                                                <table class="basic4_list mg-b30">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>고객명</th>
+                                                        <th>소속본부</th>
+                                                        <th>직급</th>
+                                                        <th>휴대전화</th>
+                                                        <th>메일주소</th>
+                                                        <th>작성자</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>2</td>
+                                                        <td><a href="#">김고객</a></td>
+                                                        <td>구매본부</td>
+                                                        <td>이사</td>
+                                                        <td>02-1234-5678</td>
+                                                        <td>000asdf@naver.com</td>
+                                                        <td>관리자</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td><a href="#">홍길동</a></td>
+                                                        <td>구매본부</td>
+                                                        <td>이사</td>
+                                                        <td>02-1234-5678</td>
+                                                        <td>000asdf@naver.com</td>
+                                                        <td>관리자</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                <h3>고객이슈</h3>
+
+                                                <table class="basic4_list mg-b30">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>이슈종류</th>
+                                                        <th>이슈제기자</th>
+                                                        <th>이슈제목</th>
+                                                        <th>해결책임자</th>
+                                                        <th>발생일자</th>
+                                                        <th>해결목표일자</th>
+                                                        <th>해결일자</th>
+                                                        <th>이슈상태</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>3</td>
+                                                        <td>제품불만</td>
+                                                        <td>손아섭</td>
+                                                        <td>불만있어요</td>
+                                                        <td>이승만</td>
+                                                        <td>2016-04-05</td>
+                                                        <td>2016-04-07</td>
+                                                        <td>2016-04-07</td>
+                                                        <td><i class="statusColor statusColor-green"></i></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2</td>
+                                                        <td>제품불만</td>
+                                                        <td>손아섭</td>
+                                                        <td>불만있어요</td>
+                                                        <td>이승만</td>
+                                                        <td>2016-04-05</td>
+                                                        <td>2016-04-07</td>
+                                                        <td>-</td>
+                                                        <td><i class="statusColor statusColor-yellow"></i></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td>제품불만</td>
+                                                        <td>손아섭</td>
+                                                        <td>불만있어요</td>
+                                                        <td>이승만</td>
+                                                        <td>2016-04-05</td>
+                                                        <td>2016-04-07</td>
+                                                        <td>-</td>
+                                                        <td><i class="statusColor statusColor-red"></i></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                <h3>서비스프로젝트</h3>
+
+                                                <table class="basic4_list mg-b30">
+                                                    <thead>
+                                                    <tr>
+                                                        <th rowspan="2">No</th>
+                                                        <th rowspan="2">프로젝트명</th>
+                                                        <th rowspan="2">영업대표</th>
+                                                        <th colspan="4">프로젝트 이슈</th>
+                                                        <th rowspan="2">수행단계</th>
+                                                        <th rowspan="2">진행률(%)</th>
+                                                        <th rowspan="2">Status</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>총건수</th>
+                                                        <th>완료</th>
+                                                        <th>진행중</th>
+                                                        <th>미결</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>2</td>
+                                                        <td>롯데카드 차세대</td>
+                                                        <td>김대표</td>
+                                                        <td>10</td>
+                                                        <td>3</td>
+                                                        <td>5</td>
+                                                        <td>2</td>
+                                                        <td>분석</td>
+                                                        <td>
+                                                            <span class="">43%</span>
+                                                            <div class="progress progress-bar-default mg-no">
+                                                                <div style="width: 43%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="43" role="progressbar" class="progress-bar"></div>
+                                                            </div>
+                                                        </td>
+                                                        <td><i class="statusColor statusColor-yellow"></i></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td>롯데카드 차세대</td>
+                                                        <td>김대표</td>
+                                                        <td>10</td>
+                                                        <td>3</td>
+                                                        <td>5</td>
+                                                        <td>2</td>
+                                                        <td>분석</td>
+                                                        <td>
+                                                            <span class="">78%</span>
+                                                            <div class="progress progress-bar-default mg-no">
+                                                                <div style="width: 78%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="43" role="progressbar" class="progress-bar">
+                                                                    <span class="sr-only">43% Complete (success)</span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td><i class="statusColor statusColor-yellow"></i></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div id="tab2-4" class="tab-pane">
+                                                <h2>영업성과(고객사 기준)</h2>
+
+                                                <table class="basic4_list mg-b30">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>회계년도</th>
+                                                        <th>계약건수</th>
+                                                        <th>계약금액(백만원)</th>
+                                                        <th>담당자</th>
+                                                        <th>컨택일자</th>
+                                                        <th>Action Items</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>3</td>
+                                                        <td>2016년</td>
+                                                        <td>2</td>
+                                                        <td>150M</td>
+                                                        <td>이대호</td>
+                                                        <td>2016-04-07</td>
+                                                        <td>
+                                                            AAA (2016/05/20)<br/>
+                                                            BB (2016/04/10)
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2</td>
+                                                        <td>2016년</td>
+                                                        <td>2</td>
+                                                        <td>150M</td>
+                                                        <td>이대호</td>
+                                                        <td>2016-04-07</td>
+                                                        <td>
+                                                            AAA (2016/05/20)<br/>
+                                                            BB (2016/04/10)
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td>2016년</td>
+                                                        <td>2</td>
+                                                        <td>150M</td>
+                                                        <td>이대호</td>
+                                                        <td>2016-04-07</td>
+                                                        <td>
+                                                            AAA (2016/05/20)<br/>
+                                                            BB (2016/04/10)
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <div id="tab2-5" class="tab-pane">
+                                                <h2>최근 컨택 History (최근 6개월 – 고객개인 기준)</h2>
+
+                                                <table class="basic4_list mg-b30">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+                                                        <th>분류</th>
+                                                        <th>고객사</th>
+                                                        <th>고객명</th>
+                                                        <th>컨택제목</th>
+                                                        <th>담당자</th>
+                                                        <th>컨택일자</th>
+                                                        <th>Action Items</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>4</td>
+                                                        <td>방문</td>
+                                                        <td>롯데제과</td>
+                                                        <td>이대호</td>
+                                                        <td>고객 홈런 축하 방문</td>
+                                                        <td>장그래</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>
+                                                            AAA (2016-04-10)<br/>
+                                                            BB (2016-04-10)
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>3</td>
+                                                        <td>이메일</td>
+                                                        <td>롯데제과</td>
+                                                        <td>이대호</td>
+                                                        <td>고객 홈런 축하 방문</td>
+                                                        <td>장그래</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>
+                                                            AAA (2016-04-10)<br/>
+                                                            BB (2016-04-10)
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>2</td>
+                                                        <td>방문</td>
+                                                        <td>롯데제과</td>
+                                                        <td>이대호</td>
+                                                        <td>고객 홈런 축하 방문</td>
+                                                        <td>장그래</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>
+                                                            AAA (2016-04-10)<br/>
+                                                            BB (2016-04-10)
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td>방문</td>
+                                                        <td>롯데제과</td>
+                                                        <td>이대호</td>
+                                                        <td>고객 홈런 축하 방문</td>
+                                                        <td>장그래</td>
+                                                        <td>2016-04-10</td>
+                                                        <td>
+                                                            AAA (2016-04-10)<br/>
+                                                            BB (2016-04-10)
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <!-- 상세보기 영역:end -->
+        </div>
+    </div>
+
+    <!-- 신규등록 -->
+    <div class="modal inmodal fade" id="myModal1" tabindex="-1" role="dialog"  aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">고객 신규등록</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox float-e-margins">
+
+                                <div class="ibox-content border_n">
+                                    <form method="get" class="form-horizontal">
+
+                                        <!-- <div class="form-group"><label class="col-sm-2 control-label">고객 기본정보</label>
+                                            <div class="col-sm-10">
+                                                <div class="col-sm-4 m-b custom-photo">
+                                                    <span class="photo" style="background:url('../../images/pc/namecard.png') no-repeat center center; background-size:cover;"></span>
+                                                    <a href="#"><img src="../../images/pc/icon_plus.png"/></a>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <label class="col-sm-4 control-label">고객명</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="김진욱" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">직급</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="대리" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">휴대전화</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="예) 010-1234-5678" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">일반전화</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="예) 02-1234-5678" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">이메일</label>
+                                                    <div class="col-sm-8"><input type="text" placeholder="예) sellers@seller.co.kr" class="form-control"></div>
+                                                </div>
+                                            </div>
+                                        </div> -->
+
+                                        <!-- 고객 기본정보  -->
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">고객명</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="황선홍" class="form-control"></div>
+                                            <label class="col-sm-2 control-label">직급</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="이사" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">휴대전화</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) 010-1234-5678" class="form-control"></div>
+                                            <label class="col-sm-2 control-label">일반전화</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) 02-1234-5678" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">이메일</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) sellers@seller.co.kr" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-bottom"></div>
+
+
+                                        <!-- TabMenu -->
+                                        <div class="tab-area">
+
+                                            <!-- tab-menu -->
+                                            <ul class="tabmenu-type">
+                                                <li><a href="#" class="sel">소속회사</a></li>
+                                                <li><a href="#" class="">개인정보</a></li>
+                                                <li><a href="#" class="">비즈니스이력</a></li>
+                                            </ul>
+                                            <!--// tab-menu -->
+
+                                            <!-- tab-cont -->
+
+                                            <!-- 소속회사 -->
+                                            <div class="sub_cont scont1 off">
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">고객사명</label>
+                                                    <div class="col-sm-4">
+                                                        <div class="company-search-single"><!-- 고객사 검색 : 자동완성 -->
+                                                            <div class="company-current"><!-- 현재 등록된 고객사 -->
+                                                                <span>삼성증권<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                            </div>
+                                                        </div>                                                                                            
+                                                    </div>
+                                                    <label class="col-sm-2 control-label">고객사ID</label>
+                                                    <div class="col-sm-4"><div class="fc_sgray pd-t7">A2SD4556346</div></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">소속본부</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="서비스본부" class="form-control"></div>
+                                                    <label class="col-sm-2 control-label">소속부서</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="영업1부" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">소속팀명</label>
+                                                    <div class="col-sm-4">
+                                                        <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                            <select class="form-control" name="account">
+                                                            <option>전체</option>
+                                                            <option>사업분부1</option>
+                                                            <option>사업분부2</option>
+                                                        </select></div>
+                                                    </div>
+                                                    <label class="col-sm-2 control-label">직책</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="영업1팀" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">보고라인</label>
+                                                    <div class="col-sm-10 pd-no">
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">1단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" value="본부장 홍석천 전무" class="form-control"></div>
+                                                        </div>
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">2단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" class="form-control"></div>
+                                                        </div>
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">3단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" class="form-control"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">담당업무</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="UI/UX 기획" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">직장 주소</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="서울시 서대문구 충정로3가 동아일보사건물" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">자사와의 관계</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">사내친한직원</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="박신혜, 김례원" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">정보출처</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="" class="form-control"></div>
+                                                    <label class="col-sm-2 control-label">이전영업사원</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="사원명" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">명함등록</label>
+                                                    <div class="col-sm-10">
+                                                        <div class="input-default pop-file">
+                                                            <div class="file-dragdrap-area">
+                                                                <div class="fileUpload btn btn-gray">
+                                                                    <span>사진첨부</span>
+                                                                    <input type="file" class="upload" />
+                                                                </div>
+                                                                <div class="file-in-list">
+                                                                    <span><a href="#"><i class="fa fa-file-powerpoint-o fa-lg"></i> 황선홍이사 명함.jpg</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12 m-b ag_c custom-photo2">
+                                                        <span class="photo" style="background:url('../../images/pc/namecard2.png') no-repeat center center; background-size:cover;"><img src="../../images/pc/namecard_default.png" /></span>
+                                                        <!-- 등록된 이미지가 없을 경우에는 디폴트 이미지가 노출되면, 이미지가 등록되면 디폴트는 사라지고 등록이미지가 배경으로 보여짐 -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!--// 소속회사 -->
+
+                                            <!-- 개인정보 -->
+                                            <div class="sub_cont scont2 ">
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">학력</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">학력관련 인맥정보</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+                                                
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">경력</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">경력관련 인맥정보</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">가족</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">친한사람</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">SNS</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">기타</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+                                            </div>
+                                            <!--// 개인정보 -->
+
+                                            <!-- 비즈니스이력 -->
+                                            <div class="sub_cont scont3 off">
+                                                <table id="" class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>프로젝트명</th>
+                                                            <th>역할</th>
+                                                            <th>포지션(Pro/Anti)</th>
+                                                            <th>시작일</th>
+                                                            <th>마감일</th>
+                                                            <th>상세내용</th>
+                                                            <th>삭제</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>연예가 중계 HW납품</td>
+                                                            <td>정보제공자</td>
+                                                            <td>Pro</td>
+                                                            <td>2016-04-10</td>
+                                                            <td>2016-05-10</td>
+                                                            <td>요구사항 및 일정제공</td>
+                                                            <td><a href="#" class=""><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                <p class="text-center pd-t10">
+                                                   <a href="#" class="btn-row-add" name="buttonSaleAddRow">+ 리스트 추가</a>
+                                                </p>
+                                            </div>
+                                            <!--// 비즈니스이력 -->
+
+                                            <!--// tab-cont -->
+
+                                        </div>
+                                        <!--// TabMenu -->
+
+                                        <div class="hr-line-bottom"></div>
+
+                                        <p class="text-center pt-t20">
+                                            <button type="button" class="btn btn-w-m btn-primary btn-seller">등록</button>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <!--// 신규등록 -->
+
+    <!-- 정보수정 -->
+    <div class="modal inmodal fade" id="myModal2" tabindex="-1" role="dialog"  aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">황선홍 이사</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox float-e-margins">
+
+                                <div class="ibox-content border_n">
+                                    <form method="get" class="form-horizontal">
+                                        <div class="form-group">
+                                            <div class="col-sm-12 ag_r">작성자 : 홍길동 / 작성일 : 2016-05-10</div>
+                                        </div>
+                                        
+                                        <div class="hr-line-bottom"></div>
+
+                                        <!-- <div class="form-group"><label class="col-sm-2 control-label">고객 기본정보</label>
+                                            <div class="col-sm-10">
+                                                <div class="col-sm-4 m-b custom-photo">
+                                                    <span class="photo" style="background:url('../../images/pc/namecard.png') no-repeat center center; background-size:cover;"></span>
+                                                    <a href="#"><img src="../../images/pc/icon_plus.png"/></a>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <label class="col-sm-4 control-label">고객명</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="김진욱" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">직급</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="대리" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">휴대전화</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="예) 010-1234-5678" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">일반전화</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="예) 02-1234-5678" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">이메일</label>
+                                                    <div class="col-sm-8"><input type="text" placeholder="예) sellers@seller.co.kr" class="form-control"></div>
+                                                </div>
+                                            </div>
+                                        </div> -->
+
+                                        <!-- 고객 기본정보  -->
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">고객명</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="황선홍" class="form-control"></div>
+                                            <label class="col-sm-2 control-label">직급</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="이사" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">휴대전화</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) 010-1234-5678" class="form-control"></div>
+                                            <label class="col-sm-2 control-label">일반전화</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) 02-1234-5678" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">이메일</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) sellers@seller.co.kr" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-bottom"></div>
+
+
+                                        <!-- TabMenu -->
+                                        <div class="tab-area">
+
+                                            <!-- tab-menu -->
+                                            <ul class="tabmenu-type">
+                                                <li><a href="#" class="sel">소속회사</a></li>
+                                                <li><a href="#" class="">개인정보</a></li>
+                                                <li><a href="#" class="">비즈니스이력</a></li>
+                                            </ul>
+                                            <!--// tab-menu -->
+
+                                            <!-- tab-cont -->
+
+                                            <!-- 소속회사 -->
+                                            <div class="sub_cont scont1 off">
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">고객사명</label>
+                                                    <div class="col-sm-4">
+                                                        <div class="company-search-single"><!-- 고객사 검색 : 자동완성 -->
+                                                            <div class="company-current"><!-- 현재 등록된 고객사 -->
+                                                                <span>삼성증권<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                            </div>
+                                                        </div>                                                                                            
+                                                    </div>
+                                                    <label class="col-sm-2 control-label">고객사ID</label>
+                                                    <div class="col-sm-4"><div class="fc_sgray pd-t7">A2SD4556346</div></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">소속본부</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="서비스본부" class="form-control"></div>
+                                                    <label class="col-sm-2 control-label">소속부서</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="영업1부" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">소속팀명</label>
+                                                    <div class="col-sm-4">
+                                                        <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                            <select class="form-control" name="account">
+                                                            <option>전체</option>
+                                                            <option>사업분부1</option>
+                                                            <option>사업분부2</option>
+                                                        </select></div>
+                                                    </div>
+                                                    <label class="col-sm-2 control-label">직책</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="영업1팀" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">보고라인</label>
+                                                    <div class="col-sm-10 pd-no">
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">1단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" value="본부장 홍석천 전무" class="form-control"></div>
+                                                            <div class="col-sm-12 control-label ag_l">고객ID : A098u35</div>
+                                                        </div>
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">2단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" class="form-control"></div>
+                                                            <div class="col-sm-12 control-label ag_l">고객ID : A098u35</div>
+                                                        </div>
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">3단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" class="form-control"></div>
+                                                            <div class="col-sm-12 control-label ag_l">고객ID : A098u35</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">담당업무</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="UI/UX 기획" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">직장 주소</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="서울시 서대문구 충정로3가 동아일보사건물" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">자사와의 관계</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">사내친한직원</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="박신혜, 김례원" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">정보출처</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="" class="form-control"></div>
+                                                    <label class="col-sm-2 control-label">이전영업사원</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="사원명" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">명함등록</label>
+                                                    <div class="col-sm-10">
+                                                        <div class="input-default pop-file">
+                                                            <div class="file-dragdrap-area">
+                                                                <div class="fileUpload btn btn-gray">
+                                                                    <span>사진첨부</span>
+                                                                    <input type="file" class="upload" />
+                                                                </div>
+                                                                <div class="file-in-list">
+                                                                    <span><a href="#"><i class="fa fa-file-powerpoint-o fa-lg"></i> 황선홍이사 명함.jpg</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12 m-b ag_c custom-photo2">
+                                                        <span class="photo" style="background:url('../../images/pc/namecard2.png') no-repeat center center; background-size:cover;"><img src="../../images/pc/namecard_default.png" /></span>
+                                                        <!-- 등록된 이미지가 없을 경우에는 디폴트 이미지가 노출되면, 이미지가 등록되면 디폴트는 사라지고 등록이미지가 배경으로 보여짐 -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!--// 소속회사 -->
+
+                                            <!-- 개인정보 -->
+                                            <div class="sub_cont scont2 ">
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">학력</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">학력관련 인맥정보</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+                                                
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">경력</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">경력관련 인맥정보</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">가족</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">친한사람</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">SNS</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">기타</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+                                            </div>
+                                            <!--// 개인정보 -->
+
+                                            <!-- 비즈니스이력 -->
+                                            <div class="sub_cont scont3 off">
+                                                <table id="" class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>프로젝트명</th>
+                                                            <th>역할</th>
+                                                            <th>포지션(Pro/Anti)</th>
+                                                            <th>시작일</th>
+                                                            <th>마감일</th>
+                                                            <th>상세내용</th>
+                                                            <th>삭제</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>연예가 중계 HW납품</td>
+                                                            <td>정보제공자</td>
+                                                            <td>Pro</td>
+                                                            <td>2016-04-10</td>
+                                                            <td>2016-05-10</td>
+                                                            <td>요구사항 및 일정제공</td>
+                                                            <td><a href="#" class=""><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                <p class="text-center pd-t10">
+                                                   <a href="#" class="btn-row-add" name="buttonSaleAddRow">+ 리스트 추가</a>
+                                                </p>
+                                            </div>
+                                            <!--// 비즈니스이력 -->
+
+                                            <!--// tab-cont -->
+
+                                        </div>
+                                        <!--// TabMenu -->
+
+                                        <div class="hr-line-bottom"></div>
+
+                                        <p class="text-center pt-t20">
+                                            <button type="button" class="btn btn-outline btn-primary btn-seller-outline mg-r10">삭제</button>
+                                            <button type="button" class="btn btn-w-m btn-primary btn-seller">수정</button>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <!--// 정보수정 -->
+
+    <!-- 고객영업활동 추가 -->
+    <div class="modal inmodal fade" id="myModal3" tabindex="-1" role="dialog"  aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">고객 영업활동 등록</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox float-e-margins">
+
+                                <div class="ibox-content border_n">
+                                    <form method="get" class="form-horizontal">
+
+                                        <div class="form-group"><label class="col-sm-2 control-label">영업활동 선택</label>
+                                            <div class="col-sm-10">
+                                                <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                    <select class="form-control" name="account">
+                                                    <option>고객컨택내용</option>
+                                                    <option>잠재영업기회</option>
+                                                    <option>영업기회</option>
+                                                    <option>고객이슈</option>
+                                                </select></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="ta-c pd-t20">
+                                            해당 영업활동: 고객컨택내용, 잠재영업기회, 영업기회, 고객이슈) 입력폼 노출<br/><br/><br/><br/><br/>
+                                        </div>
+
+                                        <div class="hr-line-bottom"></div>
+
+                                        <p class="text-center pt-t20">
+                                            <button type="button" class="btn btn-w-m btn-primary btn-seller">등록</button>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <!--// 고객영업활동 추가 -->
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

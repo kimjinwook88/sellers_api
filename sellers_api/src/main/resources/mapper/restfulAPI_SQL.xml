@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="restfulApi">
+	
+	<insert id="insertKey" parameterType="hashmap">
+		INSERT INTO RSA_SECURITY_KEY
+		(
+		PUBLICKEY_MODULUS,
+		PUBLICKEY_EXPONENT,
+		PRIVATEKEY_MODULUS,
+		PRIVATEKEY_EXPONENT,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+		#{publicKeyModulus},
+		#{publicKeyExponent},
+		#{privateKeyModulus},
+		#{privateKeyExponent},
+		CURRENT_TIMESTAMP,
+		CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<select id="selectKey" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			SECURITY_KEY_ID,
+			PRIVATEKEY_MODULUS, 
+			PRIVATEKEY_EXPONENT 
+		FROM RSA_SECURITY_KEY
+		WHERE 1=1 
+		AND PUBLICKEY_MODULUS = #{RSAModulus}
+		AND PUBLICKEY_EXPONENT = #{RSAExponent}
+	</select>
+	
+	<select id="selectUserDeviceKey" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			DEVICE_KEY_ID,
+			MEMBER_ID_NUM,
+			DEVICE_KEY,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE
+		FROM OUR_USER_MOBILE_DEVICE_KEY
+		WHERE 1=1
+		AND MEMBER_ID_NUM = #{member_id_num}
+		ORDER BY SYS_UPDATE_DATE ASC 
+	</select>
+	
+	<update id="updateUserDeviceKey" parameterType="hashmap">
+		UPDATE OUR_USER_MOBILE_DEVICE_KEY
+			SET 
+				DEVICE_KEY=#{userDi}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND MEMBER_ID_NUM = #{member_id_num}
+		AND DEVICE_KEY_ID = #{device_key_id}
+	</update>
+	
+	<insert id="insertUserDeviceKey" parameterType="hashmap">
+		INSERT INTO OUR_USER_MOBILE_DEVICE_KEY
+		(
+			MEMBER_ID_NUM,
+			DEVICE_KEY,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{member_id_num},
+			#{userDi},
+			CURRENT_TIMESTAMP,
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+</mapper>

@@ -1,0 +1,112 @@
+html, body {width:100%; height:100%;}
+
+@font-face{
+   font-family:ng;
+   src:url{../font/NanumGothic.eot}
+   src:local(※), url(../font/NanumGothic.woff) format('woff')
+}
+
+body, textarea, select, input {font:15px 'NanumGothic','나눔고딕','맑은 고딕','돋움', dotum, AppleGothic, sans-serif, ng;
+	color:#666;
+	word-break:break-all;
+	margin:0;
+	padding:0;
+	scrollbar-face-color:#F2F2F2;
+	scrollbar-shadow-color:#C7C7C7;
+	scrollbar-highlight-color:#C7C7C7;
+	scrollbar-3dlight-color:#FFF;
+	scrollbar-darkshadow-color:#FFF;
+	scrollbar-track-color:#F2F2F2;
+	scrollbar-arrow-color:#999;
+}
+
+h1, h2, h3, h4 {font:12px 'NanumGothic','나눔고딕','맑은 고딕','돋움', dotum, AppleGothic, sans-serif, ng; font-weight:bold;}
+
+div,p,h1,h2,h3,h4,dl,dt,dd,th,td,form {margin:0; padding:0;}
+table {font-size:12px; border-collapse:collapse; border-spacing:0; word-break:break-all;}
+ul, li, ol {list-style-type:none; margin:0; padding:0;}
+hr {display:none;}
+img {border:0 none;}
+label {margin:0; padding:0; font-size:12px;}
+fieldset {margin:0; padding:0; border:0 none;}
+legend {display:none;}
+
+/* link */
+a, a:link, a:visited {color:#666; text-decoration:none; cursor:pointer }
+a:hover, a:active {color:#2dbae7; cursor:pointer;}
+
+/* align */
+.ag_l {text-align:left !important;}
+.ag_c {text-align:center !important;}
+.ag_r {text-align:right !important;}
+.ag_j {text-align:justify !important;}
+
+.fl_l {float:left;}
+.fl_r {float:right;}
+.fl_n {float:none;}
+.overH {overflow:hidden;}
+.cboth {clear:both;}
+
+.v_m 	{vertical-align:middle;}
+
+
+/*  color  */
+.fc_red {color:#D03E3A;}
+.fc_spur {color:#9e74b6;}
+.fc_sgray {color:#939393;}
+.fc_sellers {color:#2dbae7;}
+
+/*  underline  */
+.ft_u	{text-decoration:underline;}
+.ft_dot {border-bottom:dotted 1px #999;}
+
+/* padding / margin */
+.mg_l10 {margin-left:10px;}
+.mg_b10 {margin-bottom:10px;}
+.mg_b20 {margin-bottom:20px;}
+.mg_b30 {margin-bottom:30px;}
+.pd_25 {padding:25px;}
+
+/*radius*/
+.r2 {border-radius:2px; -webkit-border-radius:2px; -moz-border-radius:2px; -o-border-radius:2px;}
+.r5 {border-radius:5px; -webkit-border-radius:5px; -moz-border-radius:5px; -o-border-radius:5px;}
+
+/* 메일 내용 스타일 ///////////////////////////////////////////*/
+.wrap 			{width:700px; margin:10px auto 0;}
+.header 		{height:70px; position:relative;}
+.header span 	{color:#fff; position:absolute; top:27px; right:20px;}
+
+.content 		{padding:25px; background-color:#f8fafb; line-height:150%;}
+.contact_info 	{background-color:#fff; border-top:solid 4px #2dbae7;}
+.row 			{padding:10px 10px 10px 150px; border-bottom:dotted 1px #ddd;}
+.row:after		{display:block; content:""; clear:both;}
+.row span 			{float:left; display:block; width:130px; color:#999; text-align:right; margin-left:-150px; padding-right:12px;}
+.row .cont_txt 		{float:right; width:90%; color:#333; text-align:left; padding-right:10%;}
+
+.bar {background:url('../images/bar.gif') no-repeat center right;}
+
+table.base 			{width:100%; border-top:solid 2px #333;}
+table.base th 		{padding:5px; color:/* #999 */#333; background-color:#f8fafb; border-bottom:solid 1px #cccccc; border-right:solid 1px #eeeeee; font-weight:bold;}
+table.base td		{padding:7px 5px; text-align:center; border-bottom:solid 1px #cccccc; border-right:solid 1px #eeeeee;}
+table.base .endcell {border-right:none;}
+
+
+.status_green 		{background-color:#1ab394;}
+.status_yellow 		{background-color:#ffc001;}
+.status_red 		{background-color:#f20156;}
+
+.btn_go 		{display:inline-block; padding:0 20px; height:50px; line-height:50px; font-size:16px; color:#fff !important; background-color:#2dbae7;}
+
+
+.footer 		{padding-top:25px; font-size:12px; color:#fff; text-align:center; height:50px; background-color:#5f5e62;}
+
+
+
+
+
+
+
+
+
+
+

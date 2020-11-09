@@ -1,0 +1,2524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="bizStrategy">
+	<select id="selectBizStrategyList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		  SELECT 
+		        @ROWNUM := @ROWNUM +1 AS ROWNUM,
+		        TB.*
+		 FROM 
+		        (
+		        SELECT 
+		            BS.BIZ_ID, 
+		            BS.CATEGORY, 
+		            BS.CREATOR_ID, 
+		            BS.CREATE_DATETIME, 
+		            BS.SUBJECT, 
+		            BS.KEY_CONTENTS,
+		            DATE_FORMAT(BS.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+		            DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+		            IFNULL(DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+		            BS.REVIEW_CYCLE,
+		            OMI.HAN_NAME,
+		            OMI.MEMBER_ID_NUM,
+		            ODI.DIVISION_NAME,
+		            OMI.PHONE,
+		            OMI.EMAIL,
+		            OMI2.HAN_NAME AS RL_NAME,
+		            OMI2.MEMBER_ID_NUM AS RL_ID,
+		            ODI2.DIVISION_NAME AS RL_DIVISION,
+		            
+		            MAX(IF(MILESTONE.RANK=1, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_5,
+					MAX(IF(MILESTONE.RANK=1, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_5,
+					MAX(IF(MILESTONE.RANK=1, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_5,
+					
+					MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_5,
+					MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_5,
+					MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_5,
+					
+		            IFNULL(BFS.FILE_COUNT,0) AS FILE_COUNT
+		    FROM 
+		            BIZ_STRATEGY AS  BS
+		            LEFT OUTER JOIN
+		            (
+		            	SELECT COUNT(BIZ_ID) AS FILE_COUNT, BIZ_ID
+		            	FROM BIZ_FILE_STORE
+		            	GROUP BY BIZ_ID
+		            ) AS BFS ON BS.BIZ_ID = BFS.BIZ_ID   
+		            LEFT OUTER JOIN 
+		            OUR_MEMBERS_INFO AS OMI ON BS.CREATOR_ID = OMI.MEMBER_ID_NUM
+		            LEFT OUTER JOIN 
+		            OUR_MEMBERS_INFO AS OMI2 ON BS.RESPONSIBILITY_LEADER = OMI2.MEMBER_ID_NUM
+		            LEFT OUTER JOIN
+		            OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		            LEFT OUTER JOIN
+		            OUR_DIVISION_INFO AS ODI2 ON ODI2.DIVISION_NO = OMI2.MEMBER_DIVISION
+		             LEFT OUTER JOIN
+		            (
+		            	SELECT MILESTONE_ID,BIZ_ID, ACT_DUE_DATE, ACT_CLOSE_DATE, STATUS, KEY_MILESTONE,
+						IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := BIZ_ID
+						FROM BIZ_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						WHERE 1=1
+						ORDER BY BIZ_ID ASC, MILESTONE_ID ASC  
+					) AS MILESTONE ON BS.BIZ_ID = MILESTONE.BIZ_ID
+		            LEFT OUTER JOIN
+		            (
+						SELECT * 
+						FROM (
+							SELECT BIZ_ID, ACTION_ID, ISSUE_NAME, DUE_DATE, CLOSE_DATE,
+						           IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := BIZ_ID
+						    FROM BIZ_STRATEGY_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						    WHERE 1=1
+						    ORDER BY BIZ_ID ASC, ACTION_ID DESC
+					    ) AS SUB_OHA 
+						WHERE 1=1
+						AND SUB_OHA.RANK <= 5 
+		            ) AS ACTION_STATUS on ACTION_STATUS.BIZ_ID = BS.BIZ_ID
+		    WHERE 1=1
+		]]>
+					<choose>
+						<when test="global_role_code.contains('ROLE_CEO')">
+						</when>
+						<when test="global_role_code.contains('ROLE_CFO')">
+						</when>
+						<when test="global_role_code.contains('ROLE_DIVISION')">
+							<!-- AND OMI2.MEMBER_DIVISION = #{global_member_division} -->
+							<if test="searchCategory == '팀전략' ">
+							AND OMI2.MEMBER_DIVISION = #{global_member_division}
+							</if>
+						</when>
+						<when test="global_role_code.contains('ROLE_TEAM')">
+							<choose>
+								<when test="searchCategory == '회사전략' ">
+								AND BS.BIZ_ID = NULL
+								</when>
+								<when test="searchCategory == '본부전략' ">
+								AND OMI2.MEMBER_DIVISION = #{global_member_division}
+								</when>
+								<when test="searchCategory == '팀전략' ">
+								AND OMI2.MEMBER_TEAM = #{global_member_team}
+								</when>
+							</choose>
+						</when>
+					</choose>
+					
+					<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+						<choose>
+							<when test="searchPKArray != null and searchPKArray != '' ">
+							AND BS.BIZ_ID IN(${searchPKArray})
+							</when>
+							<otherwise>
+							AND BS.BIZ_ID IN('')
+							</otherwise>
+						</choose>
+					</if>
+					
+					<if test=" searchCategory != null and searchCategory != '' ">
+				      	AND BS.CATEGORY = #{searchCategory}
+				    </if>
+						
+					<if test=" searchDivision != null and searchDivision != '' ">
+						AND ODI2.DIVISION_NAME LIKE CONCAT('%', #{searchDivision}, '%')
+				    </if>
+				    
+					<if test="searchOwner != null and searchOwner != '' ">
+						AND OMI2.HAN_NAME LIKE CONCAT('%', #{searchOwner}, '%')
+					</if>
+	                
+	                GROUP BY BS.BIZ_ID
+	                
+		        ) AS TB, (SELECT @ROWNUM:=0) AS ROWNUM
+		        WHERE 1=1
+	        	<if test="searchActionStatus != null and searchActionStatus != '' ">
+					
+					<if test="searchActionStatus == 'actionStatusY' ">
+						AND ISSUE_ACTION_STATUS_TEXT = '#1ab394'
+					</if>
+					<if test="searchActionStatus == 'actionStatusN' ">
+						AND ISSUE_ACTION_STATUS_TEXT = '#ffc000'
+					</if>
+					<if test="searchActionStatus == 'actionStatusX' ">
+						AND ISSUE_ACTION_STATUS_TEXT = '#f20056'
+					</if>
+				</if>
+				<if test="searchStatus != null and searchStatus != '' ">
+					
+					<if test="searchStatus == 'statusY' ">
+						AND CASE 
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%R%' THEN 'red'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%Y%' THEN 'yellow'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%G%' THEN 'green'
+		            ELSE NULL
+	        		end ='green'
+					</if>
+					<if test="searchStatus == 'statusN' ">
+						AND CASE 
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%R%' THEN 'red'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%Y%' THEN 'yellow'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%G%' THEN 'green'
+		            ELSE NULL
+	        		end ='yellow'
+					</if>
+					<if test="searchStatus == 'statusX' ">
+						AND CASE 
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%R%' THEN 'red'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%Y%' THEN 'yellow'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%G%' THEN 'green'
+		            ELSE NULL
+	        		end ='red'
+					</if>
+				</if>
+				
+				<choose>
+					<when test="sortCategory != null and sortCategory != '' ">
+						ORDER BY ${sortCategory}
+					</when>
+					<otherwise>
+						ORDER BY TB.LATELY_UPDATE_DATE DESC
+					</otherwise>
+				</choose>
+				
+				<include refid="common.pagingPost2"/>
+	</select>
+	
+	<select id="selectBizStrategyListCount" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			 SELECT 
+		        COUNT(TB.BIZ_ID) AS listCount, GROUP_CONCAT(TB.BIZ_ID) AS searchPKArray
+		 FROM 
+		        (
+		        SELECT 
+		            BS.BIZ_ID, 
+		            BS.CATEGORY, 
+		            BS.CREATOR_ID, 
+		            BS.CREATE_DATETIME, 
+		            BS.SUBJECT, 
+		            BS.KEY_CONTENTS,
+		            DATE_FORMAT(BS.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+		            DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+		            IFNULL(DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+		            BS.REVIEW_CYCLE,
+		            OMI.HAN_NAME,
+		            OMI.MEMBER_ID_NUM,
+		            ODI.DIVISION_NAME,
+		            OMI.PHONE,
+		            OMI.EMAIL,
+		            OMI2.HAN_NAME AS RL_NAME,
+		            OMI2.MEMBER_ID_NUM AS RL_ID,
+		            ODI2.DIVISION_NAME AS RL_DIVISION,
+		            IFNULL(BFS.FILE_COUNT,0) AS FILE_COUNT
+		    FROM 
+		            BIZ_STRATEGY AS  BS
+		            LEFT OUTER JOIN
+		            (
+		            	SELECT COUNT(BIZ_ID) AS FILE_COUNT, BIZ_ID
+		            	FROM BIZ_FILE_STORE
+		            	GROUP BY BIZ_ID
+		            ) AS BFS ON BS.BIZ_ID = BFS.BIZ_ID   
+		            LEFT OUTER JOIN 
+		            OUR_MEMBERS_INFO AS OMI ON BS.CREATOR_ID = OMI.MEMBER_ID_NUM
+		            LEFT OUTER JOIN 
+		            OUR_MEMBERS_INFO AS OMI2 ON BS.RESPONSIBILITY_LEADER = OMI2.MEMBER_ID_NUM
+		            LEFT OUTER JOIN
+		            OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		            LEFT OUTER JOIN
+		            OUR_DIVISION_INFO AS ODI2 ON ODI2.DIVISION_NO = OMI2.MEMBER_DIVISION
+		             LEFT OUTER JOIN
+		            (
+		            	SELECT MILESTONE_ID,BIZ_ID, ACT_DUE_DATE, ACT_CLOSE_DATE, STATUS, KEY_MILESTONE,
+						IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := BIZ_ID
+						FROM BIZ_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						WHERE 1=1
+						ORDER BY BIZ_ID ASC, MILESTONE_ID ASC  
+					) AS MILESTONE ON BS.BIZ_ID = MILESTONE.BIZ_ID
+		            LEFT OUTER JOIN
+		            (
+						SELECT * 
+						FROM (
+							SELECT BIZ_ID, ACTION_ID, ISSUE_NAME, DUE_DATE, CLOSE_DATE,
+						           IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := BIZ_ID
+						    FROM BIZ_STRATEGY_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						    WHERE 1=1
+						    ORDER BY BIZ_ID ASC, ACTION_ID DESC
+					    ) AS SUB_OHA 
+						WHERE 1=1
+						AND SUB_OHA.RANK <= 5 
+		            ) AS ACTION_STATUS on ACTION_STATUS.BIZ_ID = BS.BIZ_ID
+		    WHERE 1=1
+		]]>
+					<choose>
+						<when test="global_role_code.contains('ROLE_CEO')">
+						</when>
+						<when test="global_role_code.contains('ROLE_CFO')">
+						</when>
+						<when test="global_role_code.contains('ROLE_DIVISION')">
+							<!-- AND OMI2.MEMBER_DIVISION = #{global_member_division} -->
+							<if test="searchCategory == '팀전략' ">
+							AND OMI2.MEMBER_DIVISION = #{global_member_division}
+							</if>
+						</when>
+						<when test="global_role_code.contains('ROLE_TEAM')">
+							<choose>
+								<when test="searchCategory == '회사전략' ">
+								AND BS.BIZ_ID = NULL
+								</when>
+								<when test="searchCategory == '본부전략' ">
+								AND OMI2.MEMBER_DIVISION = #{global_member_division}
+								</when>
+								<when test="searchCategory == '팀전략' ">
+								AND OMI2.MEMBER_TEAM = #{global_member_team}
+								</when>
+							</choose>
+						</when>
+					</choose>
+					
+					<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+						<choose>
+							<when test="searchPKArray != null and searchPKArray != '' ">
+							AND BS.BIZ_ID IN(${searchPKArray})
+							</when>
+							<otherwise>
+							AND BS.BIZ_ID IN('')
+							</otherwise>
+						</choose>
+					</if>
+					
+					<if test=" searchCategory != null and searchCategory != '' ">
+				      	AND BS.CATEGORY = #{searchCategory}
+				    </if>
+						
+					<if test=" searchDivision != null and searchDivision != '' ">
+						AND ODI2.DIVISION_NAME LIKE CONCAT('%', #{searchDivision}, '%')
+				    </if>
+				    
+					<if test="searchOwner != null and searchOwner != '' ">
+						AND OMI2.HAN_NAME LIKE CONCAT('%', #{searchOwner}, '%')
+					</if>
+	                
+	                GROUP BY BS.BIZ_ID
+	                
+		        ) AS TB, (SELECT @ROWNUM:=0) AS ROWNUM
+		        WHERE 1=1
+		        
+	        	<if test="searchActionStatus != null and searchActionStatus != '' ">
+					
+					<if test="searchActionStatus == 'actionStatusY' ">
+						AND ISSUE_ACTION_STATUS_TEXT = '#1ab394'
+					</if>
+					<if test="searchActionStatus == 'actionStatusN' ">
+						AND ISSUE_ACTION_STATUS_TEXT = '#ffc000'
+					</if>
+					<if test="searchActionStatus == 'actionStatusX' ">
+						AND ISSUE_ACTION_STATUS_TEXT = '#f20056'
+					</if>
+				</if>
+				
+				<if test="searchStatus != null and searchStatus != '' ">
+					
+					<if test="searchStatus == 'statusY' ">
+						AND CASE 
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%R%' THEN 'red'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%Y%' THEN 'yellow'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%G%' THEN 'green'
+		            ELSE NULL
+	        		end ='green'
+					</if>
+					<if test="searchStatus == 'statusN' ">
+						AND CASE 
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%R%' THEN 'red'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%Y%' THEN 'yellow'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%G%' THEN 'green'
+		            ELSE NULL
+	        		end ='yellow'
+					</if>
+					<if test="searchStatus == 'statusX' ">
+						AND CASE 
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%R%' THEN 'red'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%Y%' THEN 'yellow'
+		            WHEN CONCAT(IFNULL(TB.STATUS_PREV,''),IFNULL(TB.STATUS_ING,''),IFNULL(TB.STATUS_NEXT,'')) LIKE '%G%' THEN 'green'
+		            ELSE NULL
+	        		end ='red'
+					</if>
+				</if>
+	</select>
+	
+	<select id="selectBizStrategyDetail" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			 SELECT 
+			        @ROWNUM := @ROWNUM +1 AS ROWNUM,
+			        TB.*
+			 FROM 
+			        (
+			        SELECT 
+			            BS.BIZ_ID, 
+			            BS.CATEGORY, 
+			            BS.CREATOR_ID, 
+			            BS.CREATE_DATETIME, 
+			            BS.SUBJECT, KEY_CONTENTS, 
+			            DATE_FORMAT(BS.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+			            DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+			            IFNULL(DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+			            BS.REVIEW_CYCLE,
+			            OMI.HAN_NAME,
+			            OMI.MEMBER_ID_NUM,
+			            ODI.DIVISION_NAME,
+			            OMI.PHONE,
+			            OMI.EMAIL,
+			            OMI2.HAN_NAME AS RL_NAME,
+			            OMI2.MEMBER_ID_NUM AS RL_ID,
+			            ODI2.DIVISION_NAME AS RL_DIVISION
+			    FROM 
+			            BIZ_STRATEGY AS  BS
+			            LEFT OUTER JOIN 
+			            OUR_MEMBERS_INFO AS OMI ON BS.CREATOR_ID = OMI.MEMBER_ID_NUM
+			            LEFT OUTER JOIN 
+			            OUR_MEMBERS_INFO AS OMI2 ON BS.RESPONSIBILITY_LEADER = OMI2.MEMBER_ID_NUM
+			            LEFT OUTER JOIN
+			            OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+			            LEFT OUTER JOIN
+			            OUR_DIVISION_INFO AS ODI2 ON ODI2.DIVISION_NO = OMI2.MEMBER_DIVISION
+			    		WHERE 1=1
+		]]>
+					AND BS.CATEGORY = #{searchCategory}
+	                AND BS.BIZ_ID = #{pkNo}
+	                GROUP BY BS.BIZ_ID
+	                ORDER BY BS.SYS_UPDATE_DATE DESC
+	        ) AS TB, (SELECT @ROWNUM:=0) AS ROWNUM
+		        WHERE 1=1
+	</select>
+	
+	
+	
+	<!-- <select id="selectBizStrategySearchDetailGroup" parameterType="hashmap" resultType="hashmap"> -->
+	<select id="selectBizStrategyCategory" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	        SELECT CATEGORY
+			FROM BIZ_STRATEGY
+			WHERE 1=1
+		]]>
+			<choose>
+				<when test="strategy != 'CO'">
+				AND CATEGORY IN('고객전략')
+				</when>
+				<otherwise>
+				AND CATEGORY IN('회사전략','본부전략','부문전략','팀전략')
+				</otherwise>
+			</choose>
+			GROUP BY CATEGORY;  
+	</select>
+	
+	<select id="selectBizStrategyFileList" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			FILE_ID, 
+			BIZ_ID, 
+			CREATOR_ID, 
+			CREATE_DATETIME, 
+			FILE_NAME, 
+			FILE_PATH, 
+			FILE_TYPE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		FROM BIZ_FILE_STORE
+		WHERE 1=1
+		AND BIZ_ID = #{pkNo}
+	</select>
+	
+	 <insert id="insertBizStrategy" parameterType="hashmap">
+	 	<![CDATA[
+	        INSERT INTO BIZ_STRATEGY
+	        (
+	            Category, 
+	            CREATOR_ID,
+	            RESPONSIBILITY_LEADER,
+	            SUBJECT, 
+	            REVIEW_CYCLE,
+	            KEY_CONTENTS,
+	            CREATE_DATETIME
+	        )
+	        VALUES
+	        (
+	            #{selectModalCategory}, 
+	            #{hiddenModalCreatorId}, 
+	            #{hiddenModalLeader}, 
+	            #{textModalSubject}, 
+	            #{selectModalReviewCycle},
+	            #{textareaModalKeyContents},
+	            CURRENT_TIMESTAMP
+	        );
+		]]>
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<update id="updateBizStrategy" parameterType="hashmap">
+		<![CDATA[
+	        UPDATE BIZ_STRATEGY 
+	        SET Category=#{selectModalCategory},
+	        	RESPONSIBILITY_LEADER = #{hiddenModalLeader},
+				SUBJECT=#{textModalSubject}, 
+				REVIEW_CYCLE=#{selectModalReviewCycle}, 
+				KEY_CONTENTS=#{textareaModalKeyContents},
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+			WHERE BIZ_ID=#{hiddenModalPK};
+		]]>
+	</update>
+	
+	<delete id="deleteBizStrategy" parameterType="hashmap">
+		DELETE FROM BIZ_FILE_STORE WHERE BIZ_ID=#{hiddenModalPK};
+		DELETE FROM BIZ_MILESTONE WHERE BIZ_ID =#{hiddenModalPK};
+		DELETE FROM BIZ_STRATEGY_ACTION_PLAN WHERE BIZ_ID=#{hiddenModalPK};
+		DELETE FROM BIZ_STRATEGY WHERE BIZ_ID=#{hiddenModalPK};
+	</delete>
+	
+	<select id="selectResultInSearchBizStrategyList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		SELECT *
+		FROM (
+			 SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP_BIZ_STRATEGY.*,
+			CONCAT(IF(TMP_BIZ_STRATEGY.KEY_MILESTONE1 IS NOT NULL, CONCAT(TMP_BIZ_STRATEGY.KEY_MILESTONE1," (",TMP_BIZ_STRATEGY.ACT_DUE_DATE1,")"),""),IF(TMP_BIZ_STRATEGY.KEY_MILESTONE2 IS NOT NULL, CONCAT("\n",TMP_BIZ_STRATEGY.KEY_MILESTONE2," (",TMP_BIZ_STRATEGY.ACT_DUE_DATE2,")"),"")) AS KEY_MILESTONE,
+			CASE 
+				WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,'')) LIKE '%R%' THEN 'R'
+				WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,'')) LIKE '%Y%' THEN 'Y'
+				WHEN TMP_BIZ_STRATEGY.STATUS1 = 'G' AND (TMP_BIZ_STRATEGY.STATUS2 IS NULL OR  TMP_BIZ_STRATEGY.STATUS2 = '') THEN 'G'
+				WHEN TMP_BIZ_STRATEGY.STATUS1 = 'G' AND TMP_BIZ_STRATEGY.STATUS2 = 'G' THEN 'G'
+				ELSE '-'
+			END AS STATUS
+			
+		FROM 
+			(
+				SELECT 
+					BS.BIZ_ID, 
+					BS.CATEGORY, 
+					BS.CREATOR_ID, 
+					BS.CREATE_DATETIME, 
+					BS.SUBJECT, KEY_CONTENTS, 
+					DATE_FORMAT(BS.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					BS.REVIEW_CYCLE,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID,
+					MAX(IF(BM.RANK=1,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE1,
+					MAX(IF(BM.RANK=2,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE2,
+					MAX(IF(BM.RANK=1,BM.STATUS,NULL)) AS STATUS1,
+					MAX(IF(BM.RANK=2,BM.STATUS,NULL)) AS STATUS2,
+					MAX(IF(BM.RANK=1,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE1,
+					MAX(IF(BM.RANK=2,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE2
+				FROM 
+					BIZ_STRATEGY AS	 BS
+					LEFT OUTER JOIN
+					(
+						SELECT BB.*
+						FROM 
+						(
+							SELECT MILESTONE_ID,BIZ_ID, ACT_DUE_DATE, IF(ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > ACT_DUE_DATE, 'R', STATUS) AS STATUS, KEY_MILESTONE,IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := BIZ_ID
+								FROM BIZ_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+								WHERE 1=1
+								AND STATUS IS NOT NULL
+								AND STATUS != ''
+							ORDER BY MILESTONE_ID DESC
+						) AS BB
+						WHERE BB.RANK <=2
+					) AS BM ON BS.BIZ_ID = BM.BIZ_ID
+					LEFT OUTER JOIN
+					OUR_USERS_INFO AS OUI ON BS.CREATOR_ID = OUI.MEMBER_ID_NUM
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON OUI.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+				WHERE 1=1
+			]]>
+					<choose>
+						<when test="searchBizIdArray != null and searchBizIdArray != '' ">
+						AND BS.BIZ_ID IN(${searchBizIdArray})
+						</when>
+						<otherwise>
+						AND BS.BIZ_ID IN('')
+						</otherwise>
+					</choose>
+					
+					<choose>
+						<when test="strategy != 'TD'">
+						AND BS.CATEGORY IN('인증취득')
+						</when>
+						<otherwise>
+						AND BS.CATEGORY IN('제품개발')
+						</otherwise>
+					</choose>
+				    <if test=" category != null and category != '' ">
+				      AND BS.CATEGORY LIKE CONCAT('%', #{category}, '%')
+				    </if>
+				    <if test=" subject != null and subject != '' ">
+				      AND BS.SUBJECT LIKE CONCAT('%', #{subject}, '%')
+				    </if>
+				    <if test="name != null and name != '' ">
+				      AND OMI.HAN_NAME LIKE CONCAT('%', #{name}, '%')
+				    </if>
+				    <if test="allsearch != null and allsearch != '' "><!-- 전체 검색 -->
+					   AND CONCAT(IFNULL(BS.CATEGORY,''), IFNULL(BS.SUBJECT,''), IFNULL(OMI.HAN_NAME,''),IFNULL(BM.KEY_MILESTONE,'')) REGEXP #{allsearch}
+					 </if>
+					 <!-- 상세검색 -->
+					 <if test="allSearchDetail != null and allSearchDetail != '' "><!-- 전체 검색 -->
+					   	AND CONCAT(IFNULL(BS.CATEGORY,''), IFNULL(BS.SUBJECT,''), IFNULL(OMI.HAN_NAME,''),IFNULL(BM.KEY_MILESTONE,'')) REGEXP #{allSearchDetail}
+					 </if>
+					 <if test="detailCategory != null and detailCategory != '' ">
+					  	AND BS.CATEGORY = #{detailCategory}
+					 </if>
+					 <if test="quarterDateYear != null and quarterDateYear != '' ">
+						AND YEAR(BS.SYS_REGISTER_DATE) = #{quarterDateYear}
+						<if test=" quarterDateYear.equals(currentYear)">
+							AND QUARTER(BS.SYS_REGISTER_DATE) = #{quarterDate}
+					 	</if>
+					 </if>
+					GROUP BY BS.BIZ_ID
+					ORDER BY BS.SYS_UPDATE_DATE ASC
+				) AS TMP_BIZ_STRATEGY, (SELECT @ROWNUM:=0) AS ROWNUM
+				WHERE 1=1
+			ORDER BY ROWNUM DESC
+			) AS TB
+			WHERE 1=1
+			<if test=" kmStatus != null and kmStatus != '' ">
+			AND TB.STATUS = #{kmStatus}
+			</if> 
+	</select>
+	
+	<!-- <select id="selectMileStonesBizStrategyList" parameterType="hashmap" resultType="hashmap"> -->
+	<select id="selectBizStrategyMileStones" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			BM.MILESTONE_ID, 
+			BM.BIZ_ID, 
+			BM.CATEGORY, 
+			BM.CREATOR_ID,
+			BM.CREATE_DATETIME, 
+			BM.KEY_MILESTONE, 
+			IF(BM.ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > BM.ACT_DUE_DATE, 'R', BM.STATUS) AS STATUS,
+			IF(BM.ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > BM.ACT_DUE_DATE, 'R', BM.STATUS) AS HIDDEN_STATUS,  
+			OMI.HAN_NAME AS ACT_NAME, 
+			OMI.POSITION_STATUS AS ACT_POSITION,
+			BM.ACT_ID,
+			IFNULL(BM.ACT_DUE_DATE,'') AS DUE_DATE, 
+			IFNULL(BM.ACT_CLOSE_DATE,'') AS CLOSE_DATE,
+			BM.SYS_REGISTER_DATE, 
+			BM.SYS_UPDATE_DATE
+		FROM 
+		BIZ_MILESTONE AS BM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON BM.ACT_ID = OMI.MEMBER_ID_NUM , (SELECT @ROWNUM:=0) AS ROWNUM	
+		WHERE BIZ_ID = #{pkNo}
+		ORDER BY MILESTONE_ID ASC
+	</select>
+	
+	<select id="selectMileStonesBizStrategyKey" parameterType="hashmap" resultType="Integer">
+		SELECT COUNT(*)
+		FROM BIZ_MILESTONE
+		WHERE BIZ_ID = #{biz_id}
+	</select>
+		
+	<!-- <insert id="insertMileStonesBizStrategy" parameterType="hashmap"> -->
+	<insert id="insertBizStrategyMileStones" parameterType="hashmap">
+			INSERT INTO BIZ_MILESTONE
+			(
+				BIZ_ID, 
+				CATEGORY, 
+				CREATOR_ID, 
+				STATUS,
+				CREATE_DATETIME, 
+				KEY_MILESTONE, 
+				ACT_DUE_DATE, 
+				ACT_CLOSE_DATE,
+				ACT_ID
+			)
+			VALUES
+			(
+				#{filePK}, 
+				#{selectModalCategory}, 
+				#{hiddenModalCreatorId},
+				#{HIDDEN_STATUS},
+				CURRENT_TIMESTAMP, 
+				#{KEY_MILESTONE}, 
+				<choose>
+					<when test="DUE_DATE != null and DUE_DATE != '' ">
+						#{DUE_DATE},
+					</when>
+					<otherwise>
+						NULL,
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+						#{CLOSE_DATE},
+					</when>
+					<otherwise>
+						NULL,
+					</otherwise>
+				</choose>
+				#{ACT_ID} 
+			);
+	</insert>
+	
+	<!-- <update id="updateMileStonesBizStrategy" parameterType="hashmap"> -->
+	<update id="updateBizStrategyMileStones" parameterType="hashmap">
+			UPDATE BIZ_MILESTONE
+				SET 
+					Category=#{selectModalCategory},
+					KEY_MILESTONE=#{KEY_MILESTONE},
+					ACT_ID=#{ACT_ID},
+					STATUS=#{HIDDEN_STATUS},
+					<choose>
+						<when test="DUE_DATE != null and DUE_DATE != '' ">
+							ACT_DUE_DATE=#{DUE_DATE},
+						</when>
+						<otherwise>
+							ACT_DUE_DATE=NULL,
+						</otherwise>
+					</choose>
+					<choose>
+						<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+							ACT_CLOSE_DATE=#{CLOSE_DATE},
+						</when>
+						<otherwise>
+							ACT_CLOSE_DATE=NULL,
+						</otherwise>
+					</choose>
+					SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+			WHERE 1=1 
+			AND MILESTONE_ID = #{MILESTONE_ID}
+	</update>
+	
+	<select id="selectProjectPlanList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			   SELECT 
+				 @ROWNUM := @ROWNUM +1 AS ROWNUM,
+		        TB.*
+			FROM 
+				(
+				SELECT 
+					PP.PROJECT_ID, 
+					PP.CREATOR_ID, 
+					PP.CREATE_DATETIME, 
+					PP.Category, 
+					PP.CLIENT_NAME, 
+					PP.SUBJECT, 
+					PP.DETAIL_CONTENTS, 
+					PP.START_DATE, 
+					PP.END_DATE, 
+					PP.CONTRACT_AMOUNT_TOTAL, 
+					PP.CONTRACT_AMOUNT_UNIT, 
+					PP.INVEST_AMOUNT, 
+					PP.INVEST_AMOUNT_UNIT, 
+					DATE_FORMAT(PP.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(PP.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(PP.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID_NUM,
+					OMI.MEMBER_TEAM,
+					ODI.DIVISION_NAME,
+					OMI2.HAN_NAME AS EXEC_OWNER, 
+					OMI2.MEMBER_ID_NUM AS EXEC_OWNER_ID,
+					OMI2.POSITION_STATUS AS EXEC_OWNER_POSITION,
+					ODI2.DIVISION_NAME AS EXEC_DIVISION,
+					OMI3.HAN_NAME AS SALES_OWNER, 
+					OMI3.MEMBER_ID_NUM AS SALES_OWNER_ID,
+					ODI3.DIVISION_NAME AS SALES_OWNER_DIVISION,
+					OMI3.POSITION_STATUS AS SALES_OWNER_POSITION,
+					MAX(IF(MILESTONE.RANK=1, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_5,
+					MAX(IF(MILESTONE.RANK=1, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_5,
+					MAX(IF(MILESTONE.RANK=1, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_5,
+		            MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_5,
+					MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_5,
+					MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_5,
+		            IFNULL(BPP.FILE_COUNT,0) AS FILE_COUNT,
+					CCI.COMPANY_ID,
+					CCI.COMPANY_NAME,
+					CCI.CEO_NAME,
+					BPA_AMOUNT_PLAN.Q1 AS AMOUNT_PLAN_Q1,
+					BPA_AMOUNT_PLAN.Q2 AS AMOUNT_PLAN_Q2,
+					BPA_AMOUNT_PLAN.Q3 AS AMOUNT_PLAN_Q3,
+					BPA_AMOUNT_PLAN.Q4 AS AMOUNT_PLAN_Q4,
+					BPA_AMOUNT_PLAN.AFTER_YEAR AS AMOUNT_AFTER_YEAR,
+					BPA_AMOUNT_PLAN.BASIS_TOTAL AS AMOUNT_BASIS_TOTAL,
+					BPA_INVEST_PLAN.Q1 AS INVEST_PLAN_Q1,
+					BPA_INVEST_PLAN.Q2 AS INVEST_PLAN_Q2,
+					BPA_INVEST_PLAN.Q3 AS INVEST_PLAN_Q3,
+					BPA_INVEST_PLAN.Q4 AS INVEST_PLAN_Q4,
+					BPA_INVEST_PLAN.AFTER_YEAR AS INVEST_PLAN_AFTER_YEAR,
+					BPA_INVEST_PLAN.BASIS_TOTAL AS INVEST_PLAN_BASIS_TOTAL 
+				FROM 
+					BIZ_PROJECT_PLAN AS PP
+					LEFT OUTER JOIN
+					CLIENT_COMPANY_INFO AS CCI ON PP.COMPANY_ID = CCI.COMPANY_ID
+					LEFT OUTER JOIN
+		            (
+			            SELECT MILESTONE_ID, PROJECT_ID, ACT_DUE_DATE, ACT_CLOSE_DATE, STATUS, KEY_MILESTONE,
+						IF(@PREV <> PROJECT_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := PROJECT_ID
+	                    FROM BIZ_PROJECT_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+	                    WHERE 1=1
+	                    ORDER BY PROJECT_ID ASC, MILESTONE_ID ASC  
+					) AS MILESTONE ON PP.PROJECT_ID = MILESTONE.PROJECT_ID
+		            LEFT OUTER JOIN
+		            (	
+						SELECT * 
+						FROM (
+							SELECT PROJECT_ID, ACTION_ID, ISSUE_NAME, DUE_DATE, CLOSE_DATE,
+						           IF(@PREV <> PROJECT_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := PROJECT_ID
+						    FROM BIZ_PROJECT_PLAN_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						    WHERE 1=1
+						    ORDER BY PROJECT_ID ASC, ACTION_ID DESC
+					    ) AS SUB_OHA 
+						WHERE 1=1
+						AND SUB_OHA.RANK <= 5
+					) AS ACTION_STATUS ON PP.PROJECT_ID = ACTION_STATUS.PROJECT_ID
+					LEFT OUTER JOIN
+		            (
+		            	SELECT COUNT(PROJECT_ID) AS FILE_COUNT, PROJECT_ID
+		            	FROM BIZ_PROJECT_PLAN_FILE_STORE
+		            	GROUP BY PROJECT_ID
+		            ) AS BPP ON PP.PROJECT_ID = BPP.PROJECT_ID   
+		            LEFT OUTER JOIN
+					(
+						SELECT
+									AMOUNT_TMP.*,
+									(AMOUNT_TMP.Q1+AMOUNT_TMP.Q2+AMOUNT_TMP.Q3+AMOUNT_TMP.Q4+AFTER_YEAR) AS BASIS_TOTAL 
+						FROM
+						(
+							SELECT 	
+									PROJECT_ID,
+									SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q1,
+									SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q2,
+									SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q3,
+									SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q4,
+									SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS AFTER_YEAR
+							FROM BIZ_PROJECT_AMOUNT
+							GROUP BY PROJECT_ID
+						) AS AMOUNT_TMP
+					)AS BPA_AMOUNT_PLAN ON PP.PROJECT_ID = BPA_AMOUNT_PLAN.PROJECT_ID
+					LEFT OUTER JOIN
+					(
+						SELECT
+									INVEST_TMP.*,
+									(INVEST_TMP.Q1+INVEST_TMP.Q2+INVEST_TMP.Q3+INVEST_TMP.Q4+AFTER_YEAR) AS BASIS_TOTAL 
+						FROM
+						(
+							SELECT 	
+									PROJECT_ID,
+									SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q1,
+									SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q2,
+									SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q3,
+									SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q4,
+									SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS AFTER_YEAR
+							FROM BIZ_PROJECT_INVEST
+							GROUP BY PROJECT_ID
+						) AS INVEST_TMP
+					)AS BPA_INVEST_PLAN ON PP.PROJECT_ID = BPA_INVEST_PLAN.PROJECT_ID
+					LEFT OUTER JOIN
+					OUR_MEMBERS_INFO AS OMI ON PP.CREATOR_ID = OMI.MEMBER_ID_NUM
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI2 ON PP.EXEC_OWNER = OMI2.MEMBER_ID_NUM
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI3 ON PP.SALES_OWNER = OMI3.MEMBER_ID_NUM
+					LEFT OUTER JOIN
+					OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+					LEFT OUTER JOIN
+					OUR_DIVISION_INFO AS ODI2 ON ODI2.DIVISION_NO = OMI2.MEMBER_DIVISION
+					LEFT OUTER JOIN
+					OUR_DIVISION_INFO AS ODI3 ON ODI3.DIVISION_NO = OMI3.MEMBER_DIVISION
+				WHERE 1=1
+			]]>		
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_CFO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND OMI2.MEMBER_DIVISION = #{global_member_division}
+					</when>
+				</choose>
+					
+			   <if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+					<choose>
+						<when test="searchPKArray != null and searchPKArray != '' ">
+						AND PP.PROJECT_ID IN(${searchPKArray})
+						</when>
+						<otherwise>
+						AND PP.PROJECT_ID IN('')
+						</otherwise>
+					</choose>
+				</if>
+				
+				<if test=" searchCategory != null and searchCategory != '' ">
+			      AND PP.Category = #{searchCategory}
+			    </if>
+			    						
+				<if test=" searchDivision != null and searchDivision != '' ">
+			      AND OMI2.MEMBER_DIVISION = #{searchDivision}
+			    </if>
+			    
+			    <if test=" searchStartDate != null and searchStartDate != '' ">
+			      AND PP.START_DATE >= #{searchStartDate}
+			    </if>
+			    
+			    <if test=" searchEndDate != null and searchEndDate != '' ">
+			    <![CDATA[
+			      AND PP.END_DATE <= #{searchEndDate}
+			      ]]>		
+			    </if>
+			    
+			    <if test=" searchSalesPlan != null and searchSalesPlan != '' ">
+			      AND BPA_AMOUNT_PLAN.BASIS_TOTAL>= #{searchSalesPlan}
+			    </if>
+			    
+			    <if test=" searchInvestPlan != null and searchInvestPlan != '' ">
+			      AND BPA_INVEST_PLAN.BASIS_TOTAL >= #{searchInvestPlan}
+			    </if>
+			    
+					GROUP BY PP.PROJECT_ID
+					
+				) AS TB, (SELECT @ROWNUM:=0) AS ROWNUM	
+				WHERE 1=1
+				
+				<choose>
+					<when test="sortCategory != null and sortCategory != '' ">
+						ORDER BY ${sortCategory}
+					</when>
+					<otherwise>
+						ORDER BY TB.LATELY_UPDATE_DATE DESC
+					</otherwise>
+				</choose>
+				
+			   <include refid="common.pagingPost2"/>
+	</select>
+	
+	<select id="selectProjectPlanListCount" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+					COUNT(*) AS listCount, GROUP_CONCAT(TB.PROJECT_ID) AS searchPKArray
+			FROM 
+			(
+					SELECT 
+					PP.PROJECT_ID, 
+					PP.CREATOR_ID, 
+					PP.CREATE_DATETIME, 
+					PP.Category, 
+					PP.CLIENT_NAME, 
+					PP.SUBJECT, 
+					PP.DETAIL_CONTENTS, 
+					PP.START_DATE, 
+					PP.END_DATE, 
+					PP.CONTRACT_AMOUNT_TOTAL, 
+					PP.CONTRACT_AMOUNT_UNIT, 
+					PP.INVEST_AMOUNT, 
+					PP.INVEST_AMOUNT_UNIT, 
+					DATE_FORMAT(PP.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(PP.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(PP.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID_NUM,
+					OMI.MEMBER_TEAM,
+					ODI.DIVISION_NAME,
+					OMI2.HAN_NAME AS EXEC_OWNER, 
+					OMI2.MEMBER_ID_NUM AS EXEC_OWNER_ID,
+					OMI2.POSITION_STATUS AS EXEC_OWNER_POSITION,
+					ODI2.DIVISION_NAME AS EXEC_DIVISION,
+					OMI3.HAN_NAME AS SALES_OWNER, 
+					OMI3.MEMBER_ID_NUM AS SALES_OWNER_ID,
+					ODI3.DIVISION_NAME AS SALES_OWNER_DIVISION,
+					OMI3.POSITION_STATUS AS SALES_OWNER_POSITION,
+					MAX(IF(MILESTONE.RANK=1, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.ACT_DUE_DATE, "")) AS MS_DUE_DATE_5,
+					MAX(IF(MILESTONE.RANK=1, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.ACT_CLOSE_DATE, "")) AS MS_CLOSE_DATE_5,
+					MAX(IF(MILESTONE.RANK=1, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_1,
+					MAX(IF(MILESTONE.RANK=2, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_2,
+					MAX(IF(MILESTONE.RANK=3, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_3,
+					MAX(IF(MILESTONE.RANK=4, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_4,
+					MAX(IF(MILESTONE.RANK=5, MILESTONE.KEY_MILESTONE, "")) AS KEY_MILESTONE_5,
+		            MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.DUE_DATE, "")) AS ISSUE_DUE_DATE_5,
+					MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.CLOSE_DATE, "")) AS ISSUE_CLOSE_DATE_5,
+					MAX(IF(ACTION_STATUS.RANK=1, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_1,
+					MAX(IF(ACTION_STATUS.RANK=2, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_2,
+					MAX(IF(ACTION_STATUS.RANK=3, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_3,
+					MAX(IF(ACTION_STATUS.RANK=4, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_4,
+					MAX(IF(ACTION_STATUS.RANK=5, ACTION_STATUS.ISSUE_NAME, "")) AS ISSUE_NAME_5,
+		            IFNULL(BPP.FILE_COUNT,0) AS FILE_COUNT,
+					CCI.COMPANY_ID,
+					CCI.COMPANY_NAME,
+					CCI.CEO_NAME,
+					BPA_AMOUNT_PLAN.Q1 AS AMOUNT_PLAN_Q1,
+					BPA_AMOUNT_PLAN.Q2 AS AMOUNT_PLAN_Q2,
+					BPA_AMOUNT_PLAN.Q3 AS AMOUNT_PLAN_Q3,
+					BPA_AMOUNT_PLAN.Q4 AS AMOUNT_PLAN_Q4,
+					BPA_AMOUNT_PLAN.AFTER_YEAR AS AMOUNT_AFTER_YEAR,
+					BPA_AMOUNT_PLAN.BASIS_TOTAL AS AMOUNT_BASIS_TOTAL,
+					BPA_INVEST_PLAN.Q1 AS INVEST_PLAN_Q1,
+					BPA_INVEST_PLAN.Q2 AS INVEST_PLAN_Q2,
+					BPA_INVEST_PLAN.Q3 AS INVEST_PLAN_Q3,
+					BPA_INVEST_PLAN.Q4 AS INVEST_PLAN_Q4,
+					BPA_INVEST_PLAN.AFTER_YEAR AS INVEST_PLAN_AFTER_YEAR,
+					BPA_INVEST_PLAN.BASIS_TOTAL AS INVEST_PLAN_BASIS_TOTAL 
+				FROM 
+					BIZ_PROJECT_PLAN AS PP
+					LEFT OUTER JOIN
+					CLIENT_COMPANY_INFO AS CCI ON PP.COMPANY_ID = CCI.COMPANY_ID
+					LEFT OUTER JOIN
+		            (
+			            SELECT MILESTONE_ID, PROJECT_ID, ACT_DUE_DATE, ACT_CLOSE_DATE, STATUS, KEY_MILESTONE,
+						IF(@PREV <> PROJECT_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := PROJECT_ID
+	                    FROM BIZ_PROJECT_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+	                    WHERE 1=1
+	                    ORDER BY PROJECT_ID ASC, MILESTONE_ID ASC  
+					) AS MILESTONE ON PP.PROJECT_ID = MILESTONE.PROJECT_ID
+		            LEFT OUTER JOIN
+		            (	
+						SELECT * 
+						FROM (
+							SELECT PROJECT_ID, ACTION_ID, ISSUE_NAME, DUE_DATE, CLOSE_DATE,
+						           IF(@PREV <> PROJECT_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := PROJECT_ID
+						    FROM BIZ_PROJECT_PLAN_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						    WHERE 1=1
+						    ORDER BY PROJECT_ID ASC, ACTION_ID DESC
+					    ) AS SUB_OHA 
+						WHERE 1=1
+						AND SUB_OHA.RANK <= 5
+					) AS ACTION_STATUS ON PP.PROJECT_ID = ACTION_STATUS.PROJECT_ID
+					LEFT OUTER JOIN
+		            (
+		            	SELECT COUNT(PROJECT_ID) AS FILE_COUNT, PROJECT_ID
+		            	FROM BIZ_PROJECT_PLAN_FILE_STORE
+		            	GROUP BY PROJECT_ID
+		            ) AS BPP ON PP.PROJECT_ID = BPP.PROJECT_ID   
+		            LEFT OUTER JOIN
+					(
+						SELECT
+									AMOUNT_TMP.*,
+									(AMOUNT_TMP.Q1+AMOUNT_TMP.Q2+AMOUNT_TMP.Q3+AMOUNT_TMP.Q4+AFTER_YEAR) AS BASIS_TOTAL 
+						FROM
+						(
+							SELECT 	
+									PROJECT_ID,
+									SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q1,
+									SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q2,
+									SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q3,
+									SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q4,
+									SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS AFTER_YEAR
+							FROM BIZ_PROJECT_AMOUNT
+							GROUP BY PROJECT_ID
+						) AS AMOUNT_TMP
+					)AS BPA_AMOUNT_PLAN ON PP.PROJECT_ID = BPA_AMOUNT_PLAN.PROJECT_ID
+					LEFT OUTER JOIN
+					(
+						SELECT
+									INVEST_TMP.*,
+									(INVEST_TMP.Q1+INVEST_TMP.Q2+INVEST_TMP.Q3+INVEST_TMP.Q4+AFTER_YEAR) AS BASIS_TOTAL 
+						FROM
+						(
+							SELECT 	
+									PROJECT_ID,
+									SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q1,
+									SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q2,
+									SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q3,
+									SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q4,
+									SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS AFTER_YEAR
+							FROM BIZ_PROJECT_INVEST
+							GROUP BY PROJECT_ID
+						) AS INVEST_TMP
+					)AS BPA_INVEST_PLAN ON PP.PROJECT_ID = BPA_INVEST_PLAN.PROJECT_ID
+					LEFT OUTER JOIN
+					OUR_MEMBERS_INFO AS OMI ON PP.CREATOR_ID = OMI.MEMBER_ID_NUM
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI2 ON PP.EXEC_OWNER = OMI2.MEMBER_ID_NUM
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI3 ON PP.SALES_OWNER = OMI3.MEMBER_ID_NUM
+					LEFT OUTER JOIN
+					OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+					LEFT OUTER JOIN
+					OUR_DIVISION_INFO AS ODI2 ON ODI2.DIVISION_NO = OMI2.MEMBER_DIVISION
+					LEFT OUTER JOIN
+					OUR_DIVISION_INFO AS ODI3 ON ODI3.DIVISION_NO = OMI3.MEMBER_DIVISION
+				WHERE 1=1
+			]]>
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_CFO')">
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						AND OMI2.MEMBER_DIVISION = #{global_member_division}
+					</when>
+				</choose>
+					
+			   <if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+					<choose>
+						<when test="searchPKArray != null and searchPKArray != '' ">
+						AND PP.PROJECT_ID IN(${searchPKArray})
+						</when>
+						<otherwise>
+						AND PP.PROJECT_ID IN('')
+						</otherwise>
+					</choose>
+				</if>
+				
+				<if test=" searchCategory != null and searchCategory != '' ">
+			      AND PP.Category = #{searchCategory}
+			    </if>
+			    		
+				<if test=" searchDivision != null and searchDivision != '' ">
+			      AND OMI2.MEMBER_DIVISION = #{searchDivision}
+			    </if>
+			    
+			    <if test=" searchStartDate != null and searchStartDate != '' ">
+			      AND PP.START_DATE >= #{searchStartDate}
+			    </if>
+			    
+			    <if test=" searchEndDate != null and searchEndDate != '' ">
+			    <![CDATA[
+			      AND PP.END_DATE <= #{searchEndDate}
+			      ]]>		
+			    </if>
+			    
+			    <if test=" searchSalesPlan != null and searchSalesPlan != '' ">
+			      AND BPA_AMOUNT_PLAN.BASIS_TOTAL>= #{searchSalesPlan}
+			    </if>
+			    
+			    <if test=" searchInvestPlan != null and searchInvestPlan != '' ">
+			      AND BPA_INVEST_PLAN.BASIS_TOTAL >= #{searchInvestPlan}
+			    </if>
+				GROUP BY PP.PROJECT_ID
+			) AS TB, (SELECT @ROWNUM:=0) AS ROWNUM	
+			WHERE 1=1
+	</select>
+	
+	<select id="selectProjectPlanDetail" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+			SELECT 
+					PP.PROJECT_ID, 
+					PP.CREATOR_ID, 
+					PP.CREATE_DATETIME, 
+					PP.Category, 
+					PP.CLIENT_NAME, 
+					PP.SUBJECT, 
+					PP.DETAIL_CONTENTS, 
+					PP.START_DATE, 
+					PP.END_DATE, 
+					PP.CONTRACT_AMOUNT_TOTAL, 
+					PP.CONTRACT_AMOUNT_UNIT, 
+					PP.INVEST_AMOUNT, 
+					PP.INVEST_AMOUNT_UNIT, 
+					DATE_FORMAT(PP.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(PP.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(PP.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID_NUM,
+					OMI.MEMBER_TEAM,
+					ODI.DIVISION_NAME,
+					OMI2.HAN_NAME AS EXEC_OWNER, 
+					OMI2.MEMBER_ID_NUM AS EXEC_OWNER_ID,
+					OMI2.POSITION_STATUS AS EXEC_OWNER_POSITION,
+					ODI2.DIVISION_NAME AS EXEC_DIVISION,
+					OMI3.HAN_NAME AS SALES_OWNER, 
+					OMI3.MEMBER_ID_NUM AS SALES_OWNER_ID,
+					ODI3.DIVISION_NAME AS SALES_OWNER_DIVISION,
+					OMI3.POSITION_STATUS AS SALES_OWNER_POSITION,
+		            IFNULL(BPP.FILE_COUNT,0) AS FILE_COUNT,
+					CCI.COMPANY_ID,
+					CCI.COMPANY_NAME,
+					CCI.CEO_NAME,
+					BPA_AMOUNT_PLAN.Q1 AS AMOUNT_PLAN_Q1,
+					BPA_AMOUNT_PLAN.Q2 AS AMOUNT_PLAN_Q2,
+					BPA_AMOUNT_PLAN.Q3 AS AMOUNT_PLAN_Q3,
+					BPA_AMOUNT_PLAN.Q4 AS AMOUNT_PLAN_Q4,
+					BPA_AMOUNT_PLAN.AFTER_YEAR AS AMOUNT_AFTER_YEAR,
+					BPA_AMOUNT_PLAN.BASIS_TOTAL AS AMOUNT_BASIS_TOTAL,
+					BPA_INVEST_PLAN.Q1 AS INVEST_PLAN_Q1,
+					BPA_INVEST_PLAN.Q2 AS INVEST_PLAN_Q2,
+					BPA_INVEST_PLAN.Q3 AS INVEST_PLAN_Q3,
+					BPA_INVEST_PLAN.Q4 AS INVEST_PLAN_Q4,
+					BPA_INVEST_PLAN.AFTER_YEAR AS INVEST_PLAN_AFTER_YEAR,
+					BPA_INVEST_PLAN.BASIS_TOTAL AS INVEST_PLAN_BASIS_TOTAL
+					FROM 
+					BIZ_PROJECT_PLAN AS	PP
+					LEFT OUTER JOIN
+					CLIENT_COMPANY_INFO AS CCI ON PP.COMPANY_ID = CCI.COMPANY_ID
+		            LEFT OUTER JOIN
+		            (
+		            	SELECT COUNT(PROJECT_ID) AS FILE_COUNT, PROJECT_ID
+		            	FROM BIZ_PROJECT_PLAN_FILE_STORE
+		            	GROUP BY PROJECT_ID
+		            ) AS BPP ON PP.PROJECT_ID = BPP.PROJECT_ID   
+		            LEFT OUTER JOIN
+					(
+						SELECT
+									AMOUNT_TMP.*,
+									(AMOUNT_TMP.Q1+AMOUNT_TMP.Q2+AMOUNT_TMP.Q3+AMOUNT_TMP.Q4) AS BASIS_TOTAL 
+						FROM
+						(
+							SELECT 	
+									PROJECT_ID,
+									SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q1,
+									SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q2,
+									SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q3,
+									SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q4,
+									SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS AFTER_YEAR
+							FROM BIZ_PROJECT_AMOUNT
+							GROUP BY PROJECT_ID
+						) AS AMOUNT_TMP
+					)AS BPA_AMOUNT_PLAN ON PP.PROJECT_ID = BPA_AMOUNT_PLAN.PROJECT_ID
+					LEFT OUTER JOIN
+					(
+						SELECT
+									INVEST_TMP.*,
+									(INVEST_TMP.Q1+INVEST_TMP.Q2+INVEST_TMP.Q3+INVEST_TMP.Q4) AS BASIS_TOTAL 
+						FROM
+						(
+							SELECT 	
+									PROJECT_ID,
+									SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q1,
+									SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q2,
+									SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q3,
+									SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q4,
+									SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS AFTER_YEAR
+							FROM BIZ_PROJECT_INVEST
+							GROUP BY PROJECT_ID
+						) AS INVEST_TMP
+					)AS BPA_INVEST_PLAN ON PP.PROJECT_ID = BPA_INVEST_PLAN.PROJECT_ID
+				LEFT OUTER JOIN
+				OUR_MEMBERS_INFO AS OMI ON PP.CREATOR_ID = OMI.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI2 ON PP.EXEC_OWNER = OMI2.MEMBER_ID_NUM
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI3 ON PP.SALES_OWNER = OMI3.MEMBER_ID_NUM
+				LEFT OUTER JOIN
+				OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+				LEFT OUTER JOIN
+				OUR_DIVISION_INFO AS ODI2 ON ODI2.DIVISION_NO = OMI2.MEMBER_DIVISION
+				LEFT OUTER JOIN
+				OUR_DIVISION_INFO AS ODI3 ON ODI3.DIVISION_NO = OMI3.MEMBER_DIVISION
+			WHERE 1=1
+			AND PP.PROJECT_ID = #{pkNo}
+		]]>
+	</select>
+	
+	<select id="selectProjectPlanSum" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			SUM_TB.MEMBER_TEAM,
+			SUM(IFNULL(SUM_TB.AMOUNT_BASIS_TOTAL,0)) AS AMOUNT_BASIS_TOTAL,
+			SUM(IFNULL(SUM_TB.INVEST_PLAN_BASIS_TOTAL,0)) AS INVEST_PLAN_BASIS_TOTAL
+		FROM (
+			SELECT 
+						OMI.MEMBER_TEAM,
+						BPA_AMOUNT_PLAN.AFTER_YEAR AS AMOUNT_AFTER_YEAR,
+						BPA_AMOUNT_PLAN.BASIS_TOTAL AS AMOUNT_BASIS_TOTAL,
+						BPA_INVEST_PLAN.AFTER_YEAR AS INVEST_PLAN_AFTER_YEAR,
+						BPA_INVEST_PLAN.BASIS_TOTAL AS INVEST_PLAN_BASIS_TOTAL
+				FROM 
+				BIZ_PROJECT_PLAN AS	PP
+				LEFT OUTER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON PP.COMPANY_ID = CCI.COMPANY_ID
+				LEFT OUTER JOIN
+				(
+					SELECT
+								AMOUNT_TMP.*,
+								(AMOUNT_TMP.Q1+AMOUNT_TMP.Q2+AMOUNT_TMP.Q3+AMOUNT_TMP.Q4) AS BASIS_TOTAL 
+					FROM
+					(
+						SELECT 	
+								PROJECT_ID,
+								SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q1,
+								SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q2,
+								SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q3,
+								SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q4,
+								SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS AFTER_YEAR
+						FROM BIZ_PROJECT_AMOUNT
+						GROUP BY PROJECT_ID
+					) AS AMOUNT_TMP
+				)AS BPA_AMOUNT_PLAN ON PP.PROJECT_ID = BPA_AMOUNT_PLAN.PROJECT_ID
+				LEFT OUTER JOIN
+				(
+					SELECT
+								INVEST_TMP.*,
+								(INVEST_TMP.Q1+INVEST_TMP.Q2+INVEST_TMP.Q3+INVEST_TMP.Q4) AS BASIS_TOTAL 
+					FROM
+					(
+						SELECT 	
+								PROJECT_ID,
+								SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q1,
+								SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q2,
+								SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q3,
+								SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS Q4,
+								SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_INVEST_AMOUNT,0)) AS AFTER_YEAR
+						FROM BIZ_PROJECT_INVEST
+						GROUP BY PROJECT_ID
+					) AS INVEST_TMP
+				)AS BPA_INVEST_PLAN ON PP.PROJECT_ID = BPA_INVEST_PLAN.PROJECT_ID
+				LEFT OUTER JOIN
+				OUR_MEMBERS_INFO AS OMI ON PP.CREATOR_ID = OMI.MEMBER_ID_NUM
+		]]>
+				WHERE 1=1
+				<if test=" searchCategory != null and searchCategory != '' ">
+				AND PP.Category = #{searchCategory}
+				</if>
+		) AS SUM_TB
+		WHERE 1=1
+		<if test=" searchDivision != null and searchDivision != '' ">
+		AND SUM_TB.MEMBER_TEAM = #{searchDivision}
+		</if>
+		GROUP BY SUM_TB.MEMBER_TEAM
+	</select>
+	
+	<select id="selectProjectPlanLatelyUpdate" parameterType="hashmap" resultType="String">
+	    <![CDATA[
+			SELECT SYS_UPDATE_DATE
+			FROM BIZ_PROJECT_PLAN
+			ORDER BY SYS_UPDATE_DATE DESC
+			LIMIT 0,1	
+		]]>
+	</select>
+	
+	<select id="selectSearchProjectPlanDetailGroup1" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+			SELECT ODI.DIVISION_NO, ODI.DIVISION_NAME
+			FROM 
+				BIZ_PROJECT_PLAN AS	PP
+				INNER JOIN
+				OUR_MEMBERS_INFO AS OMI ON PP.SALES_OWNER = OMI.MEMBER_ID_NUM
+				LEFT OUTER JOIN
+				OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+			WHERE 1=1			
+		]]>
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_CFO')">
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					AND OMI.MEMBER_DIVISION = #{global_member_division}
+				</when>
+			</choose>
+				
+			<if test=" searchDivision != null and searchDivision != '' ">
+				AND PP.Category = #{searchDivision}
+			</if>
+			GROUP BY OMI.MEMBER_DIVISION
+	</select>
+	
+	<select id="selectProjectPlanContractInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT * 
+		FROM BIZ_PROJECT_AMOUNT
+		WHERE PROJECT_ID = #{project_id}
+	</select>
+	
+	<select id="selectProjectPlanInvestInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT * 
+		FROM BIZ_PROJECT_INVEST
+		WHERE PROJECT_ID = #{project_id}
+	</select>
+	
+	<!-- 프로젝트 계획 입력 -->
+	<insert id="insertProjectPlan" parameterType="hashmap">
+	        INSERT INTO BIZ_PROJECT_PLAN
+	        (
+	        	CREATOR_ID, 
+	        	CREATE_DATETIME, 
+	        	Category, 
+	        	<if test=" hiddenModalCompanyId != null and hiddenModalCompanyId != '' ">
+	        	COMPANY_ID,
+	        	</if>
+	        	EXEC_OWNER, 
+	        	SALES_OWNER, 
+	        	SUBJECT, 
+	        	DETAIL_CONTENTS, 
+	        	START_DATE, 
+	        	END_DATE, 
+	        	<if test=" hiddenModalTotalContractAmount != null and hiddenModalTotalContractAmount != '' ">
+	        	CONTRACT_AMOUNT_TOTAL, 
+	        	</if>
+	        	CONTRACT_AMOUNT_UNIT, 
+	        	<if test=" hiddenModalTotalInvestAmount != null and hiddenModalTotalInvestAmount != '' ">
+	        	INVEST_AMOUNT, 
+	        	</if>
+	        	INVEST_AMOUNT_UNIT
+	        )
+	        VALUES
+	        (
+	        	#{hiddenModalCreatorId}, 
+	        	CURRENT_TIMESTAMP,
+	            #{selectModalCategory},
+	            <if test=" hiddenModalCompanyId != null and hiddenModalCompanyId != '' ">
+	            #{hiddenModalCompanyId},
+	        	</if>
+	            #{hiddenModalExecutionOwner},
+	            #{hiddenModalSalesOwner},
+	            #{textModalSubject}, 
+	            #{textareaModalDetailContents},
+	            #{textModalStartDate},
+	            #{textModalEndDate},
+	            <if test=" hiddenModalTotalContractAmount != null and hiddenModalTotalContractAmount != '' ">
+	            #{hiddenModalTotalContractAmount},
+	            </if>
+	            #{selectModalContractAmount},
+	            <if test=" hiddenModalTotalInvestAmount != null and hiddenModalTotalInvestAmount != '' ">
+	            #{hiddenModalTotalInvestAmount},
+	            </if>
+	            #{selectModalInvestAmount}
+	        );
+		<!--  #{hiddenModalTotalContractAmount},
+	            #{hiddenModalContractAmount1},
+	            #{hiddenModalContractAmount2},
+	            #{hiddenModalContractAmount3},
+	            #{hiddenModalContractAmount4},
+	            #{hiddenModalContractAmountName1},
+	            #{hiddenModalContractAmountName2},
+	            #{hiddenModalContractAmountName3},
+	            #{hiddenModalContractAmountName4},
+	            #{hiddenModalTotalInvestAmount},
+	            #{hiddenModalInvestAmountQ1},
+	            #{hiddenModalInvestAmountQ2},
+	            #{hiddenModalInvestAmountQ3},
+	            #{hiddenModalInvestAmountQ4},
+	            #{hiddenModalInvestAmountNameQ1},
+	            #{hiddenModalInvestAmountNameQ2},
+	            #{hiddenModalInvestAmountNameQ3},
+	            #{hiddenModalInvestAmountNameQ4} -->
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<!-- 프로젝트 계획 Contract 입력 -->
+	<insert id="insertProjectPlanContract" parameterType="hashmap">
+	 	<![CDATA[
+	        INSERT INTO BIZ_PROJECT_AMOUNT
+	        (
+	        	PROJECT_ID, 
+	        	CREATOR_ID, 
+	        	CREATE_DATETIME,
+	        	BASIS_MONTH,
+	        	BASIS_PLAN_REVENUE_AMOUNT,
+	        	BASIS_ACTUAL_REVENUE_AMOUNT
+	        )
+	        VALUES
+	        (
+	        	#{hiddenModalProjectId}, 
+	        	#{hiddenModalCreatorId}, 
+	        	CURRENT_TIMESTAMP,
+	        	#{ContractDate},
+	        	#{ContractPlanAmount},
+	        	#{ContractActualAmount}
+	        );
+		]]>
+	</insert>
+	
+	<!-- 프로젝트 계획 Invest 입력 -->
+	<insert id="insertProjectPlanInvest" parameterType="hashmap">
+	 	<![CDATA[
+	        INSERT INTO BIZ_PROJECT_INVEST
+	        (
+	        	PROJECT_ID, 
+	        	CREATOR_ID, 
+	        	CREATE_DATETIME, 
+	        	BASIS_MONTH,
+	        	BASIS_PLAN_INVEST_AMOUNT,
+	        	BASIS_ACTUAL_INVEST_AMOUNT
+	        )
+	        VALUES
+	        (
+	        	#{hiddenModalProjectId}, 
+	        	#{hiddenModalCreatorId}, 
+	        	CURRENT_TIMESTAMP,
+	        	#{InvestDate},
+	        	#{InvestPlanAmount},
+	        	#{InvestActualAmount}
+	        );
+		]]>
+	</insert>
+	
+	<update id="updateProjectPlan" parameterType="hashmap">
+	        UPDATE BIZ_PROJECT_PLAN
+	        SET 
+	        	Category =                   #{selectModalCategory},
+	        	<if test=" hiddenModalCompanyId != null and hiddenModalCompanyId != '' ">
+	        	COMPANY_ID=                 	            #{hiddenModalCompanyId},
+	        	</if>
+	        	EXEC_OWNER=                 	            #{hiddenModalExecutionOwner},
+	        	SALES_OWNER=                	            #{hiddenModalSalesOwner},
+	        	SUBJECT=                    	            #{textModalSubject}, 
+	        	DETAIL_CONTENTS=            	            #{textareaModalDetailContents},
+	        	START_DATE=                 	            #{textModalStartDate},
+	        	END_DATE=                   	            #{textModalEndDate},
+	        	<if test=" hiddenModalTotalContractAmount != null and hiddenModalTotalContractAmount != '' ">
+	        	CONTRACT_AMOUNT_TOTAL=      	            #{hiddenModalTotalContractAmount},
+	        	</if>
+	        	CONTRACT_AMOUNT_UNIT=       	            #{selectModalContractAmount},
+	        	<if test=" hiddenModalTotalInvestAmount != null and hiddenModalTotalInvestAmount != '' ">
+	        	INVEST_AMOUNT=              	            #{hiddenModalTotalInvestAmount},
+	        	</if>
+	        	INVEST_AMOUNT_UNIT=         	            #{selectModalInvestAmount},
+	        	SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+			WHERE PROJECT_ID=#{hiddenModalProjectId};
+	</update>
+	
+	<select id="selectProjectPlanFileList" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			FILE_ID, 
+			PROJECT_ID, 
+			CREATOR_ID, 
+			CREATE_DATETIME, 
+			FILE_NAME, 
+			FILE_PATH, 
+			FILE_TYPE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		FROM BIZ_PROJECT_PLAN_FILE_STORE
+		WHERE 1=1
+		AND PROJECT_ID = #{pkNo}
+	</select>
+	
+	<insert id="insertProjectPlanFile" parameterType="hashmap">
+	    <![CDATA[
+		    INSERT INTO BIZ_PROJECT_PLAN_FILE_STORE
+			(
+				PROJECT_ID, 
+				CREATOR_ID, 
+				CREATE_DATETIME, 
+				FILE_NAME, 
+				FILE_PATH, 
+				FILE_TYPE
+			)
+			VALUES
+			(
+				#{fileBizId}, 
+				#{creatorId}, 
+				CURRENT_TIMESTAMP,
+				#{originalFileName}, 
+				#{filePath}, 
+				#{originalFileExtension}
+			);
+	    ]]>
+	</insert>
+	
+	<select id="selectMileStonesProjectPlanList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			BPM.MILESTONE_ID, 
+			BPM.PROJECT_ID, 
+			BPM.Category, 
+			BPM.CREATOR_ID,
+			BPM.CREATE_DATETIME, 
+			BPM.KEY_MILESTONE, 
+			IF(BPM.ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > BPM.ACT_DUE_DATE, 'R', BPM.STATUS) AS STATUS,
+			IF(BPM.ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > BPM.ACT_DUE_DATE, 'R', BPM.STATUS) AS HIDDEN_STATUS, 
+			BPM.ACT_ID, 
+			OMI.HAN_NAME AS ACT_NAME,
+			OMI.POSITION_STATUS AS ACT_POSITION,
+			IFNULL(BPM.ACT_DUE_DATE,'') AS DUE_DATE, 
+			IFNULL(BPM.ACT_CLOSE_DATE,'') AS CLOSE_DATE, 
+			BPM.SYS_REGISTER_DATE, 
+			BPM.SYS_UPDATE_DATE
+		FROM BIZ_PROJECT_MILESTONE AS BPM 
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON BPM.ACT_ID = OMI.MEMBER_ID_NUM , (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE PROJECT_ID = #{pkNo}
+		ORDER BY MILESTONE_ID ASC
+	</select>
+	
+	<select id="selectMileStonesProjectPlanKey" parameterType="hashmap" resultType="Integer">
+		SELECT COUNT(*)
+		FROM BIZ_PROJECT_MILESTONE
+		WHERE PROJECT_ID = #{project_id}
+	</select>
+	
+	<select id="selectProjectPlanOpportunityList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			BPPO.BIZ_PP_OPP_ID, 
+			BPPO.PROJECT_ID, 
+			BPPO.OPP_COMPANY_ID, 
+			BPPO.OPP_NAME, 
+			BPPO.OPP_AMOUNT, 
+			BPPO.OPP_DATE, 
+			BPPO.OPP_SALES_MAN_ID, 
+			BPPO.CREATOR_ID, 
+			BPPO.SYS_REGISTER_DATE, 
+			BPPO.SYS_UPDATE_DATE,
+			CCI.COMPANY_NAME,
+			OMI.HAN_NAME,
+			OMI.POSITION_STATUS
+		FROM 
+			BIZ_PROJECT_PLAN_OPPORTUNITY AS BPPO
+			LEFT OUTER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON BPPO.OPP_COMPANY_ID = CCI.COMPANY_ID
+			LEFT OUTER JOIN
+			OUR_MEMBERS_INFO AS OMI ON BPPO.OPP_SALES_MAN_ID = OMI.MEMBER_ID_NUM
+		WHERE BPPO.PROJECT_ID = #{pkNo}
+		ORDER BY BPPO.BIZ_PP_OPP_ID
+	</select>
+	
+	<delete id="deleteOppProjectPlan" parameterType="hashmap">
+		DELETE FROM BIZ_PROJECT_PLAN_OPPORTUNITY 
+		WHERE PROJECT_ID = #{filePK}
+	</delete>
+		
+	<insert id="insertOppProjectPlan" parameterType="hashmap">
+		INSERT INTO BIZ_PROJECT_PLAN_OPPORTUNITY
+		(
+			PROJECT_ID, 
+			OPP_COMPANY_ID, 
+			OPP_NAME, 
+			OPP_AMOUNT, 
+			OPP_DATE, 
+			OPP_SALES_MAN_ID, 
+			CREATOR_ID, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{pkNo}, 
+			#{COMPANY_ID}, 
+			#{NAME}, 
+			#{AMOUNT}, 
+			<choose>
+				<when test="PLAN_DATE != null and PLAN_DATE != '' ">
+				#{PLAN_DATE},
+				</when>
+				<otherwise>
+				NULL,
+				</otherwise>
+			</choose>
+			#{MEMBER_ID}, 
+			#{hiddenModalCreatorId}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<insert id="insertMileStonesProjectPlanList" parameterType="hashmap">
+			INSERT INTO BIZ_PROJECT_MILESTONE
+			(
+				PROJECT_ID, 
+				CATEGORY, 
+				CREATOR_ID, 
+				STATUS,
+				CREATE_DATETIME, 
+				KEY_MILESTONE, 
+				ACT_ID, 
+				ACT_NAME,
+				ACT_DUE_DATE, 
+				ACT_CLOSE_DATE
+			)
+			VALUES
+			(
+				#{project_id}, 
+				#{category}, 
+				#{creator_id},
+				#{STATUS},
+				CURRENT_TIMESTAMP, 
+				#{KEY_MILESTONE}, 
+				#{ACT_ID}, 
+				#{ACT_NAME},
+				#{DUE_DATE}, 
+				#{CLOSE_DATE} 
+			);
+	</insert>
+	
+	<update id="updateMileStonesProjectPlanList" parameterType="hashmap">
+			UPDATE BIZ_PROJECT_MILESTONE
+				SET 
+					Category=#{category},
+					CREATOR_ID=#{creator_id},
+					KEY_MILESTONE=#{KEY_MILESTONE},
+					ACT_ID=#{ACT_ID},
+					ACT_NAME=#{ACT_NAME},
+					STATUS=#{STATUS},
+					ACT_DUE_DATE=#{DUE_DATE},
+					ACT_CLOSE_DATE=#{CLOSE_DATE},
+					SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+				<!-- <trim prefix="SET" suffixOverrides=",">
+					<if test="category != null">Category=#{category},</if>
+					<if test="creator_id != null">CREATOR_ID=#{creator_id},</if>
+					<if test="KEY_MILESTONE != null">KEY_MILESTONE=#{KEY_MILESTONE},</if>
+					<if test="ACT_ID != null">ACT_ID=#{ACT_ID},</if>
+					<if test="STATUS != null">STATUS=#{STATUS},</if>
+					<if test="ACT_DUE_DATE != null">ACT_DUE_DATE=#{ACT_DUE_DATE},</if>
+					<if test="ACT_CLOSE_DATE != null">ACT_CLOSE_DATE=#{ACT_CLOSE_DATE},</if>
+					SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+				</trim> -->
+			WHERE 1=1 
+			AND PROJECT_ID = #{project_id}
+			AND MILESTONE_ID = #{MILESTONE_ID}
+	</update>
+	
+	<delete id="deleteProjectPlan" parameterType="hashmap">
+		DELETE FROM BIZ_PROJECT_PLAN_FILE_STORE WHERE PROJECT_ID=#{hiddenModalProjectId};
+		DELETE FROM BIZ_PROJECT_MILESTONE WHERE PROJECT_ID =#{hiddenModalProjectId};
+		DELETE FROM BIZ_PROJECT_AMOUNT WHERE PROJECT_ID=#{hiddenModalProjectId};
+		DELETE FROM BIZ_PROJECT_INVEST WHERE PROJECT_ID=#{hiddenModalProjectId};
+		DELETE FROM BIZ_PROJECT_PLAN_ACTION_PLAN WHERE PROJECT_ID=#{hiddenModalProjectId};
+		DELETE FROM BIZ_PROJECT_PLAN WHERE PROJECT_ID=#{hiddenModalProjectId};
+	</delete>
+	
+	<delete id="deleteProjectPlanContractAmount" parameterType="hashmap">
+		DELETE FROM BIZ_PROJECT_AMOUNT WHERE PROJECT_ID=#{hiddenModalProjectId};
+	</delete>
+	
+	<delete id="deleteProjectPlanInvestAmount" parameterType="hashmap">
+		DELETE FROM BIZ_PROJECT_INVEST WHERE PROJECT_ID=#{hiddenModalProjectId};
+	</delete>
+	
+	<select id="selectProjectPlanIssue" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+		BPA.ACTION_ID,
+		BPA.ACTION_OWNER_ID,
+		BPA.PROJECT_ID,
+		BPA.CREATOR_ID,
+		BPA.ISSUE_NAME,
+		BPA.ISSUE_ITEM,
+		BPA.ACTION_PLAN_NAME,
+		OMI.HAN_NAME AS ACTION_OWNER,
+		OMI.POSITION_STATUS AS ACTION_OWNER_POSITION,
+		BPA.DUE_DATE,
+		BPA.CLOSE_DATE,
+		IF(CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > DUE_DATE, 'R', IF(CLOSE_DATE IS NULL, 'Y', 'G')) AS STATUS,
+		BPA.SYS_REGISTER_DATE
+		FROM 
+		BIZ_PROJECT_PLAN_ACTION_PLAN AS BPA
+		LEFT OUTER JOIN 
+		OUR_MEMBERS_INFO AS OMI on BPA.ACTION_OWNER_ID = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		AND BPA.PROJECT_ID = #{hiddenModalPK}
+		]]>
+		ORDER BY BPA.ACTION_ID ASC;
+	</select>
+	
+	<select id="selectActionPlanProjectPlanKey" parameterType="hashmap" resultType="Integer">
+		SELECT COUNT(*)
+		FROM BIZ_PROJECT_PLAN_ACTION_PLAN
+		WHERE PROJECT_ID = #{hiddenModalPK}
+	</select>
+	
+	<insert id="insertProjectPlanIssue" parameterType="hashmap">
+		INSERT INTO BIZ_PROJECT_PLAN_ACTION_PLAN
+		(
+			PROJECT_ID, 
+			CREATOR_ID, 
+			ISSUE_NAME,
+			ISSUE_ITEM,
+			ACTION_PLAN_NAME, 
+			ACTION_OWNER, 
+			ACTION_OWNER_ID,
+			DUE_DATE, 
+			CLOSE_DATE, 
+			STATUS,
+			CREATE_DATETIME
+		)
+		VALUES
+		(
+			#{hiddenModalPK}, 
+			#{hiddenModalCreatorId}, 
+			#{ISSUE_NAME}, 
+			#{ISSUE_ITEM}, 
+			#{ACTION_PLAN_NAME}, 
+			#{ACTION_OWNER},
+			#{ACTION_OWNER_ID},
+			<choose>
+				<when test="DUE_DATE != null and DUE_DATE != '' ">
+					#{DUE_DATE},
+				</when>
+				<otherwise>
+					NULL,
+				</otherwise>
+			</choose> 
+			
+			<choose>
+				<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+					#{CLOSE_DATE},
+				</when>
+				<otherwise>
+					NULL,
+				</otherwise>
+			</choose> 
+			#{HIDDEN_STATUS},
+			CURRENT_TIMESTAMP
+		);
+			
+	</insert>
+	
+	<update id="updateProjectPlanIssue" parameterType="hashmap">
+		UPDATE BIZ_PROJECT_PLAN_ACTION_PLAN 
+		SET 
+			ISSUE_NAME  = #{ISSUE_NAME}, 
+			ISSUE_ITEM  = #{ISSUE_ITEM}, 
+			ACTION_PLAN_NAME  = #{ACTION_PLAN_NAME}, 
+			ACTION_OWNER = #{ACTION_OWNER}, 
+			ACTION_OWNER_ID = #{ACTION_OWNER_ID},
+			<choose>
+				<when test="DUE_DATE != null and DUE_DATE != '' ">
+					DUE_DATE= #{DUE_DATE},
+				</when>
+				<otherwise>
+					DUE_DATE = NULL,
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+					CLOSE_DATE= #{CLOSE_DATE},
+				</when>
+				<otherwise>
+					CLOSE_DATE = NULL,
+				</otherwise>
+			</choose> 
+			STATUS = #{HIDDEN_STATUS}
+		WHERE 1=1
+		AND PROJECT_ID = #{hiddenModalPK}
+		AND ACTION_ID = #{ACTION_ID}
+		;
+	</update>
+
+
+	<delete id="deleteProjectPlanActionPlan" parameterType="hashmap">
+		DELETE FROM BIZ_PROJECT_PLAN_ACTION_PLAN WHERE ACTION_ID=#{action_id};
+	</delete>
+
+	<!-- 사업전략의 이슈플랜 추가 by hssong -->	
+	<select id="selectBizStrategyIssue" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+		BPA.ACTION_ID,
+		BPA.BIZ_ID,
+		BPA.CREATOR_ID,
+		BPA.ISSUE_NAME,
+		BPA.ISSUE_ITEM,
+		BPA.ACTION_PLAN_NAME,
+		OMI.HAN_NAME AS ACTION_OWNER,
+		OMI.POSITION_STATUS AS ACTION_OWNER_POSITION,
+		BPA.ACTION_OWNER_ID,
+		BPA.DUE_DATE,
+		BPA.CLOSE_DATE,
+		IF(CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > DUE_DATE, 'R', IF(CLOSE_DATE IS NULL, 'Y', 'G')) AS STATUS,
+		BPA.SYS_REGISTER_DATE
+		FROM BIZ_STRATEGY_ACTION_PLAN AS BPA
+		LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI 
+			ON BPA.ACTION_OWNER_ID = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		AND BPA.BIZ_ID = #{hiddenModalPK}
+		]]>
+		ORDER BY BPA.ACTION_ID ASC;
+	</select>
+	
+	<select id="selectActionPlanBizStrategyKey" parameterType="hashmap" resultType="Integer">
+		SELECT COUNT(*)
+		FROM BIZ_STRATEGY_ACTION_PLAN
+		WHERE BIZ_ID = #{hiddenModalPK}
+	</select>
+	
+	<insert id="insertBizStrategyIssue" parameterType="hashmap">
+		INSERT INTO BIZ_STRATEGY_ACTION_PLAN
+		(
+			BIZ_ID, 
+			CREATOR_ID, 
+			ISSUE_NAME,
+			ISSUE_ITEM,
+			ACTION_PLAN_NAME, 
+			ACTION_OWNER, 
+			ACTION_OWNER_ID,
+			DUE_DATE, 
+			CLOSE_DATE, 
+			STATUS,
+			CREATE_DATETIME
+		)
+		VALUES
+		(
+			#{hiddenModalPK}, 
+			#{hiddenModalCreatorId}, 
+			#{ISSUE_NAME}, 
+			#{ISSUE_ITEM}, 
+			#{ACTION_PLAN_NAME}, 
+			#{ACTION_OWNER},
+			#{ACTION_OWNER_ID},
+			<choose>
+				<when test="DUE_DATE != null and DUE_DATE != '' ">
+					#{DUE_DATE},
+				</when>
+				<otherwise>
+					NULL,
+				</otherwise>
+			</choose> 
+			
+			<choose>
+				<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+					#{CLOSE_DATE},
+				</when>
+				<otherwise>
+					NULL,
+				</otherwise>
+			</choose> 
+			#{HIDDEN_STATUS},
+			CURRENT_TIMESTAMP
+		);
+			
+	</insert>
+	
+	<update id="updateBizStrategyIssue" parameterType="hashmap">
+		UPDATE BIZ_STRATEGY_ACTION_PLAN 
+		SET 
+			ISSUE_NAME  = #{ISSUE_NAME}, 
+			ISSUE_ITEM  = #{ISSUE_ITEM}, 
+			ACTION_PLAN_NAME  = #{ACTION_PLAN_NAME}, 
+			ACTION_OWNER = #{ACTION_OWNER}, 
+			ACTION_OWNER_ID = #{ACTION_OWNER_ID},
+			<choose>
+				<when test="DUE_DATE != null and DUE_DATE != '' ">
+					DUE_DATE= #{DUE_DATE},
+				</when>
+				<otherwise>
+					DUE_DATE = NULL,
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+					CLOSE_DATE= #{CLOSE_DATE},
+				</when>
+				<otherwise>
+					CLOSE_DATE = NULL,
+				</otherwise>
+			</choose> 
+			STATUS = #{HIDDEN_STATUS}
+		WHERE 1=1
+		AND BIZ_ID = #{hiddenModalPK}
+		AND ACTION_ID = #{ACTION_ID}
+		;
+	</update>
+
+	<!-- <delete id="deleteBizStrategyActionPlan" parameterType="hashmap"> -->
+	<delete id="deleteBizStrategyIssue" parameterType="hashmap">
+		DELETE FROM BIZ_STRATEGY_ACTION_PLAN WHERE ACTION_ID=#{ACTION_ID} AND BIZ_ID = #{hiddenModalPK};
+	</delete>
+	
+	
+	<!-- mobile -->
+	<select id="selectBizStrategyCountMobile" parameterType="hashmap" resultType="Integer">
+		<![CDATA[
+	SELECT 
+		COUNT(*) CNT
+	FROM 
+	(
+		 SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP_BIZ_STRATEGY.*,
+			CONCAT(IF(TMP_BIZ_STRATEGY.KEY_MILESTONE1 IS NOT NULL, CONCAT(TMP_BIZ_STRATEGY.KEY_MILESTONE1," (",TMP_BIZ_STRATEGY.ACT_DUE_DATE1,")"),""),IF(TMP_BIZ_STRATEGY.KEY_MILESTONE2 IS NOT NULL, CONCAT("\n",TMP_BIZ_STRATEGY.KEY_MILESTONE2," (",TMP_BIZ_STRATEGY.ACT_DUE_DATE2,")"),"")) AS KEY_MILESTONE,
+			CASE 
+				WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,'')) LIKE '%R%' THEN 'R'
+				WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,'')) LIKE '%Y%' THEN 'Y'
+				WHEN TMP_BIZ_STRATEGY.STATUS1 = 'G' AND (TMP_BIZ_STRATEGY.STATUS2 IS NULL OR  TMP_BIZ_STRATEGY.STATUS2 = '') THEN 'G'
+				WHEN TMP_BIZ_STRATEGY.STATUS1 = 'G' AND TMP_BIZ_STRATEGY.STATUS2 = 'G' THEN 'G'
+				ELSE '-'
+			END AS STATUS
+			
+		FROM 
+			(
+				SELECT 
+					BS.BIZ_ID, 
+					BS.CATEGORY, 
+					BS.CREATOR_ID, 
+					BS.CREATE_DATETIME, 
+					BS.SUBJECT, KEY_CONTENTS, 
+					DATE_FORMAT(BS.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					BS.REVIEW_CYCLE,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID,
+					MAX(IF(BM.RANK=1,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE1,
+					MAX(IF(BM.RANK=2,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE2,
+					MAX(IF(BM.RANK=1,BM.STATUS,NULL)) AS STATUS1,
+					MAX(IF(BM.RANK=2,BM.STATUS,NULL)) AS STATUS2,
+					MAX(IF(BM.RANK=1,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE1,
+					MAX(IF(BM.RANK=2,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE2
+				FROM 
+					BIZ_STRATEGY AS	 BS
+					LEFT OUTER JOIN
+					(
+						SELECT BB.*
+						FROM 
+						(
+							SELECT MILESTONE_ID,BIZ_ID, ACT_DUE_DATE, IF(ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > ACT_DUE_DATE, 'R', STATUS) AS STATUS, KEY_MILESTONE,IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := BIZ_ID
+								FROM BIZ_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+								WHERE 1=1
+								AND STATUS IS NOT NULL
+								AND STATUS != ''
+							ORDER BY MILESTONE_ID DESC
+						) AS BB
+						WHERE BB.RANK <=2
+					) AS BM ON BS.BIZ_ID = BM.BIZ_ID
+					LEFT OUTER JOIN
+					OUR_USERS_INFO AS OUI ON BS.CREATOR_ID = OUI.MEMBER_ID_NUM
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON OUI.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+				WHERE 1=1
+				]]>
+						<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+							<choose>
+								<when test="searchPKArray != null and searchPKArray != '' ">
+								AND BS.BIZ_ID IN(${searchPKArray})
+								</when>
+								<otherwise>
+								AND BS.BIZ_ID IN('')
+								</otherwise>
+							</choose>
+						</if>
+						
+						 <!-- 검색 -->
+						 <if test="allSearchDetail != null and allSearchDetail != '' ">
+						   	AND CONCAT(IFNULL(BS.CATEGORY,''), IFNULL(BS.SUBJECT,''), IFNULL(OMI.HAN_NAME,''),IFNULL(BM.KEY_MILESTONE,'')) REGEXP #{allSearchDetail}
+						 </if>
+						 <!-- 모바일 검색 -->
+						 <if test="searchKeyword != null and searchKeyword != '' ">
+						   	AND CONCAT(IFNULL(BS.SUBJECT,'')) REGEXP #{searchKeyword}
+						 </if>
+						 <if test="detailCategory != null and detailCategory != '' ">
+						  	AND BS.CATEGORY = #{detailCategory}
+						 </if>
+					GROUP BY BS.BIZ_ID
+					ORDER BY BS.SYS_UPDATE_DATE ASC
+				) AS TMP_BIZ_STRATEGY, (SELECT @ROWNUM:=0) AS ROWNUM	
+				WHERE 1=1
+			ORDER BY ROWNUM DESC
+		) AS TB
+		WHERE 1=1
+		<if test=" kmStatus != null and kmStatus != '' ">
+		AND TB.STATUS = #{kmStatus}
+		</if>
+	</select>
+	
+	<select id="selectBizStrategyListMobile" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			TB.* 
+		FROM 
+		(
+			SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				TMP_BIZ_STRATEGY.*,
+				CONCAT
+				(
+					IF(TMP_BIZ_STRATEGY.KEY_MILESTONE1 IS NOT NULL
+						, CONCAT
+								(
+									TMP_BIZ_STRATEGY.KEY_MILESTONE1
+									," ("
+									, TMP_BIZ_STRATEGY.ACT_DUE_DATE1
+									, ")")
+									, ""
+								)
+						, IF(TMP_BIZ_STRATEGY.KEY_MILESTONE2 IS NOT NULL
+							, CONCAT
+									(
+										"\n"
+										, TMP_BIZ_STRATEGY.KEY_MILESTONE2
+										, " ("
+										, TMP_BIZ_STRATEGY.ACT_DUE_DATE2
+										, ")")
+										, ""
+									)
+						, IF(TMP_BIZ_STRATEGY.KEY_MILESTONE3 IS NOT NULL
+							, CONCAT
+									(
+										"\n"
+										, TMP_BIZ_STRATEGY.KEY_MILESTONE3
+										, " ("
+										, TMP_BIZ_STRATEGY.ACT_DUE_DATE3
+										, ")")
+										, ""
+									)
+				) AS KEY_MILESTONE,
+				CASE
+					WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,''),IFNULL(TMP_BIZ_STRATEGY.STATUS3,''),IFNULL(TMP_BIZ_STRATEGY.STATUS4,''),IFNULL(TMP_BIZ_STRATEGY.STATUS5,'')) LIKE '%R%' THEN 'R'
+					WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,''),IFNULL(TMP_BIZ_STRATEGY.STATUS3,''),IFNULL(TMP_BIZ_STRATEGY.STATUS4,''),IFNULL(TMP_BIZ_STRATEGY.STATUS5,'')) LIKE '%Y%' THEN 'Y'
+					WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,''),IFNULL(TMP_BIZ_STRATEGY.STATUS3,''),IFNULL(TMP_BIZ_STRATEGY.STATUS4,''),IFNULL(TMP_BIZ_STRATEGY.STATUS5,'')) = '' THEN '-'
+					ELSE 'G'
+				END AS STATUS
+			FROM 
+			(
+				SELECT 
+					BS.BIZ_ID, 
+					BS.CATEGORY, 
+					BS.CREATOR_ID, 
+					BS.CREATE_DATETIME, 
+					BS.SUBJECT, KEY_CONTENTS, 
+					DATE_FORMAT(BS.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(BS.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					BS.REVIEW_CYCLE,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID,
+		            OMI2.HAN_NAME AS RL_NAME,
+		            OMI2.MEMBER_ID_NUM AS RL_ID,
+		            OMI2.MEMBER_DIVISION AS RL_DIVISION,
+		            ODI.DIVISION_NAME AS RL_DIVISION_NAME,
+					MAX(IF(BM.RANK=1,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE1,
+					MAX(IF(BM.RANK=2,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE2,
+					MAX(IF(BM.RANK=3,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE3,
+					MAX(IF(BM.RANK=4,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE4,
+					MAX(IF(BM.RANK=5,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE5,
+					MAX(IF(BM.RANK=1,BM.STATUS,NULL)) AS STATUS1,
+					MAX(IF(BM.RANK=2,BM.STATUS,NULL)) AS STATUS2,
+					MAX(IF(BM.RANK=3,BM.STATUS,NULL)) AS STATUS3,
+					MAX(IF(BM.RANK=4,BM.STATUS,NULL)) AS STATUS4,
+					MAX(IF(BM.RANK=5,BM.STATUS,NULL)) AS STATUS5,
+					MAX(IF(BM.RANK=1,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE1,
+					MAX(IF(BM.RANK=2,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE2,
+					MAX(IF(BM.RANK=3,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE3,
+					MAX(IF(BM.RANK=4,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE4,
+					MAX(IF(BM.RANK=5,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE5,
+					MAX(IF(ACTION_STATUS.RANK=1,ACTION_STATUS.DUE_DATE,NULL)) AS ISSUE_DUE_DATE1,
+					MAX(IF(ACTION_STATUS.RANK=2,ACTION_STATUS.DUE_DATE,NULL)) AS ISSUE_DUE_DATE2,
+					MAX(IF(ACTION_STATUS.RANK=3,ACTION_STATUS.DUE_DATE,NULL)) AS ISSUE_DUE_DATE3,
+					MAX(IF(ACTION_STATUS.RANK=4,ACTION_STATUS.DUE_DATE,NULL)) AS ISSUE_DUE_DATE4,
+					MAX(IF(ACTION_STATUS.RANK=5,ACTION_STATUS.DUE_DATE,NULL)) AS ISSUE_DUE_DATE5,
+					MAX(IF(ACTION_STATUS.RANK=1,ACTION_STATUS.STATUS,NULL)) AS ISSUE_STATUS1,
+					MAX(IF(ACTION_STATUS.RANK=2,ACTION_STATUS.STATUS,NULL)) AS ISSUE_STATUS2,
+					MAX(IF(ACTION_STATUS.RANK=3,ACTION_STATUS.STATUS,NULL)) AS ISSUE_STATUS3,
+					MAX(IF(ACTION_STATUS.RANK=4,ACTION_STATUS.STATUS,NULL)) AS ISSUE_STATUS4,
+					MAX(IF(ACTION_STATUS.RANK=5,ACTION_STATUS.STATUS,NULL)) AS ISSUE_STATUS5,
+					MAX(IF(ACTION_STATUS.RANK=1,ACTION_STATUS.ISSUE_NAME,NULL)) AS ISSUE_NAME1,
+					MAX(IF(ACTION_STATUS.RANK=2,ACTION_STATUS.ISSUE_NAME,NULL)) AS ISSUE_NAME2,
+					MAX(IF(ACTION_STATUS.RANK=3,ACTION_STATUS.ISSUE_NAME,NULL)) AS ISSUE_NAME3,
+					MAX(IF(ACTION_STATUS.RANK=4,ACTION_STATUS.ISSUE_NAME,NULL)) AS ISSUE_NAME4,
+					MAX(IF(ACTION_STATUS.RANK=5,ACTION_STATUS.ISSUE_NAME,NULL)) AS ISSUE_NAME5
+				FROM BIZ_STRATEGY AS BS
+/*
+				LEFT OUTER JOIN
+				(
+					SELECT BB.*
+					FROM 
+					(
+						SELECT MILESTONE_ID,BIZ_ID, ACT_DUE_DATE, IF(ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > ACT_DUE_DATE, 'R', STATUS) AS STATUS, KEY_MILESTONE,IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := BIZ_ID
+							FROM BIZ_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+							WHERE 1=1
+							AND STATUS IS NOT NULL
+							AND STATUS != ''
+						ORDER BY MILESTONE_ID DESC
+					) AS BB
+					WHERE BB.RANK <=2
+				) AS BM ON BS.BIZ_ID = BM.BIZ_ID
+*/
+				LEFT OUTER JOIN
+				(
+					SELECT
+						MILESTONES_SUB4.*
+					FROM
+					(
+						SELECT
+							MILESTONE_ID
+							, BIZ_ID
+							, ACT_DUE_DATE
+							, ACT_CLOSE_DATE
+							,CASE
+								WHEN (NULLIF(ACT_DUE_DATE,'') IS NULL and NULLIF(ACT_CLOSE_DATE,'') IS NULL) THEN ''
+								WHEN NULLIF(ACT_CLOSE_DATE,'') IS NOT NULL THEN 'G'
+								WHEN ACT_DUE_DATE >= current_date THEN 'Y'
+								WHEN ACT_DUE_DATE < current_date THEN 'R'
+								ELSE '-'
+							END AS STATUS
+							, KEY_MILESTONE
+							, IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK
+							, @PREV := BIZ_ID
+						FROM
+						(
+							SELECT MILESTONES_SUB2.* 
+							FROM
+							(
+								SELECT
+									MILESTONE_ID
+									, BIZ_ID
+									, ACT_DUE_DATE
+									, ACT_CLOSE_DATE
+									, STATUS
+									, KEY_MILESTONE
+									, IF(@PREV2 <> BIZ_ID, @CNT2 := 1, @CNT2 := @CNT2 + 1) AS RANK
+									, @PREV2 := BIZ_ID
+								FROM BIZ_MILESTONE, (SELECT @PREV2 := NULL) AS PREV, (SELECT @CNT2 := 0) AS CNT
+								WHERE 1=1
+								AND
+								(
+										ACT_CLOSE_DATE IS NULL
+										/*
+										OR
+										ACT_CLOSE_DATE = ''
+										*/
+								)
+								ORDER BY MILESTONE_ID ASC, ACT_DUE_DATE  ASC
+							) AS MILESTONES_SUB2
+							WHERE MILESTONES_SUB2.RANK <= 2
+							UNION ALL
+							SELECT MILESTONES_SUB1.* 
+							FROM
+							(
+								SELECT
+									MILESTONE_ID
+									, BIZ_ID
+									, ACT_DUE_DATE
+									, ACT_CLOSE_DATE
+									, STATUS
+									, KEY_MILESTONE
+									, IF(@PREV1 <> BIZ_ID, @CNT1 := 1, @CNT1 := @CNT1 + 1) AS RANK
+									, @PREV1 := BIZ_ID
+								FROM BIZ_MILESTONE, (SELECT @PREV1 := NULL) AS PREV, (SELECT @CNT1 := 0) AS CNT
+								WHERE 1=1
+								AND ACT_CLOSE_DATE IS NOT NULL
+								/* AND ACT_CLOSE_DATE != '' */
+								ORDER BY MILESTONE_ID DESC, ACT_CLOSE_DATE ASC
+							) AS MILESTONES_SUB1
+							WHERE MILESTONES_SUB1.RANK <= 5
+						) AS MILESTONES_SUB3, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+						ORDER BY BIZ_ID ASC, MILESTONE_ID DESC, ACT_DUE_DATE  DESC 
+					) AS MILESTONES_SUB4
+					WHERE RANK <= 5
+				) AS BM ON BS.BIZ_ID = BM.BIZ_ID
+				
+				LEFT OUTER JOIN
+        (
+					SELECT * 
+					FROM (
+						SELECT BIZ_ID, ACTION_ID, ISSUE_NAME, DUE_DATE, CLOSE_DATE,
+						case
+							WHEN (NULLIF(DUE_DATE,'') IS NULL and NULLIF(CLOSE_DATE,'') IS NULL) THEN ''
+							WHEN NULLIF(CLOSE_DATE,'') IS NOT NULL THEN 'G'
+							WHEN DUE_DATE >= current_date THEN 'Y'
+							WHEN DUE_DATE < current_date THEN 'R'
+							ELSE '-'
+						END AS STATUS,
+			           IF(@PREV <> BIZ_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := BIZ_ID
+					    FROM BIZ_STRATEGY_ACTION_PLAN, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+					    WHERE 1=1
+					    ORDER BY BIZ_ID ASC, ACTION_ID DESC
+				    ) AS SUB_OHA 
+					WHERE 1=1
+					AND SUB_OHA.RANK <= 5 
+        ) AS ACTION_STATUS on ACTION_STATUS.BIZ_ID = BS.BIZ_ID
+				
+				LEFT OUTER JOIN OUR_USERS_INFO AS OUI
+					ON BS.CREATOR_ID = OUI.MEMBER_ID_NUM
+				LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI
+					ON OUI.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+				LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI2
+					ON BS.RESPONSIBILITY_LEADER = OMI2.MEMBER_ID_NUM
+				LEFT OUTER JOIN OUR_DIVISION_INFO AS ODI
+					ON OMI2.MEMBER_DIVISION = ODI.DIVISION_NO
+				WHERE 1=1
+	]]>
+	<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+		<choose>
+			<when test="searchPKArray != null and searchPKArray != '' ">
+				AND BS.BIZ_ID IN(${searchPKArray})
+			</when>
+			<otherwise>
+				AND BS.BIZ_ID IN('')
+			</otherwise>
+		</choose>
+	</if>
+							
+	<!-- 검색 -->
+	<if test="allSearchDetail != null and allSearchDetail != '' ">
+				AND CONCAT(IFNULL(BS.CATEGORY,''), IFNULL(BS.SUBJECT,''), IFNULL(OMI.HAN_NAME,''),IFNULL(BM.KEY_MILESTONE,'')) REGEXP #{allSearchDetail}
+	</if>
+	<!-- 모바일 검색 -->
+	<if test="searchKeyword != null and searchKeyword != '' ">
+				AND CONCAT(IFNULL(BS.SUBJECT,'')) REGEXP #{searchKeyword}
+	</if>
+	<if test="detailCategory != null and detailCategory != '' ">
+				AND BS.CATEGORY = #{detailCategory}
+	</if>
+				GROUP BY BS.BIZ_ID
+				ORDER BY BS.SYS_UPDATE_DATE ASC
+			) AS TMP_BIZ_STRATEGY, (SELECT @ROWNUM:=0) AS ROWNUM	
+			WHERE 1=1
+			ORDER BY ROWNUM DESC
+		) AS TB
+		WHERE 1=1
+	<if test=" kmStatus != null and kmStatus != '' ">
+		AND TB.STATUS = #{kmStatus}
+	</if>
+	<if test=" lastrow != null and rows != null ">
+		LIMIT ${lastrow}, ${rows}
+	</if>
+	</select>
+	
+	<select id="gridMileStonesBizStrategyList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			BM.MILESTONE_ID, 
+			BM.BIZ_ID, 
+			BM.CATEGORY, 
+			BM.CREATOR_ID,
+			BM.CREATE_DATETIME, 
+			BM.KEY_MILESTONE, 
+			<!-- IF(BM.ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > BM.ACT_DUE_DATE, 'R', BM.STATUS) AS STATUS, -->
+			<![CDATA[
+				CASE
+					WHEN (NULLIF(BM.ACT_DUE_DATE,'') IS NULL AND NULLIF(BM.ACT_CLOSE_DATE,'') IS NULL) THEN ''
+					WHEN NULLIF(BM.ACT_CLOSE_DATE,'') IS NOT NULL THEN 'G'
+					WHEN BM.ACT_DUE_DATE >= current_date THEN 'Y'
+					WHEN BM.ACT_DUE_DATE < current_date THEN 'R'
+					ELSE '-'
+				END AS STATUS,
+			]]>
+			IF(BM.ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > BM.ACT_DUE_DATE, 'R', BM.STATUS) AS HIDDEN_STATUS,  
+			OMI.HAN_NAME AS ACT_NAME,
+			OMI.PHONE AS ACT_PHONE, 
+			BM.ACT_ID AS HIDDEN_ACT_ID, 
+			BM.ACT_DUE_DATE, 
+			BM.ACT_CLOSE_DATE, 
+			BM.SYS_REGISTER_DATE, 
+			BM.SYS_UPDATE_DATE
+		FROM BIZ_MILESTONE AS BM
+		LEFT OUTER JOIN OUR_MEMBERS_INFO AS OMI
+			ON BM.ACT_ID = OMI.MEMBER_ID_NUM , (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE BIZ_ID = #{biz_id}
+		ORDER BY MILESTONE_ID ASC
+	</select>
+	
+	<select id="selectProjectPlanListMobile" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+			TB.*
+		FROM
+		(
+			SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				TMP_BIZ_STRATEGY.*,
+				CONCAT(IF(TMP_BIZ_STRATEGY.KEY_MILESTONE1 IS NOT NULL, CONCAT(TMP_BIZ_STRATEGY.KEY_MILESTONE1," (",TMP_BIZ_STRATEGY.ACT_DUE_DATE1,")"),""),IF(TMP_BIZ_STRATEGY.KEY_MILESTONE2 IS NOT NULL, CONCAT("\n",TMP_BIZ_STRATEGY.KEY_MILESTONE2," (",TMP_BIZ_STRATEGY.ACT_DUE_DATE2,")"),"")) AS KEY_MILESTONE,
+				CASE 
+					WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,'')) LIKE '%R%' THEN 'R'
+					WHEN CONCAT(IFNULL(TMP_BIZ_STRATEGY.STATUS1,''),IFNULL(TMP_BIZ_STRATEGY.STATUS2,'')) LIKE '%Y%' THEN 'Y'
+					WHEN TMP_BIZ_STRATEGY.STATUS1 = 'G' AND (TMP_BIZ_STRATEGY.STATUS2 IS NULL OR  TMP_BIZ_STRATEGY.STATUS2 = '') THEN 'G'
+					WHEN TMP_BIZ_STRATEGY.STATUS1 = 'G' AND TMP_BIZ_STRATEGY.STATUS2 = 'G' THEN 'G'
+					ELSE '-'
+				END AS STATUS
+			FROM 
+				(
+				SELECT 
+					PP.PROJECT_ID, 
+					PP.CREATOR_ID, 
+					PP.CREATE_DATETIME, 
+					PP.CATEGORY, 
+					PP.CLIENT_NAME, 
+					PP.SUBJECT, 
+					PP.DETAIL_CONTENTS, 
+					PP.START_DATE, 
+					PP.END_DATE, 
+					PP.CONTRACT_AMOUNT_TOTAL, 
+					PP.CONTRACT_AMOUNT_UNIT, 
+					PP.INVEST_AMOUNT, 
+					PP.INVEST_AMOUNT_UNIT, 
+					DATE_FORMAT(PP.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(PP.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(PP.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID,
+					OMI.MEMBER_TEAM,
+					OMI2.HAN_NAME AS EXEC_OWNER, 
+					OMI2.MEMBER_ID_NUM AS EXEC_OWNER_ID,
+					OMI2.MEMBER_DIVISION AS EXEC_DIVISION,
+					OMI3.HAN_NAME AS SALES_OWNER, 
+					OMI3.MEMBER_ID_NUM AS SALES_OWNER_ID,
+					MAX(IF(BM.RANK=1,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE1,
+					MAX(IF(BM.RANK=2,BM.ACT_DUE_DATE,NULL)) AS ACT_DUE_DATE2,
+					MAX(IF(BM.RANK=1,BM.STATUS,NULL)) AS STATUS1,
+					MAX(IF(BM.RANK=2,BM.STATUS,NULL)) AS STATUS2,
+					MAX(IF(BM.RANK=1,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE1,
+					MAX(IF(BM.RANK=2,BM.KEY_MILESTONE,NULL)) AS KEY_MILESTONE2,
+					CCI.COMPANY_ID,
+					CCI.COMPANY_NAME,
+					CCI.CEO_NAME,
+					BPA.Q1,
+					BPA.Q2,
+					BPA.Q3,
+					BPA.Q4,
+					BPA.AFTER_YEAR,
+					BPA.BASIS_TOTAL
+					FROM 
+					BIZ_PROJECT_PLAN AS	PP
+					LEFT OUTER JOIN
+					CLIENT_COMPANY_INFO AS CCI ON PP.COMPANY_ID = CCI.COMPANY_ID
+					LEFT OUTER JOIN
+					(
+						SELECT BB.*
+						FROM 
+						(
+							SELECT MILESTONE_ID, PROJECT_ID,ACT_DUE_DATE, IF(ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > ACT_DUE_DATE, 'R', STATUS) AS STATUS, KEY_MILESTONE,IF(@PREV <> PROJECT_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, @PREV := PROJECT_ID
+								FROM BIZ_PROJECT_MILESTONE, (SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT
+								WHERE 1=1
+								AND STATUS IS NOT NULL
+								AND STATUS != ''
+							ORDER BY MILESTONE_ID DESC
+						) AS BB
+						WHERE BB.RANK <=2
+					) AS BM ON PP.PROJECT_ID = BM.PROJECT_ID
+					LEFT OUTER JOIN
+					(
+						SELECT
+									AMTMP.*,
+									(AMTMP.Q1+AMTMP.Q2+AMTMP.Q3+AMTMP.Q4+AFTER_YEAR) AS BASIS_TOTAL 
+						FROM
+						(
+							SELECT 	
+									PROJECT_ID,
+									SUM(IF(QUARTER(BASIS_MONTH)=1 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q1,
+									SUM(IF(QUARTER(BASIS_MONTH)=2 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q2,
+									SUM(IF(QUARTER(BASIS_MONTH)=3 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q3,
+									SUM(IF(QUARTER(BASIS_MONTH)=4 AND DATE_FORMAT(NOW(),'%Y') = DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS Q4,
+									SUM(IF(DATE_FORMAT(NOW(),'%Y') <> DATE_FORMAT(BASIS_MONTH,'%Y'),BASIS_PLAN_REVENUE_AMOUNT,0)) AS AFTER_YEAR
+							FROM BIZ_PROJECT_AMOUNT
+							GROUP BY PROJECT_ID
+						) AS AMTMP
+					)AS BPA ON PP.PROJECT_ID = BPA.PROJECT_ID
+					LEFT OUTER JOIN
+					OUR_MEMBERS_INFO AS OMI ON PP.CREATOR_ID = OMI.MEMBER_ID_NUM
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI2 ON PP.EXEC_OWNER = OMI2.MEMBER_ID_NUM
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI3 ON PP.SALES_OWNER = OMI3.MEMBER_ID_NUM
+					
+				WHERE 1=1
+				]]>
+				 <!-- 검색-->
+			  <if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+					<choose>
+						<when test="searchPKArray != null and searchPKArray != '' ">
+						AND PP.PROJECT_ID IN(${searchPKArray})
+						</when>
+						<otherwise>
+						AND PP.PROJECT_ID IN('')
+						</otherwise>
+					</choose>
+				</if>
+						
+				<if test=" searchCategory != null and searchCategory != '' ">
+			      AND PP.Category = #{searchCategory}
+			    </if>
+			    
+				<if test=" searchDivision != null and searchDivision != '' ">
+			      AND OMI.MEMBER_TEAM = #{searchDivision}
+			    </if>
+			    
+			    <if test=" searchStartDate != null and searchStartDate != '' ">
+			      AND PP.START_DATE >= #{searchStartDate}
+			    </if>
+			    
+			    <if test=" searchEndDate != null and searchEndDate != '' ">
+			    <![CDATA[
+			      AND PP.END_DATE <= #{searchEndDate}
+			      ]]>		
+			    </if>
+			    
+				<if test="searchAll != null and searchAll != '' ">
+				   AND CONCAT(
+					   	IFNULL(PP.SUBJECT,''),
+					   	IFNULL(PP.Category,''), 
+					   	IFNULL(MILESTONE.KEY_MILESTONE,''), 
+					   	IFNULL(PP.EXEC_OWNER ,''),
+					   	IFNULL(PP.SALES_OWNER ,'')
+				   	) REGEXP #{searchAll}
+				 </if>
+					GROUP BY PP.PROJECT_ID
+					ORDER BY PP.SYS_UPDATE_DATE ASC
+				) AS TMP_BIZ_STRATEGY, (SELECT @ROWNUM:=0) AS ROWNUM	
+				WHERE 1=1
+			ORDER BY ROWNUM DESC
+			) AS TB
+			WHERE 1=1
+			<if test=" kmStatus != null and kmStatus != '' ">
+			AND TB.STATUS = #{kmStatus}
+			</if>
+		<if test=" lastrow != null and rows != null ">
+		LIMIT ${lastrow}, ${rows}
+		</if>
+	</select>
+	
+	<select id="gridMileStonesProjectPlanList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			MILESTONE_ID, 
+			PROJECT_ID, 
+			Category, 
+			CREATOR_ID,
+			CREATE_DATETIME, 
+			KEY_MILESTONE, 
+			IF(ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > ACT_DUE_DATE, 'R', STATUS) AS STATUS,
+			IF(ACT_CLOSE_DATE IS NULL AND DATE_FORMAT(NOW(), '%Y-%m-%d') > ACT_DUE_DATE, 'R', STATUS) AS HIDDEN_STATUS, 
+			ACT_ID, 
+			ACT_DUE_DATE, 
+			ACT_CLOSE_DATE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		FROM BIZ_PROJECT_MILESTONE, (SELECT @ROWNUM:=0) AS ROWNUM	
+		WHERE PROJECT_ID = #{project_id}
+		ORDER BY MILESTONE_ID ASC
+	</select>
+</mapper>

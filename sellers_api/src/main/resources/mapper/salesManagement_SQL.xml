@@ -1,0 +1,3341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="salesManagement">
+
+	<select id="selectProposalsInfotList" parameterType="hashmap"
+		resultType="hashmap">
+			<![CDATA[
+				 SELECT 
+					@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+					TMP.*
+					FROM 
+						(
+							SELECT 
+								PM.PROPOSAL_ID, 
+								PM.CATEGORY_PRODUCT, 
+								PM.CATEGORY_BIZ, 
+								PM.PROPOSAL_SUBJECT, 
+								PM.DETAIL_CONTENTS, 
+								PM.PROPOSAL_LEADER_ID,
+								OMI2.HAN_NAME AS  PROPOSAL_LEADER_NAME,
+								PM.PROPOSAL_START_DATE, 
+								PM.PROPOSAL_END_DATE, 
+								PM.PROPOSAL_PT_DATE, 
+								PM.PROPOSAL_RESULT_DATE, 
+								PM.PROPOSAL_AMOUNT, 
+								PM.PROPOSAL_AMOUNT_DETAIL,
+								PM.PROPOSAL_COST_AMOUNT, 
+								PM.PROPOSAL_COST_DETAIL, 
+								PM.PROPOSAL_RESULT, 
+								PM.PROPOSAL_RESULT_DETAIL, 
+								PM.PROGRESS_STATUS, 
+								PM.CREATOR_ID, 
+								DATE_FORMAT(PM.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+								DATE_FORMAT(PM.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+								DATE_FORMAT(PM.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+								OMI.HAN_NAME,
+								OMI.MEMBER_ID,
+								CCI.COMPANY_ID,
+								CCI.COMPANY_NAME,
+								CII.CUSTOMER_ID,
+								CII.CUSTOMER_NAME,
+								CII.POSITION AS CUSTOMER_POSITION,
+								IFNULL(PFS.FILE_COUNT,0) AS FILE_COUNT
+						FROM 
+							PROPOSAL_MGMT AS PM		
+							LEFT OUTER JOIN
+				            (
+				            	SELECT COUNT(PROPOSAL_ID) AS FILE_COUNT, PROPOSAL_ID
+				            	FROM PROPOSAL_FILE_STORE
+				            	GROUP BY PROPOSAL_ID
+				            ) AS PFS ON PFS.PROPOSAL_ID = PM.PROPOSAL_ID
+		            		LEFT OUTER JOIN  
+							CLIENT_COMPANY_INFO AS CCI ON PM.COMPANY_ID = CCI.COMPANY_ID
+							LEFT OUTER JOIN 
+							OUR_MEMBERS_INFO AS OMI ON PM.CREATOR_ID = OMI.MEMBER_ID_NUM
+							LEFT OUTER JOIN 
+							OUR_MEMBERS_INFO AS OMI2 ON PM.PROPOSAL_LEADER_ID = OMI2.MEMBER_ID_NUM
+							LEFT OUTER  JOIN
+							CLIENT_INDIVIDUAL_INFO AS CII ON CII.CUSTOMER_ID = PM.CUSTOMER_ID
+							
+						WHERE 1=1
+				]]>
+		<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND PM.PROPOSAL_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND PM.PROPOSAL_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+
+		<if test="searchCompany != null and searchCompany != '' ">
+			AND CCI.COMPANY_NAME LIKE CONCAT('%', #{searchCompany}, '%')
+		</if>
+
+		<if test="searchProposalCategory != null and searchProposalCategory != '' ">
+			AND PM.CATEGORY_BIZ = #{searchProposalCategory}
+		</if>
+
+		<if test="searchOwner != null and searchOwner != '' ">
+			AND OMI2.HAN_NAME LIKE CONCAT('%', #{searchOwner}, '%')
+		</if>
+
+		<if test="searchAll != null and searchAll != '' ">
+			AND CONCAT(
+			IFNULL(PM.PROPOSAL_SUBJECT,'')
+			) REGEXP #{searchAll}
+		</if>
+
+		) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE 1=1
+		
+		<choose>
+			<when test="sortCategory != null and sortCategory != '' ">
+				ORDER BY ${sortCategory}
+			</when>
+			<otherwise>
+				ORDER BY TMP.LATELY_UPDATE_DATE DESC
+			</otherwise>
+		</choose>
+		
+		<include refid="common.pagingPost2" />
+	</select>
+
+
+	<select id="selectProposalsInfoLatelyUpdate" parameterType="hashmap"
+		resultType="String">
+		<![CDATA[
+			SELECT SYS_UPDATE_DATE
+			FROM PROPOSAL_MGMT
+			ORDER BY SYS_UPDATE_DATE DESC
+			LIMIT 0,1	
+		]]>
+	</select>
+
+	<select id="selectProposalsInfoListCount" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		COUNT(*) AS listCount, GROUP_CONCAT(PM.PROPOSAL_ID) AS searchPKArray
+		FROM
+		PROPOSAL_MGMT AS PM
+		LEFT OUTER JOIN
+		(
+		SELECT COUNT(PROPOSAL_ID) AS FILE_COUNT, PROPOSAL_ID
+		FROM PROPOSAL_FILE_STORE
+		GROUP BY PROPOSAL_ID
+		) AS PFS ON PFS.PROPOSAL_ID = PM.PROPOSAL_ID
+		LEFT OUTER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON PM.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON PM.CREATOR_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON PM.PROPOSAL_LEADER_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		CLIENT_INDIVIDUAL_INFO AS CII ON CII.CUSTOMER_ID = PM.CUSTOMER_ID
+		WHERE 1=1
+		<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+			<choose>
+				<when test="searchPKArray != null and searchPKArray != '' ">
+					AND PM.PROPOSAL_ID IN(${searchPKArray})
+				</when>
+				<otherwise>
+					AND PM.PROPOSAL_ID IN('')
+				</otherwise>
+			</choose>
+		</if>
+
+		<if test="searchCompany != null and searchCompany != '' ">
+			AND CCI.COMPANY_NAME LIKE CONCAT('%', #{searchCompany},
+			'%')
+		</if>
+
+		<if test="searchProposalCategory != null and searchProposalCategory != '' ">
+			AND PM.CATEGORY_BIZ = #{searchProposalCategory}
+		</if>
+
+		<if test="searchOwner != null and searchOwner != '' ">
+			AND OMI2.HAN_NAME LIKE CONCAT('%', #{searchOwner}, '%')
+		</if>
+
+		<if test="searchAll != null and searchAll != '' ">
+			AND CONCAT(
+			IFNULL(PM.PROPOSAL_SUBJECT,'')
+			) REGEXP #{searchAll}
+		</if>
+	</select>
+
+	<select id="selectProposalsInfoDetail" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		PM.PROPOSAL_ID,
+		PM.CATEGORY_PRODUCT,
+		PM.CATEGORY_BIZ,
+		PM.PROPOSAL_SUBJECT,
+		PM.DETAIL_CONTENTS,
+		PM.PROPOSAL_LEADER_ID,
+		OMI2.HAN_NAME AS PROPOSAL_LEADER_NAME,
+		PM.PROPOSAL_START_DATE,
+		PM.PROPOSAL_END_DATE,
+		PM.PROPOSAL_PT_DATE,
+		PM.PROPOSAL_RESULT_DATE,
+		PM.PROPOSAL_AMOUNT,
+		PM.PROPOSAL_AMOUNT_DETAIL,
+		PM.PROPOSAL_COST_AMOUNT,
+		PM.PROPOSAL_COST_DETAIL,
+		PM.PROPOSAL_RESULT,
+		PM.PROPOSAL_RESULT_DETAIL,
+		PM.PROGRESS_STATUS,
+		PM.CREATOR_ID,
+		DATE_FORMAT(PM.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE,
+		DATE_FORMAT(PM.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+		DATE_FORMAT(PM.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE,
+		OMI.HAN_NAME,
+		OMI.MEMBER_ID,
+		CCI.COMPANY_ID,
+		CCI.COMPANY_NAME,
+		CII.CUSTOMER_ID,
+		CII.CUSTOMER_NAME,
+		CII.POSITION AS CUSTOMER_POSITION
+		FROM
+		PROPOSAL_MGMT AS PM
+		LEFT OUTER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON PM.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON PM.CREATOR_ID = OMI.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI2 ON PM.PROPOSAL_LEADER_ID = OMI2.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		CLIENT_INDIVIDUAL_INFO AS CII ON CII.CUSTOMER_ID = PM.CUSTOMER_ID
+		WHERE 1=1
+		AND PM.PROPOSAL_ID = #{pkNo}
+	</select>
+
+	<select id="selectProposalsInfoFileList" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		FILE_ID,
+		PROPOSAL_ID,
+		CREATOR_ID,
+		CREATE_DATETIME,
+		FILE_NAME,
+		FILE_PATH,
+		FILE_TYPE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		FROM PROPOSAL_FILE_STORE
+		WHERE 1=1
+		AND PROPOSAL_ID = #{pkNo}
+	</select>
+
+	<select id="suggestSearchDetailGroup1" parameterType="java.util.List"
+		resultType="hashmap">
+		SELECT CCI.COMPANY_ID, CCI.COMPANY_NAME
+		FROM
+		PROPOSAL_MGMT AS PM
+		LEFT OUTER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON PM.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN
+		OUR_MEMBERS_INFO AS OMI ON PM.CREATOR_ID = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		GROUP BY CCI.COMPANY_ID, CCI.COMPANY_NAME
+	</select>
+
+	<update id="updateProposalsInfo" parameterType="hashmap">
+		UPDATE PROPOSAL_MGMT
+		SET
+		CATEGORY_PRODUCT= #{hiddenModalSuggestCategoryProduct},
+		CATEGORY_BIZ= #{selectModalSuggestCategoryBiz},
+		PROPOSAL_SUBJECT= #{textModalSubject},
+		DETAIL_CONTENTS= #{textareaModalDetailContents},
+		COMPANY_ID = #{hiddenModalCompanyId},
+		CUSTOMER_ID = #{hiddenModalCustomerId},
+		PROPOSAL_LEADER_ID= #{hiddenModalSuggestLeaderId},
+		<choose>
+			<when
+				test="textModalSuggestStartDate != null and textModalSuggestStartDate != '' ">
+				PROPOSAL_START_DATE = #{textModalSuggestStartDate},
+			</when>
+			<otherwise>
+				PROPOSAL_START_DATE = NULL,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when
+				test="textModalSuggestEndDate != null and textModalSuggestEndDate != '' ">
+				PROPOSAL_END_DATE = #{textModalSuggestEndDate},
+			</when>
+			<otherwise>
+				PROPOSAL_END_DATE = NULL,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when
+				test="textModalSuggestPtDate != null and textModalSuggestPtDate != '' ">
+				PROPOSAL_PT_DATE = #{textModalSuggestPtDate},
+			</when>
+			<otherwise>
+				PROPOSAL_PT_DATE = NULL,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when
+				test="textModalSuggestResultDate != null and textModalSuggestResultDate != '' ">
+				PROPOSAL_RESULT_DATE = #{textModalSuggestResultDate},
+			</when>
+			<otherwise>
+				PROPOSAL_RESULT_DATE = NULL,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="hiddenModalAmount != null and hiddenModalAmount != '' ">
+				PROPOSAL_AMOUNT = #{hiddenModalAmount},
+			</when>
+			<otherwise>
+				PROPOSAL_AMOUNT = NULL,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="hiddenModalCost != null and hiddenModalCost != '' ">
+				PROPOSAL_COST_AMOUNT = #{hiddenModalCost},
+			</when>
+			<otherwise>
+				PROPOSAL_COST_AMOUNT = NULL,
+			</otherwise>
+		</choose>
+
+		PROPOSAL_AMOUNT_DETAIL= #{textareaModalAmountDetail},
+		PROPOSAL_COST_DETAIL= #{textareaModalCostDetail},
+		PROPOSAL_RESULT= #{radioSuggestResult},
+		PROGRESS_STATUS= #{radioSuggestProgress},
+		PROPOSAL_RESULT_DETAIL= #{textareaResultDetail},
+		SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE PROPOSAL_ID=#{hiddenModalPK};
+	</update>
+
+	<insert id="insertProposalsInfo" parameterType="hashmap">
+		INSERT INTO PROPOSAL_MGMT
+		(
+		CATEGORY_BIZ,
+		CATEGORY_PRODUCT,
+		PROPOSAL_SUBJECT,
+		DETAIL_CONTENTS,
+		COMPANY_ID,
+		CUSTOMER_ID,
+		PROPOSAL_LEADER_ID,
+		PROPOSAL_START_DATE,
+		PROPOSAL_END_DATE,
+		PROPOSAL_PT_DATE,
+		PROPOSAL_RESULT_DATE,
+		PROPOSAL_AMOUNT,
+		PROPOSAL_COST_AMOUNT,
+		PROPOSAL_AMOUNT_DETAIL,
+		PROPOSAL_COST_DETAIL,
+		PROGRESS_STATUS,
+		PROPOSAL_RESULT,
+		PROPOSAL_RESULT_DETAIL,
+		CREATOR_ID,
+		CREATE_DATE,
+		SYS_REGISTER_DATE,
+		SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+		#{selectModalSuggestCategoryBiz},
+		#{hiddenModalSuggestCategoryProduct},
+		#{textModalSubject},
+		#{textareaModalDetailContents},
+		#{hiddenModalCompanyId},
+		#{hiddenModalCustomerId},
+		#{hiddenModalSuggestLeaderId},
+		<choose>
+			<when
+				test="textModalSuggestStartDate != null and textModalSuggestStartDate != '' ">
+				#{textModalSuggestStartDate},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+		<choose>
+			<when
+				test="textModalSuggestEndDate != null and textModalSuggestEndDate != '' ">
+				#{textModalSuggestEndDate},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+		<choose>
+			<when
+				test="textModalSuggestPtDate != null and textModalSuggestPtDate != '' ">
+				#{textModalSuggestPtDate},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+		<choose>
+			<when
+				test="textModalSuggestResultDate != null and textModalSuggestResultDate != '' ">
+				#{textModalSuggestResultDate},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="hiddenModalAmount != null and hiddenModalAmount != '' ">
+				#{hiddenModalAmount},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+
+		<choose>
+			<when test="hiddenModalCost != null and hiddenModalCost != '' ">
+				#{hiddenModalCost},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>
+		#{textareaModalAmountDetail},
+		#{textareaModalCostDetail},
+		#{radioSuggestProgress},
+		#{radioSuggestResult},
+		#{textareaResultDetail},
+		#{hiddenModalCreatorId},
+		CURRENT_TIMESTAMP,
+		CURRENT_TIMESTAMP,
+		CURRENT_TIMESTAMP
+		);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+			SELECT LAST_INSERT_ID();
+		</selectKey>
+	</insert>
+
+	<delete id="deleteClientContact" parameterType="hashmap">
+	</delete>
+
+
+
+	<select id="selectResultDashBoardMember" parameterType="hashmap"
+		resultType="hashmap">
+			<![CDATA[
+				SELECT 
+					OMI.MEMBER_DIVISION,
+					ODI.DIVISION_NAME,
+					OMI.MEMBER_TEAM,
+					OTI.TEAM_NAME,
+					OMI.MEMBER_ID_NUM,
+					OMI.HAN_NAME,
+					
+					SUM(IFNULL(ESP_YEAR.TARGET_REV,0)) AS FY_TARGET_REV, 
+					SUM(IFNULL(ESP_YEAR.TARGET_GP,0)) AS FY_TARGET_GP,
+					SUM(IFNULL(ESP_QUARTER.TARGET_REV,0)) AS Q_TARGET_REV,
+					SUM(IFNULL(ESP_QUARTER.TARGET_GP,0)) AS Q_TARGET_GP,
+					
+					SUM(IFNULL(ESA.ACTUAL_TCV_AMOUNT,0)) AS TCV_AMOUNT,
+					SUM(IFNULL(ESA.ACTUAL_REV_AMOUNT,0)) AS REV_AMOUNT,
+					SUM(IFNULL(ESA.ACTUAL_GP_AMOUNT,0)) AS ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(ESA.PLAN_GP_AMOUNT,0)) AS PLAN_GP_AMOUNT,
+					
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_TCV_AMOUNT,0)) AS THIS_YEAR_TCV_AMOUNT, 
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_REV_AMOUNT,0)) AS THIS_YEAR_REV_AMOUNT,
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_GP_AMOUNT,0)) AS THIS_YEAR_ACTUAL_GP_AMOUNT, 
+					SUM(IFNULL(ESA_THIS_YEAR.PLAN_GP_AMOUNT,0)) AS THIS_YEAR_PLAN_GP_AMOUNT,
+					
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_TCV_AMOUNT,0)) AS LAST_YEAR_TCV_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_REV_AMOUNT,0)) AS LAST_YEAR_REV_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_GP_AMOUNT,0)) AS LAST_YEAR_ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.PLAN_GP_AMOUNT,0)) AS LAST_YEAR_PLAN_GP_AMOUNT
+			FROM 
+					(
+						SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+						FROM OUR_MEMBERS_INFO AS IOMI
+						WHERE 1=1 
+						AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} ) 
+					) AS OMI  
+					INNER JOIN
+					OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S'  -- AND OMI.POSITION_TYPE = '영업직'
+					INNER JOIN
+					OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+					LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(#{startDate})
+				GROUP BY MEMBER_ID_NUM
+			) AS ESP_YEAR ON ESP_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+			LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(#{startDate})
+				AND BASIS_MONTH <= #{endDate}
+				GROUP BY MEMBER_ID_NUM 
+			) AS ESP_QUARTER ON ESP_QUARTER.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0) + IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0) + IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+										SELECT MAX(ACTUAL_DATE) 
+										FROM ERP_SALES_ACTUAL
+										WHERE 1=1
+										AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+										AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})
+									)
+			) AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+										SELECT MAX(ACTUAL_DATE) 
+										FROM ERP_SALES_ACTUAL
+										WHERE 1=1
+										AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+										AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})
+									)
+			) AS ESA_THIS_YEAR ON ESA_THIS_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+											SELECT MAX(ACTUAL_DATE) 
+											FROM ERP_SALES_ACTUAL
+											WHERE 1=1
+											AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+											AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})-1
+									)
+				) AS ESA_LAST_YEAR ON ESA_LAST_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,OMI.HAN_NAME
+			HAVING 1=1
+			]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+		</choose>
+	</select>
+
+	<!-- 성과관리 고객별 그룹 -->
+	<select id="selectResultDashBoardCompanyGroup" parameterType="hashmap"
+		resultType="hashmap">
+			<![CDATA[ 
+				SELECT 
+					CCI.COMPANY_ID,
+                    ( SUM(IFNULL(ESA.ACTUAL_REV,0)) - SUM(IFNULL(ESA_LAST.ACTUAL_REV,0)) ) as Q2Q_REV,
+                    ( SUM(IFNULL(ESA.ACTUAL_GP,0)) - SUM(IFNULL(ESA_LAST.ACTUAL_GP,0)) ) as Q2Q_GP,
+                    
+                    SUM(IFNULL(ESA.ACTUAL_REV,0)) AS  ACTUAL_REV_AMOUNT_Q,
+                    
+                    SUM(IFNULL(ESA.ACTUAL_GP,0)) AS ACTUAL_GP_AMOUNT_Q,
+                    
+                    SUM(IFNULL(ESA2.ACTUAL_REV,0)) AS  ACTUAL_REV_AMOUNT_FY,
+                    SUM(IFNULL(ESA2.ACTUAL_GP,0)) AS ACTUAL_GP_AMOUNT_FY,
+                    
+                    SUM(IFNULL(ESA_LAST.ACTUAL_REV,0)) AS  ACTUAL_REV_AMOUNT_LAST,
+                    SUM(IFNULL(ESA_LAST.ACTUAL_GP,0)) AS ACTUAL_GP_AMOUNT_LAST
+				FROM 
+                    CLIENT_COMPANY_INFO AS CCI
+                    INNER JOIN
+                    (
+                              SELECT 
+                                        CCI.COMPANY_ID,
+                                        SUM(OA.BASIS_PLAN_REVENUE_AMOUNT) AS ACTUAL_REV,
+                                        SUM(OA.BASIS_PLAN_GP_AMOUNT) AS ACTUAL_GP
+                              FROM 
+                              OPPORTUNITY_LOG AS OL 
+                              INNER JOIN
+                              CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID 
+                              INNER JOIN
+                              OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+                              WHERE 1=1
+                              AND OL.SALES_CYCLE = '3'
+                              AND YEAR(OA.BASIS_MONTH) = YEAR(#{searchDate})
+                              AND QUARTER(OA.BASIS_MONTH) = QUARTER(#{searchDate}) -- 변경
+                    ]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OL.IDENTIFIER_ID = #{global_member_id}
+			</when>
+		</choose>
+		GROUP BY CCI.COMPANY_ID
+		) AS ESA ON ESA.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN -- 현재 년도 실적 REV, GP
+		(
+		SELECT
+		CCI.COMPANY_ID,
+		SUM(OA.BASIS_PLAN_REVENUE_AMOUNT) AS ACTUAL_REV,
+		SUM(OA.BASIS_PLAN_GP_AMOUNT) AS ACTUAL_GP
+		FROM
+		OPPORTUNITY_LOG AS OL
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID
+		INNER JOIN
+		OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+		WHERE 1=1
+		AND OL.SALES_CYCLE = '3'
+		AND YEAR(OA.BASIS_MONTH) = YEAR(#{searchDate})
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OL.IDENTIFIER_ID = #{global_member_id}
+			</when>
+		</choose>
+		GROUP BY CCI.COMPANY_ID
+		) AS ESA2 ON ESA2.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN -- 지난분기 영업기회 REV, GP
+		(
+		SELECT
+		CCI.COMPANY_ID,
+		SUM(OA.BASIS_PLAN_REVENUE_AMOUNT) AS ACTUAL_REV,
+		SUM(OA.BASIS_PLAN_GP_AMOUNT) AS ACTUAL_GP
+		FROM
+		OPPORTUNITY_LOG AS OL
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID
+		INNER JOIN
+		OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+		WHERE 1=1
+		AND OL.SALES_CYCLE = '3'
+		AND CASE
+		WHEN QUARTER(DATE_SUB(#{searchDate}, INTERVAL 1 QUARTER)) = 4
+		THEN YEAR(OA.BASIS_MONTH) = YEAR(#{searchDate})-1
+		ELSE YEAR(OA.BASIS_MONTH) = YEAR(#{searchDate})
+		END
+		AND QUARTER(OA.BASIS_MONTH) = QUARTER(DATE_SUB(#{searchDate}, INTERVAL 1
+		QUARTER))
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OL.IDENTIFIER_ID = #{global_member_id}
+			</when>
+		</choose>
+		GROUP BY CCI.COMPANY_ID
+		) AS ESA_LAST ON ESA_LAST.COMPANY_ID = CCI.COMPANY_ID
+		GROUP BY CCI.COMPANY_ID
+		HAVING 1=1
+		ORDER BY CCI.COMPANY_ID
+	</select>
+
+	<select id="selectResultDashBoardCompany" parameterType="hashmap"
+		resultType="hashmap">
+			<![CDATA[ 
+				SELECT 
+                    CCI.COMPANY_ID,
+                    CCI.COMPANY_NAME,
+                    
+                    ( SUM(IFNULL(ESA.ACTUAL_REV,0)) - SUM(IFNULL(ESA_LAST.ACTUAL_REV,0)) ) as Q2Q_REV,
+                    ( SUM(IFNULL(ESA.ACTUAL_GP,0)) - SUM(IFNULL(ESA_LAST.ACTUAL_GP,0)) ) as Q2Q_GP,
+                    
+                    SUM(IFNULL(ESA.ACTUAL_REV,0)) AS  ACTUAL_REV_AMOUNT_Q,
+                    
+                    SUM(IFNULL(ESA.ACTUAL_GP,0)) AS ACTUAL_GP_AMOUNT_Q,
+                    
+                    SUM(IFNULL(ESA2.ACTUAL_REV,0)) AS  ACTUAL_REV_AMOUNT_FY,
+                    SUM(IFNULL(ESA2.ACTUAL_GP,0)) AS ACTUAL_GP_AMOUNT_FY,
+                    
+                    SUM(IFNULL(ESA_LAST.ACTUAL_REV,0)) AS  ACTUAL_REV_AMOUNT_LAST,
+                    SUM(IFNULL(ESA_LAST.ACTUAL_GP,0)) AS ACTUAL_GP_AMOUNT_LAST
+				FROM 
+                    CLIENT_COMPANY_INFO AS CCI
+             	 	INNER JOIN
+                    (
+                              SELECT 
+                                        CCI.COMPANY_ID,
+                                        SUM(OA.BASIS_PLAN_REVENUE_AMOUNT) AS ACTUAL_REV,
+                                        SUM(OA.BASIS_PLAN_GP_AMOUNT) AS ACTUAL_GP
+                              FROM 
+                              OPPORTUNITY_LOG AS OL 
+                              INNER JOIN
+                              CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID 
+                              INNER JOIN
+                              OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+                              WHERE 1=1
+                              AND OL.SALES_CYCLE = '3'
+                              AND YEAR(OA.BASIS_MONTH) = YEAR(#{searchDate})
+                              AND QUARTER(OA.BASIS_MONTH) = QUARTER(#{searchDate}) -- 변경
+                    ]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OL.IDENTIFIER_ID = #{global_member_id}
+			</when>
+		</choose>
+		GROUP BY CCI.COMPANY_ID
+		) AS ESA ON ESA.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN -- 현재 년도 실적 REV, GP
+		(
+		SELECT
+		CCI.COMPANY_ID,
+		SUM(OA.BASIS_PLAN_REVENUE_AMOUNT) AS ACTUAL_REV,
+		SUM(OA.BASIS_PLAN_GP_AMOUNT) AS ACTUAL_GP
+		FROM
+		OPPORTUNITY_LOG AS OL
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID
+		INNER JOIN
+		OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+		WHERE 1=1
+		AND OL.SALES_CYCLE = '3'
+		AND YEAR(OA.BASIS_MONTH) = YEAR(#{searchDate})
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OL.IDENTIFIER_ID = #{global_member_id}
+			</when>
+		</choose>
+		GROUP BY CCI.COMPANY_ID
+		) AS ESA2 ON ESA2.COMPANY_ID = CCI.COMPANY_ID
+		LEFT OUTER JOIN -- 지난분기 영업기회 REV, GP
+		(
+		SELECT
+		CCI.COMPANY_ID,
+		SUM(OA.BASIS_PLAN_REVENUE_AMOUNT) AS ACTUAL_REV,
+		SUM(OA.BASIS_PLAN_GP_AMOUNT) AS ACTUAL_GP
+		FROM
+		OPPORTUNITY_LOG AS OL
+		INNER JOIN
+		CLIENT_COMPANY_INFO AS CCI ON OL.COMPANY_ID = CCI.COMPANY_ID
+		INNER JOIN
+		OPPORTUNITY_AMOUNT AS OA ON OL.OPPORTUNITY_ID = OA.OPPORTUNITY_ID
+		WHERE 1=1
+		AND OL.SALES_CYCLE = '3'
+		AND CASE
+		WHEN QUARTER(DATE_SUB(#{searchDate}, INTERVAL 1 QUARTER)) = 4
+		THEN YEAR(OA.BASIS_MONTH) = YEAR(#{searchDate})-1
+		ELSE YEAR(OA.BASIS_MONTH) = YEAR(#{searchDate})
+		END
+		AND QUARTER(OA.BASIS_MONTH) = QUARTER(DATE_SUB(#{searchDate}, INTERVAL 1
+		QUARTER))
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OL.IDENTIFIER_ID = #{global_member_id}
+			</when>
+		</choose>
+		GROUP BY CCI.COMPANY_ID
+		) AS ESA_LAST ON ESA_LAST.COMPANY_ID = CCI.COMPANY_ID
+		GROUP BY CCI.COMPANY_ID,CCI.COMPANY_NAME
+		HAVING 1=1
+		ORDER BY CCI.COMPANY_NAME
+	</select>
+
+	<select id="selectResultDashBoardDivision" parameterType="hashmap"
+		resultType="hashmap">
+			<![CDATA[
+				SELECT 
+					OMI.MEMBER_DIVISION,
+					ODI.DIVISION_NAME,
+					
+					SUM(IFNULL(ESP_YEAR.TARGET_REV,0)) AS FY_TARGET_REV, 
+					SUM(IFNULL(ESP_YEAR.TARGET_GP,0)) AS FY_TARGET_GP,
+					SUM(IFNULL(ESP_QUARTER.TARGET_REV,0)) AS Q_TARGET_REV,
+					SUM(IFNULL(ESP_QUARTER.TARGET_GP,0)) AS Q_TARGET_GP,
+					
+					SUM(IFNULL(ESA.ACTUAL_TCV_AMOUNT,0)) AS TCV_AMOUNT,
+					SUM(IFNULL(ESA.ACTUAL_REV_AMOUNT,0)) AS REV_AMOUNT,
+					SUM(IFNULL(ESA.ACTUAL_GP_AMOUNT,0)) AS ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(ESA.PLAN_GP_AMOUNT,0)) AS PLAN_GP_AMOUNT,
+					
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_TCV_AMOUNT,0)) AS THIS_YEAR_TCV_AMOUNT, 
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_REV_AMOUNT,0)) AS THIS_YEAR_REV_AMOUNT,
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_GP_AMOUNT,0)) AS THIS_YEAR_ACTUAL_GP_AMOUNT, 
+					SUM(IFNULL(ESA_THIS_YEAR.PLAN_GP_AMOUNT,0)) AS THIS_YEAR_PLAN_GP_AMOUNT,
+					
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_TCV_AMOUNT,0)) AS LAST_YEAR_TCV_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_REV_AMOUNT,0)) AS LAST_YEAR_REV_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_GP_AMOUNT,0)) AS LAST_YEAR_ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.PLAN_GP_AMOUNT,0)) AS LAST_YEAR_PLAN_GP_AMOUNT
+			FROM 
+			(
+				SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+				FROM OUR_MEMBERS_INFO AS IOMI
+				WHERE 1=1 
+				AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} ) 
+			) AS OMI  
+			INNER JOIN
+			OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S' -- AND OMI.POSITION_TYPE = '영업직' 
+			LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(#{startDate})
+				GROUP BY MEMBER_ID_NUM
+			) AS ESP_YEAR ON ESP_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+			LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(#{startDate})
+				AND BASIS_MONTH <= #{endDate}
+				GROUP BY MEMBER_ID_NUM 
+			) AS ESP_QUARTER ON ESP_QUARTER.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0) + IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0) + IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+										SELECT MAX(ACTUAL_DATE) 
+										FROM ERP_SALES_ACTUAL
+										WHERE 1=1
+										AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+										AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})
+									)
+			) AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+										SELECT MAX(ACTUAL_DATE) 
+										FROM ERP_SALES_ACTUAL
+										WHERE 1=1
+										AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+										AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})
+									)
+			) AS ESA_THIS_YEAR ON ESA_THIS_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+											SELECT MAX(ACTUAL_DATE) 
+											FROM ERP_SALES_ACTUAL
+											WHERE 1=1
+											AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+											AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})-1
+									)
+				) AS ESA_LAST_YEAR ON ESA_LAST_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+				GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME
+				HAVING 1=1
+			]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+			</when>
+		</choose>
+	</select>
+
+
+
+	<select id="selectResultDashBoardTeam" parameterType="hashmap"
+		resultType="hashmap">
+			<![CDATA[
+				SELECT 
+					OMI.MEMBER_DIVISION,
+					ODI.DIVISION_NAME,
+					OMI.MEMBER_TEAM,
+					OTI.TEAM_NAME,
+					
+					SUM(IFNULL(ESP_YEAR.TARGET_REV,0)) AS FY_TARGET_REV, 
+					SUM(IFNULL(ESP_YEAR.TARGET_GP,0)) AS FY_TARGET_GP,
+					SUM(IFNULL(ESP_QUARTER.TARGET_REV,0)) AS Q_TARGET_REV,
+					SUM(IFNULL(ESP_QUARTER.TARGET_GP,0)) AS Q_TARGET_GP,
+					
+					SUM(IFNULL(ESA.ACTUAL_TCV_AMOUNT,0)) AS TCV_AMOUNT,
+					SUM(IFNULL(ESA.ACTUAL_REV_AMOUNT,0)) AS REV_AMOUNT,
+					SUM(IFNULL(ESA.ACTUAL_GP_AMOUNT,0)) AS ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(ESA.PLAN_GP_AMOUNT,0)) AS PLAN_GP_AMOUNT,
+					
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_TCV_AMOUNT,0)) AS THIS_YEAR_TCV_AMOUNT, 
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_REV_AMOUNT,0)) AS THIS_YEAR_REV_AMOUNT,
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_GP_AMOUNT,0)) AS THIS_YEAR_ACTUAL_GP_AMOUNT, 
+					SUM(IFNULL(ESA_THIS_YEAR.PLAN_GP_AMOUNT,0)) AS THIS_YEAR_PLAN_GP_AMOUNT,
+					
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_TCV_AMOUNT,0)) AS LAST_YEAR_TCV_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_REV_AMOUNT,0)) AS LAST_YEAR_REV_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_GP_AMOUNT,0)) AS LAST_YEAR_ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.PLAN_GP_AMOUNT,0)) AS LAST_YEAR_PLAN_GP_AMOUNT
+			FROM 
+					(
+						SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+						FROM OUR_MEMBERS_INFO AS IOMI
+						WHERE 1=1 
+						AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} ) 
+					) AS OMI  
+					INNER JOIN
+					OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S'  -- AND OMI.POSITION_TYPE = '영업직'
+					INNER JOIN
+					OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+					LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(#{startDate})
+				GROUP BY MEMBER_ID_NUM
+			) AS ESP_YEAR ON ESP_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+			LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(#{startDate})
+				AND BASIS_MONTH <= #{endDate}
+				GROUP BY MEMBER_ID_NUM 
+			) AS ESP_QUARTER ON ESP_QUARTER.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0) + IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0) + IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+										SELECT MAX(ACTUAL_DATE) 
+										FROM ERP_SALES_ACTUAL
+										WHERE 1=1
+										AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+										AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})
+									)
+			) AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+										SELECT MAX(ACTUAL_DATE) 
+										FROM ERP_SALES_ACTUAL
+										WHERE 1=1
+										AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+										AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})
+									)
+			) AS ESA_THIS_YEAR ON ESA_THIS_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+											SELECT MAX(ACTUAL_DATE) 
+											FROM ERP_SALES_ACTUAL
+											WHERE 1=1
+											AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+											AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})-1
+									)
+				) AS ESA_LAST_YEAR ON ESA_LAST_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME
+			HAVING 1=1
+			]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+			</when>
+		</choose>
+	</select>
+
+	<!-- selectResultDashBoardMember 원래 소스 -->
+	<select id="selectResultDashBoardMember2" parameterType="hashmap"
+		resultType="hashmap">
+			<![CDATA[
+				SELECT 
+					OMI.MEMBER_DIVISION,
+					ODI.DIVISION_NAME,
+					OMI.MEMBER_TEAM,
+					OTI.TEAM_NAME,
+					OMI.MEMBER_ID_NUM,
+					OMI.HAN_NAME,
+					
+					SUM(IFNULL(ESP_YEAR.TARGET_REV,0)) AS FY_TARGET_REV, 
+					SUM(IFNULL(ESP_YEAR.TARGET_GP,0)) AS FY_TARGET_GP,
+					SUM(IFNULL(ESP_QUARTER.TARGET_REV,0)) AS Q_TARGET_REV,
+					SUM(IFNULL(ESP_QUARTER.TARGET_GP,0)) AS Q_TARGET_GP,
+					
+					SUM(IFNULL(ESA.ACTUAL_TCV_AMOUNT,0)) AS TCV_AMOUNT,
+					SUM(IFNULL(ESA.ACTUAL_REV_AMOUNT,0)) AS REV_AMOUNT,
+					SUM(IFNULL(ESA.ACTUAL_GP_AMOUNT,0)) AS ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(ESA.PLAN_GP_AMOUNT,0)) AS PLAN_GP_AMOUNT,
+					
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_TCV_AMOUNT,0)) AS THIS_YEAR_TCV_AMOUNT, 
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_REV_AMOUNT,0)) AS THIS_YEAR_REV_AMOUNT,
+					SUM(IFNULL(ESA_THIS_YEAR.ACTUAL_GP_AMOUNT,0)) AS THIS_YEAR_ACTUAL_GP_AMOUNT, 
+					SUM(IFNULL(ESA_THIS_YEAR.PLAN_GP_AMOUNT,0)) AS THIS_YEAR_PLAN_GP_AMOUNT,
+					
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_TCV_AMOUNT,0)) AS LAST_YEAR_TCV_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_REV_AMOUNT,0)) AS LAST_YEAR_REV_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.ACTUAL_GP_AMOUNT,0)) AS LAST_YEAR_ACTUAL_GP_AMOUNT,
+					SUM(IFNULL(ESA_LAST_YEAR.PLAN_GP_AMOUNT,0)) AS LAST_YEAR_PLAN_GP_AMOUNT
+			FROM 
+					(
+						SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+						FROM OUR_MEMBERS_INFO AS IOMI
+						WHERE 1=1 
+						AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= #{startDate} ) 
+					) AS OMI  
+					INNER JOIN
+					OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION AND ODI.DIVISION_TYPE = 'S'  -- AND OMI.POSITION_TYPE = '영업직'
+					INNER JOIN
+					OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM AND OTI.TEAM_TYPE = 'S'
+					LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(#{startDate})
+				GROUP BY MEMBER_ID_NUM
+			) AS ESP_YEAR ON ESP_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM 
+			LEFT OUTER JOIN
+			(
+				SELECT 
+					MEMBER_ID_NUM,
+					SUM(TARGET_REVENUE_AMOUNT) AS TARGET_REV,
+					SUM(TARGET_GP_AMOUNT) AS TARGET_GP
+				FROM ERP_SALES_PLAN
+				WHERE 1=1
+				AND YEAR(BASIS_MONTH) = YEAR(#{startDate})
+				AND BASIS_MONTH <= #{endDate}
+				GROUP BY MEMBER_ID_NUM 
+			) AS ESP_QUARTER ON ESP_QUARTER.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0) + IFNULL(3Q_ACTUAL_REV_AMOUNT,0) + IFNULL(2Q_ACTUAL_REV_AMOUNT,0) + IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0) + IFNULL(3Q_ACTUAL_GP_AMOUNT,0) + IFNULL(2Q_ACTUAL_GP_AMOUNT,0) + IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+										SELECT MAX(ACTUAL_DATE) 
+										FROM ERP_SALES_ACTUAL
+										WHERE 1=1
+										AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+										AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})
+									)
+			) AS ESA ON ESA.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+										SELECT MAX(ACTUAL_DATE) 
+										FROM ERP_SALES_ACTUAL
+										WHERE 1=1
+										AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+										AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})
+									)
+			) AS ESA_THIS_YEAR ON ESA_THIS_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+			(
+				SELECT 
+						MEMBER_ID_NUM,
+						IFNULL(Y_TCV,0) AS ACTUAL_TCV_AMOUNT,		
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_REV_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_REV_AMOUNT,0)
+						END AS ACTUAL_REV_AMOUNT,
+						CASE 
+							WHEN QUARTER(ACTUAL_DATE) = 1 THEN IFNULL(1Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 2 THEN IFNULL(2Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 3 THEN IFNULL(3Q_ACTUAL_GP_AMOUNT,0)
+							WHEN QUARTER(ACTUAL_DATE) = 4 THEN IFNULL(4Q_ACTUAL_GP_AMOUNT,0)
+						END AS ACTUAL_GP_AMOUNT,
+						IFNULL(1Q_ACTUAL_PGP_AMOUNT,0) AS PLAN_GP_AMOUNT
+				FROM ERP_SALES_ACTUAL
+				WHERE 1=1
+				AND ACTUAL_DATE = (
+											SELECT MAX(ACTUAL_DATE) 
+											FROM ERP_SALES_ACTUAL
+											WHERE 1=1
+											AND YEAR(ACTUAL_DATE) = YEAR(#{startDate})
+											AND QUARTER(ACTUAL_DATE) = QUARTER(#{startDate})-1
+									)
+				) AS ESA_LAST_YEAR ON ESA_LAST_YEAR.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+			GROUP BY OMI.MEMBER_DIVISION, ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,OMI.HAN_NAME
+			HAVING 1=1
+			]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_CFO')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OMI.MEMBER_DIVISION = #{searchDivision}
+				AND OMI.MEMBER_TEAM = #{searchTeam}
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OMI.MEMBER_DIVISION = #{global_member_division}
+				AND OMI.MEMBER_TEAM = #{global_member_team}
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>
+		</choose>
+	</select>
+
+
+	<select id="gridFaceTime_month_avg" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+					TMP_TB1.MEMBER_ID_NUM,
+					IF(TMP_TB1.DIVISION_NAME IS NULL OR TMP_TB1.DIVISION_NAME = '',TMP_TB1.TEAM_NAME,TMP_TB1.DIVISION_NAME) AS DIVISION_NAME,
+					TMP_TB1.TEAM_NAME,
+					TMP_TB1.HAN_NAME,
+					TMP_TB1.LAST_BASIS_TIME,
+					(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)/post_count avr,
+					
+					TMP_TB1.LAST_EVENT_1 AS LAST_EVENT_TIME_1,
+	                TMP_TB1.LAST_EVENT_2 AS LAST_EVENT_TIME_2,
+	                TMP_TB1.LAST_EVENT_3 AS LAST_EVENT_TIME_3,
+	                TMP_TB1.LAST_EVENT_4 AS LAST_EVENT_TIME_4,
+	                TMP_TB1.LAST_EVENT_5 AS LAST_EVENT_TIME_5,
+	                TMP_TB1.LAST_EVENT_6 AS LAST_EVENT_TIME_6,
+	                TMP_TB1.LAST_EVENT_7 AS LAST_EVENT_TIME_7,
+	                                
+	                TMP_TB1.THIS_EVENT_1 AS THIS_EVENT_TIME_1,
+	                TMP_TB1.THIS_EVENT_2 AS THIS_EVENT_TIME_2, 
+	                TMP_TB1.THIS_EVENT_3 AS THIS_EVENT_TIME_3,
+	                TMP_TB1.THIS_EVENT_4 AS THIS_EVENT_TIME_4,
+	                TMP_TB1.THIS_EVENT_5 AS THIS_EVENT_TIME_5,
+	                TMP_TB1.THIS_EVENT_6 AS THIS_EVENT_TIME_6,
+	                TMP_TB1.THIS_EVENT_7 AS THIS_EVENT_TIME_7,
+	                100-( FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)
+	                + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) +
+
+	                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)) as THISOTHER,
+	                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_1,
+	                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_2,
+	                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_3,
+	                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_4,
+	                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_5,
+	                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_6,
+	                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_7,
+	                
+	                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_1,
+	                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_2,
+	                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_3,
+	                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_4,
+	                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_5,
+	                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_6,
+	                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_7,
+	                
+	                
+					CONCAT(TMP_TB1.LAST_EVENT_1,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_1,
+					CONCAT(TMP_TB1.LAST_EVENT_2,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_2,
+					CONCAT(TMP_TB1.LAST_EVENT_3,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_3,
+					CONCAT(TMP_TB1.LAST_EVENT_4,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_4,
+					CONCAT(TMP_TB1.LAST_EVENT_5,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_5,
+					CONCAT(TMP_TB1.LAST_EVENT_6,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_6,
+					CONCAT(TMP_TB1.LAST_EVENT_7,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_7,
+					(
+						CONCAT
+						(
+							TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7
+							,' ('
+							,IF((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ','')
+							,ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1)
+							,'%)'
+						)
+					) AS LAST_TOTAL,
+					
+					TMP_TB1.THIS_BASIS_TIME,
+					CONCAT(TMP_TB1.THIS_EVENT_1,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_1,
+					CONCAT(TMP_TB1.THIS_EVENT_2,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_2,
+					CONCAT(TMP_TB1.THIS_EVENT_3,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_3,
+					CONCAT(TMP_TB1.THIS_EVENT_4,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_4,
+					CONCAT(TMP_TB1.THIS_EVENT_5,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_5,
+					CONCAT(TMP_TB1.THIS_EVENT_6,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_6,
+					CONCAT(TMP_TB1.THIS_EVENT_7,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_7,
+					(
+						CONCAT
+						(
+							TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7
+							,' ('
+							,IF((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ','')
+							,ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+							,'%)'
+						)
+					) AS THIS_TOTAL,
+					IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_TIME_1,
+					IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_TIME_2,
+					IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_TIME_3,
+					IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_TIME_4,
+					IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_TIME_5,
+					IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_TIME_6,
+					IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_TIME_7
+			FROM
+			]]>
+		(
+		SELECT
+		OMI.MEMBER_ID_NUM,
+		ODI.DIVISION_NAME,
+		OTI.TEAM_NAME,
+		OMI.HAN_NAME,
+		count(distinct OMI.MEMBER_ID) POST_COUNT,
+
+		<!-- 지난달 -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_1_TIME,0)) LAST_EVENT_1,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_3_TIME,0)) LAST_EVENT_3,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_5_TIME,0)) LAST_EVENT_5,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6,
+		<!-- SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'01') 
+			AND CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'31'), AIT.ACTIVITY_CODE_7_TIME,0)) 
+			LAST_EVENT_7, SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'01') 
+			AND CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'31'), AIT.ACTIVITY_CODE_8_TIME,0)) 
+			LAST_EVENT_8, -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+		<!-- 이번달 -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+		<!-- SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 
+			1 month) AND DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL 
+			1 month), AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7, SUM(IF(AIT.ANAL_DATE 
+			BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 
+			1 month) AND DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL 
+			1 month), AIT.ACTIVITY_CODE_8_TIME,0)) THIS_EVENT_8, -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+		FROM
+		OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+		ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		INNER JOIN
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+		WHERE 1=1
+		<!-- 년 검색 -->
+		<choose>
+			<when test="selectFaceYear != null and selectFaceYear != '' ">
+				AND ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+				CONCAT(#{selectFaceYear},'1231')
+				<!-- 월 검색 -->
+				<choose>
+					<when test="selectFaceMonth != null and selectFaceMonth != '' ">
+						AND ANAL_DATE BETWEEN
+						DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL
+						1 month) AND
+						LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01'))
+					</when>
+					<otherwise>
+						AND ANAL_DATE BETWEEN
+						DATE_SUB(CONCAT(#{selectFaceYear},MONTH(NOW()),'01'),INTERVAL 1
+						month) AND CONCAT(#{selectFaceYear},MONTH(NOW()),'31')
+					</otherwise>
+				</choose>
+			</when>
+			<otherwise>
+				AND ANAL_DATE BETWEEN CONCAT(YEAR(NOW()),'0101') AND
+				CONCAT(YEAR(NOW()),'1231')
+				<!-- 월 검색 -->
+				<choose>
+					<when test="selectFaceMonth != null and selectFaceMonth != '' ">
+						AND ANAL_DATE BETWEEN
+						DATE_SUB(CONCAT(YEAR(NOW()),#{selectFaceMonth},'01'),INTERVAL 1
+						month) AND CONCAT(YEAR(NOW()),#{selectFaceMonth},'31')
+					</when>
+					<otherwise>
+						AND ANAL_DATE BETWEEN
+						DATE_SUB(CONCAT(YEAR(NOW()),MONTH(NOW()),'01'),INTERVAL 1 month)
+						AND CONCAT(YEAR(NOW()),MONTH(NOW()),'31')
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+		<!-- 본부 검색 -->
+
+		AND ODI.DIVISION_TYPE = 'S'
+		AND OTI.TEAM_TYPE = 'S'
+
+		GROUP BY ODI.DIVISION_NAME with rollup
+		) AS TMP_TB1;
+	</select>
+
+	<select id="gridFaceTime_quarter_avg" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				TMP_TB1.MEMBER_ID_NUM,
+				IF(TMP_TB1.DIVISION_NAME IS NULL OR TMP_TB1.DIVISION_NAME = '',TMP_TB1.TEAM_NAME,TMP_TB1.DIVISION_NAME) AS DIVISION_NAME,
+				TMP_TB1.TEAM_NAME,
+				TMP_TB1.HAN_NAME,
+				TMP_TB1.LAST_BASIS_TIME,
+				
+				TMP_TB1.POST_COUNT,
+				(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)/post_count avr,
+				
+				TMP_TB1.LAST_EVENT_1 AS LAST_EVENT_TIME_1,
+                TMP_TB1.LAST_EVENT_2 AS LAST_EVENT_TIME_2,
+                TMP_TB1.LAST_EVENT_3 AS LAST_EVENT_TIME_3,
+                TMP_TB1.LAST_EVENT_4 AS LAST_EVENT_TIME_4,
+                TMP_TB1.LAST_EVENT_5 AS LAST_EVENT_TIME_5,
+                TMP_TB1.LAST_EVENT_6 AS LAST_EVENT_TIME_6,
+                TMP_TB1.LAST_EVENT_7 AS LAST_EVENT_TIME_7,
+                                
+                TMP_TB1.THIS_EVENT_1 AS THIS_EVENT_TIME_1,
+                TMP_TB1.THIS_EVENT_2 AS THIS_EVENT_TIME_2, 
+                TMP_TB1.THIS_EVENT_3 AS THIS_EVENT_TIME_3,
+                TMP_TB1.THIS_EVENT_4 AS THIS_EVENT_TIME_4,
+                TMP_TB1.THIS_EVENT_5 AS THIS_EVENT_TIME_5,
+                TMP_TB1.THIS_EVENT_6 AS THIS_EVENT_TIME_6,
+                TMP_TB1.THIS_EVENT_7 AS THIS_EVENT_TIME_7,
+                
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_7,
+                100-( FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1)
+                + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) +
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1)) as LASTOTHER,
+                
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_7,	
+                100-( FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)
+                + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) +
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)) as THISOTHER,
+                
+				CONCAT(TMP_TB1.LAST_EVENT_1,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_1,
+				CONCAT(TMP_TB1.LAST_EVENT_2,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_2,
+				CONCAT(TMP_TB1.LAST_EVENT_3,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_3,
+				CONCAT(TMP_TB1.LAST_EVENT_4,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_4,
+				CONCAT(TMP_TB1.LAST_EVENT_5,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_5,
+				CONCAT(TMP_TB1.LAST_EVENT_6,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_6,
+				CONCAT(TMP_TB1.LAST_EVENT_7,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS LAST_TOTAL,
+				
+				TMP_TB1.THIS_BASIS_TIME,
+				CONCAT(TMP_TB1.THIS_EVENT_1,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_1,
+				CONCAT(TMP_TB1.THIS_EVENT_2,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_2,
+				CONCAT(TMP_TB1.THIS_EVENT_3,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_3,
+				CONCAT(TMP_TB1.THIS_EVENT_4,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_4,
+				CONCAT(TMP_TB1.THIS_EVENT_5,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_5,
+				CONCAT(TMP_TB1.THIS_EVENT_6,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_6,
+				CONCAT(TMP_TB1.THIS_EVENT_7,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS THIS_TOTAL,
+				
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_1,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_2,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_3,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_4,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_5,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_6,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_7,
+				
+				IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_1,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_2,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_3,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_4,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_5,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_6,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_7,
+				IF((IFNULL(ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_TOTAL,
+				ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1) AS COMPARE_TOTAL
+			FROM
+			]]>
+		(
+		SELECT
+		OMI.MEMBER_DIVISION,
+		OMI.MEMBER_TEAM,
+		OMI.MEMBER_ID_NUM,
+		ODI.DIVISION_NAME,
+		OTI.TEAM_NAME,OMI.HAN_NAME,
+		count(distinct OMI.MEMBER_ID) POST_COUNT,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1, AIT.ANAL_BASIS_TIME,0))
+		LAST_BASIS_TIME,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_1_TIME,0))
+		LAST_EVENT_1,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_2_TIME,0))
+		LAST_EVENT_2,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_3_TIME,0))
+		LAST_EVENT_3,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_4_TIME,0))
+		LAST_EVENT_4,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_5_TIME,0))
+		LAST_EVENT_5,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_6_TIME,0))
+		LAST_EVENT_6,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_7_TIME,0))
+		LAST_EVENT_7,
+
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) , ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+		SUM(IF(QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+		FROM
+		OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+		ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		LEFT OUTER JOIN
+		OUR_TEAM_INFO AS OTI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+		WHERE 1=1
+
+		AND ODI.DIVISION_TYPE ='S'
+		AND OTI.TEAM_TYPE = 'S'
+
+		GROUP BY ODI.DIVISION_NAME with rollup
+
+		) AS TMP_TB1
+	</select>
+
+
+	<!-- 본부별 그래프 데이터 -->
+	<!-- <select id="selectGraphData" parameterType="hashmap" resultType="hashmap"> 
+		<![CDATA[ select MEMBER_DIVISION, MEMBER_TEAM, HAN_NAME, post_count, (THIS_EVENT_1 
+		+ THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 
+		+ THIS_EVENT_7) total, (THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 
+		+ THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)/post_count avr, ROUND(( (THIS_EVENT_1 
+		/ THIS_BASIS_TIME) * '100' ), 2) per1, ROUND(( (THIS_EVENT_2 / THIS_BASIS_TIME) 
+		* '100' ), 2) per2, ROUND(( (THIS_EVENT_3 / THIS_BASIS_TIME) * '100' ), 2) 
+		per3, ROUND(( (THIS_EVENT_4 / THIS_BASIS_TIME) * '100' ), 2) per4, ROUND(( 
+		(THIS_EVENT_5 / THIS_BASIS_TIME) * '100' ), 2) per5, ROUND(( (THIS_EVENT_6 
+		/ THIS_BASIS_TIME) * '100' ), 2) per6, ROUND(( (THIS_EVENT_7 / THIS_BASIS_TIME) 
+		* '100' ), 2) per7, 100 - (((THIS_EVENT_1 / THIS_BASIS_TIME) * '100')+ ( 
+		(THIS_EVENT_2 / THIS_BASIS_TIME) * '100' ) + ( (THIS_EVENT_3 / THIS_BASIS_TIME) 
+		* '100' ) + ( (THIS_EVENT_4 / THIS_BASIS_TIME) * '100' ) + ( (THIS_EVENT_5 
+		/ THIS_BASIS_TIME) * '100' ) + ( (THIS_EVENT_6 / THIS_BASIS_TIME) * '100' 
+		) + ( (THIS_EVENT_7 / THIS_BASIS_TIME) * '100' )) otherPer from ]]> ( SELECT 
+		OMI.HAN_NAME, OMI.MEMBER_TEAM, OMI.MEMBER_DIVISION, count(distinct OMI.MEMBER_ID) 
+		post_count, SUM(IFNULL(AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME, SUM(IFNULL(AIT.ACTIVITY_CODE_1_TIME,0)) 
+		LAST_EVENT_1, SUM(IFNULL(AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2, SUM(IFNULL(AIT.ACTIVITY_CODE_3_TIME,0)) 
+		LAST_EVENT_3, SUM(IFNULL(AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4, SUM(IFNULL(AIT.ACTIVITY_CODE_5_TIME,0)) 
+		LAST_EVENT_5, SUM(IFNULL(AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6, SUM(IFNULL(AIT.ACTIVITY_CODE_7_TIME,0)) 
+		LAST_EVENT_7, SUM(IFNULL(AIT.ANAL_BASIS_TIME,0)) THIS_BASIS_TIME, SUM(IFNULL(AIT.ACTIVITY_CODE_1_TIME,0)) 
+		THIS_EVENT_1, SUM(IFNULL(AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2, SUM(IFNULL(AIT.ACTIVITY_CODE_3_TIME,0)) 
+		THIS_EVENT_3, SUM(IFNULL(AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4, SUM(IFNULL(AIT.ACTIVITY_CODE_5_TIME,0)) 
+		THIS_EVENT_5, SUM(IFNULL(AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6, SUM(IFNULL(AIT.ACTIVITY_CODE_7_TIME,0)) 
+		THIS_EVENT_7 FROM OUR_MEMBERS_INFO AS OMI INNER JOIN ANAL_INDIVIDUAL_TIME 
+		AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM INNER JOIN OUR_DIVISION_INFO 
+		AS ODI ON ODI.DIVISION_NAME = OMI.MEMBER_DIVISION WHERE 1=1 <if test="selectFacePost 
+		!= null and selectFacePost != '' "> AND MEMBER_DIVISION = #{selectFacePost} 
+		</if> <if test="selectFaceTeam != null and selectFaceTeam != '' "> AND MEMBER_TEAM 
+		= #{selectFaceTeam} </if> AND ODI.DIVISION_TYPE = 'S' <choose> <when test="selectFacePost 
+		!= null and selectFacePost != '' "> <choose> <when test="selectFaceTeam != 
+		null and selectFaceTeam != '' "> GROUP BY OMI.MEMBER_TEAM , OMI.HAN_NAME 
+		with rollup </when> <otherwise> GROUP BY OMI.MEMBER_TEAM with rollup </otherwise> 
+		</choose> </when> <otherwise> GROUP BY OMI.MEMBER_DIVISION with rollup </otherwise> 
+		</choose> ) as aaa order by member_division desc </select> -->
+
+
+	<select id="selectGraphData" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			select 
+				DIVISION_NAME, TEAM_NAME, HAN_NAME,
+				post_count,
+				(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7) total,
+				(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)/post_count avr,
+				ROUND(( (THIS_EVENT_1 / THIS_BASIS_TIME) * '100' ), 2) per1,
+				ROUND(( (THIS_EVENT_2 / THIS_BASIS_TIME) * '100' ), 2) per2,
+				ROUND(( (THIS_EVENT_3 / THIS_BASIS_TIME) * '100' ), 2) per3,
+				ROUND(( (THIS_EVENT_4 / THIS_BASIS_TIME) * '100' ), 2) per4,
+				ROUND(( (THIS_EVENT_5 / THIS_BASIS_TIME) * '100' ), 2) per5,
+				ROUND(( (THIS_EVENT_6 / THIS_BASIS_TIME) * '100' ), 2) per6,
+				ROUND(( (THIS_EVENT_7 / THIS_BASIS_TIME) * '100' ), 2) per7,
+				100 - (((THIS_EVENT_1 / THIS_BASIS_TIME) * '100')+ ( (THIS_EVENT_2 / THIS_BASIS_TIME) * '100' )
+				+ ( (THIS_EVENT_3 / THIS_BASIS_TIME) * '100' ) + ( (THIS_EVENT_4 / THIS_BASIS_TIME) * '100' ) 
+				+ ( (THIS_EVENT_5 / THIS_BASIS_TIME) * '100' ) + ( (THIS_EVENT_6 / THIS_BASIS_TIME) * '100' )
+				+ ( (THIS_EVENT_7 / THIS_BASIS_TIME) * '100' )) otherPer
+				from
+				]]>
+		(
+		select
+		ODI.DIVISION_NAME, OMI.HAN_NAME, OTI.TEAM_NAME,
+		count(distinct OMI.MEMBER_ID) post_count,
+		SUM(IFNULL(AIT.ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+		from our_division_info as ODI
+		INNER JOIN
+		OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		INNER JOIN
+		ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		where 1=1
+
+		<if test="selectFacePost != null and selectFacePost != '' ">
+			AND ODI.DIVISION_NAME = #{selectFacePost}
+		</if>
+		<if test="selectFaceTeam != null and selectFaceTeam != '' ">
+			AND OTI.TEAM_NAME = #{selectFaceTeam}
+		</if>
+
+
+		AND ODI.DIVISION_TYPE = 'S'
+
+
+		<choose>
+			<when test="selectFacePost != null and selectFacePost != '' ">
+				<choose>
+					<when test="selectFaceTeam != null and selectFaceTeam != '' ">
+						GROUP BY OTI.TEAM_NAME , OMI.HAN_NAME with rollup
+					</when>
+					<otherwise>
+						GROUP BY OTI.TEAM_NAME with rollup
+					</otherwise>
+				</choose>
+			</when>
+			<otherwise>
+				GROUP BY ODI.DIVISION_NAME with rollup
+			</otherwise>
+		</choose>
+
+		) as aaa
+	</select>
+
+	<select id="selectMyProductivityGraphData" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			select 
+				DIVISION_NAME, TEAM_NAME, HAN_NAME, MEMBER_ID_NUM,
+				post_count,
+				(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7) total,
+				(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)/post_count avr,
+				ROUND(( (THIS_EVENT_1 / THIS_BASIS_TIME) * '100' ), 2) per1,
+				ROUND(( (THIS_EVENT_2 / THIS_BASIS_TIME) * '100' ), 2) per2,
+				ROUND(( (THIS_EVENT_3 / THIS_BASIS_TIME) * '100' ), 2) per3,
+				ROUND(( (THIS_EVENT_4 / THIS_BASIS_TIME) * '100' ), 2) per4,
+				ROUND(( (THIS_EVENT_5 / THIS_BASIS_TIME) * '100' ), 2) per5,
+				ROUND(( (THIS_EVENT_6 / THIS_BASIS_TIME) * '100' ), 2) per6,
+				ROUND(( (THIS_EVENT_7 / THIS_BASIS_TIME) * '100' ), 2) per7,
+				100 - (((THIS_EVENT_1 / THIS_BASIS_TIME) * '100')+ ( (THIS_EVENT_2 / THIS_BASIS_TIME) * '100' )
+				+ ( (THIS_EVENT_3 / THIS_BASIS_TIME) * '100' ) + ( (THIS_EVENT_4 / THIS_BASIS_TIME) * '100' ) 
+				+ ( (THIS_EVENT_5 / THIS_BASIS_TIME) * '100' ) + ( (THIS_EVENT_6 / THIS_BASIS_TIME) * '100' )
+				+ ( (THIS_EVENT_7 / THIS_BASIS_TIME) * '100' )) otherPer
+				from
+				]]>
+		(
+		select
+		ODI.DIVISION_NAME, OMI.HAN_NAME, OTI.TEAM_NAME, OMI.MEMBER_ID_NUM,
+		count(distinct OMI.MEMBER_ID) post_count,
+		SUM(IFNULL(AIT.ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+		from our_division_info as ODI
+		INNER JOIN
+		OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		INNER JOIN
+		ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		where 1=1
+
+		AND AIT.MEMBER_ID_NUM=#{global_member_id}
+		) as aaa
+	</select>
+
+
+	<!-- 생산성 셀렉박스 본부 선택 pie 데이터 -->
+	<select id="test3" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+		select 
+				MEMBER_DIVISION,
+				MEMBER_TEAM,
+				THIS_EVENT_1, post_count,    
+				THIS_EVENT_2, post_count,  
+				THIS_EVENT_3, post_count, 
+				THIS_EVENT_4, post_count, 
+				THIS_EVENT_6, post_count, 
+				THIS_EVENT_7, post_count, 
+				THIS_EVENT_5, post_count, 
+				ROUND(( (THIS_EVENT_1 / (THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)) * '100' ), 1) per1,
+				ROUND(( (THIS_EVENT_2 / (THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)) * '100' ), 1) per2,
+				ROUND(( (THIS_EVENT_3 / (THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)) * '100' ), 1) per3,
+				ROUND(( (THIS_EVENT_4 / (THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)) * '100' ), 1) per4,
+				ROUND(( (THIS_EVENT_5 / (THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)) * '100' ), 1) per5,
+				ROUND(( (THIS_EVENT_6 / (THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)) * '100' ), 1) per6,
+				ROUND(( (THIS_EVENT_7 / (THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)) * '100' ), 1) per7
+				from
+				]]>
+		(
+		SELECT
+		OMI.MEMBER_DIVISION,
+		OMI.MEMBER_TEAM,
+		count(distinct OMI.MEMBER_ID) post_count,
+		SUM(IFNULL(AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_1_TIME,0)) LAST_EVENT_1,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_3_TIME,0)) LAST_EVENT_3,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_5_TIME,0)) LAST_EVENT_5,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+		SUM(IFNULL(AIT.ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+		SUM(IFNULL(AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+		FROM
+		OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+		ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		INNER JOIN
+		OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NAME = OMI.MEMBER_DIVISION
+		WHERE 1=1
+		AND ODI.DIVISION_TYPE = 'S'
+
+		<if test="selectFacePost != null and selectFacePost != '' ">
+			AND MEMBER_DIVISION = #{selectFacePost}
+		</if>
+
+		<if test="selectFaceTeam != null and selectFaceTeam != '' ">
+			AND MEMBER_TEAM = #{selectFaceTeam}
+		</if>
+
+		<if test="selectFaceMember !=null and selectFaceMember != '' ">
+			AND HAN_NAME = #{selectFaceMember}
+		</if>
+		GROUP BY OMI.MEMBER_TEAM WITH ROLLUP
+		) as aaa
+	</select>
+
+
+	<select id="gridFaceTime_year" parameterType="hashmap"
+		resultType="hashmap">
+			<![CDATA[
+			SELECT
+				TMP_TB1.MEMBER_ID_NUM,
+				POST_COUNT,
+				(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)/post_count avr,
+				
+				TMP_TB1.TEAM_NAME,
+				TMP_TB1.DIVISION_NAME,
+				TMP_TB1.HAN_NAME,
+				TMP_TB1.LAST_BASIS_TIME,		
+				
+				TMP_TB1.LAST_EVENT_1 AS LAST_EVENT_TIME_1,
+                TMP_TB1.LAST_EVENT_2 AS LAST_EVENT_TIME_2,
+                TMP_TB1.LAST_EVENT_3 AS LAST_EVENT_TIME_3,
+                TMP_TB1.LAST_EVENT_4 AS LAST_EVENT_TIME_4,
+                TMP_TB1.LAST_EVENT_5 AS LAST_EVENT_TIME_5,
+                TMP_TB1.LAST_EVENT_6 AS LAST_EVENT_TIME_6,
+                TMP_TB1.LAST_EVENT_7 AS LAST_EVENT_TIME_7,
+                                
+                TMP_TB1.THIS_EVENT_1 AS THIS_EVENT_TIME_1,
+                TMP_TB1.THIS_EVENT_2 AS THIS_EVENT_TIME_2, 
+                TMP_TB1.THIS_EVENT_3 AS THIS_EVENT_TIME_3,
+                TMP_TB1.THIS_EVENT_4 AS THIS_EVENT_TIME_4,
+                TMP_TB1.THIS_EVENT_5 AS THIS_EVENT_TIME_5,
+                TMP_TB1.THIS_EVENT_6 AS THIS_EVENT_TIME_6,
+                TMP_TB1.THIS_EVENT_7 AS THIS_EVENT_TIME_7,
+                
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_7,
+                100-( FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1)
+                + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) +
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1))
+                as LASTOTHER,
+                
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_7,
+                100-( FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)
+                + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) +
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1))
+                as THISOTHER,
+                
+                
+				CONCAT(TMP_TB1.LAST_EVENT_1,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_1,
+				CONCAT(TMP_TB1.LAST_EVENT_2,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_2,
+				CONCAT(TMP_TB1.LAST_EVENT_3,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_3,
+				CONCAT(TMP_TB1.LAST_EVENT_4,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_4,
+				CONCAT(TMP_TB1.LAST_EVENT_5,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_5,
+				CONCAT(TMP_TB1.LAST_EVENT_6,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_6,
+				CONCAT(TMP_TB1.LAST_EVENT_7,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS LAST_TOTAL,
+				
+				TMP_TB1.THIS_BASIS_TIME,
+				CONCAT(TMP_TB1.THIS_EVENT_1,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_1,
+				CONCAT(TMP_TB1.THIS_EVENT_2,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_2,
+				CONCAT(TMP_TB1.THIS_EVENT_3,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_3,
+				CONCAT(TMP_TB1.THIS_EVENT_4,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_4,
+				CONCAT(TMP_TB1.THIS_EVENT_5,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_5,
+				CONCAT(TMP_TB1.THIS_EVENT_6,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_6,
+				CONCAT(TMP_TB1.THIS_EVENT_7,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS THIS_TOTAL,
+				
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_1,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_2,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_3,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_4,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_5,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_6,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_7,
+				
+				IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_1,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_2,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_3,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_4,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_5,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_6,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_7,
+				IF((IFNULL(ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_TOTAL,
+				ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1) AS COMPARE_TOTAL
+			FROM
+			]]>
+		(
+		SELECT
+		OMI.MEMBER_ID_NUM,
+		ODI.DIVISION_NAME,
+		OTI.TEAM_NAME,
+		OMI.HAN_NAME,
+		count(distinct OMI.MEMBER_ID) POST_COUNT,
+
+		<!-- 지난 -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR) AND
+		DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR),
+		AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME,
+		SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR)
+		AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR),
+		AIT.ACTIVITY_CODE_1_TIME,0)) LAST_EVENT_1,
+		SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR)
+		AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR),
+		AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2,
+		SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR)
+		AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR),
+		AIT.ACTIVITY_CODE_3_TIME,0)) LAST_EVENT_3,
+		SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR)
+		AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR),
+		AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4,
+		SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR)
+		AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR),
+		AIT.ACTIVITY_CODE_5_TIME,0)) LAST_EVENT_5,
+		SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR)
+		AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR),
+		AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6,
+		SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 1 YEAR)
+		AND DATE_SUB(CONCAT(#{selectFaceYear},'1231'),INTERVAL 1 YEAR),
+		AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+		<!-- 이번 -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+		CONCAT(#{selectFaceYear},'1231'), AIT.ANAL_BASIS_TIME,0))
+		THIS_BASIS_TIME,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+		CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_1_TIME,0))
+		THIS_EVENT_1,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+		CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_2_TIME,0))
+		THIS_EVENT_2,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+		CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_3_TIME,0))
+		THIS_EVENT_3,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+		CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_4_TIME,0))
+		THIS_EVENT_4,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+		CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_5_TIME,0))
+		THIS_EVENT_5,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+		CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_6_TIME,0))
+		THIS_EVENT_6,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+		CONCAT(#{selectFaceYear},'1231'), AIT.ACTIVITY_CODE_7_TIME,0))
+		THIS_EVENT_7
+		FROM
+		OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+		ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		INNER JOIN
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+		WHERE 1=1
+		<!-- <choose> <when test="selectFaceYear != null and selectFaceYear != 
+			'' "> AND ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},'0101'),INTERVAL 
+			1 YEAR) AND CONCAT(#{selectFaceYear},'1231') </when> <otherwise> AND ANAL_DATE 
+			BETWEEN DATE_SUB(CONCAT(YEAR(NOW()),'0101'),INTERVAL 1 YEAR) AND CONCAT(YEAR(NOW()),'1231') 
+			</otherwise> </choose> -->
+
+		AND ODI.DIVISION_TYPE = 'S'
+		AND OTI.TEAM_TYPE = 'S'
+		-- AND OMI.POSITION_TYPE = '영업직'
+
+		<choose>
+			<!-- 나의 생산성 캘린더 현재 나의 ID 넘겨줘서 내 생산성 데이터만 가져오기 -->
+			<when test="hiddenUserID != null and hiddenUserID != '' ">
+				AND OMI.MEMBER_ID_NUM = #{hiddenUserID}
+			</when>
+			<otherwise><!-- 생산성 -->
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')"> <!-- CEO -->
+						<choose>
+							<when test=" roleChildDivision != null and roleChildDivision != '' "> <!-- CEO 본부장 페이지 -->
+								<choose>
+									<when test=" gridDataYN != null and gridDataYN != '' "> <!-- 그래프 밑 팀별 데이터 가져오기 위해 -->
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+										HAVING 1=1
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER by OMI.HAN_NAME ASC
+									</when>
+									<otherwise> <!-- 그래프 본부별 팀명 가져오기 -->
+
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										ORDER BY OTI.TEAM_NAME
+									</otherwise>
+								</choose>
+							</when>
+							<when test=" roleChildTeam != null and roleChildTeam != '' "> <!-- CEO 팀장 페이지 -->
+								<choose>
+									<when test=" gridDataYN != null and gridDataYN != '' ">
+										GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,
+										OMI.HAN_NAME
+										HAVING 1=1
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER BY OMI.HAN_NAME ASC
+									</when>
+									<otherwise>
+										GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,
+										OMI.HAN_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER BY OMI.HAN_NAME ASC
+									</otherwise>
+								</choose>
+							</when>
+							<when test=" roleChildDivision == null and roleChildTeam == null "> <!-- CEO 회사전체 페이지 -->
+								GROUP BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME
+							</when>
+						</choose>
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')"> <!-- 본부장 -->
+						<choose>
+							<when test=" roleChild != null and roleChild != '' "> <!-- 본부장 전체 직원 -->
+
+								GROUP BY
+								OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+								HAVING 1=1
+
+								AND ODI.DIVISION_NAME = #{selectFacePost}
+
+								AND OTI.TEAM_NAME = #{selectFaceTeam}
+								ORDER BY OMI.HAN_NAME ASC
+							</when>
+							<otherwise> <!-- 본부장 본부별 -->
+								<choose>
+									<when test=" gridDataYN != null and gridDataYN != '' "> <!-- 그래프 밑 팀별 데이터 가져오기 위해 -->
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+										HAVING 1=1
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER BY OMI.HAN_NAME ASC
+									</when>
+									<otherwise> <!-- 그래프에서 본부 전체 가져오기 ( 본부별 팀명 ) -->
+
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+
+										ORDER by OTI.TEAM_NAME ASC
+									</otherwise>
+								</choose>
+							</otherwise>
+						</choose>
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')"><!-- 팀장 -->
+
+						GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,
+						OMI.HAN_NAME
+						HAVING 1=1
+
+						AND OTI.TEAM_NAME = #{selectFaceTeam}
+
+						ORDER BY OMI.HAN_NAME ASC
+					</when>
+				</choose>
+			</otherwise>
+		</choose>
+
+		) AS TMP_TB1
+	</select>
+
+	<select id="gridFaceTime_month" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				TMP_TB1.MEMBER_ID_NUM,
+				IF(TMP_TB1.DIVISION_NAME IS NULL OR TMP_TB1.DIVISION_NAME = '',TMP_TB1.TEAM_NAME,TMP_TB1.DIVISION_NAME) AS DIVISION_NAME,
+				POST_COUNT,
+				(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)/post_count avr,
+				
+				TMP_TB1.TEAM_NAME,
+				TMP_TB1.HAN_NAME,
+				TMP_TB1.LAST_BASIS_TIME,		
+				
+				TMP_TB1.LAST_EVENT_1 AS LAST_EVENT_TIME_1,
+                TMP_TB1.LAST_EVENT_2 AS LAST_EVENT_TIME_2,
+                TMP_TB1.LAST_EVENT_3 AS LAST_EVENT_TIME_3,
+                TMP_TB1.LAST_EVENT_4 AS LAST_EVENT_TIME_4,
+                TMP_TB1.LAST_EVENT_5 AS LAST_EVENT_TIME_5,
+                TMP_TB1.LAST_EVENT_6 AS LAST_EVENT_TIME_6,
+                TMP_TB1.LAST_EVENT_7 AS LAST_EVENT_TIME_7,
+                                
+                TMP_TB1.THIS_EVENT_1 AS THIS_EVENT_TIME_1,
+                TMP_TB1.THIS_EVENT_2 AS THIS_EVENT_TIME_2, 
+                TMP_TB1.THIS_EVENT_3 AS THIS_EVENT_TIME_3,
+                TMP_TB1.THIS_EVENT_4 AS THIS_EVENT_TIME_4,
+                TMP_TB1.THIS_EVENT_5 AS THIS_EVENT_TIME_5,
+                TMP_TB1.THIS_EVENT_6 AS THIS_EVENT_TIME_6,
+                TMP_TB1.THIS_EVENT_7 AS THIS_EVENT_TIME_7,
+                
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_7,
+                100-( FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1)
+                + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) +
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1)) as LASTOTHER,
+                
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_7,
+                100-( FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)
+                + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) +
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)) as THISOTHER,
+                
+                
+				CONCAT(TMP_TB1.LAST_EVENT_1,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_1,
+				CONCAT(TMP_TB1.LAST_EVENT_2,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_2,
+				CONCAT(TMP_TB1.LAST_EVENT_3,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_3,
+				CONCAT(TMP_TB1.LAST_EVENT_4,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_4,
+				CONCAT(TMP_TB1.LAST_EVENT_5,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_5,
+				CONCAT(TMP_TB1.LAST_EVENT_6,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_6,
+				CONCAT(TMP_TB1.LAST_EVENT_7,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS LAST_TOTAL,
+				
+				TMP_TB1.THIS_BASIS_TIME,
+				CONCAT(TMP_TB1.THIS_EVENT_1,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_1,
+				CONCAT(TMP_TB1.THIS_EVENT_2,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_2,
+				CONCAT(TMP_TB1.THIS_EVENT_3,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_3,
+				CONCAT(TMP_TB1.THIS_EVENT_4,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_4,
+				CONCAT(TMP_TB1.THIS_EVENT_5,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_5,
+				CONCAT(TMP_TB1.THIS_EVENT_6,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_6,
+				CONCAT(TMP_TB1.THIS_EVENT_7,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS THIS_TOTAL,
+				
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_1,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_2,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_3,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_4,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_5,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_6,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_7,
+				
+				IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_1,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_2,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_3,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_4,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_5,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_6,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_7,
+				IF((IFNULL(ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_TOTAL,
+				ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1) AS COMPARE_TOTAL
+			FROM
+			]]>
+		(
+		SELECT
+		OMI.MEMBER_ID_NUM,
+		ODI.DIVISION_NAME,
+		OTI.TEAM_NAME,
+		OMI.HAN_NAME,
+		count(distinct OMI.MEMBER_ID) POST_COUNT,
+		<!-- 지난달 -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_1_TIME,0)) LAST_EVENT_1,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_3_TIME,0)) LAST_EVENT_3,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_5_TIME,0)) LAST_EVENT_5,
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6,
+		<!-- SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'01') 
+			AND CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'31'), AIT.ACTIVITY_CODE_7_TIME,0)) 
+			LAST_EVENT_7, SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'01') 
+			AND CONCAT(#{selectFaceYear},#{selectFaceMonth}-1,'31'), AIT.ACTIVITY_CODE_8_TIME,0)) 
+			LAST_EVENT_8, -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 1
+		month) AND
+		DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL
+		1 month), AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+		<!-- 이번달 -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+		SUM(IF(AIT.ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+		<!-- SUM(IF(AIT.ANAL_DATE BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 
+			1 month) AND DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL 
+			1 month), AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7, SUM(IF(AIT.ANAL_DATE 
+			BETWEEN DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL 
+			1 month) AND DATE_SUB(LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),INTERVAL 
+			1 month), AIT.ACTIVITY_CODE_8_TIME,0)) THIS_EVENT_8, -->
+		SUM(IF(AIT.ANAL_DATE BETWEEN
+		CONCAT(#{selectFaceYear},#{selectFaceMonth},'01') AND
+		LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01')),
+		AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+		FROM
+		OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+		ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		INNER JOIN
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+		WHERE 1=1
+
+		<!-- 년 검색 -->
+		<choose>
+			<when test="selectFaceYear != null and selectFaceYear != '' ">
+				AND ANAL_DATE BETWEEN CONCAT(#{selectFaceYear},'0101') AND
+				CONCAT(#{selectFaceYear},'1231')
+				<!-- 월 검색 -->
+				<choose>
+					<when test="selectFaceMonth != null and selectFaceMonth != '' ">
+						AND ANAL_DATE BETWEEN
+						DATE_SUB(CONCAT(#{selectFaceYear},#{selectFaceMonth},'01'),INTERVAL
+						1 month) AND
+						LAST_DAY(CONCAT(#{selectFaceYear},'-',#{selectFaceMonth},'-','01'))
+					</when>
+					<otherwise>
+						AND ANAL_DATE BETWEEN
+						DATE_SUB(CONCAT(#{selectFaceYear},MONTH(NOW()),'01'),INTERVAL 1
+						month) AND CONCAT(#{selectFaceYear},MONTH(NOW()),'31')
+					</otherwise>
+				</choose>
+			</when>
+			<otherwise>
+				AND ANAL_DATE BETWEEN CONCAT(YEAR(NOW()),'0101') AND
+				CONCAT(YEAR(NOW()),'1231')
+				<!-- 월 검색 -->
+				<choose>
+					<when test="selectFaceMonth != null and selectFaceMonth != '' ">
+						AND ANAL_DATE BETWEEN
+						DATE_SUB(CONCAT(YEAR(NOW()),#{selectFaceMonth},'01'),INTERVAL 1
+						month) AND CONCAT(YEAR(NOW()),#{selectFaceMonth},'31')
+					</when>
+					<otherwise>
+						AND ANAL_DATE BETWEEN
+						DATE_SUB(CONCAT(YEAR(NOW()),MONTH(NOW()),'01'),INTERVAL 1 month)
+						AND CONCAT(YEAR(NOW()),MONTH(NOW()),'31')
+					</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+
+
+		AND ODI.DIVISION_TYPE = 'S'
+		AND OTI.TEAM_TYPE = 'S'
+		-- AND OMI.POSITION_TYPE = '영업직'
+		<choose>
+			<!-- 나의 생산성 -->
+			<when test="hiddenUserID != null and hiddenUserID != '' ">
+				AND OMI.MEMBER_ID_NUM = #{hiddenUserID}
+			</when>
+			<otherwise><!-- 생산성 -->
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')"> <!-- CEO -->
+						<choose>
+							<when test=" roleChildDivision != null and roleChildDivision != '' "> <!-- CEO 본부장 페이지 -->
+								<choose>
+									<when test=" gridDataYN != null and gridDataYN != '' "> <!-- 그래프 밑 팀별 데이터 가져오기 위해 -->
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+										HAVING 1=1
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER by OMI.HAN_NAME ASC
+									</when>
+									<otherwise> <!-- 그래프 본부별 팀명 가져오기 -->
+
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										ORDER by OTI.TEAM_NAME ASC
+									</otherwise>
+								</choose>
+							</when>
+							<when test=" roleChildTeam != null and roleChildTeam != '' "> <!-- CEO 팀장 페이지 -->
+								<choose>
+									<when test=" gridDataYN != null and gridDataYN != '' ">
+
+										GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,
+										OMI.HAN_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER BY OMI.HAN_NAME ASC
+									</when>
+									<otherwise> <!-- 그래프 팀벼별 직원 가져오기 -->
+
+										GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,
+										OMI.HAN_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER BY OMI.HAN_NAME ASC
+									</otherwise>
+								</choose>
+
+							</when>
+							<when test=" roleChildDivision == null and roleChildTeam == null "> <!-- CEO 회사전체 페이지 -->
+								GROUP BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME
+							</when>
+						</choose>
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')"> <!-- 본부장 -->
+						<choose>
+							<when test=" roleChild != null and roleChild != '' "> <!-- 본부장 전체 직원 -->
+
+								GROUP BY
+								OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+								HAVING 1=1
+
+								AND ODI.DIVISION_NAME = #{selectFacePost}
+								AND OTI.TEAM_NAME = #{selectFaceTeam}
+
+								ORDER by OMI.HAN_NAME ASC
+							</when>
+							<otherwise> <!-- 본부장 본부별 -->
+								<choose>
+									<when test=" gridDataYN != null and gridDataYN != '' "> <!-- 그래프 밑 팀별 데이터 가져오기 위해 -->
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+										HAVING 1=1
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER by OMI.HAN_NAME ASC
+									</when>
+									<otherwise> <!-- 그래프에서 본부 전체 가져오기 ( 본부별 팀명 ) -->
+
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										ORDER by OTI.TEAM_NAME ASC
+									</otherwise>
+								</choose>
+							</otherwise>
+						</choose>
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')"><!-- 팀장 -->
+						GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,
+						OMI.HAN_NAME
+						HAVING 1=1
+						AND OTI.TEAM_NAME = #{selectFaceTeam}
+						ORDER BY OMI.HAN_NAME ASC
+					</when>
+				</choose>
+			</otherwise>
+		</choose>
+		) AS TMP_TB1;
+
+	</select>
+
+	<select id="gridFaceTime_quarter" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				TMP_TB1.MEMBER_ID_NUM,
+				IF(TMP_TB1.DIVISION_NAME IS NULL OR TMP_TB1.DIVISION_NAME = '',TMP_TB1.TEAM_NAME,TMP_TB1.DIVISION_NAME) AS DIVISION_NAME,
+				TMP_TB1.TEAM_NAME,
+				TMP_TB1.HAN_NAME,
+				TMP_TB1.LAST_BASIS_TIME,
+				
+				TMP_TB1.POST_COUNT,
+				(THIS_EVENT_1 + THIS_EVENT_2 + THIS_EVENT_3 + THIS_EVENT_4 + THIS_EVENT_5 + THIS_EVENT_6 + THIS_EVENT_7)/post_count avr,
+				
+				TMP_TB1.LAST_EVENT_1 AS LAST_EVENT_TIME_1,
+                TMP_TB1.LAST_EVENT_2 AS LAST_EVENT_TIME_2,
+                TMP_TB1.LAST_EVENT_3 AS LAST_EVENT_TIME_3,
+                TMP_TB1.LAST_EVENT_4 AS LAST_EVENT_TIME_4,
+                TMP_TB1.LAST_EVENT_5 AS LAST_EVENT_TIME_5,
+                TMP_TB1.LAST_EVENT_6 AS LAST_EVENT_TIME_6,
+                TMP_TB1.LAST_EVENT_7 AS LAST_EVENT_TIME_7,
+                                
+                TMP_TB1.THIS_EVENT_1 AS THIS_EVENT_TIME_1,
+                TMP_TB1.THIS_EVENT_2 AS THIS_EVENT_TIME_2, 
+                TMP_TB1.THIS_EVENT_3 AS THIS_EVENT_TIME_3,
+                TMP_TB1.THIS_EVENT_4 AS THIS_EVENT_TIME_4,
+                TMP_TB1.THIS_EVENT_5 AS THIS_EVENT_TIME_5,
+                TMP_TB1.THIS_EVENT_6 AS THIS_EVENT_TIME_6,
+                TMP_TB1.THIS_EVENT_7 AS THIS_EVENT_TIME_7,
+                
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) AS LAST_EVENT_PERCENT_7,
+                100-( FORMAT(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100,1)
+                + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) +
+                FORMAT(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100,1)) as LASTOTHER,
+                
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_1,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_2,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_3,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_4,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_5,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_6,
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) AS THIS_EVENT_PERCENT_7,	
+                100-( FORMAT(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)
+                + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) +
+                FORMAT(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100,1) + FORMAT(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100,1)) as THISOTHER,
+                
+				CONCAT(TMP_TB1.LAST_EVENT_1,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_1,
+				CONCAT(TMP_TB1.LAST_EVENT_2,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_2,
+				CONCAT(TMP_TB1.LAST_EVENT_3,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_3,
+				CONCAT(TMP_TB1.LAST_EVENT_4,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_4,
+				CONCAT(TMP_TB1.LAST_EVENT_5,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_5,
+				CONCAT(TMP_TB1.LAST_EVENT_6,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_6,
+				CONCAT(TMP_TB1.LAST_EVENT_7,' (',IF((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),'%)') AS LAST_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS LAST_TOTAL,
+				
+				TMP_TB1.THIS_BASIS_TIME,
+				CONCAT(TMP_TB1.THIS_EVENT_1,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_1,
+				CONCAT(TMP_TB1.THIS_EVENT_2,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_2,
+				CONCAT(TMP_TB1.THIS_EVENT_3,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_3,
+				CONCAT(TMP_TB1.THIS_EVENT_4,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_4,
+				CONCAT(TMP_TB1.THIS_EVENT_5,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_5,
+				CONCAT(TMP_TB1.THIS_EVENT_6,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_6,
+				CONCAT(TMP_TB1.THIS_EVENT_7,' (',IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ',''),ROUND((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1),'%)') AS THIS_EVENT_7,
+				(
+					CONCAT
+					(
+						TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7
+						,' ('
+						,IF((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0) * 100) < 10,' ','')
+						,ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+						,'%)'
+					)
+				) AS THIS_TOTAL,
+				
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_1,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_2,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_3,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_4,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_5,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_6,
+				FORMAT(ROUND(IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0)*100,1) - ROUND(IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)*100,1),1) AS COMPARE_EVENT_TIME_7,
+				
+				IF((IFNULL(TMP_TB1.THIS_EVENT_1/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_1/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_1,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_2/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_2/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_2,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_3/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_3/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_3,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_4/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_4/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_4,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_5/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_5/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_5,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_6/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_6/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_6,
+				IF((IFNULL(TMP_TB1.THIS_EVENT_7/TMP_TB1.THIS_BASIS_TIME,0) - IFNULL(TMP_TB1.LAST_EVENT_7/TMP_TB1.LAST_BASIS_TIME,0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_7,
+				IF((IFNULL(ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1),0)) >=0,'blue','red') AS COMPARE_EVENT_COLOR_TOTAL,
+				ROUND((IFNULL((TMP_TB1.THIS_EVENT_1 + TMP_TB1.THIS_EVENT_2 + TMP_TB1.THIS_EVENT_3 + TMP_TB1.THIS_EVENT_4 + TMP_TB1.THIS_EVENT_5 + TMP_TB1.THIS_EVENT_6 + TMP_TB1.THIS_EVENT_7)/TMP_TB1.THIS_BASIS_TIME,0)) * 100,1)
+				-
+				ROUND((IFNULL((TMP_TB1.LAST_EVENT_1 + TMP_TB1.LAST_EVENT_2 + TMP_TB1.LAST_EVENT_3 + TMP_TB1.LAST_EVENT_4 + TMP_TB1.LAST_EVENT_5 + TMP_TB1.LAST_EVENT_6 + TMP_TB1.LAST_EVENT_7)/TMP_TB1.LAST_BASIS_TIME,0)) * 100,1) AS COMPARE_TOTAL
+			FROM
+			]]>
+		(
+		SELECT
+		OMI.MEMBER_DIVISION,
+		OMI.MEMBER_TEAM,
+		OMI.MEMBER_ID_NUM,
+		ODI.DIVISION_NAME,
+		OTI.TEAM_NAME,OMI.HAN_NAME,
+		count(distinct OMI.MEMBER_ID) POST_COUNT,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND QUARTER(AIT.ANAL_DATE) =
+		QUARTER(#{quarterDate}) -1, AIT.ANAL_BASIS_TIME,0)) LAST_BASIS_TIME,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND
+		QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1,
+		AIT.ACTIVITY_CODE_1_TIME,0)) LAST_EVENT_1,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND QUARTER(AIT.ANAL_DATE) =
+		QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_2_TIME,0)) LAST_EVENT_2,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND
+		QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1,
+		AIT.ACTIVITY_CODE_3_TIME,0)) LAST_EVENT_3,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND QUARTER(AIT.ANAL_DATE) =
+		QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_4_TIME,0)) LAST_EVENT_4,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND
+		QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1,
+		AIT.ACTIVITY_CODE_5_TIME,0)) LAST_EVENT_5,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND QUARTER(AIT.ANAL_DATE) =
+		QUARTER(#{quarterDate}) -1, AIT.ACTIVITY_CODE_6_TIME,0)) LAST_EVENT_6,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND
+		QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) -1,
+		AIT.ACTIVITY_CODE_7_TIME,0)) LAST_EVENT_7,
+
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND QUARTER(AIT.ANAL_DATE) =
+		QUARTER(#{quarterDate}) , ANAL_BASIS_TIME,0)) THIS_BASIS_TIME,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND
+		QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_1_TIME,0)) THIS_EVENT_1,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND QUARTER(AIT.ANAL_DATE) =
+		QUARTER(#{quarterDate}) , AIT.ACTIVITY_CODE_2_TIME,0)) THIS_EVENT_2,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND
+		QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_3_TIME,0)) THIS_EVENT_3,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND QUARTER(AIT.ANAL_DATE) =
+		QUARTER(#{quarterDate}) , AIT.ACTIVITY_CODE_4_TIME,0)) THIS_EVENT_4,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND
+		QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_5_TIME,0)) THIS_EVENT_5,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND QUARTER(AIT.ANAL_DATE) =
+		QUARTER(#{quarterDate}) , AIT.ACTIVITY_CODE_6_TIME,0)) THIS_EVENT_6,
+		SUM(IF(YEAR(AIT.ANAL_DATE) = YEAR(#{quarterDate}) AND
+		QUARTER(AIT.ANAL_DATE) = QUARTER(#{quarterDate}) ,
+		AIT.ACTIVITY_CODE_7_TIME,0)) THIS_EVENT_7
+		FROM
+		OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+		ANAL_INDIVIDUAL_TIME AS AIT ON OMI.MEMBER_ID_NUM = AIT.MEMBER_ID_NUM
+		LEFT OUTER JOIN
+		OUR_DIVISION_INFO AS ODI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+		LEFT OUTER JOIN
+		OUR_TEAM_INFO AS OTI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+		WHERE 1=1
+
+		AND ODI.DIVISION_TYPE ='S'
+		AND OTI.TEAM_TYPE = 'S'
+		-- AND OMI.POSITION_TYPE ='영업직'
+
+		<choose>
+			<!-- 나의 생산성 -->
+			<when test="hiddenUserID != null and hiddenUserID != '' ">
+				AND OMI.MEMBER_ID_NUM = #{hiddenUserID}
+			</when>
+			<otherwise><!-- 생산성 -->
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')"> <!-- CEO -->
+						<choose>
+							<when test=" roleChildDivision != null and roleChildDivision != '' "> <!-- CEO 본부장 페이지 -->
+								<choose>
+									<when test=" gridDataYN != null and gridDataYN != '' "> <!-- 그래프 밑 팀별 데이터 가져오기 위해 -->
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+										HAVING 1=1
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER by OMI.HAN_NAME ASC
+									</when>
+									<otherwise> <!-- 그래프 본부별 팀명 가져오기 -->
+
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										ORDER BY OTI.TEAM_NAME ASC
+									</otherwise>
+								</choose>
+							</when>
+							<when test=" roleChildTeam != null and roleChildTeam != '' "> <!-- CEO 팀장 페이지 -->
+
+								GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,
+								OMI.HAN_NAME
+								HAVING 1=1
+
+								AND ODI.DIVISION_NAME = #{selectFacePost}
+								AND OTI.TEAM_NAME = #{selectFaceTeam}
+								ORDER BY OMI.HAN_NAME ASC
+							</when>
+							<when test=" roleChildDivision == null and roleChildTeam == null "> <!-- CEO 회사전체 페이지 -->
+								GROUP BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME
+							</when>
+						</choose>
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')"> <!-- 본부장 -->
+						<choose>
+							<when test=" roleChild != null and roleChild != '' "> <!-- 본부장 전체 직원 -->
+
+								GROUP BY
+								OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+								HAVING 1=1
+
+								AND ODI.DIVISION_NAME = #{selectFacePost}
+								AND OTI.TEAM_NAME = #{selectFaceTeam}
+
+								ORDER by OMI.HAN_NAME ASC
+							</when>
+							<otherwise> <!-- 본부장 본부별 -->
+								<choose>
+									<when test=" gridDataYN != null and gridDataYN != '' "> <!-- 그래프 밑 팀별 데이터 가져오기 위해 -->
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.HAN_NAME
+										HAVING 1=1
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+
+										AND OTI.TEAM_NAME = #{selectFaceTeam}
+										ORDER by OMI.HAN_NAME ASC
+									</when>
+									<otherwise> <!-- 그래프에서 본부 전체 가져오기 ( 본부별 팀명 ) -->
+
+										GROUP BY
+										OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME
+										HAVING 1=1
+
+										AND ODI.DIVISION_NAME = #{selectFacePost}
+										ORDER by OTI.TEAM_NAME ASC
+									</otherwise>
+								</choose>
+							</otherwise>
+						</choose>
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')"><!-- 팀장 -->
+
+						GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME,OMI.MEMBER_ID_NUM,
+						OMI.HAN_NAME
+						HAVING 1=1
+						AND OTI.TEAM_NAME = #{selectFaceTeam}
+						ORDER BY OMI.HAN_NAME ASC
+					</when>
+				</choose>
+			</otherwise>
+		</choose>
+
+
+		<!-- <choose> <when test="global_role_code.contains('ROLE_CEO')"> GROUP 
+			BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME </when> <when test="global_role_code.contains('ROLE_CFO')"> 
+			GROUP BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME </when> <when test="global_role_code.contains('ROLE_DIVISION')"> 
+			GROUP BY OMI.MEMBER_DIVISION,ODI.DIVISION_NAME,OMI.MEMBER_TEAM,OTI.TEAM_NAME 
+			HAVING 1=1 AND OMI.MEMBER_DIVISION = #{global_member_division} </when> <when 
+			test="global_role_code.contains('ROLE_TEAM')"> GROUP BY OMI.MEMBER_TEAM,OTI.TEAM_NAME 
+			HAVING 1=1 AND OMI.MEMBER_TEAM = #{global_member_team} </when> <when test="global_role_code.contains('ROLE_MEMBER')"> 
+			GROUP BY OMI.MEMBER_ID_NUM,OMI.HAN_NAME HAVING 1=1 AND OMI.MEMBER_ID_NUM 
+			= #{global_member_id} </when> </choose> -->
+		) AS TMP_TB1
+	</select>
+
+	<select id="faceTimeSearchDetailGroup1" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT * FROM
+		(
+			SELECT YEAR(ANAL_DATE) AS FACE_YEAR
+			FROM ANAL_INDIVIDUAL_TIME
+			UNION
+			SELECT YEAR(NOW()) AS FACE_YEAR
+		) AS FY
+		ORDER BY FY.FACE_YEAR
+	</select>
+
+	<select id="faceTimeSearchDetailGroup2" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT DATE_FORMAT(ANAL_DATE,'%m') AS FACE_MONTH
+		FROM ANAL_INDIVIDUAL_TIME
+		WHERE 1=1
+		<choose>
+			<when test="selectFaceYear != null and selectFaceYear != '' ">
+				AND YEAR(ANAL_DATE) = #{selectFaceYear}
+			</when>
+			<otherwise>
+				AND YEAR(ANAL_DATE) = YEAR(NOW())
+			</otherwise>
+		</choose>
+		GROUP BY MONTH(ANAL_DATE)
+	</select>
+	<!-- <select id="faceTimeSearchDetailGroup3" parameterType="hashmap" resultType="hashmap"> 
+		SELECT IF(MEMBER_DIVISION IS NULL OR MEMBER_DIVISION = '',MEMBER_TEAM,MEMBER_DIVISION) 
+		AS MEMBER_DIVISION, ODI.DIVISION_TYPE FROM OUR_MEMBERS_INFO as OMI INNER 
+		JOIN OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NAME = OMI.MEMBER_DIVISION 
+		where ODI.DIVISION_TYPE = 'S' GROUP BY IF(OMI.MEMBER_DIVISION IS NULL OR 
+		OMI.MEMBER_DIVISION = '',OMI.MEMBER_TEAM,OMI.MEMBER_DIVISION) </select> -->
+
+	<select id="faceTimeSearchDetailGroup3" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[ 
+				SELECT ODI.DIVISION_NAME, OTI.TEAM_NAME, ODI.DIVISION_TYPE
+					FROM OUR_DIVISION_INFO AS ODI
+					INNER JOIN
+						OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_DIVISION = ODI.DIVISION_NO
+					INNER JOIN
+						OUR_TEAM_INFO AS OTI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+					WHERE 1=1 
+					AND ODI.DIVISION_TYPE = 'S'
+					AND OTI.TEAM_TYPE = 'S'
+					-- AND OMI.POSITION_TYPE='영업직'
+					
+					
+		]]>
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				GROUP BY DIVISION_NAME
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND ODI.DIVISION_NO = #{global_member_division}
+				GROUP BY TEAM_NAME
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND ODI.DIVISION_NO = #{global_member_division}
+				AND OTI.TEAM_NO = #{global_member_team}
+				GROUP BY DIVISION_NAME
+			</when>
+
+			<!-- <when test="role != null and role != '' "> <if test="role == 'roleCeo' 
+				"> GROUP BY DIVISION_NAME </if> <if test="role == 'roleCfo' "> GROUP BY DIVISION_NAME 
+				</if> <if test="role == 'roleDivision' "> AND ODI.DIVISION_NO = #{global_member_division} 
+				GROUP BY TEAM_NAME </if> <if test="role == 'roleTeam' "> AND ODI.DIVISION_NO 
+				= #{global_member_division} AND OTI.TEAM_NO = #{global_member_team} GROUP 
+				BY DIVISION_NAME </if> </when> -->
+		</choose>
+
+	</select>
+
+
+
+	<select id="faceTimeSearchDetailGroup4" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT QUARTER(ANAL_DATE) AS FACE_QUARTER
+		FROM ANAL_INDIVIDUAL_TIME
+		WHERE 1=1
+		<choose>
+			<when test="selectFaceYear != null and selectFaceYear != '' ">
+				AND YEAR(ANAL_DATE) = #{selectFaceYear}
+			</when>
+			<otherwise>
+				AND YEAR(ANAL_DATE) = YEAR(NOW())
+				UNION
+				SELECT QUARTER(NOW()) as FACE_YEAR
+			</otherwise>
+		</choose>
+	</select>
+	<!-- <select id="faceTimeSearchDetailGroup5" parameterType="hashmap" resultType="hashmap"> 
+		SELECT IF(MEMBER_TEAM IS NULL OR MEMBER_TEAM = '',MEMBER_TEAM,MEMBER_TEAM) 
+		AS MEMBER_TEAM FROM OUR_MEMBERS_INFO WHERE MEMBER_DIVISION = #{selectFacePost} 
+		GROUP BY IF(MEMBER_TEAM IS NULL OR MEMBER_TEAM = '',MEMBER_TEAM,MEMBER_TEAM) 
+		</select> -->
+
+	<select id="faceTimeSearchDetailGroup5" parameterType="hashmap"
+		resultType="hashmap">
+		<![CDATA[ 
+				 SELECT TEAM_NAME FROM OUR_TEAM_INFO AS OTI
+					INNER JOIN
+						OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OTI.DIVISION_NO
+					INNER JOIN
+						OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+					WHERE 1=1
+					AND OTI.TEAM_TYPE = 'S'
+		]]>
+		<choose>
+			<when test="selectFacePost != null and selectFacePost != '' ">
+				AND ODI.DIVISION_NAME = #{selectFacePost}
+			</when>
+			<otherwise>
+				AND ODI.DIVISION_NO = #{global_member_division}
+			</otherwise>
+		</choose>
+		-- AND OMI.POSITION_TYPE = '영업직'
+		GROUP by OTI.TEAM_NAME
+	</select>
+
+	<!-- <select id="faceTimeSearchDetailGroup6" parameterType="hashmap" resultType="hashmap"> 
+		SELECT IF(HAN_NAME IS NULL OR HAN_NAME = '',HAN_NAME,HAN_NAME) AS HAN_NAME 
+		FROM OUR_MEMBERS_INFO WHERE MEMBER_DIVISION = #{selectFacePost} and MEMBER_TEAM= 
+		#{selectFaceTeam} GROUP BY IF(HAN_NAME IS NULL OR HAN_NAME = '',HAN_NAME,HAN_NAME) 
+		</select> -->
+
+	<select id="faceTimeSearchDetailGroup6" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT OMI.HAN_NAME
+		FROM OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+		OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		INNER JOIN
+		OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		WHERE ODI.DIVISION_NAME=#{selectFacePost} AND OTI.TEAM_NAME =
+		#{selectFaceTeam}
+		GROUP BY OMI.HAN_NAME
+	</select>
+
+
+	<insert id="insertTestData" parameterType="hashmap">
+		INSERT INTO ANAL_INDIVIDUAL_TIME
+		(
+		MEMBER_ID_NUM,
+		ANAL_DATE,
+		ANAL_BASIS_TIME,
+		ACTIVITY_CODE_1_TIME,
+		ACTIVITY_CODE_2_TIME,
+		ACTIVITY_CODE_3_TIME,
+		ACTIVITY_CODE_4_TIME,
+		ACTIVITY_CODE_5_TIME,
+		ACTIVITY_CODE_6_TIME,
+		ACTIVITY_CODE_7_TIME
+		)
+		values
+		(
+		#{MEMBER_ID_NUM},
+		#{ANAL_DATE},
+		#{ANAL_BASIS_TIME},
+		#{ACTIVITY_CODE_1_TIME},
+		#{ACTIVITY_CODE_2_TIME},
+		#{ACTIVITY_CODE_3_TIME},
+		#{ACTIVITY_CODE_4_TIME},
+		#{ACTIVITY_CODE_5_TIME},
+		#{ACTIVITY_CODE_6_TIME},
+		#{ACTIVITY_CODE_7_TIME}
+		)
+	</insert>
+
+	<select id="listTestUser" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		MEMBER_ID_NUM
+		FROM OUR_MEMBERS_INFO
+		<!-- WHERE MEMBER_DIVISION = "10000018"; -->
+	</select>
+
+	<select id="listTestDivision" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		OMI.MEMBER_ID_NUM, OMI.MEMBER_DIVISION, OMI.MEMBER_TEAM
+		FROM OUR_MEMBERS_INFO AS OMI
+		INNER JOIN
+		OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		WHERE ODI.DIVISION_TYPE = "S"
+		AND ODI.DIVISION_NO = #{DIVISION_NO}
+	</select>
+
+	<update id="updateTestData" parameterType="hashmap">
+
+		UPDATE ANAL_INDIVIDUAL_TIME set
+		ACTIVITY_CODE_1_TIME=#{ACTIVITY_CODE_1_TIME},
+		ACTIVITY_CODE_2_TIME=#{ACTIVITY_CODE_2_TIME},
+		ACTIVITY_CODE_3_TIME=#{ACTIVITY_CODE_3_TIME},
+		ACTIVITY_CODE_4_TIME=#{ACTIVITY_CODE_4_TIME},
+		ACTIVITY_CODE_5_TIME=#{ACTIVITY_CODE_5_TIME},
+		ACTIVITY_CODE_6_TIME=#{ACTIVITY_CODE_6_TIME},
+		ACTIVITY_CODE_7_TIME=#{ACTIVITY_CODE_7_TIME}
+		WHERE MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+	</update>
+
+	<select id="selectDivisionList" parameterType="hashmap" resultType="hashmap">
+		 SELECT 
+		 DIVISION_NO, DIVISION_NAME 
+		 FROM OUR_DIVISION_INFO
+		 WHERE 1=1
+		 AND DIVISION_TYPE = 'S'
+	</select>
+	
+	<!-- 1년 목표 -->
+	<select id="selectYearTarget" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+		        ODI.DIVISION_NO, 
+		        ODI.DIVISION_NAME,
+		        SUM(IFNULL(TARGET_REVENUE_AMOUNT,0)) AS TARGET_REV,
+		        SUM(IFNULL(TARGET_GP_AMOUNT,0)) AS TARGET_GP
+		FROM 
+		OUR_DIVISION_INFO AS ODI
+		INNER JOIN
+		(
+			SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+			FROM OUR_MEMBERS_INFO AS IOMI
+			WHERE 1=1 
+			AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= CONCAT(#{selectYear},'-','01','-','01') ) 
+		) AS OMI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		LEFT OUTER JOIN
+		ERP_SALES_PLAN as ESP ON ESP.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM AND ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		WHERE 1=1
+		AND ODI.DIVISION_NO = #{selectDivision}
+		GROUP BY ODI.DIVISION_NO, ODI.DIVISION_NAME
+	</select>
+	
+	<!-- 분기별 목표 -->
+	<select id="selectQuaterTarget" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		        ODI.DIVISION_NO, 
+		        ODI.DIVISION_NAME,
+		        SUM(CASE WHEN ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        THEN IFNULL(TARGET_REVENUE_AMOUNT,0) ELSE 0 end) as 1Q_TARGET_REV,
+		        SUM(CASE WHEN ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        THEN IFNULL(TARGET_REVENUE_AMOUNT,0) ELSE 0 end) as 2Q_TARGET_REV,
+		        SUM(CASE WHEN ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        THEN IFNULL(TARGET_REVENUE_AMOUNT,0) ELSE 0 end) as 3Q_TARGET_REV,
+		        SUM(CASE WHEN ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        THEN IFNULL(TARGET_REVENUE_AMOUNT,0) ELSE 0 end) as 4Q_TARGET_REV,
+		
+		        SUM(CASE WHEN ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        THEN IFNULL(TARGET_GP_AMOUNT,0) ELSE 0 end) as 1Q_TARGET_GP,
+		        SUM(CASE WHEN ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        THEN IFNULL(TARGET_GP_AMOUNT,0) ELSE 0 end) as 2Q_TARGET_GP,
+		        SUM(CASE WHEN ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        THEN IFNULL(TARGET_GP_AMOUNT,0) ELSE 0 end) as 3Q_TARGET_GP,
+		        SUM(CASE WHEN ESP.BASIS_MONTH BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        THEN IFNULL(TARGET_GP_AMOUNT,0) ELSE 0 end) as 4Q_TARGET_GP
+		FROM 
+		OUR_DIVISION_INFO AS ODI
+		INNER JOIN
+		(
+			SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+			FROM OUR_MEMBERS_INFO AS IOMI
+			WHERE 1=1 
+			AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= CONCAT(#{selectYear},'-','01','-','01') ) 
+		) AS OMI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		LEFT OUTER JOIN
+		ERP_SALES_PLAN as ESP ON ESP.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		AND ODI.DIVISION_NO = #{selectDivision}
+		GROUP BY ODI.DIVISION_NO, ODI.DIVISION_NAME
+	</select>
+	
+	<!-- SI TCV, REV, GP -->
+	<select id="selectSiReport" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		        ODI.DIVISION_NO, 
+		        ODI.DIVISION_NAME,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 1Q_TCV, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 2Q_TCV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 3Q_TCV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 4Q_TCV,
+		        
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 1Q_REV, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 2Q_REV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 3Q_REV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 4Q_REV,
+		        
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 1Q_GP, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 2Q_GP,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 3Q_GP,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        AND EDC.OBTAIN_ORDER_TYPE in ('SI','SI수출','상품SI') THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 4Q_GP
+		FROM 
+		OUR_DIVISION_INFO AS ODI
+		INNER JOIN
+		(
+			SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+			FROM OUR_MEMBERS_INFO AS IOMI
+			WHERE 1=1 
+			AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= CONCAT(#{selectYear},'-','01','-','01') ) 
+		) AS OMI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		LEFT OUTER JOIN
+		ERP_DASHBOARD_CHECKLIST AS EDC ON EDC.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		AND ODI.DIVISION_NO = #{selectDivision}
+		GROUP BY ODI.DIVISION_NO, ODI.DIVISION_NAME
+	</select>
+	
+	<!-- MA TCV, REV, GP -->
+	<select id="selectMaReport" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+		        ODI.DIVISION_NO, 
+		        ODI.DIVISION_NAME,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 1Q_TCV, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 2Q_TCV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 3Q_TCV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 4Q_TCV,
+		        
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 1Q_REV, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 2Q_REV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 3Q_REV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 4Q_REV,
+		        
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 1Q_GP, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 2Q_GP,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 3Q_GP,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 4Q_GP
+		FROM 
+		OUR_DIVISION_INFO AS ODI
+		INNER JOIN
+		(
+			SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+			FROM OUR_MEMBERS_INFO AS IOMI
+			WHERE 1=1 
+			AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= CONCAT(#{selectYear},'-','01','-','01') ) 
+		) AS OMI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		LEFT OUTER JOIN
+		ERP_DASHBOARD_CHECKLIST AS EDC ON EDC.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM AND EDC.OBTAIN_ORDER_TYPE in ('DTMA','IBMA','SEMA','SEMA수출','SIMA')
+		WHERE 1=1
+		AND ODI.DIVISION_NO = #{selectDivision}
+		GROUP BY ODI.DIVISION_NO, ODI.DIVISION_NAME
+	</select>
+	
+	<!-- 기타 TCV, REV, GP -->
+	<select id="selectEtcReport" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+		        ODI.DIVISION_NO, 
+		        ODI.DIVISION_NAME,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 1Q_TCV, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 2Q_TCV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 3Q_TCV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        THEN IFNULL(EDC.TCV,0) ELSE 0 END) AS 4Q_TCV,
+		        
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 1Q_REV, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 2Q_REV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 3Q_REV,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        THEN IFNULL(EDC.ACCRUE_REV,0) ELSE 0 END) AS 4Q_REV,
+		        
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','01','-','01') AND CONCAT(#{selectYear},'-','03','-','31') 
+		        THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 1Q_GP, 
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','04','-','01') AND CONCAT(#{selectYear},'-','06','-','30') 
+		        THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 2Q_GP,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','07','-','01') AND CONCAT(#{selectYear},'-','09','-','30') 
+		        THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 3Q_GP,
+		        SUM(CASE WHEN EDC.DT_IVL BETWEEN CONCAT(#{selectYear},'-','10','-','01') AND CONCAT(#{selectYear},'-','12','-','31')
+		        THEN IFNULL(EDC.ACCRUE_GP,0) ELSE 0 END) AS 4Q_GP
+		FROM 
+		OUR_DIVISION_INFO AS ODI
+		INNER JOIN
+		(
+			SELECT IOMI.MEMBER_DIVISION,IOMI.MEMBER_TEAM,IOMI.MEMBER_ID_NUM,IOMI.HAN_NAME
+			FROM OUR_MEMBERS_INFO AS IOMI
+			WHERE 1=1 
+			AND ( IOMI.STOP_DATE IS NULL OR IOMI.STOP_DATE >= CONCAT(#{selectYear},'-','01','-','01') ) 
+		) AS OMI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		LEFT OUTER JOIN
+		ERP_DASHBOARD_CHECKLIST AS EDC ON EDC.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM and EDC.OBTAIN_ORDER_TYPE not in ('SI','SI수출','상품SI', 'DTMA','IBMA','SEMA','SEMA수출','SIMA')
+		where 1=1
+		AND ODI.DIVISION_NO = #{selectDivision}
+		GROUP BY ODI.DIVISION_NO, ODI.DIVISION_NAME
+	</select>
+
+	<!-- 분기별 주간보고 리스트 -->
+	<select id="selectWeeklyReportQuarter" parameterType="hashmap" resultType="hashmap">
+		SELECT OMI.MEMBER_ID_NUM , EDC.OBTAIN_ORDER_TYPE, OMI.HAN_NAME, EDC.COMPANY_NAME, EDC.PROJECT_NAME, EDC.TCV, EDC.ACCRUE_REV, EDC.ACCRUE_GP, EDC.DT_SO, EDC.DT_IVL, EDC.SYS_UPDATE_DATE
+		FROM 
+		OUR_DIVISION_INFO AS ODI
+		INNER JOIN
+		OUR_MEMBERS_INFO AS OMI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		INNER JOIN
+		ERP_DASHBOARD_CHECKLIST AS EDC ON EDC.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+		and DIVISION_NO = #{selectDivision}
+		<choose>
+			<when test=" selectQuarter == 1 ">
+				and EDC.DT_IVL BETWEEN '2018-01-01' AND '2018-03-31'
+			</when>
+			<when test=" selectQuarter == 2 ">
+				and EDC.DT_IVL BETWEEN '2018-04-01' AND '2018-06-30'
+			</when>
+			<when test=" selectQuarter == 3 ">
+				and EDC.DT_IVL BETWEEN '2018-07-01' AND '2018-09-30'
+			</when>
+			<when test=" selectQuarter == 4 ">
+				and EDC.DT_IVL BETWEEN '2018-10-01' AND '2018-12-31'
+			</when>
+			<otherwise>
+				and EDC.DT_IVL BETWEEN '2018-01-01' AND '2018-03-31'
+			</otherwise>
+		</choose>
+		ORDER BY EDC.DT_IVL DESC
+	</select>
+</mapper>

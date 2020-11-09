@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>영업기회</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body class="fixed-sidebar">
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header ta-c">
+                        <div class="dropdown profile-element">
+                            <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                            <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                            <a href="#">
+                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                            </a>
+                        </div>
+                        <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                            디유넷
+                        </div>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객사정보</a></li>
+                            <li><a href="#">고객개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li class="active">
+                        <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객컨택내용</a></li>
+                            <li class="active"><a href="#">영업기회</a></li>
+                            <li><a href="#">잠재영업기회</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객이슈</a></li>
+                            <li><a href="#">고객만족도</a></li>
+                            <li><a href="#">서비스프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">파트너사협업</a></li>
+                            <li><a href="#">파트너사정보</a></li>
+                            <li><a href="#">파트너사개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                        <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class=""><a href="#">성과관리</a></li>
+                            <li><a href="#">생산성</a></li>
+                            <li><a href="#">제안서정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">회사/부문별전략</a></li>
+                            <li><a href="#">고객별전략</a></li>
+                            <li><a href="#">전략프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">캘린더</a></li>
+                            <li><a href="#">나의 할 일</a></li>
+                        </ul>
+                    </li>
+                    <li class="special_link">
+                        <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                    </li>
+                </ul>
+                <div class="product-logo text-center">
+                    <img src="../../images/pc/product_logo.png" alt=""/>
+                    <span>Copyright Seller’s Company © 2016</span>
+                </div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="white-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+                   
+                </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                            </a>
+                        </li>
+
+
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-sign-out"></i> 로그아웃
+                            </a>
+                        </li>
+                    </ul>
+
+                </nav>
+            </div>
+
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-4">
+                    <h2>영업기회</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a>고객영업활동</a>
+                        </li>
+                        <li class="active">
+                            <strong>영업기회</strong>
+                        </li>
+                    </ol>
+                </div>
+                <div class="col-sm-8">
+                    <div class="time-update">
+                        <span class="text-muted small pull-right">최근 업데이트: <i class="fa fa-clock-o"></i> 2:10 pm - 12.06.2014</span>
+                    </div>
+                    <div class="search-common">
+                        <div class="input-default" style="margin:0;">
+                            <span class="input-group-btn">
+                                    <a href="#" class="btn btn-search-option"><i class="fa fa-search"></i> 검색</a>
+                            </span>
+
+                            <div class="search-detail off">
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>고객명</label> <select class="form-control" name="account">
+                                        <option>고객명을 선택해주세요</option>
+                                        <option>김고객</option>
+                                        <option>홍길동</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>회사명</label> <select class="form-control" name="account">
+                                        <option>회사를 선택해주세요</option>
+                                        <option>삼성</option>
+                                        <option>LG</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">메일주소</label>
+                                    <div class="input-group" style="width:100%;" ><input type="text" placeholder="" class="input form-control"></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <div class="form-group"><label>작성자</label> <select class="form-control" name="account">
+                                        <option>작성자를 선택해주세요</option>
+                                        <option>관리자</option>
+                                        <option>영업사원1</option>
+                                    </select></div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">최종변경일</label>
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="03/04/2016">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 m-b">                                    
+                                    <label class="control-label" for="date_modified">기간설정</label>
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="시작일">
+                                        </div>
+                                    </div>
+                                
+                                    <div style="padding:0px 5px; text-align:center; font-size:18px;">~</div>                                 
+                                
+                                    <div id="data_1">
+                                        <div class="input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="종료일">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 m-b">
+                                    <label class="control-label" for="date_modified">전체</label>
+                                    <div class="input-group" style="width:100%;" ><input type="text" placeholder="" class="input form-control"></div>
+                                </div>
+                                <div class="col-sm-12 ag_r">
+                                    <label for="result-in-search" class="mg-r10"> <input type="checkbox" id="result-in-search" class="input v-m" /> 결과내 검색</label>
+                                    <button type="button" class="btn btn-w-m btn-primary btn-seller"><i class="fa fa-search"></i> 상세검색</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wrapper wrapper-content  animated fadeInRight">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="ibox">
+                            <div class="ibox-content border_n">
+                                <div class="clear">
+                                    <div class="func-top-left fl_l">                                            
+                                        <button class="btn btn-white btn-sm"><i class="fa fa-arrow-left"></i></button>
+                                        <strong>2016년 4분기</strong>
+                                        <button class="btn btn-white btn-sm"><i class="fa fa-arrow-right"></i></button>
+                                        <span class="mg-l10">금액 단위: 백만원</span>
+                                    </div>
+
+                                    <div class="func-top-right fl_r pd-b10">
+                                        <div class="fl_l mg-r10">
+                                            <button type="button" class="btn btn-outline btn-seller-outline">리스트</button>
+                                        </div>
+                                        <div class="fl_l">
+                                            <button type="button" class="btn btn-w-m btn-seller">신규등록</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="cboth"></div>                                    
+
+                                    <!-- <h2>Opportunity Summary</h2> -->
+                                    <!-- I. Opportunity Summary  table -->
+                                    <table class="dashboard_type1 mg-b50">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2">구분</th>
+                                                <th colspan="4">TCV</th>
+                                                <th colspan="4">REV</th>
+                                                <th colspan="4">GP</th>
+                                                <th rowspan="2" class="end key-chang">Weekly<br/>KEY Changes</th>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <a href="#">In FCST</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">B/(W) Tgt</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">W2W</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">Out FCST</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">In FCST</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">B/(W) Tgt</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">W2W</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">Out FCST</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">In FCST</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">B/(W) Tgt</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">W2W</a>
+                                                </th>
+                                                <th>
+                                                    <a href="#">Out FCST</a>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th><a href="#">엔터프라이즈사업본부</a></th>
+                                                <td class="cell-status cell-statusColor-sred fc_white">200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <tr>
+                                                <th><a href="#">IBM SW 사업본부</a></th>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td class="cell-status cell-statusColor-sred fc_white">120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="fc_blue2 ft_bold">200,000,000</td>
+                                                <td class="fc_blue2 ft_bold">10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <tr>
+                                                <th><a href="#">BA사업부</a></th>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <tr>
+                                                <th><a href="#">IBM HW 사업본부</a></th>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <tr>
+                                                <th><a href="#">DT 사업본부</a></th>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <tr>
+                                                <th><a href="#">IBM HW 사업본부</a></th>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <tr>
+                                                <th><a href="#">SW 사업본부</a></th>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <tr>
+                                                <th><a href="#">보안사업본부</a></th>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <tr>
+                                                <th class="line_b"><a href="#">I&P 사업본부</a></th>
+                                                <td class="line_b">200,000,000</td>
+                                                <td class="line_b">10,000,000</td>
+                                                <td class="line_b">120,000,000</td>
+                                                <td class="line_b">200,000,000</td>
+                                                <td class="line_b">200,000,000</td>
+                                                <td class="line_b">10,000,000</td>
+                                                <td class="line_b">120,000,000</td>
+                                                <td class="line_b">200,000,000</td>
+                                                <td class="line_b">200,000,000</td>
+                                                <td class="line_b">10,000,000</td>
+                                                <td class="line_b">120,000,000</td>
+                                                <td class="line_b">200,000,000</td>
+                                                <td class="line_b end"></td>
+                                            </tr>
+
+                                            <!-- 회사총계 -->
+                                            <tr class="total">
+                                                <th>회사 총계</th>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td>10,000,000</td>
+                                                <td>120,000,000</td>
+                                                <td>200,000,000</td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <!--// 회사총계 -->
+
+                                            <!-- Weekly KEY Changes -->
+                                            <tr class="key-chang">
+                                                <th>Weekly KEY Changes</th>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td class="end"></td>
+                                            </tr>
+                                            <!--// Weekly KEY Changes -->
+                                        </tbody>
+                                    </table>
+                                    <!--// I. Opportunity Summary  table -->
+
+
+                                    <h2>Key Actions for the Recovery</h2>                                    
+                                    <!-- I. Key Actions for the Recovery   table -->
+                                    <table class="dashboard_type2">
+                                        <colgroup>
+                                            <col width=""/>
+                                            <col width=""/>
+                                            <col width="100px"/>
+                                            <col width="100px"/>
+                                            <col width=""/>
+                                            <col width=""/>
+                                            <col width=""/>
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th>Gap 영역</th>
+                                                <th>Action Plan</th>
+                                                <th>실행자</th>
+                                                <th>목표일자</th>
+                                                <th>KPI</th>
+                                                <th>주간</th>
+                                                <th class="end">누계</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="">Gap영역</td>
+                                                <td class=""></td>
+                                                <td class="">김준연</td>
+                                                <td class="">2016-10-30</td>
+                                                <td class=""></td>
+                                                <td class=""></td>
+                                                <td class="end "></td>
+                                            </tr>
+                                            <tr>
+                                                <td class=""></td>
+                                                <td class=""></td>
+                                                <td class="">김준연</td>
+                                                <td class="">2016-10-30</td>
+                                                <td class=""></td>
+                                                <td class=""></td>
+                                                <td class="end "></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!--// I. Key Actions for the Recovery   table -->
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

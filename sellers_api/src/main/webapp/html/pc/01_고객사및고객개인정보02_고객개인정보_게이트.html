@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>고객개인정보</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body class="fixed-sidebar">
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header ta-c">
+                        <div class="dropdown profile-element">
+                            <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                            <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                            <a href="#">
+                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                            </a>
+                        </div>
+                        <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                            디유넷
+                        </div>
+                    </li>
+                    <li class="active">
+                        <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객사정보</a></li>
+                            <li class="active"><a href="#">고객개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객컨택내용</a></li>
+                            <li><a href="#">영업기회</a></li>
+                            <li><a href="#">잠재영업기회</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객이슈</a></li>
+                            <li><a href="#">고객만족도</a></li>
+                            <li><a href="#">서비스프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">파트너사협업</a></li>
+                            <li><a href="#">파트너사정보</a></li>
+                            <li><a href="#">파트너사개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                        <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class=""><a href="#">성과관리</a></li>
+                            <li><a href="#">생산성</a></li>
+                            <li><a href="#">제안서정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">회사/부문별전략</a></li>
+                            <li><a href="#">고객별전략</a></li>
+                            <li><a href="#">전략프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">캘린더</a></li>
+                            <li><a href="#">나의 할 일</a></li>
+                        </ul>
+                    </li>
+                    <li class="special_link">
+                        <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                    </li>
+                </ul>
+                <div class="product-logo text-center">
+                    <img src="../../images/pc/product_logo.png" alt=""/>
+                    <span>Copyright Seller’s Company © 2016</span>
+                </div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="white-bg">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>
+                       
+                    </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <span class="m-r-sm text-muted welcome-message">Seller's 에 오신것을 환영합니다.</span>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-envelope"></i>  <span class="label label-warning">16</span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a class=" count-info" data-toggle="" href="#">
+                                <i class="fa fa-bell"></i>  <span class="label label-primary">8</span>
+                            </a>
+                        </li>
+
+
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-sign-out"></i> 로그아웃
+                            </a>
+                        </li>
+                    </ul>
+
+                </nav>
+            </div>
+            <div class="row wrapper border-bottom white-bg page-heading">
+                <div class="col-sm-4">
+                    <h2>고객개인정보</h2>
+                    <ol class="breadcrumb">
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>
+                            <a>고객사 및 고객개인정보</a>
+                        </li>
+                        <li class="active">
+                            <strong>고객개인정보</strong>
+                        </li>
+                    </ol>
+                </div>
+                <div class="col-sm-8">
+                    <div class="time-update">
+                        <span class="text-muted small pull-right">최근 업데이트: <i class="fa fa-clock-o"></i> 2:10 pm - 12.06.2014</span>
+                    </div>
+                    <div class="search-common">
+                        <div class="input-default" style="margin:0;">
+                            <span class="input-group-btn">
+                                    <a href="#" class="btn btn-search-option"><i class="fa fa-search"></i> 검색</a>
+                            </span>
+
+                            <div class="search-detail collapse">
+                                <div class="singleSearch">
+                                    <input type="text" placeholder="고객명 또는 고객사를 입력해주세요" class="input form-control">
+                                    <button type="button" class="btn btn-w-s btn-seller"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 정보검색 리스트 영역 : start -->
+            <div class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    
+                    <div class="gateArea">
+                        <div class="searchArea  ag_c">
+                            <img src="../../images/pc/gate_img2.png" class="thum mg-b10" />
+                            <p class="mg-b10">고객 정보를 조회하기 위해 고객명을 입력해주세요.</p>
+
+                            <div class="pgsearch">
+                                <input type="text" /><a href="#" class="btn"><i class="fa fa-search"></i> 검색</a>
+                            </div>
+                        </div>
+                        <div class="newArea ag_c">
+                            <img src="../../images/pc/gate_img1.png" class="thum mg-b10" />
+                            <p class="mg-b10">등록된 정보가 없을 시 고객을 등록해 주세요.</p>
+
+                            <a href="#" class="btn btn-green r3" data-toggle="modal" data-target="#myModal1">고객 등록</a>
+                        </div>                        
+                    </div>
+
+                </div>
+            </div>
+            <!-- 정보검색 리스트 영역 : end -->
+        </div>
+    </div>
+
+    <!-- 신규등록 -->
+    <div class="modal inmodal fade" id="myModal1" tabindex="-1" role="dialog"  aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">고객 신규등록</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox float-e-margins">
+
+                                <div class="ibox-content border_n">
+                                    <form method="get" class="form-horizontal">
+
+                                        <!-- <div class="form-group"><label class="col-sm-2 control-label">고객 기본정보</label>
+                                            <div class="col-sm-10">
+                                                <div class="col-sm-4 m-b custom-photo">
+                                                    <span class="photo" style="background:url('../../images/pc/namecard.png') no-repeat center center; background-size:cover;"></span>
+                                                    <a href="#"><img src="../../images/pc/icon_plus.png"/></a>
+                                                </div>
+                                                <div class="col-sm-8">
+                                                    <label class="col-sm-4 control-label">고객명</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="김진욱" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">직급</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="대리" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">휴대전화</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="예) 010-1234-5678" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">일반전화</label>
+                                                    <div class="col-sm-8 m-b"><input type="text" placeholder="예) 02-1234-5678" class="form-control"></div>
+                                                    <label class="col-sm-4 control-label">이메일</label>
+                                                    <div class="col-sm-8"><input type="text" placeholder="예) sellers@seller.co.kr" class="form-control"></div>
+                                                </div>
+                                            </div>
+                                        </div> -->
+
+                                        <!-- 고객 기본정보  -->
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">고객명</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="황선홍" class="form-control"></div>
+                                            <label class="col-sm-2 control-label">직급</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="이사" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">휴대전화</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) 010-1234-5678" class="form-control"></div>
+                                            <label class="col-sm-2 control-label">일반전화</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) 02-1234-5678" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="form-group pos-rel"><label class="col-sm-2 control-label">이메일</label>
+                                            <div class="col-sm-4"><input type="text" placeholder="예) sellers@seller.co.kr" class="form-control"></div>
+                                        </div>
+
+                                        <div class="hr-line-bottom"></div>
+
+
+                                        <!-- TabMenu -->
+                                        <div class="tab-area">
+
+                                            <!-- tab-menu -->
+                                            <ul class="tabmenu-type">
+                                                <li><a href="#" class="sel">소속회사</a></li>
+                                                <li><a href="#" class="">개인정보</a></li>
+                                                <li><a href="#" class="">비즈니스이력</a></li>
+                                            </ul>
+                                            <!--// tab-menu -->
+
+                                            <!-- tab-cont -->
+
+                                            <!-- 소속회사 -->
+                                            <div class="sub_cont scont1 ">
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">고객사명</label>
+                                                    <div class="col-sm-4">
+                                                        <div class="company-search-single"><!-- 고객사 검색 : 자동완성 -->
+                                                            <div class="company-current"><!-- 현재 등록된 고객사 -->
+                                                                <span>삼성증권<a href="#"><i class="fa fa-times-circle va_m"></i></a></span>
+                                                            </div>
+                                                        </div>                                                                                            
+                                                    </div>
+                                                    <label class="col-sm-2 control-label">고객사ID</label>
+                                                    <div class="col-sm-4"><div class="fc_sgray pd-t7">A2SD4556346</div></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">소속본부</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="서비스본부" class="form-control"></div>
+                                                    <label class="col-sm-2 control-label">소속부서</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="영업1부" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">소속팀명</label>
+                                                    <div class="col-sm-4">
+                                                        <div class="select-com"><!-- <label>항목선택</label> --> 
+                                                            <select class="form-control" name="account">
+                                                            <option>전체</option>
+                                                            <option>사업분부1</option>
+                                                            <option>사업분부2</option>
+                                                        </select></div>
+                                                    </div>
+                                                    <label class="col-sm-2 control-label">직책</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="영업1팀" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">보고라인</label>
+                                                    <div class="col-sm-10 pd-no">
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">1단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" value="본부장 홍석천 전무" class="form-control"></div>
+                                                        </div>
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">2단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" class="form-control"></div>
+                                                        </div>
+                                                        <div class="col-sm-4 pd-no">
+                                                            <label class="col-sm-12 control-label ag_l">3단계</label>
+                                                            <div class="col-sm-12"><input type="text" placeholder="고객명 입력" class="form-control"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">담당업무</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="UI/UX 기획" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">직장 주소</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="서울시 서대문구 충정로3가 동아일보사건물" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">자사와의 관계</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">사내친한직원</label>
+                                                    <div class="col-sm-10"><input type="text" placeholder="박신혜, 김례원" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">정보출처</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="" class="form-control"></div>
+                                                    <label class="col-sm-2 control-label">이전영업사원</label>
+                                                    <div class="col-sm-4"><input type="text" placeholder="사원명" class="form-control"></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group"><label class="col-sm-2 control-label">명함등록</label>
+                                                    <div class="col-sm-10">
+                                                        <div class="input-default pop-file">
+                                                            <div class="file-dragdrap-area">
+                                                                <div class="fileUpload btn btn-gray">
+                                                                    <span>사진첨부</span>
+                                                                    <input type="file" class="upload" />
+                                                                </div>
+                                                                <div class="file-in-list">
+                                                                    <span><a href="#"><i class="fa fa-file-powerpoint-o fa-lg"></i> 황선홍이사 명함.jpg</a> <a href="#"><i class="fa fa-times-circle"></i></a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12 m-b ag_c custom-photo2">
+                                                        <span class="photo" style="background:url('../../images/pc/namecard2.png') no-repeat center center; background-size:cover;"><img src="../../images/pc/namecard_default.png" /></span>
+                                                        <!-- 등록된 이미지가 없을 경우에는 디폴트 이미지가 노출되면, 이미지가 등록되면 디폴트는 사라지고 등록이미지가 배경으로 보여짐 -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!--// 소속회사 -->
+
+                                            <!-- 개인정보 -->
+                                            <div class="sub_cont scont2 off">
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">가족</label>
+                                                    <div class="col-sm-10"><textarea class="form-control"></textarea></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">성향</label>
+                                                    <div class="col-sm-10"><textarea class="form-control"></textarea></div>
+                                                </div>
+                                                
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">학력</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">학력관련 인맥정보</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+                                                
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">경력</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                    <label class="col-sm-2 control-label">경력관련 인맥정보</label>
+                                                    <div class="col-sm-4"><textarea class="form-control"></textarea></div>
+                                                </div>
+                                                
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">사회활동</label>
+                                                    <div class="col-sm-10"><textarea class="form-control"></textarea></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">친한사람</label>
+                                                    <div class="col-sm-10"><textarea class="form-control"></textarea></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">SNS</label>
+                                                    <div class="col-sm-10"><textarea class="form-control"></textarea></div>
+                                                </div>
+
+                                                <div class="hr-line-dashed"></div>
+
+                                                <div class="form-group pos-rel"><label class="col-sm-2 control-label">기타</label>
+                                                    <div class="col-sm-10"><textarea class="form-control"></textarea></div>
+                                                </div>
+                                            </div>
+                                            <!--// 개인정보 -->
+
+                                            <!-- 비즈니스이력 -->
+                                            <div class="sub_cont scont3 off">
+                                                <table id="" class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>프로젝트명</th>
+                                                            <th>역할</th>
+                                                            <th>포지션(Pro/Anti)</th>
+                                                            <th>시작일</th>
+                                                            <th>마감일</th>
+                                                            <th>상세내용</th>
+                                                            <th>삭제</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>연예가 중계 HW납품</td>
+                                                            <td>정보제공자</td>
+                                                            <td>Pro</td>
+                                                            <td>2016-04-10</td>
+                                                            <td>2016-05-10</td>
+                                                            <td>요구사항 및 일정제공</td>
+                                                            <td><a href="#" class=""><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                                <p class="text-center pd-t10">
+                                                   <a href="#" class="btn-row-add" name="buttonSaleAddRow">+ 리스트 추가</a>
+                                                </p>
+                                            </div>
+                                            <!--// 비즈니스이력 -->
+
+                                            <!--// tab-cont -->
+
+                                        </div>
+                                        <!--// TabMenu -->
+
+                                        <div class="hr-line-bottom"></div>
+
+                                        <p class="text-center pt-t20">
+                                            <button type="button" class="btn btn-w-m btn-primary btn-seller">등록</button>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <!--// 신규등록 -->
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>

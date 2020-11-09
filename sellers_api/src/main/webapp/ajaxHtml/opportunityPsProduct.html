@@ -1,0 +1,37 @@
+							<tr>
+		                      <td>
+		                      		<ul name="ulPsMultiple" class="flexdatalist-multiple" style="border: 1px solid rgb(204, 204, 204); border-radius: 4px; background-color: rgb(255, 255, 255); padding:none;">
+		                                <li class="input-container flexdatalist-multiple-value pos-rel" name="liPsProductSeach" style="width: 100%;">
+		                                <input type="text" class="form-control" name="textPsProductSeach" placeholder="품목코드 또는 품목명을 검색해 주세요." autocomplete="off" style="width: 100%;" auto-bind="0">
+		                                <input type="hidden" name="hiddenPsProductCode" value=""/>
+		                            	<input type="hidden" name="hiddenPsWorksCode" value=""/>
+		                                <div class="autocomplete-suggestions "></div></li>
+		                            </ul>
+							  </td>
+		                      <td><span name="spanPs"></span></td>
+		                      <td>
+								<input type="text" style="text-align: right;" onclick="oppProduct.zero(this);" onblur="oppProduct.blur(this);oppProduct.psCount(this);" onkeyup="commonCheck.onlyInteger(this);" class="form-control" name="ps_product_count" value="0" maxlength="5">		                      
+		                      </td>
+		                      <td>
+								<input type="text" style="text-align: right;" onclick="oppProduct.zero(this);" onblur="oppProduct.blur(this);oppProduct.psPrice(this);" onkeyup="commonCheck.onlyRealNumber(this);" class="form-control" name="ps_product_price" value="0">		                      
+		                      </td>
+		                      <td>
+		                      	<input type="text" style="text-align: right;" onclick="oppProduct.zero(this);" onblur="oppProduct.blur(this);oppProduct.psTotal(this);" onkeyup="commonCheck.onlyRealNumber(this);" class="form-control" name="ps_product_total" value="0">
+		                      </td>
+		                       <td>
+									<ul name="ulPsCompanyMultiple" class="flexdatalist-multiple" style="border: 1px solid rgb(204, 204, 204); border-radius: 4px; background-color: rgb(255, 255, 255); padding:none;">
+		                                <li class="input-container flexdatalist-multiple-value pos-rel" name="liPsCompanySeach" style="width: 100%;">
+		                                <input type="text" class="form-control" name="textPsCompanySeach" placeholder="매입처를 검색해 주세요." autocomplete="off" style="width: 100%;" auto-bind="0">
+		                                <input type="hidden" name="hiddenPsCompany" value=""/>
+		                                <div class="autocomplete-suggestions "></div></li>
+		                            </ul>		                      
+		                      </td>
+		                      <td>
+								<div class="data_1">
+                                     <div class="input-group date">
+                                         <span class="input-group-addon" style="display:none;"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" name="textModalPsDate" value="">
+                                     </div>
+                                 </div>		                      
+		                      </td>
+		                      <td><a href="javascript:void(0);" onClick="oppProduct.psDel(this);"><i class="fa fa-trash-o fa-lg"></i></a></td>
+		                    </tr>

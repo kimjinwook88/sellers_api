@@ -1,0 +1,1447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="poi">
+	
+	 <insert id="insertClientIndividualInfo" parameterType="hashmap">
+	        INSERT INTO CLIENT_INDIVIDUAL_INFO
+	        (	
+	        	CUSTOMER_ID,
+	        	COMPANY_ID,
+	        	CUSTOMER_NAME, 
+	        	DIVISION,
+	        	POST,
+	        	TEAM,
+	        	POSITION,
+	        	DUTY,
+	        	CELL_PHONE,
+	        	PHONE,
+	        	EMAIL,
+	        	ADDRESS,
+	        	FRIENDSHIP_INFO,
+	        	INFO_SOURCE,
+	        	PINFO_CAREER,
+	        	PINFO_SOCIAL_ACTS,
+	        	PINFO_FAMILY,
+	        	PINFO_INCLINATION,
+	        	PINFO_FAMILIARS,
+	        	PINFO_SNS,
+	        	PINFO_ETC,
+	        	CREATOR_ID,
+	        	CREATE_DATE,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE,
+	        	REPORTING_LINE_DIVISION_ID,
+	        	REPORTING_LINE_POST_ID,
+	        	REPORTING_LINE_TEAM_ID,
+	        	PINFO_EDUCATION_PERSON,
+	        	PINFO_CAREER_PERSON,
+	        	PINFO_EDUCATION,
+	        	PREV_SALES_MEMBER_ID,
+	        	POSITION_DUTY,
+	        	PINFO_RELATIONSHIP,
+	        	LIKEABILITY,
+	        	RELATION,
+	        	DIRECTOR_ID,
+	        	USE_YN
+	        )
+			VALUES
+			(
+				#{CUSTOMER_ID},
+				#{COMPANY_ID},
+	        	#{CUSTOMER_NAME}, 
+	        	#{DIVISION},
+	        	#{POST},
+	        	#{TEAM},
+	        	#{POSITION},
+	        	#{DUTY},
+	        	#{CELL_PHONE},
+	        	#{PHONE},
+	        	#{EMAIL},
+	        	#{ADDRESS},
+	        	#{FRIENDSHIP_INFO},
+	        	#{INFO_SOURCE},
+	        	#{PINFO_CAREER},
+	        	#{PINFO_SOCIAL_ACTS},
+	        	#{PINFO_FAMILY},
+	        	#{PINFO_INCLINATION},
+	        	#{PINFO_FAMILIARS},
+	        	#{PINFO_SNS},
+	        	#{PINFO_ETC},
+	        	#{creatorId},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP,
+	        	#{REPORTING_LINE_DIVISION_ID},
+	        	#{REPORTING_LINE_POST_ID},
+	        	#{REPORTING_LINE_TEAM_ID},
+	        	#{PINFO_EDUCATION_PERSON},
+	        	#{PINFO_CAREER_PERSON},
+	        	#{PINFO_EDUCATION},
+	        	#{PREV_SALES_MEMBER_ID},
+	        	#{POSITION_DUTY},
+	        	#{PINFO_RELATIONSHIP},
+	        	#{LIKEABILITY},
+	        	#{RELATION},
+	        	#{DIRECTOR_ID},
+	        	'Y'
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT 
+        		CUSTOMER_ID 
+        	FROM CLIENT_INDIVIDUAL_INFO 
+        	WHERE CUSTOMER_ID = #{CUSTOMER_ID}
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertClientCompanyInfo" parameterType="hashmap">
+	        INSERT INTO CLIENT_COMPANY_INFO
+	        (
+	        	COMPANY_ID,
+	        	SEGMENT_CODE,
+	        	ERP_REG_CODE,
+	        	COMPANY_NAME,
+	        	CEO_NAME,
+	        	COMPANY_TELNO,
+	        	POSTAL_CODE,
+	        	POSTAL_ADDRESS,
+	        	BUSINESS_NUMBER,
+	        	BUSINESS_TYPE,
+	        	BUSINESS_SECTOR,
+	        	COMPANY_STATUS,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE,
+	        	CIO_NAME,
+	        	CTO_NAME,
+	        	CEO_ID,
+	        	CIO_ID,
+	        	CTO_ID,
+	        	CLIENT_CATEGORY
+	        )
+			VALUES
+			(
+				#{COMPANY_ID},
+				#{SEGMENT_CODE},
+				#{ERP_REG_CODE},
+				#{COMPANY_NAME},
+				#{CEO_NAME},
+				#{COMPANY_TELNO},
+				#{POSTAL_CODE},
+				#{POSTAL_ADDRESS},
+				#{BUSINESS_NUMBER},
+				#{BUSINESS_TYPE},
+				#{BUSINESS_SECTOR},
+				#{COMPANY_STATUS},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP,
+	        	#{CIO_NAME},
+	        	#{CTO_NAME},
+	        	#{CEO_ID},
+	        	#{CIO_ID},
+	        	#{CTO_ID},
+	        	#{CLIENT_CATEGORY}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT 
+        		COMPANY_ID 
+        	FROM CLIENT_COMPANY_INFO 
+        	WHERE COMPANY_ID = #{COMPANY_ID}
+    	</selectKey>
+	</insert>
+	
+	<select id="selectAllMemberIdNum" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			MEMBER_ID_NUM 
+		FROM OUR_MEMBERS_INFO
+	</select>
+	
+	
+	<select id="selectErpSalesPlan" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			* 
+		FROM ERP_SALES_PLAN
+		WHERE MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND BASIS_DATE = #{BASIS_DATE}
+	</select>
+	
+	<select id="selectClientIndividualInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			*
+		FROM CLIENT_INDIVIDUAL_INFO
+		WHERE COMPANY_ID = #{COMPANY_ID}
+	</select>
+
+	<select id="selectClientIndividualDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			CUSTOMER_ID,
+			COMPANY_ID,
+			IFNULL(CUSTOMER_NAME, '') as CUSTOMER_NAME,
+			IFNULL(DIVISION, '') as DIVISION,
+			IFNULL(POST,'') as POST,
+			IFNULL(TEAM,'') as TEAM,
+			IFNULL(POSITION, '') as POSITION,
+			IFNULL(DUTY, '') as DUTY,
+			IFNULL(CELL_PHONE, '') as CELL_PHONE,
+			IFNULL(PHONE, '') as PHONE,
+			IFNULL(EMAIL, '') as EMAIL,
+			IFNULL(ADDRESS, '') as ADDRESS,
+			IFNULL(FRIENDSHIP_INFO, '') as FRIENDSHIP_INFO,
+			IFNULL(INFO_SOURCE, '') as INFO_SOURCE,
+			IFNULL(PINFO_CAREER, '') as PINFO_CAREER,
+			IFNULL(PINFO_SOCIAL_ACTS, '') as PINFO_SOCIAL_ACTS,
+			IFNULL(PINFO_FAMILY, '') as PINFO_FAMILY,
+			IFNULL(PINFO_INCLINATION, '') as PINFO_INCLINATION,
+			IFNULL(PINFO_FAMILIARS, '') as PINFO_FAMILIARS,
+			IFNULL(PINFO_SNS, '') as PINFO_SNS,
+			IFNULL(PINFO_ETC, '') as PINFO_ETC,
+			IFNULL(CREATOR_ID, '') as CREATOR_ID,
+			IFNULL(CREATE_DATE, '') as CREATE_DATE,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			IFNULL(REPORTING_LINE_DIVISION_ID, '0') as REPORTING_LINE_DIVISION_ID,
+			IFNULL(REPORTING_LINE_POST_ID, '0') as REPORTING_LINE_POST_ID,
+			IFNULL(REPORTING_LINE_TEAM_ID, '0') as REPORTING_LINE_TEAM_ID,
+			IFNULL(PINFO_EDUCATION_PERSON, '0') as PINFO_EDUCATION_PERSON,
+			IFNULL(PINFO_CAREER_PERSON, '') as PINFO_CAREER_PERSON,
+			IFNULL(PINFO_EDUCATION, '') as PINFO_EDUCATION,
+			IFNULL(PREV_SALES_MEMBER_ID, '0') as PREV_SALES_MEMBER_ID,
+			IFNULL(POSITION_DUTY, '') as POSITION_DUTY,
+			IFNULL(PINFO_RELATIONSHIP, '') as PINFO_RELATIONSHIP,
+			IFNULL(LIKEABILITY, '') as LIKEABILITY,
+			IFNULL(RELATION, '') as RELATION,
+			IFNULL(DIRECTOR_ID, '') as DIRECTOR_ID,
+			IFNULL(USE_YN, 'Y') as USE_YN
+		FROM CLIENT_INDIVIDUAL_INFO
+	</select>
+	
+	<select id="selectClientCompanyDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			COMPANY_ID,
+			SEGMENT_CODE,
+			IFNULL(ERP_REG_CODE, '') as ERP_REG_CODE,
+			IFNULL(COMPANY_NAME, '') as COMPANY_NAME,
+			IFNULL(CEO_NAME,'') as CEO_NAME,
+			IFNULL(COMPANY_TELNO,'') as COMPANY_TELNO,
+			IFNULL(POSTAL_CODE, '') as POSTAL_CODE,
+			IFNULL(POSTAL_ADDRESS, '') as POSTAL_ADDRESS,
+			IFNULL(BUSINESS_NUMBER, '') as BUSINESS_NUMBER,
+			IFNULL(BUSINESS_TYPE, '') as BUSINESS_TYPE,
+			IFNULL(BUSINESS_SECTOR, '') as BUSINESS_SECTOR,
+			IFNULL(COMPANY_STATUS, '') as COMPANY_STATUS,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			
+			IFNULL(CIO_NAME, '') as CIO_NAME,
+			IFNULL(CTO_NAME, '') as CTO_NAME,
+			IFNULL(CEO_ID, '0') as CEO_ID,
+			IFNULL(CIO_ID, '0') as CIO_ID,
+			IFNULL(CTO_ID, '0') as CTO_ID,
+			IFNULL(CLIENT_CATEGORY, '') as CLIENT_CATEGORY
+		FROM CLIENT_COMPANY_INFO
+	</select>
+	
+	<select id="selectOurMembersInfoDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			IFNULL(MEMBER_ID, '') as MEMBER_ID,
+			IFNULL(MEMBER_DIVISION, '0') as MEMBER_DIVISION,
+			IFNULL(MEMBER_POST, '') as MEMBER_POST,
+			IFNULL(MEMBER_TEAM, '0') as MEMBER_TEAM,
+			IFNULL(MEMBER_ID_NUM,'') as MEMBER_ID_NUM,
+			IFNULL(HAN_NAME,'') as HAN_NAME,
+			IFNULL(POSITION_STATUS, '') as POSITION_STATUS,
+			IFNULL(POSITION_RANK, '') as POSITION_RANK,
+			IFNULL(POSITION_DUTY, '') as POSITION_DUTY,
+			IFNULL(POSITION_TYPE, '') as POSITION_TYPE,
+			IFNULL(BUSINESS_DUTY, '') as BUSINESS_DUTY,
+			IFNULL(JOIN_DATE, '') as JOIN_DATE,
+			IFNULL(STOP_DATE, '') as STOP_DATE,
+			IFNULL(CELL_PHONE, '') as CELL_PHONE,
+			IFNULL(PHONE, '') as PHONE,
+			IFNULL(EMAIL, '') as EMAIL,
+			IFNULL(FRIENDSHIP_COMPANY, '') as FRIENDSHIP_COMPANY,
+			IFNULL(FRIENDSHIP_CUSTOMER, '') as FRIENDSHIP_CUSTOMER,
+			IFNULL(PERSONAL_PHOTO, '') as PERSONAL_PHOTO,
+			IFNULL(PHOTO_TYPE, '') as PHOTO_TYPE,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			IFNULL(USE_YN, 'N') as USE_YN
+			
+		FROM OUR_MEMBERS_INFO
+	</select>
+	
+	<select id="selectOurDivisionInfoDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			IFNULL(DIVISION_NO, '') as DIVISION_NO,
+			IFNULL(DIVISION_NAME, '') as DIVISION_NAME,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			IFNULL(DIVISION_TYPE, '') as DIVISION_TYPE,
+			IFNULL(USE_YN, '') as USE_YN,
+			IFNULL(DIVISION_LEADER,'') as DIVISION_LEADER
+			
+		FROM OUR_DIVISION_INFO
+		<!-- WHERE DIVISION_NAME = #{DIVISION_NAME} -->
+	</select>
+	
+	<select id="selectOurTeamInfoDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			IFNULL(TEAM_NO, '') as TEAM_NO,
+			IFNULL(TEAM_NAME, '') as TEAM_NAME,
+			IFNULL(TEAM_LEADER, '') as TEAM_LEADER,
+			IFNULL(USE_YN, '') as USE_YN,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			IFNULL(DIVISION_NO, '0') as DIVISION_NO,
+			IFNULL(TEAM_TYPE, '') as TEAM_TYPE
+			
+		FROM OUR_TEAM_INFO
+	</select>
+	
+	<select id="selectPartnerCompanyDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			IFNULL(PARTNER_ID, '') as PARTNER_ID,
+			IFNULL(PARTNER_CODE, '') as PARTNER_CODE,
+			IFNULL(COMPANY_NAME, '') as COMPANY_NAME,
+			IFNULL(CEO_NAME, '') as CEO_NAME,
+			IFNULL(COMPANY_TELNO, '') as COMPANY_TELNO,
+			IFNULL(POSTAL_CODE, '') as POSTAL_CODE,
+			IFNULL(POSTAL_ADDRESS, '') as POSTAL_ADDRESS,
+			IFNULL(BUSINESS_NUMBER, '') as BUSINESS_NUMBER,
+			IFNULL(BUSINESS_TYPE, '') as BUSINESS_TYPE,
+			IFNULL(BUSINESS_SECTOR, '') as BUSINESS_SECTOR,
+			IFNULL(COMPANY_STATUS, '') as COMPANY_STATUS,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			IFNULL(COMPANY_ENNAME, '') as COMPANY_ENNAME,
+			IFNULL(CEO_ID, '0') as CEO_ID,
+			IFNULL(PARTNER_CATEGORY, '') as PARTNER_CATEGORY,
+			IFNULL(COMPANY_ITEM, '') as COMPANY_ITEM,
+			IFNULL(COMPANY_HOMEPAGE, '') as COMPANY_HOMEPAGE,
+			IFNULL(COMPANY_FAXNO, '') as COMPANY_FAXNO
+			
+		FROM PARTNER_COMPANY_INFO
+	</select>
+	
+	<select id="selectCodePartnerSegmentDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			IFNULL(PARTNER_CODE, '') as PARTNER_CODE,
+			IFNULL(PARTNER_LEVEL, '') as PARTNER_LEVEL,
+			IFNULL(PARTNER_DETAIL, '') as PARTNER_DETAIL,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			IFNULL(USE_YN, '') as USE_YN
+			
+		FROM CODE_PARTNER_SEGMENT
+	</select>
+	
+	<select id="selectErpSalesPlanDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			IFNULL(PERF_TARGET_ID, '') as PERF_TARGET_ID,
+			IFNULL(MEMBER_ID_NUM, '') as MEMBER_ID_NUM,
+			IFNULL(BASIS_MONTH, '') as BASIS_MONTH,
+			IFNULL(BOOKING_TYPE, '') as BOOKING_TYPE,
+			IFNULL(TARGET_REVENUE_AMOUNT, '0') as TARGET_REV_AMOUNT,
+			IFNULL(TARGET_GP_AMOUNT, '0') as TARGET_GP_AMOUNT,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE
+			
+		FROM ERP_SALES_PLAN
+	</select>
+	
+	<select id="selectPartnerIndividualDBtoExcel" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			IFNULL(PARTNER_INDIVIDUAL_ID, '') as PARTNER_INDIVIDUAL_ID,
+			IFNULL(PARTNER_ID, '') as PARTNER_ID,
+			IFNULL(PARTNER_PERSONAL_NAME, '') as PARTNER_PERSONAL_NAME,
+			IFNULL(DIVISION, '') as DIVISION,
+			IFNULL(POST, '') as POST,
+			IFNULL(TEAM, '') as TEAM,
+			IFNULL(POSITION, '') as POSITION,
+			IFNULL(SKILL_TYPE, '') as SKILL_TYPE,
+			IFNULL(DUTY, '') as DUTY,
+			IFNULL(CELL_PHONE, '') as CELL_PHONE,
+			IFNULL(PHONE, '') as PHONE,
+			IFNULL(EMAIL, '') as EMAIL,
+			IFNULL(FRIENDSHIP_COMPANY, '') as FRIENDSHIP_COMPANY,
+			IFNULL(FRIENDSHIP_CUSTOMER, '') as FRIENDSHIP_CUSTOMER,
+			IFNULL(PERSONAL_INFO, '') as PERSONAL_INFO,
+			IFNULL(PERSONAL_PHOTO, '') as PERSONAL_PHOTO,
+			IFNULL(PHOTO_TYPE, '') as PHOTO_TYPE,
+			IFNULL(FRIENDSHIP_INFO, '') as FRIENDSHIP_INFO,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			IFNULL(CREATOR_ID, '') as CREATOR_ID,
+			USE_YN,
+			IFNULL(POSITION_DUTY, '')as POSITION_DUTY
+			
+		FROM PARTNER_INDIVIDUAL_INFO
+	</select>
+	
+	<update id="updateClientIndividualInfo2" parameterType="hashmap">
+		UPDATE CLIENT_INDIVIDUAL_INFO
+	        SET SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+        WHERE COMPANY_ID=#{COMPANY_ID}
+		AND CUSTOMER_NAME = #{CUSTOMER_NAME}
+	</update>
+	
+	
+	<update id="updateErpSalesPlan" parameterType="hashmap">
+		UPDATE ERP_SALES_PLAN
+	        SET SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        BOOKING_TYPE = #{BOOKING_TYPE},
+	        TARGET_TCV_AMOUNT = #{TARGET_TCV_AMOUNT},
+	        TARGET_REV_AMOUNT = #{TARGET_REV_AMOUNT},
+	        TARGET_GP_AMOUNT = #{TARGET_GP_AMOUNT}
+        WHERE PERF_TARGET_ID = #{PERF_TARGET_ID}
+		AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND BASIS_DATE = #{BASIS_DATE}
+	</update>
+	
+	<update id="updateClientIndividualInfo" parameterType="hashmap">
+	        UPDATE CLIENT_INDIVIDUAL_INFO
+	        SET 
+	        	CUSTOMER_NAME = #{CUSTOMER_NAME}, 
+	        	DIVISION = #{DIVISION},
+	        	POST = #{POST},
+	        	TEAM = #{TEAM},
+	        	POSITION = #{POSITION},
+	        	DUTY = #{DUTY},
+	        	CELL_PHONE = #{CELL_PHONE},
+	        	PHONE = #{PHONE},
+	        	EMAIL = #{EMAIL},
+	        	ADDRESS = #{ADDRESS},
+	        	FRIENDSHIP_INFO = #{FRIENDSHIP_INFO},
+	        	INFO_SOURCE = #{INFO_SOURCE},
+	        	PINFO_CAREER = #{PINFO_CAREER},
+	        	PINFO_SOCIAL_ACTS = #{PINFO_SOCIAL_ACTS},
+	        	PINFO_FAMILY = #{PINFO_FAMILY},
+	        	PINFO_INCLINATION = #{PINFO_INCLINATION},
+	        	PINFO_FAMILIARS = #{PINFO_FAMILIARS},
+	        	PINFO_SNS = #{PINFO_SNS},
+	        	PINFO_ETC = #{PINFO_ETC},
+	        	CREATOR_ID = #{creatorId},
+	        	CREATE_DATE = CURRENT_TIMESTAMP,
+	        	SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        	SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        	REPORTING_LINE_DIVISION_ID = #{REPORTING_LINE_DIVISION_ID},
+	        	REPORTING_LINE_POST_ID = #{REPORTING_LINE_POST_ID},
+	        	REPORTING_LINE_TEAM_ID = #{REPORTING_LINE_TEAM_ID},
+	        	PINFO_EDUCATION_PERSON = #{PINFO_EDUCATION_PERSON},
+	        	PINFO_CAREER_PERSON = #{PINFO_CAREER_PERSON},
+	        	PINFO_EDUCATION = #{PINFO_EDUCATION},
+	        	PREV_SALES_MEMBER_ID = #{PREV_SALES_MEMBER_ID},
+	        	POSITION_DUTY = #{POSITION_DUTY},
+	        	PINFO_RELATIONSHIP = #{PINFO_RELATIONSHIP},
+	        	LIKEABILITY = #{LIKEABILITY},
+	        	RELATION = #{RELATION},
+	        	DIRECTOR_ID = #{DIRECTOR_ID},
+	        	USE_YN = #{USE_YN}
+			WHERE COMPANY_ID=#{COMPANY_ID}
+			AND CUSTOMER_ID = #{CUSTOMER_ID}
+	</update>
+	
+	<update id="updateClientCompanyInfo" parameterType="hashmap">
+	        UPDATE CLIENT_COMPANY_INFO
+	        SET 
+	        	COMPANY_ID = #{COMPANY_ID},
+	        	SEGMENT_CODE = #{SEGMENT_CODE},
+	        	ERP_REG_CODE = #{ERP_REG_CODE},
+	        	COMPANY_NAME = #{COMPANY_NAME},
+	        	CEO_NAME = #{CEO_NAME},
+	        	COMPANY_TELNO = #{COMPANY_TELNO},
+	        	POSTAL_CODE = #{POSTAL_CODE},
+	        	POSTAL_ADDRESS = #{POSTAL_ADDRESS},
+	        	BUSINESS_NUMBER = #{BUSINESS_NUMBER},
+	        	BUSINESS_TYPE = #{BUSINESS_TYPE},
+	        	BUSINESS_SECTOR = #{BUSINESS_SECTOR},
+	        	COMPANY_STATUS = #{COMPANY_STATUS},
+	        	SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        	SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        	CIO_NAME = #{CIO_NAME},
+	        	CTO_NAME = #{CTO_NAME},
+	        	CEO_ID = #{CEO_ID},
+	        	CIO_ID = #{CIO_ID},
+	        	CTO_ID = #{CTO_ID},
+	        	CLIENT_CATEGORY = #{CLIENT_CATEGORY}
+			WHERE COMPANY_ID=#{COMPANY_ID}
+	</update>
+	
+	<update id="updatePartnerIndividualInfo" parameterType="hashmap">
+	        UPDATE PARTNER_INDIVIDUAL_INFO
+	        SET 
+	        	PARTNER_INDIVIDUAL_ID = #{PARTNER_INDIVIDUAL_ID},
+	        	PARTNER_ID = #{PARTNER_ID},
+	        	PARTNER_PERSONAL_NAME = #{PARTNER_PERSONAL_NAME},
+	        	DIVISION = #{DIVISION},
+	        	POST = #{POST},
+	        	TEAM = #{TEAM},
+	        	POSITION = #{POSITION},
+	        	SKILL_TYPE = #{SKILL_TYPE},
+	        	DUTY = #{DUTY},
+	        	CELL_PHONE = #{CELL_PHONE},
+	        	PHONE = #{PHONE},
+	        	EMAIL = #{EMAIL},
+	        	FRIENDSHIP_COMPANY = #{FRIENDSHIP_COMPANY},
+	        	FRIENDSHIP_CUSTOMER = #{FRIENDSHIP_CUSTOMER},
+	        	PERSONAL_INFO = #{PERSONAL_INFO},
+	        	PERSONAL_PHOTO = #{PERSONAL_PHOTO},
+	        	PHOTO_TYPE = #{PHOTO_TYPE},
+	        	FRIENDSHIP_INFO = #{FRIENDSHIP_INFO},
+	        	SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        	SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        	CREATOR_ID = #{CREATOR_ID},
+	        	USE_YN = #{USE_YN},
+	        	POSITION_DUTY=#{POSITION_DUTY}
+			WHERE PARTNER_INDIVIDUAL_ID=#{PARTNER_INDIVIDUAL_ID}
+	</update>
+	
+	<update id="updatePartnerCompanyInfo" parameterType="hashmap">
+	        UPDATE PARTNER_COMPANY_INFO
+	        SET 
+	        	PARTNER_ID = #{PARTNER_ID},
+	        	PARTNER_CODE = #{PARTNER_CODE},
+	        	COMPANY_NAME = #{COMPANY_NAME},
+	        	CEO_NAME = #{CEO_NAME},
+	        	COMPANY_TELNO = #{COMPANY_TELNO},
+	        	POSTAL_CODE = #{POSTAL_CODE},
+	        	POSTAL_ADDRESS = #{POSTAL_ADDRESS},
+	        	BUSINESS_NUMBER = #{BUSINESS_NUMBER},
+	        	BUSINESS_TYPE = #{BUSINESS_TYPE},
+	        	BUSINESS_SECTOR = #{BUSINESS_SECTOR},
+	        	COMPANY_STATUS = #{COMPANY_STATUS},
+	        	SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        	SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        	COMPANY_ENNAME = #{COMPANY_ENNAME},
+	        	CEO_ID = #{CEO_ID},
+	        	PARTNER_CATEGORY = #{PARTNER_CATEGORY},
+	        	COMPANY_ITEM = #{COMPANY_ITEM},
+	        	COMPANY_HOMEPAGE = #{COMPANY_HOMEPAGE},
+	        	COMPANY_FAXNO = #{COMPANY_FAXNO}
+			WHERE PARTNER_ID=#{PARTNER_ID}
+	</update>
+	
+	<update id="updateCodePartnerSegment" parameterType="hashmap">
+	        UPDATE CODE_PARTNER_SEGMENT
+	        SET 
+	        	PARTNER_CODE = #{PARTNER_CODE},
+	        	PARTNER_LEVEL = #{PARTNER_LEVEL},
+	        	PARTNER_DETAIL = #{PARTNER_DETAIL},
+	        	SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        	SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        	USE_YN = #{USE_YN}
+			WHERE PARTNER_CODE=#{PARTNER_CODE}
+			AND PARTNER_LEVEL = #{PARTNER_LEVEL}
+	</update>
+	
+	<update id="updateTeamInfo" parameterType="hashmap">
+	        UPDATE OUR_TEAM_INFO
+	        SET 
+	        	TEAM_NO = #{TEAM_NO},
+	        	TEAM_NAME = #{TEAM_NAME},
+	        	TEAM_LEADER = #{TEAM_LEADER},
+	        	USE_YN = #{USE_YN},
+	        	SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        	SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        	DIVISION_NO = #{DIVISION_NO},
+	        	TEAM_TYPE = #{TEAM_TYPE}
+			WHERE TEAM_NO=#{TEAM_NO}
+	</update>
+	
+	<update id="updateOurDivisionInfo" parameterType="hashmap">
+	        UPDATE OUR_DIVISION_INFO
+	        SET 
+	        	DIVISION_NO = #{DIVISION_NO},
+	        	DIVISION_NAME = #{DIVISION_NAME},
+	        	SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        	SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        	DIVISION_TYPE = #{DIVISION_TYPE},
+	        	USE_YN = #{USE_YN},
+	        	DIVISION_LEADER = #{DIVISION_LEADER}
+			WHERE DIVISION_NO=#{DIVISION_NO}
+	</update>
+	
+	<update id="updateOurMembersInfo" parameterType="hashmap">
+	        UPDATE OUR_MEMBERS_INFO
+	        SET 
+	        	MEMBER_ID = #{MEMBER_ID},
+	        	MEMBER_DIVISION = #{MEMBER_DIVISION},
+	        	MEMBER_POST = #{MEMBER_POST},
+	        	MEMBER_TEAM = #{MEMBER_TEAM},
+	        	MEMBER_ID_NUM = #{MEMBER_ID_NUM},
+	        	HAN_NAME = #{HAN_NAME},
+	        	POSITION_STATUS = #{POSITION_STATUS},
+	        	POSITION_RANK = #{POSITION_RANK},
+	        	POSITION_DUTY = #{POSITION_DUTY},
+	        	POSITION_TYPE = #{POSITION_TYPE},
+	        	BUSINESS_DUTY = #{BUSINESS_DUTY},
+	        	JOIN_DATE = #{JOIN_DATE},
+	        	STOP_DATE = #{STOP_DATE},
+	        	CELL_PHONE = #{CELL_PHONE},
+	        	PHONE = #{PHONE},
+	        	EMAIL = #{EMAIL},
+	        	FRIENDSHIP_COMPANY = #{FRIENDSHIP_COMPANY},
+	        	FRIENDSHIP_CUSTOMER = #{FRIENDSHIP_CUSTOMER},
+	        	PERSONAL_PHOTO = #{PERSONAL_PHOTO},
+	        	PHOTO_TYPE = #{PHOTO_TYPE},
+	        	SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        	SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        	USE_YN = #{USE_YN}
+			WHERE MEMBER_ID=#{MEMBER_ID}
+	</update>
+	
+	<insert id="insertSalesTerritoryAlignNewCompanyAllMap" parameterType="hashmap">
+		<if test="memberList.size != 0">
+			INSERT INTO SALES_TERRITORY_ALIGN_MAP (
+				MEMBER_ID_NUM, 
+				COMPANY_ID, 
+				GRANTOR_MEMBER_ID_NUM, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			) VALUES
+			<foreach collection="memberList" item="item" separator=",">
+			(
+				#{item.MEMBER_ID_NUM}, 
+				#{COMPANY_ID}, 
+				#{creatorId}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			)
+			</foreach>
+		</if>
+	</insert>
+	
+	<insert id="insertErpDashBoard" parameterType="hashmap">
+		INSERT INTO ERP_DASHBOARD_CHECKLIST (
+			DIVISION_NAME, 
+			TEAM_NAME, 
+			OBTAIN_ORDER_TYPE, 
+			PROJECT_ID,
+			ACCRUE_REV,
+			ACCRUE_GP,
+			TCV,
+			PROJECT_NAME,
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+			
+		) VALUES
+		(
+			#{DIVISION_NAME}, 
+			#{TEAM_NAME}, 
+			#{OBTAIN_ORDER_TYPE},
+			#{PROJECT_ID},
+			#{ACCRUE_REV},
+			#{ACCRUE_GP},
+			#{TCV},
+			#{PROJECT_NAME},
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		)
+	</insert>
+	
+	
+	<update id="updateErpSalesActual" parameterType="hashmap">
+	        UPDATE ERP_SALES_ACTUAL
+	        SET
+	        FISCAL_YEAR = #{FISCAL_YEAR},
+	        ACTUAL_DATE = #{ACTUAL_DATE},
+	        HAN_NAME = #{HAN_NAME},
+	        MEMBER_ID_NUM = #{MEMBER_ID_NUM},
+	        
+	        1Q_ACTUAL_TCV_AMOUNT = ROUND(#{ACHIEVE_REV_1Q}, 0),
+	        1Q_ACTUAL_REV_AMOUNT = ROUND(#{ACHIEVE_REV_1Q}, 0),
+	        1Q_ACTUAL_GP_AMOUNT = ROUND(#{ACHIEVE_GP_1Q}, 0),
+	        
+	        2Q_ACTUAL_TCV_AMOUNT = ROUND(#{ACHIEVE_REV_2Q}, 0),
+	        2Q_ACTUAL_REV_AMOUNT = ROUND(#{ACHIEVE_REV_2Q}, 0),
+	        2Q_ACTUAL_GP_AMOUNT = ROUND(#{ACHIEVE_GP_2Q}, 0),
+	        
+	        3Q_ACTUAL_TCV_AMOUNT = ROUND(#{ACHIEVE_REV_3Q}, 0),
+	        3Q_ACTUAL_REV_AMOUNT = ROUND(#{ACHIEVE_REV_3Q}, 0),
+	        3Q_ACTUAL_GP_AMOUNT = ROUND(#{ACHIEVE_GP_3Q}, 0),
+	        
+	        4Q_ACTUAL_TCV_AMOUNT = ROUND(#{ACHIEVE_REV_4Q}, 0),
+	        4Q_ACTUAL_REV_AMOUNT = ROUND(#{ACHIEVE_REV_4Q}, 0),
+	        4Q_ACTUAL_GP_AMOUNT = ROUND(#{ACHIEVE_GP_4Q}, 0),
+	        
+	        SYS_REGISTER_DATE = CURRENT_TIMESTAMP,
+	        SYS_UPDATE_DATE = CURRENT_TIMESTAMP,
+	        
+	        1q_actual_pgp_amount = ROUND(#{ACHIEVE_GP_1Q}, 0),
+	        2q_actual_pgp_amount = ROUND(#{ACHIEVE_GP_2Q}, 0),
+	        3q_actual_pgp_amount = ROUND(#{ACHIEVE_GP_3Q}, 0),
+	        4q_actual_pgp_amount = ROUND(#{ACHIEVE_GP_4Q}, 0)
+	        
+			WHERE MEMBER_ID_NUM=#{MEMBER_ID_NUM}
+	</update>
+	
+	<update id="updateErpSalesActualDate" parameterType="hashmap">
+	        UPDATE ERP_SALES_ACTUAL
+	        SET 
+	        ACTUAL_DATE = #{ACTUAL_DATE}
+			WHERE ACTUAL_DATE=#{ACTUAL_DATE}
+	</update>
+	
+	<update id="updateShareMemberErpSalesActual" parameterType="hashmap">
+	        UPDATE ERP_SALES_ACTUAL SET 
+				1Q_ACTUAL_TCV_AMOUNT= ROUND(#{1Q_ACTUAL_TCV_AMOUNT} + #{ACHIEVE_REV_1Q}, 0),
+				1Q_ACTUAL_REV_AMOUNT= ROUND(#{1Q_ACTUAL_REV_AMOUNT} + #{ACHIEVE_REV_1Q}, 0),
+				1Q_ACTUAL_GP_AMOUNT= ROUND(#{1Q_ACTUAL_GP_AMOUNT} + #{ACHIEVE_GP_1Q}, 0),
+				
+				2Q_ACTUAL_TCV_AMOUNT= ROUND(#{2Q_ACTUAL_TCV_AMOUNT} + #{ACHIEVE_REV_2Q}, 0),
+				2Q_ACTUAL_REV_AMOUNT= ROUND(#{2Q_ACTUAL_REV_AMOUNT} + #{ACHIEVE_REV_2Q}, 0),
+				2Q_ACTUAL_GP_AMOUNT= ROUND(#{2Q_ACTUAL_GP_AMOUNT} + #{ACHIEVE_GP_2Q}, 0),
+				
+				3Q_ACTUAL_TCV_AMOUNT= ROUND(#{3Q_ACTUAL_TCV_AMOUNT} + #{ACHIEVE_REV_3Q}, 0),
+				3Q_ACTUAL_REV_AMOUNT= ROUND(#{3Q_ACTUAL_REV_AMOUNT} + #{ACHIEVE_REV_3Q}, 0),
+				3Q_ACTUAL_GP_AMOUNT= ROUND(#{3Q_ACTUAL_GP_AMOUNT} + #{ACHIEVE_GP_3Q}, 0),
+				
+				4Q_ACTUAL_TCV_AMOUNT= ROUND(#{4Q_ACTUAL_TCV_AMOUNT} + #{ACHIEVE_REV_4Q}, 0),
+				4Q_ACTUAL_REV_AMOUNT= ROUND(#{4Q_ACTUAL_REV_AMOUNT} + #{ACHIEVE_REV_4Q}, 0),
+				4Q_ACTUAL_GP_AMOUNT= ROUND(#{4Q_ACTUAL_GP_AMOUNT} + #{ACHIEVE_GP_4Q}, 0),
+				
+				1q_actual_pgp_amount= ROUND(#{1q_actual_pgp_amount} + #{ACHIEVE_GP_1Q}, 0),
+				2q_actual_pgp_amount= ROUND(#{2q_actual_pgp_amount} + #{ACHIEVE_GP_2Q}, 0),
+				3q_actual_pgp_amount= ROUND(#{3q_actual_pgp_amount} + #{ACHIEVE_GP_3Q}, 0),
+				4q_actual_pgp_amount= ROUND(#{4q_actual_pgp_amount} + #{ACHIEVE_GP_4Q}, 0)
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+			AND FISCAL_YEAR = #{FISCAL_YEAR}
+			AND ACTUAL_DATE = #{ACTUAL_DATE}
+	</update>
+	
+	<update id="updateResetShareMemberErpSalesActual" parameterType="hashmap">
+		UPDATE ERP_SALES_ACTUAL SET 
+				1Q_ACTUAL_TCV_AMOUNT= ROUND(#{1Q_ACTUAL_TCV_AMOUNT} - #{ACHIEVE_REV_1Q}, 0),
+				1Q_ACTUAL_REV_AMOUNT= ROUND(#{1Q_ACTUAL_REV_AMOUNT} - #{ACHIEVE_REV_1Q}, 0),
+				1Q_ACTUAL_GP_AMOUNT= ROUND(#{1Q_ACTUAL_GP_AMOUNT} - #{ACHIEVE_GP_1Q}, 0),
+				
+				2Q_ACTUAL_TCV_AMOUNT= ROUND(#{2Q_ACTUAL_TCV_AMOUNT} - #{ACHIEVE_REV_2Q}, 0),
+				2Q_ACTUAL_REV_AMOUNT= ROUND(#{2Q_ACTUAL_REV_AMOUNT} - #{ACHIEVE_REV_2Q}, 0),
+				2Q_ACTUAL_GP_AMOUNT= ROUND(#{2Q_ACTUAL_GP_AMOUNT} - #{ACHIEVE_GP_2Q}, 0),
+				
+				3Q_ACTUAL_TCV_AMOUNT= ROUND(#{3Q_ACTUAL_TCV_AMOUNT} - #{ACHIEVE_REV_3Q}, 0),
+				3Q_ACTUAL_REV_AMOUNT= ROUND(#{3Q_ACTUAL_REV_AMOUNT} - #{ACHIEVE_REV_3Q}, 0),
+				3Q_ACTUAL_GP_AMOUNT= ROUND(#{3Q_ACTUAL_GP_AMOUNT} - #{ACHIEVE_GP_3Q}, 0),
+				
+				4Q_ACTUAL_TCV_AMOUNT= ROUND(#{4Q_ACTUAL_TCV_AMOUNT} - #{ACHIEVE_REV_4Q}, 0),
+				4Q_ACTUAL_REV_AMOUNT= ROUND(#{4Q_ACTUAL_REV_AMOUNT} - #{ACHIEVE_REV_4Q}, 0),
+				4Q_ACTUAL_GP_AMOUNT= ROUND(#{4Q_ACTUAL_GP_AMOUNT} - #{ACHIEVE_GP_4Q}, 0),
+				
+				1q_actual_pgp_amount= ROUND(#{1q_actual_pgp_amount} - #{ACHIEVE_GP_1Q}, 0),
+				2q_actual_pgp_amount= ROUND(#{2q_actual_pgp_amount} - #{ACHIEVE_GP_2Q}, 0),
+				3q_actual_pgp_amount= ROUND(#{3q_actual_pgp_amount} - #{ACHIEVE_GP_3Q}, 0),
+				4q_actual_pgp_amount= ROUND(#{4q_actual_pgp_amount} - #{ACHIEVE_GP_4Q}, 0)
+			WHERE 1=1
+			AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+			AND FISCAL_YEAR = #{FISCAL_YEAR}
+			AND ACTUAL_DATE = #{ACTUAL_DATE}
+	</update>
+	
+	<insert id="insertErpSalesActual" parameterType="hashmap">
+		INSERT INTO ERP_SALES_ACTUAL (
+			FISCAL_YEAR, 
+			ACTUAL_DATE, 
+			HAN_NAME, 
+			MEMBER_ID_NUM, 
+			
+			1Q_ACTUAL_TCV_AMOUNT,
+			1Q_ACTUAL_REV_AMOUNT,
+			1Q_ACTUAL_GP_AMOUNT,
+			
+			2Q_ACTUAL_TCV_AMOUNT,
+			2Q_ACTUAL_REV_AMOUNT,
+			2Q_ACTUAL_GP_AMOUNT,
+			
+			3Q_ACTUAL_TCV_AMOUNT,
+			3Q_ACTUAL_REV_AMOUNT,
+			3Q_ACTUAL_GP_AMOUNT,
+			
+			4Q_ACTUAL_TCV_AMOUNT,
+			4Q_ACTUAL_REV_AMOUNT,
+			4Q_ACTUAL_GP_AMOUNT,
+			
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE,
+			
+			1q_actual_pgp_amount,
+			2q_actual_pgp_amount,
+			3q_actual_pgp_amount,
+			4q_actual_pgp_amount
+		) VALUES
+		(
+			#{FISCAL_YEAR}, 
+			#{ACTUAL_DATE}, 
+			#{HAN_NAME},
+			#{MEMBER_ID_NUM},
+			
+			ROUND(#{ACHIEVE_REV_1Q}, 0),
+			ROUND(#{ACHIEVE_REV_1Q}, 0),
+			ROUND(#{ACHIEVE_GP_1Q}, 0),
+			
+			ROUND(#{ACHIEVE_REV_2Q}, 0),
+			ROUND(#{ACHIEVE_REV_2Q}, 0),
+			ROUND(#{ACHIEVE_GP_2Q}, 0),
+			
+			ROUND(#{ACHIEVE_REV_3Q}, 0),
+			ROUND(#{ACHIEVE_REV_3Q}, 0),
+			ROUND(#{ACHIEVE_GP_3Q}, 0),
+			
+			ROUND(#{ACHIEVE_REV_4Q}, 0),
+			ROUND(#{ACHIEVE_REV_4Q}, 0),
+			ROUND(#{ACHIEVE_GP_4Q}, 0),
+			
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP,
+			
+			ROUND(#{ACHIEVE_GP_1Q}, 0),
+			ROUND(#{ACHIEVE_GP_2Q}, 0),
+			ROUND(#{ACHIEVE_GP_3Q}, 0),
+			ROUND(#{ACHIEVE_GP_4Q}, 0)
+		)
+	</insert>
+	
+	<insert id="insertOurMembersInfo" parameterType="hashmap">
+	        INSERT INTO OUR_MEMBERS_INFO
+	        (
+	        	MEMBER_DIVISION,
+	        	MEMBER_POST,
+	        	MEMBER_TEAM,
+	        	MEMBER_ID_NUM,
+	        	HAN_NAME,
+	        	POSITION_STATUS,
+	        	POSITION_RANK,
+	        	POSITION_DUTY,
+	        	POSITION_TYPE,
+	        	BUSINESS_DUTY,
+	        	JOIN_DATE,
+	        	STOP_DATE,
+	        	CELL_PHONE,
+	        	PHONE,
+	        	EMAIL,
+	        	FRIENDSHIP_COMPANY,
+	        	FRIENDSHIP_CUSTOMER,
+	        	PERSONAL_PHOTO,
+	        	PHOTO_TYPE,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE
+	        )
+			VALUES
+			(
+				#{MEMBER_DIVISION},
+				#{MEMBER_POST},
+				#{MEMBER_TEAM},
+				#{MEMBER_ID_NUM},
+				#{HAN_NAME},
+				#{POSITION_STATUS},
+				#{POSITION_RANK},
+				#{POSITION_DUTY},
+				#{POSITION_TYPE},
+				#{BUSINESS_DUTY},
+				#{JOIN_DATE},
+				#{STOP_DATE},
+				#{CELL_PHONE},
+				#{PHONE},
+				#{EMAIL},
+				#{FRIENDSHIP_COMPANY},
+				#{FRIENDSHIP_CUSTOMER},
+				#{PERSONAL_PHOTO},
+				#{PHOTO_TYPE},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertErpSalesPlan" parameterType="hashmap">
+	        INSERT INTO OUR_MEMBERS_INFO
+	        (
+	        	PERF_TARGET_ID,
+	        	MEMBER_ID_NUM,
+	        	BASIS_DATE,
+	        	BOOKING_TYPE,
+	        	TARGET_TCV_AMOUNT,
+	        	TARGET_REV_AMOUNT,
+	        	TARGET_GP_AMOUNT,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE
+	        )
+			VALUES
+			(
+				#{PERF_TARGET_ID},
+				#{MEMBER_ID_NUM},
+				#{BASIS_DATE},
+				#{BOOKING_TYPE},
+				#{TARGET_TCV_AMOUNT},
+				#{TARGET_REV_AMOUNT},
+				#{TARGET_GP_AMOUNT},
+				CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<select id="selectAllClientCompanyId" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			COMPANY_ID 
+		FROM CLIENT_COMPANY_INFO
+	</select>
+	
+	
+	<select id="selectTeamInfo" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			* 
+		FROM OUR_TEAM_INFO
+		WHERE 1=1
+		AND TEAM_NAME = #{TEAM_NAME}
+		]]>
+		<if test="DIVISION_NO != null and DIVISION_NO != '' and DIVISION_NO !=0 ">
+			AND DIVISION_NO = #{DIVISION_NO}
+		</if>
+		<if test="TEAM_TYPE != null and TEAM_TYPE != '' ">
+			AND TEAM_TYPE = #{TEAM_TYPE}
+		</if>		
+		
+	</select>
+	
+	<select id="selectOurDivisionInfo" parameterType="hashmap" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			DIVISION_NO 
+		FROM OUR_DIVISION_INFO
+		WHERE 1=1
+		AND DIVISION_NAME = #{DIVISION_NAME}
+		]]>
+		<if test="DIVISION_TYPE != null and DIVISION_TYPE != '' ">
+			AND DIVISION_TYPE = #{DIVISION_TYPE}
+		</if>
+	</select>
+	
+	<select id="selectMembersInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			OMI.HAN_NAME,
+			OMI.MEMBER_ID_NUM,
+			OTI.TEAM_NAME,
+			ODI.DIVISION_NAME
+		FROM OUR_MEMBERS_INFO AS OMI
+		LEFT OUTER JOIN
+		OUR_TEAM_INFO AS OTI ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		LEFT OUTER JOIN
+		OUR_DIVISION_INFO AS ODI ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+		WHERE 1=1
+		AND OMI.HAN_NAME LIKE CONCAT(#{HAN_NAME}, '%')
+	</select>
+	
+	<select id="selectShareMemberErpSalesActualData" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			FISCAL_YEAR, 
+			ACTUAL_DATE, 
+			HAN_NAME, 
+			MEMBER_ID_NUM, 
+			1Q_ACTUAL_TCV_AMOUNT,
+			1Q_ACTUAL_REV_AMOUNT,
+			1Q_ACTUAL_GP_AMOUNT,
+			2Q_ACTUAL_TCV_AMOUNT, 
+			2Q_ACTUAL_REV_AMOUNT,
+			2Q_ACTUAL_GP_AMOUNT,
+			3Q_ACTUAL_TCV_AMOUNT,
+			3Q_ACTUAL_REV_AMOUNT,
+			3Q_ACTUAL_GP_AMOUNT,
+			4Q_ACTUAL_TCV_AMOUNT,
+			4Q_ACTUAL_REV_AMOUNT,
+			4Q_ACTUAL_GP_AMOUNT,
+			1q_actual_pgp_amount,
+			2q_actual_pgp_amount,
+			3q_actual_pgp_amount,
+			4q_actual_pgp_amount
+		FROM ERP_SALES_ACTUAL
+		WHERE 1=1
+		AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND FISCAL_YEAR = #{FISCAL_YEAR}
+		AND ACTUAL_DATE = #{ACTUAL_DATE}
+	</select>
+	
+	<select id="selectOurMembersInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			*
+		FROM OUR_MEMBERS_INFO
+		WHERE MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+	</select>
+	
+	<select id="selectErpDashBoard" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			*
+		FROM ERP_DASHBOARD_CHECKLIST
+		WHERE PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<delete id="deleteActualData" parameterType="hashmap">
+		DELETE FROM ERP_SALES_ACTUAL
+		WHERE 1=1 
+		AND MEMBER_ID_NUM = #{MEMBER_ID_NUM}
+		AND FISCAL_YEAR = #{FISCAL_YEAR}
+		AND ACTUAL_DATE = #{ACTUAL_DATE}
+	</delete>
+	
+	<delete id="deleteSalesActualData" parameterType="hashmap">
+		DELETE FROM ERP_SALES_ACTUAL
+		WHERE 1=1 
+		AND ACTUAL_DATE = #{ACTUAL_DATE}
+	</delete>
+	
+	<insert id="insertSalesTerritoryAlignNewOurMemberAllMap" parameterType="hashmap">
+		<if test="clientCompanyList.size != 0">
+			INSERT INTO SALES_TERRITORY_ALIGN_MAP (
+				MEMBER_ID_NUM, 
+				COMPANY_ID, 
+				GRANTOR_MEMBER_ID_NUM, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			) VALUES
+			<foreach collection="clientCompanyList" item="item" separator=",">
+			(
+				#{MEMBER_ID_NUM}, 
+				#{item.COMPANY_ID}, 
+				#{creatorId}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			)
+			</foreach>
+		</if>
+	</insert>
+	
+	<insert id="insertOurDivisionInfo" parameterType="hashmap">
+	        INSERT INTO OUR_DIVISION_INFO
+	        (
+	        	DIVISION_NAME,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE,
+	        	DIVISION_TYPE,
+	        	USE_YN,
+	        	DIVISION_LEADER
+	        )
+			VALUES
+			(
+				#{DIVISION_NAME},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP,
+	        	#{DIVISION_TYPE},
+	        	#{USE_YN},
+	        	#{DIVISION_LEADER}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertOurTeamInfo" parameterType="hashmap">
+	        INSERT INTO OUR_TEAM_INFO
+	        (
+	        	TEAM_NAME,
+	        	TEAM_LEADER,
+	        	USE_YN,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE,
+	        	DIVISION_NO,
+	        	TEAM_TYPE
+	        )
+			VALUES
+			(
+				#{TEAM_NAME},
+				#{TEAM_LEADER},
+				#{USE_YN},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP,
+	        	#{DIVISION_NO},
+	        	#{TEAM_TYPE}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertPartnerCompanyInfo" parameterType="hashmap">
+	        INSERT INTO PARTNER_COMPANY_INFO
+	        (
+	        	PARTNER_CODE,
+	        	COMPANY_NAME,
+	        	CEO_NAME,
+	        	COMPANY_TELNO,
+	        	POSTAL_CODE,
+	        	POSTAL_ADDRESS,
+	        	BUSINESS_NUMBER,
+	        	BUSINESS_TYPE,
+	        	BUSINESS_SECTOR,
+	        	COMPANY_STATUS,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE,
+	        	COMPANY_ENNAME,
+	        	CEO_ID,
+	        	PARTNER_CATEGORY,
+	        	COMPANY_ITEM,
+	        	COMPANY_HOMEPAGE,
+	        	COMPANY_FAXNO
+	        	
+	        )
+			VALUES
+			(
+				#{PARTNER_CODE},
+				#{COMPANY_NAME},
+				#{CEO_NAME},
+				#{COMPANY_TELNO},
+				#{POSTAL_CODE},
+				#{POSTAL_ADDRESS},
+				#{BUSINESS_NUMBER},
+				#{BUSINESS_TYPE},
+				#{BUSINESS_SECTOR},
+				#{COMPANY_STATUS},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP,
+	        	#{COMPANY_ENNAME},
+	        	#{CEO_ID},
+	        	'1',
+	        	#{COMPANY_ITEM},
+	        	#{COMPANY_HOMEPAGE},
+	        	#{COMPANY_FAXNO}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertPartnerIndividualInfo" parameterType="hashmap">
+	        INSERT INTO PARTNER_INDIVIDUAL_INFO
+	        (
+	        	PARTNER_ID,
+	        	PARTNER_PERSONAL_NAME,
+	        	DIVISION,
+	        	POST,
+	        	TEAM,
+	        	POSITION,
+	        	SKILL_TYPE,
+	        	DUTY,
+	        	CELL_PHONE,
+	        	PHONE,
+	        	EMAIL,
+	        	FRIENDSHIP_COMPANY,
+	        	FRIENDSHIP_CUSTOMER,
+	        	PERSONAL_INFO,
+	        	PERSONAL_PHOTO,
+	        	PHOTO_TYPE,
+	        	FRIENDSHIP_INFO,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE,
+	        	CREATOR_ID,
+	        	USE_YN,
+	        	POSITION_DUTY
+	        )
+			VALUES
+			(
+				#{PARTNER_ID},
+				#{PARTNER_PERSONAL_NAME},
+				#{DIVISION},
+				#{POST},
+				#{TEAM},
+				#{POSITION},
+				#{SKILL_TYPE},
+				#{DUTY},
+				#{CELL_PHONE},
+				#{PHONE},
+				#{EMAIL},
+				#{FRIENDSHIP_COMPANY},
+				#{FRIENDSHIP_CUSTOMER},
+				#{PERSONAL_INFO},
+				#{PERSONAL_PHOTO},
+				#{PHOTO_TYPE},
+				#{FRIENDSHIP_INFO},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP,
+	        	#{CREATOR_ID},
+	        	'Y',
+	        	#{POSITION_DUTY}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertCodeIndustrySegment" parameterType="hashmap">
+	        INSERT INTO CODE_INDUSTRY_SEGMENT
+	        (
+	        	SEGMENT_CODE,
+	        	SEGMENT_HAN_NAME,
+	        	SEGMENT_ENG_NAME
+	        )
+			VALUES
+			(
+				#{SEGMENT_CODE},
+				#{SEGMENT_HAN_NAME},
+				#{SEGMENT_ENG_NAME}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertCodePartnerSegment" parameterType="hashmap">
+	        INSERT INTO CODE_PARTNER_SEGMENT
+	        (
+	        	PARTNER_CODE,
+	        	PARTNER_LEVEL,
+	        	PARTNER_DETAIL
+	        )
+			VALUES
+			(
+				#{PARTNER_CODE},
+	        	#{PARTNER_LEVEL},
+	        	#{PARTNER_DETAIL}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertVendorSolutionArea" parameterType="hashmap">
+	        INSERT INTO VENDOR_SOLUTION_AREA
+	        (
+	        	PRODUCT_VENDOR,
+	        	PRODUCT_GROUP,
+	        	SOLUTION_AREA
+	        )
+			VALUES
+			(
+				#{PRODUCT_VENDOR},
+				#{PRODUCT_GROUP},
+				#{SOLUTION_AREA}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertErpCompanyCredit" parameterType="hashmap">
+	        INSERT INTO ERP_COMPANY_CREDIT
+	        (
+	        	COMPANY_CODE,
+	        	COMPANY_NAME,
+	        	BUSINESS_NUMBER,
+	        	LOAN_GRADE,
+	        	CREDIT_AMOUNT,
+	        	BUSINESS_STATUS,
+	        	AUDIT_OPINION,
+	        	CREDIT_GRADE,
+	        	CASH_FLOW
+	        )
+			VALUES
+			(
+				#{COMPANY_CODE},
+	        	#{COMPANY_NAME},
+	        	#{BUSINESS_NUMBER},
+	        	#{LOAN_GRADE},
+	        	#{CREDIT_AMOUNT},
+	        	#{BUSINESS_STATUS},
+	        	#{AUDIT_OPINION},
+	        	#{CREDIT_GRADE},
+	        	#{CASH_FLOW}
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertErpSalesProject" parameterType="hashmap">
+	        INSERT INTO ERP_SALES_PROJECT
+	        (
+	        	PROJECT_CODE,
+	        	PROJECT_NAME,
+	        	BOOKING_TYPE_NAME,
+	        	REVISON,
+	        	CONTRACT_COMPANY,
+	        	CLIENT_COMPANY,
+	        	STATE,
+	        	SALES_REP_NAME,
+	        	CONTRACT_DATE,
+	        	TCV_NET_AMOUNT,
+	        	TCV_VAT_AMOUNT,
+	        	TCV_TOTAL_AMOUNT,
+	        	SALES_DIVISION,
+	        	MEMBER_ID_NUM,
+	        	BOOKING_TYPE,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE
+	        )
+			VALUES
+			(
+				#{PROJECT_CODE},
+	        	#{PROJECT_NAME},
+	        	#{BOOKING_TYPE_NAME},
+	        	#{REVISON},
+	        	#{CONTRACT_COMPANY},
+	        	#{CLIENT_COMPANY},
+	        	#{STATE},
+	        	#{SALES_REP_NAME},
+	        	#{CONTRACT_DATE},
+	        	#{TCV_NET_AMOUNT},
+	        	#{TCV_VAT_AMOUNT},
+	        	#{TCV_TOTAL_AMOUNT},
+	        	#{SALES_DIVISION},
+	        	#{MEMBER_ID_NUM},
+	        	#{BOOKING_TYPE},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<insert id="insertErpCompanyAr" parameterType="hashmap">
+	        INSERT INTO ERP_COMPANY_AR
+	        (
+	        	PROJECT_CODE,
+	        	CONTRACT_DATE,
+	        	COMPANY_NAME,
+	        	PROJECT_NAME,
+	        	PROJECT_TYPE,
+	        	AR_AMOUNT,
+	        	COLLECT_DATE,
+	        	SALES_REP_NAME,
+	        	MEMBER_DIVISION,
+	        	TCV_AMOUNT,
+	        	SYS_REGISTER_DATE,
+	        	SYS_UPDATE_DATE
+	        )
+			VALUES
+			(
+	        	#{PROJECT_CODE},
+	        	#{CONTRACT_DATE},
+	        	#{COMPANY_NAME},
+	        	#{PROJECT_NAME},
+	        	#{PROJECT_TYPE},
+	        	#{AR_AMOUNT},
+	        	#{COLLECT_DATE},
+	        	#{SALES_REP_NAME},
+	        	#{MEMBER_DIVISION},
+	        	#{TCV_AMOUNT},
+	        	CURRENT_TIMESTAMP,
+	        	CURRENT_TIMESTAMP
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	<select id="selectCompanyCategoryMaxId"  parameterType="hashmap" resultType="hashmap">
+		SELECT
+			IFNULL(MAX(COMPANY_ID), 0) AS COMPANY_ID
+		FROM CLIENT_COMPANY_INFO
+		WHERE 1=1
+		AND COMPANY_ID LIKE CONCAT(#{CLIENT_CATEGORY}, '%')
+	</select> 
+	
+	<select id="selectClientCompanyInfo"  parameterType="hashmap" resultType="hashmap">
+		SELECT
+			*
+		FROM CLIENT_COMPANY_INFO
+		WHERE 1=1
+		AND COMPANY_ID = #{COMPANY_ID}
+		LIMIT 1
+	</select>
+	
+	<select id="selectCodePartnerSegment"  parameterType="hashmap" resultType="hashmap">
+		SELECT
+			*
+		FROM CODE_PARTNER_SEGMENT
+		WHERE 1=1
+		AND PARTNER_CODE = #{PARTNER_CODE}
+		AND PARTNER_LEVEL = #{PARTNER_LEVEL}
+		LIMIT 1
+	</select>
+	
+	<select id="selectClientCompanyInfo2"  parameterType="hashmap" resultType="hashmap">
+		SELECT
+			*
+		FROM CLIENT_COMPANY_INFO
+		WHERE 1=1
+		AND COMPANY_NAME = #{COMPANY_NAME}
+		AND CLIENT_CATEGORY = #{CLIENT_CATEGORY}
+		LIMIT 1
+	</select>
+	
+	<select id="selectPartnerIdfividualInfo"  parameterType="hashmap" resultType="hashmap">
+		SELECT
+			*
+		FROM PARTNER_INDIVIDUAL_INFO
+		WHERE 1=1
+		AND PARTNER_ID = #{PARTNER_ID}
+		AND PARTNER_PERSONAL_NAME = #{PARTNER_PERSONAL_NAME}
+		LIMIT 1
+	</select>
+	
+	<select id="selectClientIndividualMaxId"  parameterType="hashmap" resultType="hashmap">
+		SELECT
+			IFNULL(MAX(CUSTOMER_ID), 0) AS CUSTOMER_ID
+		FROM CLIENT_INDIVIDUAL_INFO
+		WHERE 1=1
+		AND CUSTOMER_ID LIKE CONCAT(#{CLIENT_CATEGORY}, '%')
+	</select>
+	
+	<update id="updateSequenceInfo" parameterType="hashmap">
+		UPDATE SEQUENCE_INFO SET 
+			CLIENT_COMPANY_SEQUENCE_1 = (SELECT (SELECT MAX(COMPANY_ID) FROM CLIENT_COMPANY_INFO WHERE COMPANY_ID LIKE CONCAT('1', '%')) - 1 * 10000000) + 1,
+ 			CLIENT_COMPANY_SEQUENCE_2 = (SELECT (SELECT MAX(COMPANY_ID) FROM CLIENT_COMPANY_INFO WHERE COMPANY_ID LIKE CONCAT('2', '%')) - 2 * 10000000) + 1,
+ 			CLIENT_COMPANY_SEQUENCE_3 = (SELECT (SELECT MAX(COMPANY_ID) FROM CLIENT_COMPANY_INFO WHERE COMPANY_ID LIKE CONCAT('3', '%')) - 3 * 10000000) + 1,
+ 			CLIENT_INDIVIDUAL_SEQUENCE_1 = (SELECT (SELECT MAX(CUSTOMER_ID) FROM CLIENT_INDIVIDUAL_INFO WHERE CUSTOMER_ID LIKE CONCAT('1', '%')) - 1 * 10000000) + 1,
+ 			CLIENT_INDIVIDUAL_SEQUENCE_2 = (SELECT (SELECT MAX(CUSTOMER_ID) FROM CLIENT_INDIVIDUAL_INFO WHERE CUSTOMER_ID LIKE CONCAT('2', '%')) - 2 * 10000000) + 1,
+ 			CLIENT_INDIVIDUAL_SEQUENCE_3 = (SELECT (SELECT MAX(CUSTOMER_ID) FROM CLIENT_INDIVIDUAL_INFO WHERE CUSTOMER_ID LIKE CONCAT('3', '%')) - 3 * 10000000) + 1
+	</update>
+	
+	<update id="updateErpDashBoard" parameterType="hashmap">
+		UPDATE ERP_DASHBOARD_CHECKLIST SET 
+				DIVISION_NAME = #{DIVISION_NAME},
+	 			TEAM_NAME = #{TEAM_NAME},
+	 			OBTAIN_ORDER_TYPE = #{OBTAIN_ORDER_TYPE}, 
+	 			ACCRUE_REV = #{ACCRUE_REV},
+	 			ACCRUE_GP = #{ACCRUE_GP},
+	 			TCV = #{TCV},
+	 			PROJECT_NAME = #{PROJECT_NAME},
+	 			SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+ 			WHERE PROJECT_ID = #{PROJECT_ID} 
+	</update>
+	
+	<select id="selectPartnerCompanyInfo"  parameterType="hashmap" resultType="hashmap">
+		SELECT
+			PARTNER_ID,
+			PARTNER_CODE,
+			COMPANY_NAME
+		FROM PARTNER_COMPANY_INFO
+		WHERE 1=1
+		AND COMPANY_NAME = #{COMPANY_NAME}
+		<!-- AND PARTNER_CODE = #{PARTNER_CODE} -->
+		<!-- LIMIT 1 -->
+	</select>
+	
+</mapper>
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

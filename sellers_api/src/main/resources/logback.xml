@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<!--layout class="ch.qos.logback.classic.PatternLayout"-->
+		<encoder>
+			<Pattern>%d{yyyy-MM-dd HH:mm:ss} [%-16.16thread] %-5level %-32.32logger{36} - %msg%n</Pattern>
+		</encoder>
+		<!--/layout-->
+	</appender>
+
+	<appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>/log/sellers_demo/sellers.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>/log/sellers_demo/sellers.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>10MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%-16.16thread] %-5level %-32.32logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+<!--     <logger name="com.uni.sellers" level="info"/>
+    <logger name="jdbc.audit" level="error" />
+    <logger name="jdbc.sqltiming" level="error" />
+    <logger name="jdbc.resultset" level="error" />
+    <logger name="org.springframework.core" level="info" />
+	<logger name="org.springframework.beans" level="info" />
+	<logger name="org.springframework.context" level="info" />
+	<logger name="org.springframework.web" level="info" />
+ -->	
+    <logger name="jdbc.audit" level="warn" />
+    <logger name="jdbc.connection" level="info" />
+    <logger name="jdbc.sqltiming" level="warn" />
+    <logger name="jdbc.resultset" level="warn" />
+	<!-- <logger name="org.springframework" level="info" /> -->
+    <logger name="servletException" level="info" />
+    <logger name="com.uni.sellers" level="info"/>
+    
+	<root level="info">
+		<appender-ref ref="STDOUT"/>
+	</root>
+ 
+</configuration>

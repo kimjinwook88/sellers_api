@@ -1,0 +1,5018 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="partnerManagement">
+	
+	<!--  파트너 영업  -->
+	
+	<!-- Capacity -->
+	<select id="gridCapacityIn" parameterType="java.util.List" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				CIS.SEGMENT_HAN_NAME AS BP_NAME,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.BIZ_PLAN_TCV,'')) AS OPP_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW',(SELECT COUNT(*) FROM PARTNER_ALIGN_BYSEGMENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNED_STATUS,'')) AS STATUS_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'')) AS CONDITIONS_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', IF(PABG.SOLVE_STATUS IS NULL OR PABG.SOLVE_STATUS = '' ,'미완료',PABG.SOLVE_STATUS),'')) AS SOLVE_STATUS_HW,
+				
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.BIZ_PLAN_TCV,'')) AS OPP_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', (SELECT COUNT(*) FROM PARTNER_ALIGN_BYSEGMENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', ALIGNED_STATUS,'')) AS STATUS_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', ALIGNED_STATUS,'')) AS HIDDEN_STATUS_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'')) AS CONDITIONS_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', IF(PABG.SOLVE_STATUS IS NULL OR PABG.SOLVE_STATUS = '' ,'미완료',PABG.SOLVE_STATUS),'')) AS SOLVE_STATUS_SW,
+				
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.BIZ_PLAN_TCV,'')) AS OPP_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB',(SELECT COUNT(*) FROM PARTNER_ALIGN_BYSEGMENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNED_STATUS,'')) AS STATUS_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'')) AS CONDITIONS_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', IF(PABG.SOLVE_STATUS IS NULL OR PABG.SOLVE_STATUS = '' ,'미완료',PABG.SOLVE_STATUS),'')) AS SOLVE_STATUS_AH
+			FROM 
+				PARTNER_ALIGN_BYSEGMENT AS PAB
+				INNER JOIN
+				CODE_INDUSTRY_SEGMENT AS CIS ON CIS.SEGMENT_CODE = PAB.SEGMENT_CODE AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR =
+	]]>
+		<choose>
+			<when test="selectAccountYear != null and selectAccountYear != '' ">
+				#{selectAccountYear}
+			</when>
+			<otherwise>
+				DATE_FORMAT(NOW(),'%Y')
+			</otherwise>
+		</choose>
+			INNER JOIN
+			CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND PAB.PARTNER_CODE = CPS.PARTNER_CODE
+			LEFT OUTER JOIN
+			PARTNER_ALIGN_BYSEGMENT_GAP AS PABG ON PAB.ALIGNMENT_ID = PABG.ALIGNMENT_ID, (SELECT @ROWNUM :=0) AS ROWNUM
+		GROUP BY CIS.SEGMENT_HAN_NAME
+		<!-- ORDER BY PAB.SEGMENT_CODE -->
+		<!-- 2017-07-26 김민철 사원 요구 아래와 같으 순서 표시-->
+		ORDER BY FIELD(BP_NAME,'금융업','공공부문','제조업','통신업','유통','교육/병원','서비스') ASC
+	</select>
+	
+	<select id="gridCapacityBp" parameterType="java.util.List" resultType="hashmap">
+	<![CDATA[
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			CCI.COMPANY_NAME AS BP_NAME,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.BIZ_PLAN_TCV,'')) AS OPP_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW',(SELECT COUNT(*) FROM PARTNER_ALIGN_BYCLIENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNED_STATUS,'')) AS STATUS_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'')) AS CONDITIONS_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', IF(PABG.SOLVE_STATUS IS NULL OR PABG.SOLVE_STATUS = '' ,'미완료',PABG.SOLVE_STATUS),'')) AS SOLVE_STATUS_HW,
+			
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.BIZ_PLAN_TCV,'')) AS OPP_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', (SELECT COUNT(*) FROM PARTNER_ALIGN_BYCLIENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.ALIGNED_STATUS,'')) AS STATUS_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'')) AS CONDITIONS_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', IF(PABG.SOLVE_STATUS IS NULL OR PABG.SOLVE_STATUS = '' ,'미완료',PABG.SOLVE_STATUS),'')) AS SOLVE_STATUS_SW,
+			
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.BIZ_PLAN_TCV,'')) AS OPP_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB',(SELECT COUNT(*) FROM PARTNER_ALIGN_BYCLIENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNED_STATUS,'')) AS STATUS_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'')) AS CONDITIONS_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', IF(PABG.SOLVE_STATUS IS NULL OR PABG.SOLVE_STATUS = '' ,'미완료',PABG.SOLVE_STATUS),'')) AS SOLVE_STATUS_AH
+		FROM 
+			PARTNER_ALIGN_BYCLIENT AS PAB
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PAB.COMPANY_ID AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR = 
+	]]>
+		<choose>
+			<when test="selectAccountYear != null and selectAccountYear != '' ">
+				#{selectAccountYear}
+			</when>
+			<otherwise>
+				DATE_FORMAT(NOW(),'%Y')
+			</otherwise>
+		</choose>
+			INNER JOIN
+			CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND PAB.PARTNER_CODE = CPS.PARTNER_CODE
+			LEFT OUTER JOIN
+			PARTNER_ALIGN_BYCLIENT_GAP AS PABG ON PAB.ALIGNMENT_ID = PABG.ALIGNMENT_ID, (SELECT @ROWNUM :=0) AS ROWNUM
+		GROUP BY CCI.COMPANY_NAME
+		ORDER BY PAB.COMPANY_ID
+	</select>
+	
+	<select id="selectCapacityPartnerList" parameterType="java.util.List" resultType="hashmap">
+				<![CDATA[
+					SELECT 
+						PABL.ALIGNMENT_ID, 
+						PABL.PARTNER_ID, 
+						PABL.SYS_REGISTER_DATE, 
+						PABL.SYS_UPDATE_DATE
+						PARTNER_CODE, 
+						PCI.COMPANY_NAME, 
+						PCI.CEO_NAME, 
+						PCI.COMPANY_TELNO, 
+						PCI.POSTAL_CODE, 
+						PCI.POSTAL_ADDRESS, 
+						PCI.BUSINESS_NUMBER, 
+						PCI.BUSINESS_TYPE, 
+						PCI.BUSINESS_SECTOR, 
+						PCI.COMPANY_STATUS, 
+						PCI.COMPANY_ENNAME
+					FROM 
+				]]>
+					<choose>
+						<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+						PARTNER_ALIGN_BYCLIENT_LIST AS PABL
+						</when>
+						<otherwise>
+						PARTNER_ALIGN_BYSEGMENT_LIST AS PABL
+						</otherwise>
+					</choose>
+						INNER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PABL.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND PABL.ALIGNMENT_ID = #{alignment_id}
+	</select>
+	
+	<select id="selectCapacityPartnerAction" parameterType="java.util.List" resultType="hashmap">
+			SELECT 
+				GAP.ALIGNMENT_ID, 
+				GAP.GAP_AREA, 
+				GAP.RECOVERY_PLAN, 
+				GAP.SOLVE_MANAGER_ID,
+				GAP.SOLVE_DATE,
+				GAP.SOLVE_STATUS,
+				GAP.SYS_REGISTER_DATE, 
+				GAP.SYS_UPDATE_DATE,
+				OMI.HAN_NAME AS SOLVE_MANAGER_NAME
+			FROM 
+				<choose>
+					<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+					PARTNER_ALIGN_BYCLIENT_GAP AS GAP
+					</when>
+					<otherwise>
+					PARTNER_ALIGN_BYSEGMENT_GAP AS GAP
+					</otherwise>
+				</choose>
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON GAP.SOLVE_MANAGER_ID = OMI.MEMBER_ID_NUM 
+			WHERE 1=1
+			AND ALIGNMENT_ID = #{alignment_id}
+	</select>
+	
+	<update id="updateCapacityCompanyBp" parameterType="hashmap">
+		UPDATE PARTNER_ALIGN_BYCLIENT
+			SET 
+				ALIGNED_STATUS=#{HIDDEN_STATUS_HW}, 
+				BIZ_PLAN_TCV=#{OPP_HW}, 
+				BIZ_ACTUAL_TCV=#{SALES_HW}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND ALIGNMENT_ID=#{ALIGNMENT_ID_HW};
+				
+		UPDATE PARTNER_ALIGN_BYCLIENT
+			SET 
+				ALIGNED_STATUS=#{HIDDEN_STATUS_SW}, 
+				BIZ_PLAN_TCV=#{OPP_SW}, 
+				BIZ_ACTUAL_TCV=#{SALES_SW}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND ALIGNMENT_ID=#{ALIGNMENT_ID_SW};
+		
+		UPDATE PARTNER_ALIGN_BYCLIENT
+			SET 
+				ALIGNED_STATUS=#{HIDDEN_STATUS_AH}, 
+				BIZ_PLAN_TCV=#{OPP_AH}, 
+				BIZ_ACTUAL_TCV=#{SALES_AH}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND ALIGNMENT_ID=#{ALIGNMENT_ID_AH};
+	</update>
+	
+	<update id="updateCapacityCompanyIn" parameterType="hashmap">
+		UPDATE PARTNER_ALIGN_BYSEGMENT
+			SET 
+				ALIGNED_STATUS=#{HIDDEN_STATUS_HW}, 
+				BIZ_PLAN_TCV=#{OPP_HW}, 
+				BIZ_ACTUAL_TCV=#{SALES_HW}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND ALIGNMENT_ID=#{ALIGNMENT_ID_HW};
+				
+		UPDATE PARTNER_ALIGN_BYSEGMENT
+			SET 
+				ALIGNED_STATUS=#{HIDDEN_STATUS_SW}, 
+				BIZ_PLAN_TCV=#{OPP_SW}, 
+				BIZ_ACTUAL_TCV=#{SALES_SW}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND ALIGNMENT_ID=#{ALIGNMENT_ID_SW};
+		
+		UPDATE PARTNER_ALIGN_BYSEGMENT
+			SET 
+				ALIGNED_STATUS=#{HIDDEN_STATUS_AH}, 
+				BIZ_PLAN_TCV=#{OPP_AH}, 
+				BIZ_ACTUAL_TCV=#{SALES_AH}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND ALIGNMENT_ID=#{ALIGNMENT_ID_AH};
+	</update>
+	
+	<select id="partnerSalesGroup1" parameterType="java.util.List" resultType="hashmap">
+		SELECT LEFT(FISCAL_YEAR,4) AS FISCAL_YEAR
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				FROM PARTNER_ALIGN_BYCLIENT
+			</when>
+			<otherwise>
+				FROM PARTNER_ALIGN_BYSEGMENT
+			</otherwise>
+		</choose>
+		GROUP BY FISCAL_YEAR
+		ORDER BY FISCAL_YEAR DESC
+	</select>
+	
+	<select id="partnerSalesGroup2" parameterType="java.util.List" resultType="hashmap">
+		SELECT IFNULL(MAX(LEFT(FISCAL_YEAR,4)),'') AS FISCAL_YEAR
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				FROM PARTNER_ALIGN_BYCLIENT
+			</when>
+			<otherwise>
+				FROM PARTNER_ALIGN_BYSEGMENT
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="createCapacity" parameterType="hashmap">
+		<choose>
+				<when test="selectCreateViewList != null and selectCreateViewList.equalsIgnoreCase('bp') ">
+					<![CDATA[
+					INSERT INTO PARTNER_ALIGN_BYCLIENT (FISCAL_YEAR, COMPANY_ID, PARTNER_CODE, ALIGNED_CNT, ALIGNED_STATUS, BIZ_BUDGET_AMOUNT, BIZ_PLAN_TCV, BIZ_ACTUAL_TCV, SYS_REGISTER_DATE, SYS_UPDATE_DATE)
+					SELECT 
+								#{selectCreateYear},
+								CCI.COMPANY_ID,
+								CPS.PARTNER_CODE,
+								NULL,
+								NULL,
+								NULL,
+								NULL,
+								NULL,
+								CURRENT_TIMESTAMP,
+								CURRENT_TIMESTAMP
+					FROM 
+						CLIENT_COMPANY_INFO AS CCI
+						CROSS JOIN
+						CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y'
+					]]>
+				</when>
+				<otherwise>
+					<![CDATA[
+						INSERT INTO PARTNER_ALIGN_BYSEGMENT (FISCAL_YEAR, SEGMENT_CODE, PARTNER_CODE, ALIGNED_CNT, ALIGNED_STATUS, BIZ_BUDGET_AMOUNT, BIZ_PLAN_TCV, BIZ_ACTUAL_TCV, SYS_REGISTER_DATE, SYS_UPDATE_DATE)
+						SELECT 
+									#{selectCreateYear},
+									CIS.SEGMENT_CODE,
+									CPS.PARTNER_CODE,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									NULL,
+									CURRENT_TIMESTAMP,
+									CURRENT_TIMESTAMP
+						FROM 
+							CODE_INDUSTRY_SEGMENT AS CIS
+							CROSS JOIN
+							CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND CIS.USE_YN = 'Y'
+					]]>
+				</otherwise>
+		</choose>
+	</insert>
+	
+	<delete id="deleteCapacityParnter" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				DELETE FROM PARTNER_ALIGN_BYCLIENT_LIST WHERE 1=1 AND ALIGNMENT_ID = #{alignmentid} AND PARTNER_ID = #{partnerid}
+			</when>
+			<otherwise>
+				DELETE FROM PARTNER_ALIGN_BYSEGMENT_LIST WHERE 1=1 AND ALIGNMENT_ID = #{alignmentid} AND PARTNER_ID = #{partnerid}
+			</otherwise>
+		</choose>
+	</delete>
+	
+	<delete id="deleteCapacityParnterAll" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				DELETE FROM PARTNER_ALIGN_BYCLIENT_LIST WHERE 1=1 AND ALIGNMENT_ID = #{alignment_id}
+			</when>
+			<otherwise>
+				DELETE FROM PARTNER_ALIGN_BYSEGMENT_LIST WHERE 1=1 AND ALIGNMENT_ID = #{alignment_id}
+			</otherwise>
+		</choose>
+	</delete>
+	
+	<insert id="insertCapacityParnter" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				<![CDATA[
+					INSERT INTO PARTNER_ALIGN_BYCLIENT_LIST
+					(
+						ALIGNMENT_ID, 
+						PARTNER_ID, 
+						SYS_REGISTER_DATE, 
+						SYS_UPDATE_DATE
+					)
+					VALUES
+					(
+						#{alignment_id}, 
+						#{partner_id}, 
+						CURRENT_TIMESTAMP, 
+						CURRENT_TIMESTAMP
+					);
+				]]>
+			</when>
+			<otherwise>
+				<![CDATA[
+					INSERT INTO PARTNER_ALIGN_BYSEGMENT_LIST
+					(
+						ALIGNMENT_ID, 
+						PARTNER_ID, 
+						SYS_REGISTER_DATE, 
+						SYS_UPDATE_DATE
+					)
+					VALUES
+					(
+						#{alignment_id}, 
+						#{partner_id}, 
+						CURRENT_TIMESTAMP, 
+						CURRENT_TIMESTAMP
+					);
+				]]>
+			</otherwise>
+		</choose>
+	</insert>
+	
+	<select id="selectCapacityGapCount" parameterType="java.util.List" resultType="Integer">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				<![CDATA[
+					SELECT COUNT(*) FROM PARTNER_ALIGN_BYCLIENT_GAP WHERE 1=1 AND ALIGNMENT_ID = #{alignment_id}
+				]]>
+			</when>
+			<otherwise>
+				<![CDATA[
+					SELECT COUNT(*) FROM PARTNER_ALIGN_BYSEGMENT_GAP WHERE 1=1 AND ALIGNMENT_ID = #{alignment_id}
+				]]>
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insertCapacityAction" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+					INSERT INTO PARTNER_ALIGN_BYCLIENT_GAP
+			</when>
+			<otherwise>
+					INSERT INTO PARTNER_ALIGN_BYSEGMENT_GAP
+			</otherwise>
+		</choose>
+					(
+						ALIGNMENT_ID, 
+						GAP_AREA, 
+						SOLVE_MANAGER_ID,
+						SOLVE_DATE, 
+						SOLVE_STATUS,
+						SYS_REGISTER_DATE,
+						SYS_UPDATE_DATE
+					)
+					VALUES(
+						#{alignment_id}, 
+						#{textareaModalGap},
+						#{hiddenModalSolveManagerId},
+						 <choose>
+							<when test="textModalSolveDate != null and textModalSolveDate != '' ">
+								#{textModalSolveDate},
+							</when>
+							<otherwise>
+								NULL,
+							</otherwise>
+						</choose>
+						#{selectModalSolveStatus}, 
+						CURRENT_TIMESTAMP, 
+						CURRENT_TIMESTAMP
+					);
+	</insert>
+	
+	<update id="updateCapacityAction" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+					UPDATE PARTNER_ALIGN_BYCLIENT_GAP
+			</when>
+			<otherwise>
+					UPDATE PARTNER_ALIGN_BYSEGMENT_GAP
+			</otherwise>
+		</choose>
+						SET 
+						GAP_AREA=#{textareaModalGap},
+						SOLVE_MANAGER_ID = #{hiddenModalSolveManagerId},
+						<choose>
+							<when test="textModalSolveDate != null and textModalSolveDate != '' ">
+								SOLVE_DATE = #{textModalSolveDate},
+							</when>
+							<otherwise>
+								SOLVE_DATE = NULL,
+							</otherwise>
+						</choose> 
+						SOLVE_STATUS = #{selectModalSolveStatus},
+						SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+					WHERE ALIGNMENT_ID=#{alignment_id};
+	</update>
+	
+	<update id="updateCondition" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				<![CDATA[
+					UPDATE PARTNER_ALIGN_BYCLIENT
+						SET 
+						CONDITIONS=#{selectModalCondition},
+						SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+					WHERE ALIGNMENT_ID=#{alignment_id};
+				]]>
+			</when>
+			<otherwise>
+				<![CDATA[
+					UPDATE PARTNER_ALIGN_BYSEGMENT
+						SET 
+						CONDITIONS=#{selectModalCondition}, 
+						SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+					WHERE ALIGNMENT_ID=#{alignment_id};
+				]]>
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- Recruitment -->
+	<select id="gridRecruitmentIn" parameterType="java.util.List" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				CIS.SEGMENT_HAN_NAME AS BP_NAME,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.BIZ_PLAN_TCV,'')) AS OPP_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW',(SELECT COUNT(*) FROM PARTNER_ALIGN_BYSEGMENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNED_STATUS,'')) AS STATUS_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_HW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMHW', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'-')) AS CONDITIONS_HW,
+				
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.BIZ_PLAN_TCV,'')) AS OPP_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', (SELECT COUNT(*) FROM PARTNER_ALIGN_BYSEGMENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', ALIGNED_STATUS,'')) AS STATUS_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', ALIGNED_STATUS,'')) AS HIDDEN_STATUS_SW,
+				MAX(IF(PAB.PARTNER_CODE = 'IBMSW', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'-')) AS CONDITIONS_SW,
+				
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.BIZ_PLAN_TCV,'')) AS OPP_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB',(SELECT COUNT(*) FROM PARTNER_ALIGN_BYSEGMENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNED_STATUS,'')) AS STATUS_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_AH,
+				MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', IF(PAB.CONDITIONS IS NULL OR PAB.CONDITIONS = '' ,'-',PAB.CONDITIONS),'-')) AS CONDITIONS_AH
+			FROM 
+				PARTNER_ALIGN_BYSEGMENT AS PAB
+				INNER JOIN
+				CODE_INDUSTRY_SEGMENT AS CIS ON CIS.SEGMENT_CODE = PAB.SEGMENT_CODE AND PAB.CONDITIONS='Recruitment' AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR =
+		]]>
+		<choose>
+			<when test="selectAccountYear != null and selectAccountYear != '' ">
+				#{selectAccountYear}
+			</when>
+			<otherwise>
+				DATE_FORMAT(NOW(),'%Y')
+			</otherwise>
+		</choose>
+			INNER JOIN
+			CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND PAB.PARTNER_CODE = CPS.PARTNER_CODE, (SELECT @ROWNUM :=0) AS ROWNUM
+		GROUP BY CIS.SEGMENT_HAN_NAME
+		ORDER BY PAB.SEGMENT_CODE
+	</select>
+	
+	
+	<select id="gridRecruitmentBp" parameterType="java.util.List" resultType="hashmap">
+		<![CDATA[
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			CCI.COMPANY_NAME AS BP_NAME,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.BIZ_PLAN_TCV,'')) AS OPP_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW',(SELECT COUNT(*) FROM PARTNER_ALIGN_BYCLIENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNED_STATUS,'')) AS STATUS_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_HW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMHW', IF(CONDITIONS IS NULL OR CONDITIONS = '' ,'-',CONDITIONS),'-')) AS CONDITIONS_HW,
+			
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.BIZ_PLAN_TCV,'')) AS OPP_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', (SELECT COUNT(*) FROM PARTNER_ALIGN_BYCLIENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.ALIGNED_STATUS,'')) AS STATUS_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_SW,
+			MAX(IF(PAB.PARTNER_CODE = 'IBMSW', IF(CONDITIONS IS NULL OR CONDITIONS = '' ,'-',CONDITIONS),'-')) AS CONDITIONS_SW,
+			
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNMENT_ID,'')) AS ALIGNMENT_ID_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.BIZ_PLAN_TCV,'')) AS OPP_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.BIZ_ACTUAL_TCV,'')) AS SALES_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB',(SELECT COUNT(*) FROM PARTNER_ALIGN_BYCLIENT_LIST WHERE ALIGNMENT_ID = PAB.ALIGNMENT_ID),0)) AS ALIGN_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNED_STATUS,'')) AS STATUS_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', PAB.ALIGNED_STATUS,'')) AS HIDDEN_STATUS_AH,
+			MAX(IF(PAB.PARTNER_CODE = 'AHNLAB', IF(CONDITIONS IS NULL OR CONDITIONS = '' ,'-',CONDITIONS),'-')) AS CONDITIONS_AH
+		FROM 
+			PARTNER_ALIGN_BYCLIENT AS PAB
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PAB.COMPANY_ID AND PAB.CONDITIONS='Recruitment' AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR = 
+	]]>
+			<choose>
+			<when test="selectAccountYear != null and selectAccountYear != '' ">
+				#{selectAccountYear}
+			</when>
+			<otherwise>
+				DATE_FORMAT(NOW(),'%Y')
+			</otherwise>
+		</choose>
+			INNER JOIN
+			CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND PAB.PARTNER_CODE = CPS.PARTNER_CODE, (SELECT @ROWNUM :=0) AS ROWNUM
+		GROUP BY CCI.COMPANY_NAME
+		ORDER BY PAB.COMPANY_ID
+	</select>
+	
+	
+	<select id="gridRecruitmentCRB" parameterType="java.util.List" resultType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+			<![CDATA[
+				SELECT 
+						@ROWNUM := @ROWNUM +1 AS ROWNUM,
+						PCM.CRB_ID,
+						PCCL.ALIGNMENT_ID,
+						CCI.COMPANY_NAME AS SEGMENT_NAME,
+						CPS.PARTNER_CODE,
+						PCM.BIZ_SEGMENT,
+						PCM.FISCAL_YEAR,
+						PCM.CRB_SEQ,
+						PCCL.CRB_LOG_ID, 
+						PCCL.PARTNER_NAME, 
+						PCCL.RECOMMENDER, 
+						PCCL.EVAL_ITEM1_RESULT, 
+						PCCL.EVAL_ITEM2_RESULT, 
+						PCCL.EVAL_ITEM3_RESULT, 
+						PCCL.EVAL_ITEM4_RESULT, 
+						PCCL.EVAL_ITEM5_RESULT,
+						PCCL.EVAL_ITEM1_RESULT AS HIDDEN_EVAL_ITEM1_RESULT, 
+						PCCL.EVAL_ITEM2_RESULT AS HIDDEN_EVAL_ITEM2_RESULT, 
+						PCCL.EVAL_ITEM3_RESULT AS HIDDEN_EVAL_ITEM3_RESULT, 
+						PCCL.EVAL_ITEM4_RESULT AS HIDDEN_EVAL_ITEM4_RESULT, 
+						PCCL.EVAL_ITEM5_RESULT AS HIDDEN_EVAL_ITEM5_RESULT,
+						PCCL.CRB_CATEGORY,
+						PCCL.EVAL_FINAL_RESULT, 
+						PCCL.CRB_DATE, 
+						PCCL.CRB_MEMBERS, 
+						PCCL.SYS_REGISTER_DATE,
+						PCCL.SYS_UPDATE_DATE, 
+						PCCL.COMPANY_NAME AS BP_NAME, 
+						PCCL.PARTNER_CODE
+				FROM
+				PARTNER_CRB_MASTER AS PCM  
+				INNER JOIN
+				PARTNER_CRB_CLIENT_LOG AS PCCL ON PCM.CRB_ID = PCCL.CRB_ID AND PCM.FISCAL_YEAR = 
+			]]>
+				<choose>
+					<when test="selectAccountYear != null and selectAccountYear != '' ">
+						#{selectAccountYear}
+					</when>
+					<otherwise>
+						DATE_FORMAT(NOW(),'%Y')
+					</otherwise>
+				</choose>
+				<![CDATA[
+				LEFT OUTER JOIN
+				PARTNER_ALIGN_BYCLIENT AS PAB ON PCCL.ALIGNMENT_ID = PAB.ALIGNMENT_ID
+				INNER JOIN
+				CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PAB.COMPANY_ID AND PAB.PARTNER_CODE <> 'MSSW'
+				INNER JOIN
+				CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND PAB.PARTNER_CODE = CPS.PARTNER_CODE 
+				, (SELECT @ROWNUM :=0) AS ROWNUM
+				]]>
+				WHERE 1=1
+				AND PCM.CRB_SEQ = #{selectCRBseq}
+				ORDER BY PCCL.ALIGNMENT_ID
+			</when>
+			
+			<otherwise>
+				<![CDATA[
+					SELECT 
+						@ROWNUM := @ROWNUM +1 AS ROWNUM,
+						PCM.CRB_ID,
+						PCSL.ALIGNMENT_ID,
+						CIS.SEGMENT_HAN_NAME AS SEGMENT_NAME,
+						CPS.PARTNER_CODE,
+						PCM.BIZ_SEGMENT,
+						PCM.FISCAL_YEAR,
+						PCM.CRB_SEQ,
+						PCSL.CRB_LOG_ID, 
+						PCSL.PARTNER_NAME, 
+						PCSL.RECOMMENDER, 
+						PCSL.EVAL_ITEM1_RESULT, 
+						PCSL.EVAL_ITEM2_RESULT, 
+						PCSL.EVAL_ITEM3_RESULT, 
+						PCSL.EVAL_ITEM4_RESULT, 
+						PCSL.EVAL_ITEM5_RESULT,
+						PCSL.EVAL_ITEM1_RESULT AS HIDDEN_EVAL_ITEM1_RESULT, 
+						PCSL.EVAL_ITEM2_RESULT AS HIDDEN_EVAL_ITEM2_RESULT, 
+						PCSL.EVAL_ITEM3_RESULT AS HIDDEN_EVAL_ITEM3_RESULT, 
+						PCSL.EVAL_ITEM4_RESULT AS HIDDEN_EVAL_ITEM4_RESULT, 
+						PCSL.EVAL_ITEM5_RESULT AS HIDDEN_EVAL_ITEM5_RESULT,
+						PCSL.CRB_CATEGORY,
+						PCSL.EVAL_FINAL_RESULT, 
+						PCSL.CRB_DATE, 
+						PCSL.CRB_MEMBERS, 
+						PCSL.SYS_REGISTER_DATE,
+						PCSL.SYS_UPDATE_DATE, 
+						PCSL.SEGMENT_NAME AS BP_NAME, 
+						PCSL.PARTNER_CODE
+					FROM
+					PARTNER_CRB_MASTER AS PCM  
+					INNER JOIN
+					PARTNER_CRB_SEGMENT_LOG AS PCSL ON PCM.CRB_ID = PCSL.CRB_ID AND PCM.FISCAL_YEAR = 
+				]]>
+				<choose>
+					<when test="selectAccountYear != null and selectAccountYear != '' ">
+						#{selectAccountYear}
+					</when>
+					<otherwise>
+						DATE_FORMAT(NOW(),'%Y')
+					</otherwise>
+				</choose>
+				<![CDATA[
+					LEFT OUTER JOIN
+				 	PARTNER_ALIGN_BYSEGMENT AS PAB ON PCSL.ALIGNMENT_ID = PAB.ALIGNMENT_ID
+				 	INNER JOIN
+					CODE_INDUSTRY_SEGMENT AS CIS ON CIS.SEGMENT_CODE = PAB.SEGMENT_CODE AND PAB.PARTNER_CODE <> 'MSSW'
+					INNER JOIN
+					CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND PAB.PARTNER_CODE = CPS.PARTNER_CODE
+				, (SELECT @ROWNUM :=0) AS ROWNUM
+				]]>
+				WHERE 1=1
+				AND PCM.CRB_SEQ = #{selectCRBseq}
+				ORDER BY PCSL.ALIGNMENT_ID
+			</otherwise>
+		</choose>		
+	</select>
+	
+	
+	
+	<insert id="createRecruitmentMaster" parameterType="hashmap">
+		INSERT INTO PARTNER_CRB_MASTER
+		(
+			BIZ_SEGMENT, 
+			FISCAL_YEAR, 
+			CRB_SEQ, 
+			CRB_MEMBERS, 
+			CRB_DATE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			<choose>
+			<when test="selectCreateViewList != null and selectCreateViewList.equalsIgnoreCase('bp') ">
+			'bp',
+			</when>
+			<otherwise>
+			'in',
+			</otherwise>
+			</choose>
+			#{selectCreateAccountYear}, 
+			#{selectCreatePlace}, 
+			#{selectCreateValuer}, 
+			#{textCreateEvaluationDate}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+		<selectKey keyProperty="masterPK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	
+	<insert id="createRecruitment" parameterType="hashmap">
+	<![CDATA[
+		INSERT INTO partner_crb( BP_NAME, PARTNER_CODE, PARTNER_NAME, GAP_AREA, BIZ_SEGMENT, FISCAL_YEAR)
+		SELECT
+			PCI.PARTNER_ID,
+			CPS.PARTNER_CODE,
+			NULL,
+			PAB.COMPANY_ID,
+			PAB.ALIGNMENT_ID,
+			'bp',
+			PAB.FISCAL_YEAR
+		FROM 
+			PARTNER_ALIGN_BYCLIENT AS PAB
+			INNER JOIN
+			CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PAB.COMPANY_ID AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR =  YEAR(NOW())
+			INNER JOIN
+			CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND PAB.PARTNER_CODE = CPS.PARTNER_CODE
+			LEFT OUTER JOIN
+			PARTNER_ALIGN_BYCLIENT_LIST AS PABL ON PAB.ALIGNMENT_ID = PABL.ALIGNMENT_ID 
+			LEFT OUTER JOIN
+			PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PABL.PARTNER_ID
+		WHERE 1=1
+		AND (PAB.ALIGNED_STATUS = 'Y' OR PAB.ALIGNED_STATUS = 'R' OR PAB.CONDITIONS = 'Recruitment')
+		AND PAB.ALIGNMENT_ID NOT IN (SELECT ALIGNMENT_ID FROM PARTNER_CRB_LOG WHERE BIZ_SEGMENT = 'bp');
+		]]>				
+				
+		<![CDATA[		
+		INSERT INTO PARTNER_CRB_LOG(PARTNER_ID,PARTNER_CODE,SEGMENT_CODE,COMPANY_ID,ALIGNMENT_ID,BIZ_SEGMENT,FISCAL_YEAR)							
+		SELECT
+				PCI.PARTNER_ID,
+				CPS.PARTNER_CODE,
+				PAB.SEGMENT_CODE,
+				NULL,
+				PAB.ALIGNMENT_ID,
+				'in',
+				PAB.FISCAL_YEAR
+		FROM 
+			PARTNER_ALIGN_BYSEGMENT AS PAB
+			INNER JOIN
+			CODE_INDUSTRY_SEGMENT AS CIS ON CIS.SEGMENT_CODE = PAB.SEGMENT_CODE AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR = YEAR(NOW())
+			INNER JOIN
+			CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND PAB.PARTNER_CODE = CPS.PARTNER_CODE
+			LEFT OUTER JOIN
+			PARTNER_ALIGN_BYSEGMENT_LIST AS PABL ON PAB.ALIGNMENT_ID = PABL.ALIGNMENT_ID 
+			LEFT OUTER JOIN
+			PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PABL.PARTNER_ID
+		WHERE 1=1
+		AND (PAB.ALIGNED_STATUS = 'Y' OR PAB.ALIGNED_STATUS = 'R' OR PAB.CONDITIONS = 'Recruitment')
+		AND PAB.ALIGNMENT_ID NOT IN (SELECT ALIGNMENT_ID FROM PARTNER_CRB_LOG WHERE BIZ_SEGMENT = 'in');
+		]]>
+	</insert>
+	
+	<select id="CRBGroup1" parameterType="java.util.List" resultType="hashmap">
+		SELECT CRB_SEQ, DATE_FORMAT(SYS_REGISTER_DATE,'%Y-%m-%d') AS SYS_REGISTER_DATE
+		FROM 
+		PARTNER_CRB_MASTER
+		WHERE 1=1
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+			AND BIZ_SEGMENT = 'bp'
+			</when>
+			<otherwise>
+			AND BIZ_SEGMENT = 'in'
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="selectAccountYear != null and selectAccountYear != '' ">
+			AND FISCAL_YEAR = #{selectAccountYear}
+			</when>
+			<otherwise>
+			AND FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+			</otherwise>
+		</choose>
+		ORDER BY CRB_SEQ DESC
+	</select>
+	
+	<select id="selectCRBid" parameterType="java.util.List" resultType="Integer">
+		SELECT IFNULL(CRB_ID,1) AS CRB_ID
+		FROM 
+		PARTNER_CRB_MASTER
+		WHERE 1=1
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+			AND BIZ_SEGMENT = 'bp'
+			</when>
+			<otherwise>
+			AND BIZ_SEGMENT = 'in'
+			</otherwise>
+		</choose>
+		<if test="selectCRBseq != null and selectCRBseq != '' ">
+			AND CRB_SEQ = #{selectCRBseq}
+		</if>
+	</select>
+	
+	<update id="updateRecruitment" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+			UPDATE PARTNER_RECRUITMENT_BYCLIENT
+				SET 
+					STATUS = #{RECRUIT_STATUS}
+			WHERE 1=1
+			AND ALIGNMENT_ID = #{ALIGNMENT_ID}
+			AND RECRUITMENT_ID=#{RECRUITMENT_ID}
+			</when>
+			<otherwise>
+			UPDATE PARTNER_RECRUITMENT_BYSEGMENT
+				SET 
+					STATUS = #{RECRUIT_STATUS}
+			WHERE 1=1
+			AND ALIGNMENT_ID = #{ALIGNMENT_ID}
+			AND RECRUITMENT_ID=#{RECRUITMENT_ID}
+			</otherwise>
+		</choose>
+	</update>
+	
+	
+	<insert id="createCRB" parameterType="hashmap">
+		INSERT INTO PARTNER_CRB_MASTER
+		(
+			BIZ_SEGMENT, 
+			FISCAL_YEAR, 
+			CRB_SEQ, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{selectViewList}, 
+			#{selectAccountYear}, 
+			#{selectCRBseq}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+		<selectKey keyProperty="crbID" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+		<!-- <choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+			</when>
+			<otherwise>
+			</otherwise>
+		</choose> -->
+	</insert>
+	
+	<insert id="createRecruitmentCRB" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				<![CDATA[
+				INSERT INTO PARTNER_CRB_CLIENT_LOG
+				(CRB_ID,COMPANY_NAME, PARTNER_CODE, SYS_REGISTER_DATE, SYS_UPDATE_DATE)
+				SELECT 
+						${crbID} AS CRB_ID,
+						CCI.COMPANY_NAME,
+						PAB.PARTNER_CODE,
+						CURRENT_TIMESTAMP,
+						CURRENT_TIMESTAMP
+					FROM 
+						PARTNER_ALIGN_BYCLIENT AS PAB
+						INNER JOIN
+						CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PAB.COMPANY_ID AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR = 
+				]]>
+					<choose>
+						<when test="selectAccountYear != null and selectAccountYear != '' ">
+							#{selectAccountYear}
+						</when>
+						<otherwise>
+							DATE_FORMAT(NOW(),'%Y')
+						</otherwise>
+					</choose>
+				WHERE 1=1
+				AND (PAB.CONDITIONS = 'Recruitment')
+				GROUP BY CCI.COMPANY_NAME
+				ORDER BY PAB.ALIGNMENT_ID;
+			</when>
+			<otherwise>
+			<![CDATA[
+				INSERT INTO PARTNER_CRB_SEGMENT_LOG
+				(CRB_ID,SEGMENT_NAME, PARTNER_CODE, SYS_REGISTER_DATE, SYS_UPDATE_DATE)
+				SELECT 
+						${crbID} AS CRB_ID,
+						CIS.SEGMENT_HAN_NAME,
+						PAB.PARTNER_CODE,
+						CURRENT_TIMESTAMP,
+						CURRENT_TIMESTAMP
+					FROM 
+						PARTNER_ALIGN_BYSEGMENT AS PAB
+						INNER JOIN
+						CODE_INDUSTRY_SEGMENT AS CIS ON CIS.SEGMENT_CODE = PAB.SEGMENT_CODE AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR =
+			]]>
+						<choose>
+							<when test="selectAccountYear != null and selectAccountYear != '' ">
+								#{selectAccountYear}
+							</when>
+							<otherwise>
+								DATE_FORMAT(NOW(),'%Y')
+							</otherwise>
+						</choose>
+				WHERE 1=1
+				AND (PAB.CONDITIONS = 'Recruitment')
+				GROUP BY CIS.SEGMENT_HAN_NAME
+				ORDER BY PAB.SEGMENT_CODE;
+			</otherwise>
+		</choose>
+	</insert>
+	
+	
+	<insert id="insertRecruitment" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+			INSERT INTO PARTNER_RECRUITMENT_BYCLIENT
+			(
+				ALIGNMENT_ID, 
+				STATUS, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			(
+				#{ALIGNMENT_ID}, 
+				#{RECRUIT_STATUS}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			);
+			</when>
+			<otherwise>
+			INSERT INTO PARTNER_RECRUITMENT_BYSEGMENT
+			(
+				ALIGNMENT_ID, 
+				STATUS, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			(
+				#{ALIGNMENT_ID}, 
+				#{RECRUIT_STATUS}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			);
+			</otherwise>
+		</choose>
+	</insert>
+	
+	<insert id="insertRecruitmentCRB" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+			INSERT INTO PARTNER_CRB_CLIENT_LOG
+			(
+				CRB_ID,
+				ALIGNMENT_ID, 
+				PARTNER_NAME, 
+				EVAL_ITEM1_RESULT, 
+				EVAL_ITEM2_RESULT, 
+				EVAL_ITEM3_RESULT, 
+				EVAL_ITEM4_RESULT,
+				CRB_CATEGORY, 
+				EVAL_FINAL_RESULT, 
+				CRB_MEMBERS, 
+				CRB_DATE,
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			(
+				#{crb_id}, 
+				#{HIDDEN_ALIGNMENT_ID}, 
+				#{PARTNER_NAME}, 
+				#{HIDDEN_EVAL_ITEM1_RESULT}, 
+				#{HIDDEN_EVAL_ITEM2_RESULT}, 
+				#{HIDDEN_EVAL_ITEM3_RESULT}, 
+				#{HIDDEN_EVAL_ITEM4_RESULT},
+				#{CRB_CATEGORY},
+				#{EVAL_FINAL_RESULT}, 
+				#{CRB_MEMBERS}, 
+				#{CRB_DATE},
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			);
+			</when>
+			<otherwise>
+			INSERT INTO PARTNER_CRB_SEGMENT_LOG
+			(
+				CRB_ID,
+				ALIGNMENT_ID, 
+				PARTNER_NAME, 
+				EVAL_ITEM1_RESULT, 
+				EVAL_ITEM2_RESULT, 
+				EVAL_ITEM3_RESULT, 
+				EVAL_ITEM4_RESULT, 
+				CRB_CATEGORY,
+				EVAL_FINAL_RESULT, 
+				CRB_DATE,
+				CRB_MEMBERS, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			(
+				#{crb_id}, 
+				#{HIDDEN_ALIGNMENT_ID}, 
+				#{PARTNER_NAME}, 
+				#{HIDDEN_EVAL_ITEM1_RESULT}, 
+				#{HIDDEN_EVAL_ITEM2_RESULT}, 
+				#{HIDDEN_EVAL_ITEM3_RESULT}, 
+				#{HIDDEN_EVAL_ITEM4_RESULT},
+				#{CRB_CATEGORY}, 
+				#{EVAL_FINAL_RESULT}, 
+				#{CRB_DATE},
+				#{CRB_MEMBERS}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			);
+			</otherwise>
+		</choose>
+	</insert>
+	
+	<update id="updateRecruitmentCRB" parameterType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				UPDATE PARTNER_CRB_CLIENT_LOG
+					SET 
+						ALIGNMENT_ID =#{HIDDEN_ALIGNMENT_ID},
+						PARTNER_NAME=#{PARTNER_NAME}, 
+						EVAL_ITEM1_RESULT=#{HIDDEN_EVAL_ITEM1_RESULT}, 
+						EVAL_ITEM2_RESULT=#{HIDDEN_EVAL_ITEM2_RESULT}, 
+						EVAL_ITEM3_RESULT=#{HIDDEN_EVAL_ITEM3_RESULT}, 
+						EVAL_ITEM4_RESULT=#{HIDDEN_EVAL_ITEM4_RESULT}, 
+						EVAL_FINAL_RESULT=#{EVAL_FINAL_RESULT},
+						CRB_CATEGORY = #{CRB_CATEGORY}, 
+						CRB_DATE = #{CRB_DATE},
+						CRB_MEMBERS=#{CRB_MEMBERS}, 
+						SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+				WHERE 1=1
+				AND CRB_LOG_ID=#{CRB_LOG_ID};
+			</when>
+			<otherwise>
+				UPDATE PARTNER_CRB_SEGMENT_LOG
+					SET 
+						ALIGNMENT_ID =#{HIDDEN_ALIGNMENT_ID},
+						PARTNER_NAME=#{PARTNER_NAME}, 
+						EVAL_ITEM1_RESULT=#{HIDDEN_EVAL_ITEM1_RESULT}, 
+						EVAL_ITEM2_RESULT=#{HIDDEN_EVAL_ITEM2_RESULT}, 
+						EVAL_ITEM3_RESULT=#{HIDDEN_EVAL_ITEM3_RESULT}, 
+						EVAL_ITEM4_RESULT=#{HIDDEN_EVAL_ITEM4_RESULT},
+						CRB_CATEGORY = #{CRB_CATEGORY}, 
+						EVAL_FINAL_RESULT=#{EVAL_FINAL_RESULT},
+						CRB_DATE = #{CRB_DATE}, 
+						CRB_MEMBERS=#{CRB_MEMBERS}, 
+						SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+				WHERE 1=1
+				AND CRB_LOG_ID=#{CRB_LOG_ID};
+			</otherwise>
+		</choose>
+	</update>
+	
+	<insert id="insertRecruitmentFileCRB" parameterType="hashmap">
+		INSERT INTO PARTNER_CRB_FILE_STORE
+		(
+			BIZ_SEGMENT, 
+			CREATOR_ID, 
+			CREATE_DATETIME, 
+			FILE_NAME, 
+			FILE_PATH, 
+			FILE_TYPE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE, 
+			FISCAL_YEAR,
+			CRB_SEQ
+		)
+		VALUES
+		(
+			<choose>
+				<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+					'bp',
+				</when>
+				<otherwise>
+					'in',
+				</otherwise>
+			</choose> 
+			#{creatorId}, 
+			CURRENT_TIMESTAMP,
+			#{originalFileName}, 
+			#{filePath}, 
+			#{originalFileExtension}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP, 
+			#{selectAccountYear},
+			#{selectCRBseq}
+		);
+	</insert>
+	
+	<select id="recruitmentCRBFileList" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			FILE_ID, 
+			BIZ_SEGMENT, 
+			CREATOR_ID, 
+			CREATE_DATETIME, 
+			FILE_NAME, 
+			FILE_PATH, 
+			FILE_TYPE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE, 
+			FISCAL_YEAR,
+			CRB_SEQ
+		FROM PARTNER_CRB_FILE_STORE
+		WHERE 1=1
+		AND BIZ_SEGMENT = #{selectViewList}
+		AND FISCAL_YEAR = #{selectAccountYear}
+		AND CRB_SEQ = #{selectCRBseq};
+	</select>
+	
+	<select id="selectCRBbpNameJson" parameterType="java.util.List" resultType="hashmap">
+		<choose>
+			<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				<![CDATA[
+					SELECT 
+						CCI.COMPANY_NAME AS BP_NAME,
+						PAB.ALIGNMENT_ID AS ALIGNMENT_ID
+					FROM 
+						PARTNER_ALIGN_BYCLIENT AS PAB
+						INNER JOIN
+						CLIENT_COMPANY_INFO AS CCI ON CCI.COMPANY_ID = PAB.COMPANY_ID AND PAB.CONDITIONS='Recruitment' AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR = 
+				]]>
+						<choose>
+						<when test="selectAccountYear != null and selectAccountYear != '' ">
+							#{selectAccountYear}
+						</when>
+						<otherwise>
+							DATE_FORMAT(NOW(),'%Y')
+						</otherwise>
+					</choose>
+					GROUP BY CCI.COMPANY_NAME
+					ORDER BY PAB.COMPANY_ID
+			</when>
+			<otherwise>
+				<![CDATA[
+				SELECT 
+						CIS.SEGMENT_HAN_NAME AS BP_NAME,
+						PAB.ALIGNMENT_ID AS ALIGNMENT_ID
+					FROM 
+						PARTNER_ALIGN_BYSEGMENT AS PAB
+						INNER JOIN
+						CODE_INDUSTRY_SEGMENT AS CIS ON CIS.SEGMENT_CODE = PAB.SEGMENT_CODE AND PAB.CONDITIONS='Recruitment' AND PAB.PARTNER_CODE <> 'MSSW' AND PAB.FISCAL_YEAR =
+				]]>
+						<choose>
+							<when test="selectAccountYear != null and selectAccountYear != '' ">
+								#{selectAccountYear}
+							</when>
+							<otherwise>
+								DATE_FORMAT(NOW(),'%Y')
+							</otherwise>
+						</choose>
+				GROUP BY CIS.SEGMENT_HAN_NAME
+				ORDER BY PAB.SEGMENT_CODE
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- Enablement -->
+	<select id="gridEnablement" parameterType="java.util.List" resultType="hashmap">
+	<![CDATA[
+			SELECT 
+				ENTB.*,
+				@ROWNUMOT := @ROWNUMOT + 1 AS ROWNUM
+			FROM 
+			(
+				SELECT 
+					PEP.EDU_PLAN_ID, 
+					PEP.CREATOR_ID, 
+					PEP.CREATE_DATE, 
+					PEP.EDU_AREA, 
+					PEP.EDU_KIND, 
+					PEP.EDU_SUBJECT, 
+					PEP.EDU_TARGET, 
+					PEP.EDU_BUDGET, 
+					PEP.START_DATE, 
+					PEP.END_DATE, 
+					PEP.TOTAL_HOURS, 
+					PEP.EDU_CONTENT, 
+					DATE_FORMAT(PEP.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(PEP.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(PEP.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					PEL.SAT_VALUE,
+					PEL.SAT_COUNT,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID_NUM,
+					CONCAT('[',VSA.PRODUCT_VENDOR,'] ',VSA.SOLUTION_AREA) AS SOLUTION_AREA,
+					PEFS.FILE_COUNT
+				FROM 
+					PARTNER_ENABLE_PLAN AS PEP
+					LEFT OUTER JOIN
+					(
+						SELECT 
+							TMP2.*
+						FROM(	
+							 SELECT
+							 	TMP.*,
+							 	IF(@PREV <> TMP.EDU_PLAN_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, 
+							 	@PREV := TMP.EDU_PLAN_ID
+							 FROM
+							 (
+								SELECT 
+									EDU_PLAN_ID,
+									SAT_VALUE,
+									COUNT(SAT_VALUE) AS SAT_COUNT
+								FROM PARTNER_ENABLE_LOG
+								WHERE 1=1
+								GROUP BY EDU_PLAN_ID, SAT_VALUE
+								ORDER BY SAT_COUNT DESC, SAT_COUNT ASC
+							) AS TMP,(SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT  
+							WHERE 1=1
+							ORDER BY TMP.EDU_PLAN_ID, TMP.SAT_COUNT DESC
+						) AS TMP2
+						WHERE 1=1
+						AND TMP2.RANK = 1
+					) AS PEL ON PEP.EDU_PLAN_ID = PEL.EDU_PLAN_ID			
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON PEP.CREATOR_ID = OMI.MEMBER_ID_NUM
+					LEFT OUTER JOIN
+					VENDOR_SOLUTION_AREA AS VSA ON VSA.SOLUTION_ID = PEP.EDU_AREA
+					LEFT OUTER JOIN
+		            (
+		            	SELECT COUNT(EDU_PLAN_ID) AS FILE_COUNT, EDU_PLAN_ID
+		            	FROM PARTNER_ENABLE_FILE_STORE
+		            	GROUP BY EDU_PLAN_ID
+		            ) AS PEFS ON PEFS.EDU_PLAN_ID = PEP.EDU_PLAN_ID
+			) AS ENTB , (SELECT @ROWNUMOT:=0) AS ROWNUMOT
+			WHERE 1=1
+			ORDER BY ROWNUM DESC;
+	]]>			
+	</select>
+	
+	
+	<select id="selectEnablementCount" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					COUNT(*) AS listCount, GROUP_CONCAT(PEP.EDU_PLAN_ID) AS searchPKArray
+				FROM 
+					PARTNER_ENABLE_PLAN AS PEP
+					LEFT OUTER JOIN
+					(
+						SELECT 
+							TMP2.*
+						FROM(	
+							 SELECT
+							 	TMP.*,
+							 	IF(@PREV <> TMP.EDU_PLAN_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, 
+							 	@PREV := TMP.EDU_PLAN_ID
+							 FROM
+							 (
+								SELECT 
+									EDU_PLAN_ID,
+									SAT_VALUE,
+									COUNT(SAT_VALUE) AS SAT_COUNT
+								FROM PARTNER_ENABLE_LOG
+								WHERE 1=1
+								GROUP BY EDU_PLAN_ID, SAT_VALUE
+								ORDER BY SAT_COUNT DESC, SAT_COUNT ASC
+							) AS TMP,(SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT  
+							WHERE 1=1
+							ORDER BY TMP.EDU_PLAN_ID, TMP.SAT_COUNT DESC
+						) AS TMP2
+						WHERE 1=1
+						AND TMP2.RANK = 1
+					) AS PEL ON PEP.EDU_PLAN_ID = PEL.EDU_PLAN_ID			
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON PEP.CREATOR_ID = OMI.MEMBER_ID_NUM
+				WHERE 1=1
+			]]>		
+	</select>
+	
+	<select id="selectEnablementDetail" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					PEP.EDU_PLAN_ID, 
+					PEP.CREATOR_ID, 
+					PEP.CREATE_DATE, 
+					PEP.EDU_AREA, 
+					PEP.EDU_KIND, 
+					PEP.EDU_SUBJECT, 
+					PEP.EDU_TARGET, 
+					PEP.EDU_BUDGET, 
+					PEP.START_DATE, 
+					PEP.END_DATE, 
+					PEP.TOTAL_HOURS, 
+					PEP.EDU_CONTENT, 
+					DATE_FORMAT(PEP.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+					DATE_FORMAT(PEP.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+					IFNULL(DATE_FORMAT(PEP.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i'),NOW()) AS LATELY_UPDATE_DATE,
+					PEL.SAT_VALUE,
+					PEL.SAT_COUNT,
+					OMI.HAN_NAME,
+					OMI.MEMBER_ID_NUM
+				FROM 
+					PARTNER_ENABLE_PLAN AS PEP
+					LEFT OUTER JOIN
+					(
+						SELECT 
+							TMP2.*
+						FROM(	
+							 SELECT
+							 	TMP.*,
+							 	IF(@PREV <> TMP.EDU_PLAN_ID, @CNT := 1, @CNT := @CNT + 1) AS RANK, 
+							 	@PREV := TMP.EDU_PLAN_ID
+							 FROM
+							 (
+								SELECT 
+									EDU_PLAN_ID,
+									SAT_VALUE,
+									COUNT(SAT_VALUE) AS SAT_COUNT
+								FROM PARTNER_ENABLE_LOG
+								WHERE 1=1
+								GROUP BY EDU_PLAN_ID, SAT_VALUE
+								ORDER BY SAT_COUNT DESC, SAT_COUNT ASC
+							) AS TMP,(SELECT @PREV := NULL) AS PREV, (SELECT @CNT := 0) AS CNT  
+							WHERE 1=1
+							ORDER BY TMP.EDU_PLAN_ID, TMP.SAT_COUNT DESC
+						) AS TMP2
+						WHERE 1=1
+						AND TMP2.RANK = 1
+					) AS PEL ON PEP.EDU_PLAN_ID = PEL.EDU_PLAN_ID			
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON PEP.CREATOR_ID = OMI.MEMBER_ID_NUM
+			WHERE 1=1
+				AND PEP.EDU_PLAN_ID = #{pkNo}
+			]]>		
+	</select>
+	
+	
+	 <insert id="insertEnablement" parameterType="hashmap">
+	 INSERT INTO PARTNER_ENABLE_PLAN
+	(
+		CREATOR_ID, 
+		CREATE_DATE, 
+		EDU_AREA, 
+		EDU_KIND, 
+		EDU_LEVEL, 
+		EDU_SUBJECT, 
+		EDU_TARGET, 
+		EDU_BUDGET, 
+		START_DATE, 
+		END_DATE, 
+		TOTAL_HOURS, 
+		EDU_CONTENT
+	)
+	VALUES
+	(
+		#{hiddenModalCreatorId}, 
+		CURRENT_TIMESTAMP, 
+		#{selectModalEduArea}, 
+		#{radioModalEduKind}, 
+		#{radioModalEduLevel}, 
+		#{textModalSubject}, 
+		#{textModalEduTarget}, 
+		#{hiddenModalAmount},
+		<choose>
+			<when test="textModalStartDate != null and textModalStartDate != '' ">
+				#{textModalStartDate},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>  
+		<choose>
+			<when test="textModalEndDate != null and textModalEndDate != '' ">
+				#{textModalEndDate},
+			</when>
+			<otherwise>
+				NULL,
+			</otherwise>
+		</choose>  
+		#{textModalTotalHours}, 
+		#{textareaEduContent} 
+	);
+	<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    </selectKey>
+	</insert>
+	
+	<insert id="insertMilestonesEnablement" parameterType="hashmap">
+		INSERT INTO PARTNER_ENABLE_LOG
+		(
+			EDU_PLAN_ID, 
+			CREATOR_ID, 
+			CREATE_DATE, 
+			PARTNER_INDIVIDUAL_ID, 
+			ATTENDED_HOURS, 
+			CERTIFICATION_YN, 
+			SAT_VALUE,
+			PARTNER_ID
+		)
+		VALUES
+		(
+			#{hiddenModalPK}, 
+			#{hiddenModalCreatorId}, 
+			CURRENT_TIMESTAMP, 
+			#{HIDDEN_PARTNER_INDIVIDUAL_ID}, 
+			#{ATTENDED_HOURS}, 
+			#{CERTIFICATION_YN}, 
+			#{SAT_VALUE},
+			#{HIDDEN_PARTNER_ID}
+		);
+	</insert>
+	
+	<update id="updateEnablement" parameterType="hashmap">
+		UPDATE PARTNER_ENABLE_PLAN
+		SET 
+			EDU_AREA=           #{selectModalEduArea}, 
+			EDU_KIND=           #{radioModalEduKind}, 
+			EDU_LEVEL=           #{radioModalEduLevel}, 
+			EDU_SUBJECT=      #{textModalSubject}, 
+			EDU_TARGET=        #{textModalEduTarget}, 
+			EDU_BUDGET=       #{hiddenModalAmount}, 
+			<choose>
+				<when test="textModalStartDate != null and textModalStartDate != '' ">
+				START_DATE=        #{textModalStartDate}, 
+				</when>
+			<otherwise>
+				START_DATE=        NULL,
+			</otherwise>
+			</choose>  
+			<choose>
+				<when test="textModalEndDate != null and textModalEndDate != '' ">
+				END_DATE=           #{textModalEndDate}, 
+				</when>
+				<otherwise>
+				END_DATE=           NULL,
+				</otherwise>
+			</choose> 
+			TOTAL_HOURS=      #{textModalTotalHours}, 
+			EDU_CONTENT=     #{textareaEduContent}, 
+			SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE EDU_PLAN_ID=#{hiddenModalPK};
+	</update>
+	
+	<update id="updateMilestonesEnablement" parameterType="hashmap">
+		UPDATE PARTNER_ENABLE_LOG
+			SET 
+				PARTNER_INDIVIDUAL_ID =   #{HIDDEN_PARTNER_INDIVIDUAL_ID}, 
+				ATTENDED_HOURS =          			#{ATTENDED_HOURS}, 
+				CERTIFICATION_YN =        			#{CERTIFICATION_YN}, 
+				SAT_VALUE =               			#{SAT_VALUE} ,
+				PARTNER_ID =               			#{HIDDEN_PARTNER_ID} ,
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND EDU_LOG_ID=#{EDU_LOG_ID}
+		AND EDU_PLAN_ID=#{hiddenModalPK};
+	</update>
+	
+	
+	<select id="selectEnablementFileList" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			FILE_ID, 
+			EDU_PLAN_ID, 
+			CREATOR_ID, 
+			CREATE_DATETIME, 
+			FILE_NAME, 
+			FILE_PATH, 
+			FILE_TYPE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		FROM PARTNER_ENABLE_FILE_STORE
+		WHERE 1=1
+		AND EDU_PLAN_ID = #{pkNo}
+	</select>
+	
+	<select id="enablementSearchDetailGroup1" parameterType="java.util.List" resultType="hashmap">
+		SELECT
+			SOLUTION_ID, 
+			PRODUCT_VENDOR, 
+			PRODUCT_GROUP, 
+			SOLUTION_AREA, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE,
+			CONCAT('[',PRODUCT_VENDOR,'] ', SOLUTION_AREA) AS VENDOR_SOLUTION
+		FROM VENDOR_SOLUTION_AREA;
+	</select>
+	
+	<select id="gridMileStonesEnablement" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM + 1 AS ROWNUM,
+			PEL.EDU_LOG_ID, 
+			PEL.EDU_PLAN_ID, 
+			PEL.CREATOR_ID, 
+			PEL.CREATE_DATE, 
+			PEL.PARTNER_INDIVIDUAL_ID AS HIDDEN_PARTNER_INDIVIDUAL_ID, 
+			PEL.ATTENDED_HOURS, 
+			PEL.CERTIFICATION_YN, 
+			PEL.SAT_VALUE, 
+			PEL.PARTNER_ID AS HIDDEN_PARTNER_ID,
+			PCI.COMPANY_NAME AS PARTNER_NAME,
+			PII.PARTNER_PERSONAL_NAME,
+			PEL.SYS_REGISTER_DATE, 
+			PEL.SYS_UPDATE_DATE,
+			PEP.TOTAL_HOURS
+		FROM 
+			PARTNER_ENABLE_PLAN AS PEP
+			INNER JOIN
+			PARTNER_ENABLE_LOG AS PEL ON PEP.EDU_PLAN_ID = PEL.EDU_PLAN_ID 
+			LEFT OUTER JOIN
+			PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PEL.PARTNER_ID
+			LEFT OUTER JOIN
+			PARTNER_INDIVIDUAL_INFO AS PII ON PII.PARTNER_INDIVIDUAL_ID = PEL.PARTNER_INDIVIDUAL_ID AND PEL.EDU_PLAN_ID = #{hiddenModalPK}, (SELECT @ROWNUM:=0) AS ROWNUM
+		WHERE 1=1
+		AND PEP.EDU_PLAN_ID = #{hiddenModalPK}
+	</select>
+	
+
+
+
+
+
+
+
+
+	<!-- SalesLinkage -->	
+	<select id="gridSalesLinkage" parameterType="java.util.List" resultType="hashmap">
+		<!-- bp -->
+		<choose>
+				<when test="selectViewList != null and selectViewList.equalsIgnoreCase('bp') ">
+				SELECT 
+					@ROWNUM := @ROWNUM + 1 AS ROWNUM,			
+					PSL.LINKAGE_ID, 
+					PSL.PARTNER_ID, 
+					PSL.PARTNER_CODE,
+					PSL.FISCAL_YEAR, 
+					PSL.BIZ_SEGMENT, 
+					PSL.SALES_REP_ID, 
+					PSL.RELATED_STAFF, 
+					PSL.DIGITAL, 
+					PSL.CADENCE_CYCLE, 
+					PSL.CADENCE_TYPE, 
+					PSL.PARTNER_INDIVIDUAL_ID, 
+					PSL.CREATOR_ID, 
+					PSL.CREATE_DATE, 
+					PSL.SYS_REGISTER_DATE, 
+					PSL.SYS_UPDATE_DATE,
+					CIS.SEGMENT_CODE,
+					CIS.SEGMENT_HAN_NAME AS COMPANY_NAME,
+					CIS.SEGMENT_ENG_NAME,
+					OMI.HAN_NAME AS SALES_NAME,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_1 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_1
+						ELSE ''
+					END AS MONTH_1,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_2 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_2
+						ELSE ''
+					END AS MONTH_2,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_3 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_3
+						ELSE ''
+					END AS MONTH_3,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_4 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_4
+						ELSE ''
+					END AS MONTH_4,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_5 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_5
+						ELSE ''
+					END AS MONTH_5,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_6 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_6
+						ELSE ''
+					END AS MONTH_6,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_7 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_7
+						ELSE ''
+					END AS MONTH_7,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_8 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_8
+						ELSE ''
+					END AS MONTH_8,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_9 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_9
+						ELSE ''
+					END AS MONTH_9,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_10 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_10
+						ELSE ''
+					END AS MONTH_10,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_11 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_11
+						ELSE ''
+					END AS MONTH_11,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_12 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_12
+						ELSE ''
+					END AS MONTH_12
+				FROM 
+					PARTNER_SALES_LINAKGE AS PSL
+					LEFT OUTER JOIN
+					(
+							SELECT 
+								SUB_MONTH.LINKAGE_ID,
+								SUB_MONTH.CADENCE_CYCLE,
+								SUB_MONTH.CADENCE_TYPE,
+								SUB_MONTH.CADENCE_ID, 
+								SUB_MONTH.EXEC_DATE, 
+								SUB_MONTH.EXEC_CONTENT, 
+								SUB_MONTH.PARTNER_VOICE, 
+								SUB_MONTH.PARTNER_CODE,
+								SUB_MONTH.CREATOR_ID,
+								IF(SUB_MONTH.MONTHLY_1 > 0,'O','X') AS MONTHLY_1,
+								IF(SUB_MONTH.MONTHLY_2 > 0,'O','X') AS MONTHLY_2,
+								IF(SUB_MONTH.MONTHLY_3 > 0,'O','X') AS MONTHLY_3,
+								IF(SUB_MONTH.MONTHLY_4 > 0,'O','X') AS MONTHLY_4,
+								IF(SUB_MONTH.MONTHLY_5 > 0,'O','X') AS MONTHLY_5,
+								IF(SUB_MONTH.MONTHLY_6 > 0,'O','X') AS MONTHLY_6,
+								IF(SUB_MONTH.MONTHLY_7 > 0,'O','X') AS MONTHLY_7,
+								IF(SUB_MONTH.MONTHLY_8 > 0,'O','X') AS MONTHLY_8,
+								IF(SUB_MONTH.MONTHLY_9 > 0,'O','X') AS MONTHLY_9,
+								IF(SUB_MONTH.MONTHLY_10 > 0,'O','X') AS MONTHLY_10,
+								IF(SUB_MONTH.MONTHLY_11 > 0,'O','X') AS MONTHLY_11,
+								IF(SUB_MONTH.MONTHLY_12 > 0,'O','X') AS MONTHLY_12
+						FROM 
+								(
+									SELECT 
+											PSL.LINKAGE_ID,
+											PSL.CADENCE_CYCLE,
+											PSL.CADENCE_TYPE,
+											PSL.PARTNER_CODE,
+											PCL.CADENCE_ID, 
+											PCL.EXEC_DATE, 
+											PCL.EXEC_CONTENT, 
+											PCL.PARTNER_VOICE, 
+											PCL.CREATOR_ID,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_1,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_2,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_3,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_4,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_5,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_6,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_7,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_8,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_9,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_10,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_11,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_12
+									FROM 
+										PARTNER_SALES_LINAKGE AS PSL
+										INNER JOIN
+										PARTNER_CADENCE_LOG AS PCL ON PSL.LINKAGE_ID = PCL.LINKAGE_ID
+										<choose>
+											<when test="selectAccountYear != null and selectAccountYear != '' ">
+											AND PSL.FISCAL_YEAR = #{selectAccountYear}
+											</when>
+											<otherwise>
+											AND PSL.FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+											</otherwise>
+										</choose>
+									GROUP BY PSL.LINKAGE_ID,PSL.CADENCE_TYPE
+						) AS SUB_MONTH
+					) AS MONTH_TB ON PSL.LINKAGE_ID = MONTH_TB.LINKAGE_ID 
+					
+					<choose>
+						<when test="selectAccountYear != null and selectAccountYear != '' ">
+						AND PSL.FISCAL_YEAR = #{selectAccountYear}
+						</when>
+						<otherwise>
+						AND PSL.FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+						</otherwise>
+					</choose>
+					
+					LEFT OUTER JOIN
+					(
+							SELECT 
+								SUB_WEEKLY.LINKAGE_ID,
+								SUB_WEEKLY.CADENCE_CYCLE,
+								SUB_WEEKLY.CADENCE_TYPE,
+								SUB_WEEKLY.CADENCE_ID, 
+								SUB_WEEKLY.EXEC_DATE, 
+								SUB_WEEKLY.EXEC_CONTENT, 
+								SUB_WEEKLY.PARTNER_VOICE, 
+								SUB_WEEKLY.CREATOR_ID,
+								SUB_WEEKLY.PARTNER_CODE,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_1_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_1_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_1_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_1_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_1_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_1,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_2_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_2_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_2_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_2_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_2_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_2,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_3_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_3_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_3_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_3_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_3_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_3,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_4_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_4_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_4_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_4_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_4_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_4,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_5_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_5_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_5_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_5_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_5_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_5,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_6_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_6_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_6_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_6_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_6_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_6,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_7_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_7_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_7_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_7_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_7_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_7,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_8_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_8_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_8_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_8_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_8_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_8,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_9_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_9_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_9_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_9_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_9_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_9,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_10_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_10_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_10_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_10_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_10_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_10,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_11_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_11_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_11_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_11_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_11_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_11,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_12_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_12_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_12_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_12_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_12_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_12
+							FROM
+							(
+								SELECT 
+									PSL.LINKAGE_ID,
+									PSL.CADENCE_CYCLE,
+									PSL.CADENCE_TYPE,
+									PSL.PARTNER_CODE,
+									PCL.CADENCE_ID, 
+									PCL.EXEC_DATE, 
+									PCL.EXEC_CONTENT, 
+									PCL.PARTNER_VOICE, 
+									PCL.CREATOR_ID,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_5,
+								
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_5,
+								
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_5,
+								
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_5,
+								
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_5
+								FROM 
+									PARTNER_SALES_LINAKGE AS PSL
+									INNER JOIN
+									PARTNER_CADENCE_LOG AS PCL ON PSL.LINKAGE_ID = PCL.LINKAGE_ID
+									<choose>
+										<when test="selectAccountYear != null and selectAccountYear != '' ">
+										AND PSL.FISCAL_YEAR = #{selectAccountYear}
+										</when>
+										<otherwise>
+										AND PSL.FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+										</otherwise>
+									</choose>
+								GROUP BY PSL.LINKAGE_ID, PSL.CADENCE_CYCLE
+							)	AS SUB_WEEKLY
+					) AS WEEKLY_TB ON PSL.LINKAGE_ID = WEEKLY_TB.LINKAGE_ID
+					
+					<choose>
+						<when test="selectAccountYear != null and selectAccountYear != '' ">
+						AND PSL.FISCAL_YEAR = #{selectAccountYear}
+						</when>
+						<otherwise>
+						AND PSL.FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+						</otherwise>
+					</choose>
+					
+					INNER JOIN
+					CODE_INDUSTRY_SEGMENT AS CIS ON PSL.PARTNER_ID = CIS.SEGMENT_CODE
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON PSL.SALES_REP_ID = OMI.MEMBER_ID_NUM,(SELECT @ROWNUM := 0) AS ROWNUM
+					WHERE 1=1
+			</when>
+			<!-- in -->
+			<otherwise>
+				SELECT 
+					@ROWNUM := @ROWNUM + 1 AS ROWNUM,			
+					PSL.LINKAGE_ID, 
+					PSL.PARTNER_ID, 
+					PSL.PARTNER_CODE,
+					PSL.FISCAL_YEAR, 
+					PSL.BIZ_SEGMENT, 
+					PSL.SALES_REP_ID, 
+					PSL.RELATED_STAFF, 
+					PSL.DIGITAL, 
+					PSL.CADENCE_CYCLE, 
+					PSL.CADENCE_TYPE, 
+					PSL.PARTNER_INDIVIDUAL_ID, 
+					PSL.CREATOR_ID, 
+					PSL.CREATE_DATE, 
+					PSL.SYS_REGISTER_DATE, 
+					PSL.SYS_UPDATE_DATE,
+					PCI.COMPANY_NAME,
+					PCI.CEO_NAME,
+					PCI.COMPANY_TELNO,
+					OMI.HAN_NAME AS SALES_NAME,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_1 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_1
+						ELSE ''
+					END AS MONTH_1,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_2 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_2
+						ELSE ''
+					END AS MONTH_2,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_3 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_3
+						ELSE ''
+					END AS MONTH_3,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_4 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_4
+						ELSE ''
+					END AS MONTH_4,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_5 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_5
+						ELSE ''
+					END AS MONTH_5,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_6 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_6
+						ELSE ''
+					END AS MONTH_6,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_7 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_7
+						ELSE ''
+					END AS MONTH_7,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_8 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_8
+						ELSE ''
+					END AS MONTH_8,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_9 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_9
+						ELSE ''
+					END AS MONTH_9,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_10 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_10
+						ELSE ''
+					END AS MONTH_10,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_11 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_11
+						ELSE ''
+					END AS MONTH_11,
+					CASE 
+						WHEN PSL.CADENCE_CYCLE = 'Monthly' THEN MONTH_TB.MONTHLY_12 
+						WHEN PSL.CADENCE_CYCLE = 'Weekly' THEN WEEKLY_TB.WEEKLY_12
+						ELSE ''
+					END AS MONTH_12
+				FROM 
+					PARTNER_SALES_LINAKGE AS PSL
+					LEFT OUTER JOIN
+					(
+							SELECT 
+								SUB_MONTH.LINKAGE_ID,
+								SUB_MONTH.CADENCE_CYCLE,
+								SUB_MONTH.CADENCE_TYPE,
+								SUB_MONTH.CADENCE_ID, 
+								SUB_MONTH.EXEC_DATE, 
+								SUB_MONTH.EXEC_CONTENT, 
+								SUB_MONTH.PARTNER_VOICE, 
+								SUB_MONTH.PARTNER_CODE,
+								SUB_MONTH.CREATOR_ID,
+								IF(SUB_MONTH.MONTHLY_1 > 0,'O','X') AS MONTHLY_1,
+								IF(SUB_MONTH.MONTHLY_2 > 0,'O','X') AS MONTHLY_2,
+								IF(SUB_MONTH.MONTHLY_3 > 0,'O','X') AS MONTHLY_3,
+								IF(SUB_MONTH.MONTHLY_4 > 0,'O','X') AS MONTHLY_4,
+								IF(SUB_MONTH.MONTHLY_5 > 0,'O','X') AS MONTHLY_5,
+								IF(SUB_MONTH.MONTHLY_6 > 0,'O','X') AS MONTHLY_6,
+								IF(SUB_MONTH.MONTHLY_7 > 0,'O','X') AS MONTHLY_7,
+								IF(SUB_MONTH.MONTHLY_8 > 0,'O','X') AS MONTHLY_8,
+								IF(SUB_MONTH.MONTHLY_9 > 0,'O','X') AS MONTHLY_9,
+								IF(SUB_MONTH.MONTHLY_10 > 0,'O','X') AS MONTHLY_10,
+								IF(SUB_MONTH.MONTHLY_11 > 0,'O','X') AS MONTHLY_11,
+								IF(SUB_MONTH.MONTHLY_12 > 0,'O','X') AS MONTHLY_12
+						FROM 
+								(
+									SELECT 
+											PSL.LINKAGE_ID,
+											PSL.CADENCE_CYCLE,
+											PSL.CADENCE_TYPE,
+											PSL.PARTNER_CODE,
+											PCL.CADENCE_ID, 
+											PCL.EXEC_DATE, 
+											PCL.EXEC_CONTENT, 
+											PCL.PARTNER_VOICE, 
+											PCL.CREATOR_ID,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_1,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_2,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_3,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_4,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_5,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_6,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_7,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_8,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_9,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_10,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_11,
+											SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND PSL.CADENCE_CYCLE = 'Monthly' , 1, 0)) AS MONTHLY_12
+									FROM 
+										PARTNER_SALES_LINAKGE AS PSL
+										INNER JOIN
+										PARTNER_CADENCE_LOG AS PCL ON PSL.LINKAGE_ID = PCL.LINKAGE_ID
+										<choose>
+										<when test="selectAccountYear != null and selectAccountYear != '' ">
+										AND PSL.FISCAL_YEAR = #{selectAccountYear}
+										</when>
+										<otherwise>
+										AND PSL.FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+										</otherwise>
+									</choose>
+									GROUP BY PSL.LINKAGE_ID,PSL.CADENCE_TYPE
+						) AS SUB_MONTH
+					) AS MONTH_TB ON PSL.LINKAGE_ID = MONTH_TB.LINKAGE_ID 
+					
+					<choose>
+						<when test="selectAccountYear != null and selectAccountYear != '' ">
+						AND PSL.FISCAL_YEAR = #{selectAccountYear}
+						</when>
+						<otherwise>
+						AND PSL.FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+						</otherwise>
+					</choose>
+					
+					LEFT OUTER JOIN
+					(
+							SELECT 
+								SUB_WEEKLY.LINKAGE_ID,
+								SUB_WEEKLY.CADENCE_CYCLE,
+								SUB_WEEKLY.CADENCE_TYPE,
+								SUB_WEEKLY.CADENCE_ID, 
+								SUB_WEEKLY.EXEC_DATE, 
+								SUB_WEEKLY.EXEC_CONTENT, 
+								SUB_WEEKLY.PARTNER_VOICE, 
+								SUB_WEEKLY.CREATOR_ID,
+								SUB_WEEKLY.PARTNER_CODE,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_1_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_1_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_1_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_1_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_1_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_1,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_2_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_2_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_2_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_2_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_2_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_2,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_3_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_3_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_3_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_3_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_3_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_3,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_4_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_4_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_4_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_4_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_4_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_4,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_5_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_5_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_5_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_5_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_5_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_5,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_6_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_6_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_6_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_6_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_6_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_6,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_7_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_7_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_7_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_7_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_7_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_7,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_8_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_8_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_8_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_8_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_8_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_8,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_9_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_9_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_9_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_9_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_9_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_9,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_10_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_10_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_10_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_10_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_10_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_10,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_11_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_11_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_11_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_11_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_11_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_11,
+								CONCAT(
+									IF(SUB_WEEKLY.WEEKLY_12_1 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_12_2 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_12_3 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_12_4 > 0 , 'O ' , 'X '),
+									IF(SUB_WEEKLY.WEEKLY_12_5 > 0 , 'O ' , 'X ')
+								) AS WEEKLY_12
+							FROM
+							(
+								SELECT 
+									PSL.LINKAGE_ID,
+									PSL.CADENCE_CYCLE,
+									PSL.CADENCE_TYPE,
+									PSL.PARTNER_CODE,
+									PCL.CADENCE_ID, 
+									PCL.EXEC_DATE, 
+									PCL.EXEC_CONTENT, 
+									PCL.PARTNER_VOICE, 
+									PCL.CREATOR_ID,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =1 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_1_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =2 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_2_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =3 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_3_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =4 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_4_5,
+								
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =5 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_5_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =6 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_6_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =7 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_7_5,
+								
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =8 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_8_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =9 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_9_5,
+								
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =10 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_10_5,
+								
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =11 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_11_5,
+									
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 1 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_1,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 2 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_2,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 3 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_3,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 4 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_4,
+									SUM(IF(MONTH(PCL.EXEC_DATE) =12 AND (SELECT WEEK(PCL.EXEC_DATE,5) - WEEK(DATE_SUB(PCL.EXEC_DATE,INTERVAL DAYOFMONTH(PCL.EXEC_DATE)-1 DAY),5) + 1) = 5 AND PSL.CADENCE_CYCLE = 'WEEKLY' , 1, 0)) AS WEEKLY_12_5
+								FROM 
+									PARTNER_SALES_LINAKGE AS PSL
+									INNER JOIN
+									PARTNER_CADENCE_LOG AS PCL ON PSL.LINKAGE_ID = PCL.LINKAGE_ID
+									<choose>
+										<when test="selectAccountYear != null and selectAccountYear != '' ">
+										AND PSL.FISCAL_YEAR = #{selectAccountYear}
+										</when>
+										<otherwise>
+										AND PSL.FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+										</otherwise>
+									</choose>
+								GROUP BY PSL.LINKAGE_ID, PSL.CADENCE_CYCLE
+							)	AS SUB_WEEKLY
+					) AS WEEKLY_TB ON PSL.LINKAGE_ID = WEEKLY_TB.LINKAGE_ID
+					
+					<choose>
+						<when test="selectAccountYear != null and selectAccountYear != '' ">
+						AND PSL.FISCAL_YEAR = #{selectAccountYear}
+						</when>
+						<otherwise>
+						AND PSL.FISCAL_YEAR = DATE_FORMAT(NOW(),'%Y')
+						</otherwise>
+					</choose>
+					
+					INNER JOIN
+					PARTNER_COMPANY_INFO AS PCI ON PSL.PARTNER_ID = PCI.PARTNER_ID
+					LEFT OUTER JOIN 
+					OUR_MEMBERS_INFO AS OMI ON PSL.SALES_REP_ID = OMI.MEMBER_ID_NUM,(SELECT @ROWNUM := 0) AS ROWNUM
+					WHERE 1=1
+					<if test="searchvendor != null and searchvendor != ''">
+						AND PCI.COMPANY_NAME LIKE CONCAT('%', #{searchvendor}, '%') 
+					</if>
+					ORDER BY PCI.COMPANY_NAME, PSL.PARTNER_CODE ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="salesLinkageDetailGroup1" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			LEFT(PSL.FISCAL_YEAR,4) AS FISCAL_YEAR
+		FROM 
+			PARTNER_SALES_LINAKGE AS PSL
+			LEFT OUTER JOIN
+			PARTNER_CADENCE_LOG AS PCL ON PSL.LINKAGE_ID = PCL.LINKAGE_ID 
+			INNER JOIN
+			PARTNER_COMPANY_INFO AS PCI ON PSL.PARTNER_ID = PCI.PARTNER_ID
+			WHERE 1=1
+		GROUP BY PSL.FISCAL_YEAR
+		ORDER BY PSL.FISCAL_YEAR DESC
+	</select>
+	
+	<select id="salesLinkageDetailGroup2" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			MAX(LEFT(PSL.FISCAL_YEAR,4)) AS FISCAL_YEAR
+		FROM 
+			PARTNER_SALES_LINAKGE AS PSL
+			LEFT OUTER JOIN
+			PARTNER_CADENCE_LOG AS PCL ON PSL.LINKAGE_ID = PCL.LINKAGE_ID 
+			INNER JOIN
+			PARTNER_COMPANY_INFO AS PCI ON PSL.PARTNER_ID = PCI.PARTNER_ID
+			WHERE 1=1
+	</select>
+	
+	<select id="salesLinkageDetailGroup3" parameterType="hashmap" resultType="Integer"> 
+		SELECT COUNT(CC.PARTNER_CODE) AS CATEGORY_COUNT
+		FROM (
+			SELECT PARTNER_CODE
+			FROM PARTNER_SALES_LINAKGE
+			WHERE 1=1
+			GROUP BY PARTNER_CODE
+		) AS CC
+	</select>
+	
+	<select id="selectSalesLinkageCodeCount" parameterType="String" resultType="Integer"> 
+		SELECT COUNT(LINKAGE_ID) AS LI_COUNT
+		FROM PARTNER_SALES_LINAKGE
+		WHERE 1=1
+		AND PARTNER_CODE = #{PARTNER_CODE}
+	</select>
+	
+	 <insert id="createSalesLinkage" parameterType="hashmap">
+	 	<!-- 영업채널인것 만 insert! -->
+	 	<![CDATA[
+		 	INSERT INTO PARTNER_SALES_LINAKGE(PARTNER_ID, FISCAL_YEAR, PARTNER_CODE, BIZ_SEGMENT, CREATOR_ID, CREATE_DATE, SYS_REGISTER_DATE, SYS_UPDATE_DATE)
+			SELECT
+				PCI.PARTNER_ID,
+				DATE_FORMAT(NOW(),'%Y'),
+				CPS.PARTNER_CODE,
+				'bp',
+				#{create_id},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP
+			FROM
+			CODE_PARTNER_SEGMENT AS CPS
+			CROSS JOIN
+			PARTNER_COMPANY_INFO AS PCI ON CPS.USE_YN = 'Y'
+			WHERE 1=1
+		]]>
+			<if test="partner_id != null and partner_id != '' ">
+			AND PCI.PARTNER_ID = #{partner_id}
+			</if>
+			<if test="PARTNER_CODE_NAME != null and PARTNER_CODE_NAME != '' ">
+			AND CPS.PARTNER_CODE = #{PARTNER_CODE_NAME}
+			</if>
+			ORDER BY PCI.PARTNER_ID,CPS.PARTNER_CODE DESC;
+			<!-- INSERT INTO PARTNER_SALES_LINAKGE(PARTNER_ID, FISCAL_YEAR, PARTNER_CODE, BIZ_SEGMENT, CREATOR_ID, CREATE_DATE, SYS_REGISTER_DATE, SYS_UPDATE_DATE)
+			SELECT
+				CIS.SEGMENT_CODE,
+				DATE_FORMAT(NOW(),'%Y'),
+				CPS.PARTNER_CODE,
+				'in',
+				${create_id},
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP,
+				CURRENT_TIMESTAMP
+			FROM
+			CODE_PARTNER_SEGMENT AS CPS
+			CROSS JOIN
+			CODE_INDUSTRY_SEGMENT AS CIS ON CPS.PARTNER_CODE <> 'MSSW'
+			WHERE 1=1
+			AND CIS.USE_YN = 'Y'
+			ORDER BY CIS.SEGMENT_CODE,CPS.PARTNER_CODE DESC; -->
+	 </insert>
+	
+	
+	<update id="updateSalesLinkage" parameterType="hashmap">
+		UPDATE PARTNER_SALES_LINAKGE
+			SET 
+				SALES_REP_ID=#{hiddenModalSalesMan}, 
+				PARTNER_INDIVIDUAL_ID = #{textModalPartnerName},
+				CADENCE_CYCLE=#{radioModalCadenceCycle}, 
+				CADENCE_TYPE=#{radioModalCadenceType}, 
+				SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+		WHERE LINKAGE_ID=#{hiddenModalPK};
+	</update>
+	
+	<update id="updateSalesLinkageCode" parameterType="hashmap">
+		UPDATE PARTNER_SALES_LINAKGE
+			SET 
+				PARTNER_CODE=#{PARTNER_CODE_NAME}
+		WHERE PARTNER_CODE=#{PARTNER_CODE};
+	</update>
+	
+	<insert id="insertSalesLinkageHistory" parameterType="hashmap">
+		INSERT INTO PARTNER_CADENCE_LOG
+		(	
+			LINKAGE_ID, 
+			EXEC_DATE, 
+			EXEC_CONTENT, 
+			<!-- PARTNER_VOICE, --> 
+			CREATOR_ID, 
+			CREATE_DATE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{hiddenModalPK},
+			#{textHistoryExecDate}, 
+			#{textareaExecContent}, 
+			<!-- #{textareaHistoryVoice}, --> 
+			#{hiddenModalCreatorId}, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+		<selectKey keyProperty="cadence_id" resultType="Integer" order="AFTER">
+	       	SELECT LAST_INSERT_ID();
+	   	</selectKey>
+	</insert>
+	
+	<insert id="updateSalesLinkageHistory" parameterType="hashmap">
+		UPDATE PARTNER_CADENCE_LOG
+			SET
+			 
+				EXEC_CONTENT = #{textareaExecContent}, 
+				<!-- PARTNER_VOICE = #{textareaHistoryVoice}, --> 
+				SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND LINKAGE_ID = #{hiddenModalPK}
+		AND CADENCE_ID = #{cadence_id}
+	</insert>
+	
+	<insert id="insertSalesLinkageHistoryFile" parameterType="hashmap">
+		  INSERT INTO ${fileTableName}
+			(
+				CADENCE_ID,
+				LINKAGE_ID, 
+				CREATOR_ID, 
+				CREATE_DATETIME, 
+				FILE_NAME, 
+				FILE_PATH, 
+				FILE_TYPE
+			)
+			VALUES
+			(
+				#{cadence_id}, 
+				#{linkage_id}, 
+				#{creatorId}, 
+				CURRENT_TIMESTAMP,
+				#{originalFileName}, 
+				#{filePath}, 
+				#{originalFileExtension}
+			);
+	</insert>
+	
+	<select id="salesLinkageFileList" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			FILE_ID, 
+			LINKAGE_ID, 
+			CADENCE_ID,
+			CREATOR_ID, 
+			CREATE_DATETIME, 
+			FILE_NAME, 
+			FILE_PATH, 
+			FILE_TYPE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		FROM PARTNER_SALES_LINAKGE_FILE_STORE
+		WHERE 1=1
+		AND LINKAGE_ID = #{linkage_id}
+		AND CADENCE_ID = #{cadence_id}
+	<!-- 	<choose>
+			<when test="filePKArray != null and filePKArray != '' ">
+			WHERE LINKAGE_ID IN(${filePKArray})
+			</when>
+			<otherwise>
+			WHERE LINKAGE_ID IN('')
+			</otherwise>
+		</choose> -->
+	</select>
+	
+	<select id="selectCadenceDateList" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			CADENCE_ID, 
+			LINKAGE_ID, 
+			EXEC_DATE, 
+			EXEC_CONTENT, 
+			PARTNER_VOICE, 
+			CREATOR_ID, 
+			CREATE_DATE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE 
+		FROM PARTNER_CADENCE_LOG
+		WHERE LINKAGE_ID = #{linkage_id}
+	</select>
+	
+	<select id="selectCadenceDetail" parameterType="java.util.List" resultType="hashmap">
+		SELECT 
+			CADENCE_ID, 
+			LINKAGE_ID, 
+			EXEC_DATE, 
+			EXEC_CONTENT, 
+			PARTNER_VOICE, 
+			CREATOR_ID, 
+			CREATE_DATE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE 
+		FROM PARTNER_CADENCE_LOG
+		WHERE CADENCE_ID = #{cadence_id}
+	</select>
+	
+	<select id="gridActionPlanSalesLinkage" parameterType="java.util.List" resultType="hashmap">
+		SELECT
+			 ACTION_ID, 
+			 CADENCE_ID, 
+			 DETAIL_CONENTS, 
+			 ACTION_OWNER, 
+			 DUE_DATE, 
+			 CLOSE_DATE, 
+			 CREATOR_ID, 
+			 SYS_REGISTER_DATE, 
+			 SYS_UPDATE_DATE, 
+			 STATUS,
+			 STATUS AS HIDDEN_STATUS
+		FROM PARTNER_CADENCE_ACTION_PLAN
+		WHERE 1=1
+		AND CADENCE_ID = #{pkNo};
+	</select>
+	
+	
+	<insert id="insertCadenceActionPlan" parameterType="hashmap">
+		 INSERT INTO PARTNER_CADENCE_ACTION_PLAN
+			(
+				CADENCE_ID, 
+				<!-- CATEGORY, --> 
+				DETAIL_CONENTS, 
+				ACTION_OWNER, 
+				DUE_DATE, 
+				CLOSE_DATE, 
+				STATUS,
+				CREATOR_ID, 
+				SYS_REGISTER_DATE, 
+				SYS_UPDATE_DATE
+			)
+			VALUES
+			(
+				#{returnPK}, 
+				#{DETAIL_CONENTS}, 
+				#{ACTION_OWNER}, 
+				<choose>
+					<when test="DUE_DATE != null and DUE_DATE != '' ">
+						#{DUE_DATE},
+					</when>
+					<otherwise>
+						NULL,
+					</otherwise>
+				</choose> 
+				<choose>
+					<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+						#{CLOSE_DATE},
+					</when>
+					<otherwise>
+						NULL,
+					</otherwise>
+				</choose> 
+				#{HIDDEN_STATUS}, 
+				#{hiddenModalCreatorId}, 
+				CURRENT_TIMESTAMP, 
+				CURRENT_TIMESTAMP
+			);
+	</insert>
+	
+	<update id="updateCadenceActionPlan" parameterType="hashmap">
+		  UPDATE PARTNER_CADENCE_ACTION_PLAN
+				SET 
+					<!-- CATEGORY='', --> 
+					DETAIL_CONENTS=#{DETAIL_CONENTS}, 
+					ACTION_OWNER=#{ACTION_OWNER},  
+					<choose>
+					<when test="DUE_DATE != null and DUE_DATE != '' ">
+						DUE_DATE = #{DUE_DATE}, 
+					</when>
+					<otherwise>
+						DUE_DATE = NULL,
+					</otherwise>
+				</choose> 
+				<choose>
+					<when test="CLOSE_DATE != null and CLOSE_DATE != '' ">
+						CLOSE_DATE = #{CLOSE_DATE}, 
+					</when>
+					<otherwise>
+						CLOSE_DATE = NULL,
+					</otherwise>
+				</choose> 
+					STATUS=#{HIDDEN_STATUS},
+					SYS_UPDATE_DATE=CURRENT_TIMESTAMP
+			WHERE ACTION_ID = #{ACTION_ID};
+	</update>
+	
+	
+	<!-- Fullfillment 카운트 / 더존erp연동 -->
+	<select id="selectFullfillmentCount" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					COUNT(TB.COMPANY_CODE) AS listCount, GROUP_CONCAT(TB.COMPANY_CODE) AS searchPKArray
+				FROM
+				( 
+						SELECT 
+							ECCE.COMPANY_CODE,
+							ECCE.COMPANY_NAME
+						FROM ERP_COMPANY_CREDIT_EVAL AS ECCE
+						WHERE 1=1
+						AND ECCE.BASIS_YEAR = #{searchYear}
+				]]>		
+							GROUP BY ECCE.COMPANY_CODE		
+							HAVING 1=1
+						<if test="searchCompanyName != null and searchCompanyName != '' ">
+							AND ECCE.COMPANY_NAME LIKE CONCAT('%', #{searchCompanyName}, '%') 
+						</if>
+				) AS TB
+	</select>
+	
+	<!-- Fullfillment / 더존erp연동 -->
+	<select id="selectFullfillmentERP" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				SELECT 
+					ECCE.COMPANY_CODE, 
+					ECCE.COMPANY_NAME, 
+					ECCE.COMPANY_REG_NO, 
+					ECCE.LOAN_GRADE, 
+					ECCE.CREDIT_AMOUNT, 
+					ECCE.BUSINESS_STATUS, 
+					ECCE.BUSINESS_CONDITIONS, 
+					ECCE.BUSINESS_TYPE, 
+					ECCE.BUSINESS_DATE, 
+					ECCE.COMPANY_AMOUNT, 
+					ECCE.COMPANY_OWNER, 
+					ECCE.BUSINESS_FORM, 
+					ECCE.CHECK_1, 
+					ECCE.CHECK_2, 
+					ECCE.CHECK_3, 
+					ECCE.AUDIT_OPINION, 
+					ECCE.CREDIT_RATING, 
+					ECCE.CASH_FLOWS, 
+					ECCE.ABT_DEBIT, 
+					ECCE.ABT_SAFETY, 
+					ECCE.ABT_GROWTH, 
+					ECCE.ABT_ACTIVITY, 
+					ECCE.DC_RMK, AM_GRNT, 
+					ECCE.AM_GUARANTEE, 
+					ECCE.DT_GUARANTEE_FR, 
+					ECCE.DT_GUARANTEE_TO, 
+					ECCE.DT_SFC_NEW, 
+					ECCE.YY_SALE, 
+					ECCE.AM_SALE, 
+					ECCE.AM_PROFIT, 
+					ECCE.BASIS_YEAR, 
+					ECCE.SYS_REGISTER_DATE, 
+					ECCE.SYS_UPDATE_DATE
+				FROM ERP_COMPANY_CREDIT_EVAL AS ECCE
+				WHERE 1=1
+			]]>
+				AND ECCE.BASIS_YEAR = #{searchYear}
+				GROUP BY ECCE.COMPANY_CODE			
+				HAVING 1=1
+				<if test="searchCompanyName != null and searchCompanyName != '' ">
+					AND ECCE.COMPANY_NAME LIKE CONCAT('%', #{searchCompanyName}, '%') 
+				</if>
+				ORDER BY ECCE.SYS_UPDATE_DATE desc
+				<choose>
+					<when test="numberPagingUseYn != null and numberPagingUseYn.equalsIgnoreCase('Y')">
+						<include refid="common.pagingPost2"/> 
+					</when>
+					<otherwise>
+						<include refid="common.pagingPost2"/>
+					</otherwise>
+				</choose>		
+	</select>
+	
+	<!-- Fullfillment / standard ver. -->
+	<select id="selectFullfillment" parameterType="java.util.List" resultType="hashmap">
+	<![CDATA[ 
+		SELECT TMP_KPI.PARTNER_CODE, TMP_KPI.COMPANY_NAME, YEAR,
+			       SUM(CASE QUARTER WHEN 1 THEN TMP_KPI.AMOUNT ELSE 0 END) AS Q1,
+			       SUM(CASE QUARTER WHEN 2 THEN TMP_KPI.AMOUNT ELSE 0 END) AS Q2,
+			       SUM(CASE QUARTER WHEN 3 THEN TMP_KPI.AMOUNT ELSE 0 END) AS Q3,
+			       SUM(CASE QUARTER WHEN 4 THEN TMP_KPI.AMOUNT ELSE 0 END) AS Q4,
+			       SUM( IFNULL(TMP_KPI.AMOUNT,0)) Y_AMOUNT,
+			       TMP_AR.AR_AMOUNT,
+			       TMP_CREDIT.CREDIT_AMOUNT, 
+			       TMP_CREDIT.CREDIT_GRADE, 
+			       TMP_CREDIT.CASH_FLOW
+		FROM
+		       (
+			       SELECT 
+			       		A.PARTNER_CODE, A.COMPANY_NAME, IFNULL(DATE_FORMAT(B.CONTRACT_DATE, '%Y'), YEAR(CURDATE())) YEAR, IFNULL(QUARTER(B.CONTRACT_DATE), 0) QUARTER, SUM(B.TCV_NET_AMOUNT) AMOUNT
+			       FROM 
+			       		PARTNER_COMPANY_INFO AS A 
+			       		LEFT OUTER JOIN 
+			       		ERP_SALES_PROJECT AS B ON A.COMPANY_NAME = B.CONTRACT_COMPANY AND DATE_FORMAT(B.CONTRACT_DATE, '%Y') = #{searchYear}
+			       GROUP BY 1,2,3,4
+		       ) AS TMP_KPI
+		       LEFT OUTER JOIN
+		       (
+			       SELECT 
+			       		COMPANY_NAME, COUNT(1) AR_COUNT, SUM(AR_AMOUNT) AR_AMOUNT
+				   FROM 
+						ERP_COMPANY_AR
+				   GROUP BY 1
+			   ) AS TMP_AR ON TMP_KPI.COMPANY_NAME = TMP_AR.COMPANY_NAME
+			   LEFT OUTER JOIN
+			   (
+			   		SELECT COMPANY_NAME, CREDIT_AMOUNT, CREDIT_GRADE, CASH_FLOW
+					FROM ERP_COMPANY_CREDIT
+			   ) AS TMP_CREDIT ON TMP_KPI.COMPANY_NAME = TMP_CREDIT.COMPANY_NAME
+		GROUP BY 1,2,3
+		ORDER BY Y_AMOUNT DESC;
+	]]>
+	</select>
+	
+	
+	
+	
+	
+	
+	<!-- 고객개인정보 관리 작업중 -->
+	<select id="partnerIndividualInfoSearchDetailGroup" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	       SELECT 
+					PII.PARTNER_PERSONAL_NAME,
+					PCI.COMPANY_NAME
+			FROM 
+				PARTNER_INDIVIDUAL_INFO AS PII
+				LEFT OUTER JOIN
+				PARTNER_COMPANY_INFO AS PCI ON PII.PARTNER_ID = PCI.PARTNER_ID
+			WHERE 1=1
+			GROUP BY PII.PARTNER_ID
+		]]>
+	</select>
+	
+	<select id="gridPartnerIndividualInfo" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+				 SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				TMP.*
+				FROM 
+					(
+						SELECT 
+							PII.PARTNER_INDIVIDUAL_ID,
+							PII.PARTNER_ID,
+							PII.PARTNER_PERSONAL_NAME,
+							PII.DIVISION,
+							PII.POST,
+							PII.TEAM,
+							PII.POSITION,
+							PII.SKILL_TYPE,
+							PII.DUTY,
+							PII.CELL_PHONE,
+							PII.PHONE,
+							PII.EMAIL,
+							PII.FRIENDSHIP_COMPANY,
+							PII.FRIENDSHIP_CUSTOMER,
+							PII.CREATOR_ID,
+							PII.PERSONAL_INFO,
+							PII.PERSONAL_PHOTO,
+							PII.FRIENDSHIP_INFO,
+							PCI.COMPANY_NAME,
+							PCI.CEO_NAME,
+							OMI.HAN_NAME,
+							DATE_FORMAT(PII.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(PII.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+							DATE_FORMAT(PII.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE
+					FROM 
+						PARTNER_INDIVIDUAL_INFO AS PII
+						LEFT OUTER JOIN 
+						PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PII.PARTNER_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON PII.CREATOR_ID = OMI.MEMBER_ID_NUM
+					WHERE 1=1
+		]]>		
+					<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+						<choose>
+							<when test="searchPKArray != null and searchPKArray != '' ">
+							AND CSL.CSAT_ID IN(${searchPKArray})
+							</when>
+							<otherwise>
+							AND CSL.CSAT_ID IN('')
+							</otherwise>
+						</choose>
+					</if>
+					
+					<!-- 일반검색 전체 -->
+					 <if test="allsearch != null and allsearch != '' ">
+					   AND CONCAT(IFNULL(PII.PARTNER_PERSONAL_NAME,''), IFNULL(PCI.COMPANY_NAME,''), IFNULL(PII.CREATOR_ID,'')) REGEXP #{allsearch}
+					 </if>	
+					<!-- 일반검색 고객명 -->
+				 	<if test=" customer_name != null and customer_name != '' ">
+						AND PII.PARTNER_PERSONAL_NAME LIKE CONCAT('%', #{customer_name}, '%')
+					</if>
+					<!-- 일반검색 회사명 -->
+					<if test=" company_name != null and han_name != '' ">
+						AND PCI.COMPANY_NAME LIKE CONCAT('%', #{company_name}, '%')
+					</if>
+					<!-- 일반검색 작성자 -->
+					<if test=" han_name != null and han_name != '' ">
+						AND OMI.HAN_NAME LIKE CONCAT('%', #{han_name}, '%')
+					</if>
+					
+					<!-- 아래 상세검색부터 수정 안함 _ 수정예정 -->
+					 <!-- 상세검색 전체 -->
+					 <if test="allSearchDetail != null and allSearchDetail != '' ">
+						AND CONCAT(IFNULL(CSL.CSAT_CATEGORY,''), IFNULL(OMI.HAN_NAME,'')) REGEXP #{allSearchDetail}
+					</if>
+					 <!-- 상세검색 이슈종류 -->
+					<if test="detailCategory != null and detailCategory != '' ">
+						AND CSL.CSAT_CATEGORY =  #{detailCategory}
+					</if>
+					 <!-- 상세검색 고객사 -->
+					<if test="SysUpdateDate != null and SysUpdateDate != '' ">
+						AND DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d') =  #{SysUpdateDate}
+					</if>
+						ORDER BY PII.SYS_UPDATE_DATE ASC
+					) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					ORDER BY ROWNUM DESC;
+	</select>
+	
+	<update id="updatePartnerIndividualInfo" parameterType="hashmap">
+		<![CDATA[
+	        UPDATE PARTNER_INDIVIDUAL_INFO
+	        SET 
+	        	PARTNER_PERSONAL_NAME 	= #{textModalPartnerName},
+	        	DIVISION 				= #{textModalDivision},
+	        	POST 					= #{textModalPost},
+	        	TEAM				 	= #{textModalTeam},
+	        	POSITION 				= #{textModalPosition},
+	        	DUTY					= #{textModalDuty},
+	        	SKILL_TYPE				= #{textModalSkillType},
+	        	CELL_PHONE				= #{textModalCellPhone},
+	        	PHONE					= #{textModalPhone},
+	        	EMAIL					= #{textModalEmail},
+	        	PERSONAL_INFO			= #{textModalPerSonalInfo},
+	        	FRIENDSHIP_COMPANY		= #{textModalFriendShipCompany},
+	        	FRIENDSHIP_CUSTOMER		= #{textModalFriendShipCustomer},
+	        	PARTNER_ID 				= #{textCommonSearchCompanyId},
+	        	USE_YN 					= #{radioModalUseYN},
+	        	POSITION_DUTY			= #{textModalPositionDuty},
+				SYS_UPDATE_DATE			= CURRENT_TIMESTAMP
+			WHERE PARTNER_INDIVIDUAL_ID = #{hiddenModalPK};
+		]]>
+		<!-- PERSONAL_PHOTO	= #{textModalPerSonaPhoto}, -->
+	</update>
+
+	
+	 <insert id="insertPartnerIndividualInfo" parameterType="hashmap">
+	 	<![CDATA[
+	        INSERT INTO PARTNER_INDIVIDUAL_INFO
+	        (
+	        	PARTNER_PERSONAL_NAME, 
+	        	DIVISION,
+	        	POST,
+	        	TEAM,
+	        	POSITION,
+	        	DUTY,
+	        	SKILL_TYPE,
+	        	CELL_PHONE,
+	        	PHONE,
+	        	EMAIL,
+	        	PERSONAL_INFO,
+	        	FRIENDSHIP_COMPANY,
+	        	FRIENDSHIP_CUSTOMER,
+	        	USE_YN,
+	        	POSITION_DUTY,
+	        	CREATOR_ID,
+	        	PARTNER_ID
+	        )
+			VALUES
+			(
+				#{textModalPartnerName}, 
+				#{textModalDivision}, 
+				#{textModalPost}, 
+				#{textModalTeam}, 
+				#{textModalPosition}, 
+				#{textModalDuty}, 
+				#{textModalSkillType},
+				#{textModalCellPhone}, 
+				#{textModalPhone}, 
+				#{textModalEmail}, 
+				#{textModalPerSonalInfo}, 
+				#{textModalFriendShipCompany},
+				#{textModalFriendShipCustomer},
+				#{radioModalUseYN},
+				#{textModalPositionDuty},
+				#{hiddenModalCreatorId}, 
+				#{textCommonSearchCompanyId}
+			);
+		]]>
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+	
+	
+	
+	<!-- 고객사정보 관리 작업중 -->
+	<select id="selectPartnerInfoSearchPartnerCode" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	        SELECT PARTNER_CODE
+			FROM CODE_PARTNER_SEGMENT
+			WHERE 1=1
+		]]>
+			GROUP BY PARTNER_CODE;  
+	</select>
+	
+	<select id="partnerCompanyInfoSearchDetailGroup" parameterType="hashmap" resultType="hashmap">
+	    <![CDATA[
+	       SELECT 
+					PII.PARTNER_PERSONAL_NAME,
+					PCI.COMPANY_NAME
+			FROM 
+				PARTNER_COMPANY_INFO AS PCI
+				LEFT OUTER JOIN
+				PARTNER_INDIVIDUAL_INFO AS PII ON PII.PARTNER_ID = PCI.PARTNER_ID
+			WHERE 1=1
+			GROUP BY PII.PARTNER_ID;
+		]]>
+	</select>
+	
+	<select id="selectPartnerCompanyList" parameterType="hashmap" resultType="hashmap">
+		<include refid="common.pagingPre"/>
+		<![CDATA[
+				 SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				TMP.*
+				FROM 
+					(
+						SELECT 
+							PCI.PARTNER_ID,
+							PCI.PARTNER_CODE,
+							PCI.COMPANY_NAME,
+							PCI.CEO_NAME,
+							PCI.COMPANY_TELNO,
+							PCI.POSTAL_CODE,
+							PCI.POSTAL_ADDRESS,
+							PCI.BUSINESS_NUMBER,
+							PCI.BUSINESS_TYPE,
+							PCI.BUSINESS_SECTOR,
+							PCI.COMPANY_STATUS,
+							DATE_FORMAT(PCI.SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(PCI.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+					FROM 
+						PARTNER_COMPANY_INFO AS PCI
+						LEFT OUTER JOIN 
+						CODE_PARTNER_SEGMENT AS CPS ON CPS.USE_YN = 'Y' AND CPS.PARTNER_CODE = PCI.PARTNER_CODE
+					WHERE 1=1
+		]]>		
+					<if test="resultInSearch != null and resultInSearch.equalsIgnoreCase('Y')">
+						<choose>
+							<when test="searchPKArray != null and searchPKArray != '' ">
+							AND CSL.CSAT_ID IN(${searchPKArray})
+							</when>
+							<otherwise>
+							AND CSL.CSAT_ID IN('')
+							</otherwise>
+						</choose>
+					</if>
+					
+					<if test="serchInfo != null and serchInfo != '' ">
+					    AND PCI.COMPANY_NAME LIKE CONCAT('%', #{serchInfo}, '%')
+					</if>
+					
+					<!-- 일반검색 전체 -->
+					 <if test="allsearch != null and allsearch != '' ">
+					   AND CONCAT(IFNULL(PII.PARTNER_PERSONAL_NAME,''), IFNULL(PCI.COMPANY_NAME,''), IFNULL(PII.CREATOR_ID,'')) REGEXP #{allsearch}
+					 </if>	
+					<!-- 일반검색 회사명 -->
+					<if test=" company_name != null and company_name != '' ">
+						AND PCI.COMPANY_NAME LIKE CONCAT('%', #{company_name}, '%')
+					</if>
+					<!-- 일반검색 대표자명 -->
+				 	<if test=" ceo_name != null and ceo_name != '' ">
+						AND PCI.CEO_NAME LIKE CONCAT('%', #{ceo_name}, '%')
+					</if>
+					<!-- 일반검색 협력레벨 -->
+				 	<if test=" segment_name != null and segment_name != '' ">
+						AND CPS.PARTNER_LEVEL LIKE CONCAT('%', #{segment_name}, '%')
+					</if>
+					
+					<!-- 아래 상세검색부터 수정 안함 _ 수정예정 -->
+					
+					<!-- 일반검색 작성자 -->
+					<if test=" han_name != null and han_name != '' ">
+						AND OMI.HAN_NAME LIKE CONCAT('%', #{han_name}, '%')
+					</if>
+					
+					 <!-- 상세검색 전체 -->
+					 <if test="allSearchDetail != null and allSearchDetail != '' ">
+						AND CONCAT(IFNULL(CSL.CSAT_CATEGORY,''), IFNULL(OMI.HAN_NAME,'')) REGEXP #{allSearchDetail}
+					</if>
+					 <!-- 상세검색 이슈종류 -->
+					<if test="detailCategory != null and detailCategory != '' ">
+						AND CSL.CSAT_CATEGORY =  #{detailCategory}
+					</if>
+					 <!-- 상세검색 고객사 -->
+					<if test="SysUpdateDate != null and SysUpdateDate != '' ">
+						AND DATE_FORMAT(CSL.SYS_UPDATE_DATE, '%Y-%m-%d') =  #{SysUpdateDate}
+					</if>
+						ORDER BY PCI.SYS_UPDATE_DATE ASC
+					) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					ORDER BY COMPANY_NAME ASC
+		<include refid="common.pagingPost"/>
+	</select>
+	
+	<select id="selectCodePartnerSegmentAll" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM CODE_PARTNER_SEGMENT
+		WHERE 1=1
+		AND USE_YN = 'Y'
+	</select>
+	
+	<update id="updatePartnerCompanyInfo" parameterType="hashmap">
+	        UPDATE PARTNER_COMPANY_INFO
+	        SET 
+	        	COMPANY_NAME 		= #{textModalCompanyName},
+	        	<if test="hiddenModalCeoID != null and hiddenModalCeoID != '' ">
+	        	CEO_ID				= #{hiddenModalCeoID},
+	        	</if>
+	        	CEO_NAME		 	= #{textModalCeoName},
+	        	PARTNER_CODE 		= #{hiddenModalSegmentCode},
+	        	COMPANY_TELNO 		= #{textModalCompanyTelno},
+	        	BUSINESS_NUMBER		= #{textModalBusinessNumber},
+	        	<if test="textModalCompanyStatus != null and textModalCompanyStatus != '' ">
+	        	COMPANY_STATUS		= #{textModalCompanyStatus},
+	        	</if>
+	        	BUSINESS_TYPE		= #{textModalBusinessType},
+	        	BUSINESS_SECTOR		= #{textModalBusinessSector},
+	        	POSTAL_CODE			= #{textModalPostalCode},
+	        	POSTAL_ADDRESS		= #{textModalPostalAddress},
+	        	PARTNER_CATEGORY	= #{selectModalPartnerCompanyCategory},
+	        	COMPANY_ITEM		= #{textModalCompanyItem},
+	        	COMPANY_HOMEPAGE	= #{textModalCompanyHomepage},
+	        	COMPANY_FAXNO		= #{textModalCompanyFaxno},
+				SYS_UPDATE_DATE		= CURRENT_TIMESTAMP
+			WHERE PARTNER_ID = #{hiddenModalCompanyId};
+	</update>
+	
+	
+	<insert id="insertPartnerCompanyInfo" parameterType="hashmap">
+	        INSERT INTO PARTNER_COMPANY_INFO
+	        (
+	        	COMPANY_NAME,
+	        	<if test="hiddenModalCeoID != null and hiddenModalCeoID != '' ">
+	        	CEO_ID,
+	        	</if>
+	        	CEO_NAME,
+	        	PARTNER_CODE,
+	        	COMPANY_TELNO,
+	        	BUSINESS_NUMBER,
+	        	<if test="textModalCompanyStatus != null and textModalCompanyStatus != '' ">
+	        	COMPANY_STATUS,
+	        	</if>
+	        	BUSINESS_TYPE,
+	        	BUSINESS_SECTOR,
+	        	POSTAL_CODE,
+	        	POSTAL_ADDRESS,
+	        	PARTNER_CATEGORY,
+	        	COMPANY_ITEM,
+	        	COMPANY_HOMEPAGE,
+	        	COMPANY_FAXNO,
+	        	CREATOR_ID,
+	        	SYS_UPDATE_DATE
+	        )
+			VALUES
+			(
+				#{textModalCompanyName}, 
+				<if test="hiddenModalCeoID != null and hiddenModalCeoID != '' ">
+				#{hiddenModalCeoID},
+				</if>
+				#{textModalCeoName}, 
+				#{hiddenModalSegmentCode}, 
+				#{textModalCompanyTelno}, 
+				#{textModalBusinessNumber}, 
+				<if test="textModalCompanyStatus != null and textModalCompanyStatus != '' ">
+				#{textModalCompanyStatus}, 
+				</if>
+				#{textModalBusinessType}, 
+				#{textModalBusinessSector}, 
+				#{textModalPostalCode}, 
+				#{textModalPostalAddress}, 
+				#{selectModalPartnerCompanyCategory},
+				#{textModalCompanyItem},
+				#{textModalCompanyHomepage},
+				#{textModalCompanyFaxno},
+				#{hiddenModalCreatorId},
+				CURRENT_TIMESTAMP
+			);
+		<selectKey keyProperty="filePK" resultType="Integer" order="AFTER">
+        	SELECT LAST_INSERT_ID();
+    	</selectKey>
+	</insert>
+	
+
+
+
+
+
+	<!-- 고객개인정보 View 작업중 -->
+	
+	<select id="gridPartnerCompany" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					PII.DIVISION,
+					PII.POSITION,
+					PII.CELL_PHONE,
+					PII.PARTNER_PERSONAL_NAME,
+					PII.EMAIL,
+					PII.DUTY,
+					OMI.HAN_NAME
+				
+					FROM PARTNER_INDIVIDUAL_INFO AS PII
+					LEFT OUTER JOIN 
+								OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = PII.CREATOR_ID
+					WHERE 1=1 AND PII.PARTNER_PERSONAL_NAME = #{hiddenModalPK}
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					
+		]]>
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+
+
+	<!-- 파트너사개인정보 카드view -->
+	<select id="gridPartnerIndividualInfoList" parameterType="hashmap" resultType="hashmap">
+	<include refid="common.pagingPre"/> 
+				 SELECT 
+					@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+					TMP.*
+				FROM 
+					(
+						SELECT 
+							<if test="partnerIdvId != null and partnerIdvId != '' ">
+							CASE WHEN PII.PARTNER_INDIVIDUAL_ID = #{partnerIdvId} THEN 1 ELSE 0 END AS ORDERNO,
+							</if>
+						<![CDATA[
+							PII.PARTNER_INDIVIDUAL_ID,
+							PII.PARTNER_ID,
+							PII.PARTNER_PERSONAL_NAME,
+							PII.DIVISION,
+							PII.POST,
+							PII.TEAM,
+							PII.SKILL_TYPE,
+							PII.POSITION,
+							PII.DUTY,
+							PII.CELL_PHONE,
+							PII.PHONE,
+							PII.EMAIL,
+							PII.FRIENDSHIP_COMPANY,
+							PII.FRIENDSHIP_CUSTOMER,
+							PII.PERSONAL_INFO,
+							PII.PERSONAL_PHOTO,
+							PII.PHOTO_TYPE,
+							PII.FRIENDSHIP_INFO,
+							PII.CREATOR_ID,
+							PII.USE_YN,
+							PCI.COMPANY_NAME,
+							PCI.CEO_NAME,
+							OMI.HAN_NAME,
+							DATE_FORMAT(PII.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(PII.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+							DATE_FORMAT(PII.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE
+					FROM 
+						PARTNER_INDIVIDUAL_INFO AS PII
+						LEFT OUTER JOIN 
+						PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PII.PARTNER_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON PII.CREATOR_ID = OMI.MEMBER_ID_NUM
+					WHERE 1=1
+						ORDER BY PII.SYS_UPDATE_DATE DESC
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+				WHERE 1=1
+				]]>	
+				<choose>
+					<when test="partnerIdvId != null and partnerIdvId != '' ">
+					ORDER BY ORDERNO DESC, PARTNER_PERSONAL_NAME ASC
+					</when>
+					<otherwise>
+					ORDER BY PARTNER_PERSONAL_NAME ASC
+					</otherwise>
+				</choose>
+		<include refid="common.pagingPost"/> 	
+	</select>
+	
+	
+	<select id="gridPartnerIndividualInfoList2" parameterType="hashmap" resultType="hashmap">
+	<!-- <include refid="common.pagingPre"/> -->
+				 SELECT 
+					@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+					TMP.*
+				FROM 
+					(
+						SELECT
+							<if test="partnerIdvId != null and partnerIdvId != '' ">
+							CASE WHEN PII.PARTNER_INDIVIDUAL_ID = #{partnerIdvId} THEN 1 ELSE 0 END AS ORDERNO,
+							</if>
+							PII.PARTNER_INDIVIDUAL_ID,
+							PII.PARTNER_ID,
+							PII.PARTNER_PERSONAL_NAME,
+							PII.DIVISION,
+							PII.POST,
+							PII.TEAM,
+							PII.POSITION,
+							PII.SKILL_TYPE,
+							PII.DUTY,
+							PII.CELL_PHONE,
+							PII.PHONE,
+							PII.EMAIL,
+							PII.FRIENDSHIP_COMPANY,
+							PII.FRIENDSHIP_CUSTOMER,
+							PII.PERSONAL_INFO,
+							PII.FRIENDSHIP_INFO,
+							PII.CREATOR_ID,
+							PCI.COMPANY_NAME,
+							PCI.CEO_NAME,
+							PII.USE_YN,
+							OMI.HAN_NAME,
+							DATE_FORMAT(PII.SYS_REGISTER_DATE, '%Y-%m-%d') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(PII.SYS_UPDATE_DATE, '%Y-%m-%d') AS SYS_UPDATE_DATE,
+							DATE_FORMAT(PII.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS LATELY_UPDATE_DATE
+					FROM 
+						PARTNER_INDIVIDUAL_INFO AS PII
+						LEFT OUTER JOIN 
+						PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PII.PARTNER_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON PII.CREATOR_ID = OMI.MEMBER_ID_NUM
+					WHERE 1=1
+					 <if test="serchInfo != null and serchInfo != '' ">
+					   	AND (PII.PARTNER_PERSONAL_NAME LIKE CONCAT('%', #{serchInfo}, '%')
+					   	OR PCI.COMPANY_NAME LIKE CONCAT('%', #{serchInfo}, '%'))
+					</if>
+					<if test="partnerId != null and partnerId != '' ">
+					   	AND PII.PARTNER_INDIVIDUAL_ID = #{partnerId}
+					</if>
+						ORDER BY PII.SYS_UPDATE_DATE DESC
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+				WHERE 1=1
+				<choose>
+					<when test="partnerIdvId != null and partnerIdvId != '' ">
+					ORDER BY ORDERNO DESC, PARTNER_PERSONAL_NAME ASC
+					</when>
+					<otherwise>
+					ORDER BY PARTNER_PERSONAL_NAME ASC
+					</otherwise>
+				</choose>
+				<!-- ORDER BY ROWNUM DESC -->
+		<!-- <include refid="common.pagingPost"/> -->
+	</select>
+
+	<select id="gridPartnerIndividualDetail" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+						PII.PARTNER_INDIVIDUAL_ID,
+						PII.PARTNER_PERSONAL_NAME,
+						PII.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						PII.DIVISION,
+						PII.POST,
+						PII.TEAM,
+						PII.POSITION,
+						PII.SKILL_TYPE,
+						PII.DUTY,
+						PII.CELL_PHONE,
+						PII.PHONE,
+						PII.EMAIL,
+						PII.FRIENDSHIP_COMPANY,
+						PII.FRIENDSHIP_CUSTOMER,
+						PII.PERSONAL_INFO,
+						PII.FRIENDSHIP_INFO,
+						PII.CREATOR_ID,
+						PII.USE_YN,
+						PII.POSITION_DUTY,
+						OMI.HAN_NAME,
+						DATE_FORMAT(PII.SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+						DATE_FORMAT(PII.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+					FROM PARTNER_INDIVIDUAL_INFO AS PII
+					LEFT OUTER JOIN 
+								OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = PII.CREATOR_ID
+					LEFT OUTER JOIN 
+								PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PII.PARTNER_ID			
+					
+					WHERE 1=1 
+					<if test="customerId != null and customerId != '' ">
+					AND PII.PARTNER_INDIVIDUAL_ID = #{customerId}
+					</if>
+					ORDER BY PARTNER_PERSONAL_NAME ASC
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+	
+	<!-- 고객사정보 View 작업중 -->
+	
+	<select id="selectPartnerCompanyIndividualList" parameterType="hashmap" resultType="hashmap">
+		<![CDATA[
+			SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					PII.DIVISION,
+					PII.POSITION,
+					PII.CELL_PHONE,
+					PII.PARTNER_PERSONAL_NAME,
+					PII.EMAIL,
+					PII.DUTY,
+					PII.USE_YN,
+					OMI.HAN_NAME
+				
+					FROM PARTNER_INDIVIDUAL_INFO AS PII
+					LEFT OUTER JOIN 
+								OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = PII.CREATOR_ID
+					WHERE 1=1 AND PII.PARTNER_ID = #{hiddenModalPK}
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					
+		]]>
+				<!-- ORDER BY
+					CASE 
+					   WHEN TMP.POSITION_DUTY = 'CEO' THEN 3
+					   WHEN TMP.POSITION_DUTY = 'COO' THEN 2
+					   WHEN TMP.POSITION_DUTY = 'CFO' THEN 1
+					END DESC, FIELD(TMP.POSITION,'회장','대표이사','부회장','사장','부사장','전무','상무','이사','부장','차장','과장','계장','대리','주임','사원','인턴','',NULL)
+					 -->
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+	
+	
+	
+	<select id="partnerIndividualPhotoList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			FILE_ID, 
+			PARTNER_INDIVIDUAL_ID, 
+			CREATOR_ID, 
+			CREATE_DATETIME, 
+			FILE_NAME, 
+			FILE_PATH, 
+			FILE_TYPE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		FROM PARTNER_INDIVIDUAL_PHOTO_STORE
+		<choose>
+			<when test="filePKArray != null and filePKArray != '' ">
+			WHERE PARTNER_INDIVIDUAL_ID IN(${filePKArray})
+			</when>
+			<when test="customerId != null and customerId != '' ">
+			WHERE PARTNER_INDIVIDUAL_ID=#{customerId}
+			</when>
+			<otherwise>
+			WHERE PARTNER_INDIVIDUAL_ID IN('')
+			</otherwise>
+		</choose>
+		<!-- <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+	        #{item.BIZ_ID}
+	  	</foreach> -->
+	</select>
+	
+	<select id="selectPartnerIndividualNameCard" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM PARTNER_INDIVIDUAL_PHOTO_STORE WHERE PARTNER_INDIVIDUAL_ID=#{hiddenModalPK} AND FILE_PATH LIKE 'nameCard/%';
+	</select>
+	
+	<select id="selectPartnerIndividualPhoto" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM PARTNER_INDIVIDUAL_PHOTO_STORE WHERE PARTNER_INDIVIDUAL_ID=#{hiddenModalPK} AND FILE_PATH LIKE 'photo/%';
+	</select>
+	
+	<select id="selectPartnerIndividualInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM PARTNER_INDIVIDUAL_INFO WHERE PARTNER_INDIVIDUAL_ID=#{hiddenModalPK};
+	</select>
+	
+	<delete id="deleteIndividualPhoto" parameterType="hashmap">
+		DELETE FROM PARTNER_INDIVIDUAL_PHOTO_STORE WHERE PARTNER_INDIVIDUAL_ID=#{hiddenModalPK};
+	</delete>
+	
+	<delete id="deletePartnerIndividualInfo" parameterType="hashmap">
+		DELETE FROM PARTNER_INDIVIDUAL_PHOTO_STORE WHERE PARTNER_INDIVIDUAL_ID=#{hiddenModalPK};
+		DELETE FROM PARTNER_INDIVIDUAL_INFO WHERE PARTNER_INDIVIDUAL_ID=#{hiddenModalPK};
+	</delete>
+	
+	
+	
+	
+	
+	
+	<select id="listPartnerCompanyInfoView2" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+			(
+				SELECT  
+						PCI.PARTNER_ID,
+						PCI.PARTNER_CODE,
+						PCI.COMPANY_NAME,
+						PCI.CEO_NAME,
+						PCI.COMPANY_TELNO,
+						PCI.POSTAL_CODE,
+						PCI.POSTAL_ADDRESS,
+						PCI.BUSINESS_NUMBER,
+						PCI.BUSINESS_TYPE,
+						PCI.BUSINESS_SECTOR,
+						PCI.COMPANY_STATUS,
+						DATE_FORMAT(PCI.SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+						DATE_FORMAT(PCI.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+				FROM 
+					PARTNER_COMPANY_INFO AS PCI
+				WHERE 1=1
+				<if test="serchInfo != null and serchInfo != '' ">
+				    AND PCI.COMPANY_NAME LIKE CONCAT('%', #{serchInfo}, '%')
+				</if>
+			) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+		WHERE 1=1
+		ORDER BY ROWNUM DESC
+	</select>
+	
+	<select id="listPartnerCompanyInfoLeftList" parameterType="hashmap" resultType="hashmap">
+		<include refid="common.pagingPre"/>
+				 SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				TMP.*
+				FROM 
+					(
+						SELECT  
+							<if test="partnerId != null and partnerId != '' ">
+							CASE WHEN PCI.PARTNER_ID = #{partnerId} THEN 1 ELSE 0 END AS ORDERNO,
+							</if>
+						<![CDATA[
+							PCI.PARTNER_ID,
+							PCI.PARTNER_CODE,
+							PCI.COMPANY_NAME,
+							PCI.CEO_NAME,
+							PCI.COMPANY_TELNO,
+							PCI.POSTAL_CODE,
+							PCI.POSTAL_ADDRESS,
+							PCI.BUSINESS_NUMBER,
+							PCI.BUSINESS_TYPE,
+							PCI.BUSINESS_SECTOR,
+							PCI.COMPANY_STATUS,
+							DATE_FORMAT(PCI.SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(PCI.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+					FROM 
+						PARTNER_COMPANY_INFO AS PCI
+					WHERE 1=1
+		]]>		
+					
+					<if test="serchInfo != null and serchInfo != '' ">
+					    AND PCI.COMPANY_NAME LIKE CONCAT('%', #{serchInfo}, '%')
+					</if>
+					
+					<!-- 일반검색 전체 -->
+					 <if test="allsearch != null and allsearch != '' ">
+					   AND CONCAT(IFNULL(PCI.COMPANY_NAME,''), IFNULL(PII.CREATOR_ID,'')) REGEXP #{allsearch}
+					 </if>	
+					<!-- 일반검색 회사명 -->
+					<if test=" company_name != null and company_name != '' ">
+						AND PCI.COMPANY_NAME LIKE CONCAT('%', #{company_name}, '%')
+					</if>
+					<!-- 일반검색 대표자명 -->
+				 	<if test=" ceo_name != null and ceo_name != '' ">
+						AND PCI.CEO_NAME LIKE CONCAT('%', #{ceo_name}, '%')
+					</if>
+					
+					<!-- 아래 상세검색부터 수정 안함 _ 수정예정 -->
+					
+					 <!-- 상세검색 전체 -->
+					 <if test="allSearchDetail != null and allSearchDetail != '' ">
+						AND CONCAT(IFNULL(PCI.COMPANY_NAME,''), IFNULL(PCI.CEO_NAME,'')) REGEXP #{allSearchDetail}
+					</if>
+						ORDER BY PCI.SYS_UPDATE_DATE ASC
+					) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					<choose>
+						<when test="partnerId != null and partnerId != '' ">
+						ORDER BY ORDERNO DESC, COMPANY_NAME ASC
+						</when>
+						<otherwise>
+						ORDER BY COMPANY_NAME ASC
+						</otherwise>
+					</choose>
+			<include refid="common.pagingPost"/>
+	</select>
+	
+	<select id="listPartnerCompanyInfoLeftList2" parameterType="hashmap" resultType="hashmap">
+		<include refid="common.pagingPre"/>
+				 SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				TMP.*
+				FROM 
+					(
+						SELECT  
+							<if test="partnerId != null and partnerId != '' ">
+							CASE WHEN PCI.PARTNER_ID = #{partnerId} THEN 1 ELSE 0 END AS ORDERNO,
+							</if>
+						<![CDATA[
+							PCI.PARTNER_ID,
+							PCI.PARTNER_CODE,
+							PCI.COMPANY_NAME,
+							PCI.CEO_NAME,
+							PCI.COMPANY_TELNO,
+							PCI.POSTAL_CODE,
+							PCI.POSTAL_ADDRESS,
+							PCI.BUSINESS_NUMBER,
+							PCI.BUSINESS_TYPE,
+							PCI.BUSINESS_SECTOR,
+							PCI.COMPANY_STATUS,
+							DATE_FORMAT(PCI.SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(PCI.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+					FROM 
+						PARTNER_COMPANY_INFO AS PCI
+					WHERE 1=1
+		]]>		
+					
+						ORDER BY PCI.SYS_UPDATE_DATE ASC
+					) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1
+					<choose>
+						<when test="partnerId != null and partnerId != '' ">
+						ORDER BY ORDERNO DESC, COMPANY_NAME ASC
+						</when>
+						<otherwise>
+						ORDER BY COMPANY_NAME ASC
+						</otherwise>
+					</choose>
+			<include refid="common.pagingPost"/>
+	</select>
+	
+	<select id="selectPartnerCompanyInfo" parameterType="hashmap" resultType="hashmap">
+		 SELECT 
+				@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+				TMP.*
+				FROM 
+				(
+					SELECT  
+							PCI.PARTNER_ID,
+							PCI.PARTNER_CODE,
+							PCI.COMPANY_NAME,
+							PCI.CEO_ID,
+							PCI.CEO_NAME,
+							CEO.POSITION AS CEO_POSITION,
+							PCI.COMPANY_TELNO,
+							PCI.POSTAL_CODE,
+							PCI.POSTAL_ADDRESS,
+							PCI.BUSINESS_NUMBER,
+							PCI.BUSINESS_TYPE,
+							PCI.BUSINESS_SECTOR,
+							PCI.COMPANY_STATUS,
+							PCI.PARTNER_CATEGORY,
+							PCI.COMPANY_ITEM,
+							PCI.COMPANY_HOMEPAGE,
+							PCI.COMPANY_FAXNO,
+							PCI.CREATOR_ID,
+							OMI.HAN_NAME AS CREATOR_NAME,
+							DATE_FORMAT(PCI.SYS_REGISTER_DATE, '%Y-%m-%d %H:%i') AS SYS_REGISTER_DATE, 
+							DATE_FORMAT(PCI.SYS_UPDATE_DATE, '%Y-%m-%d %H:%i') AS SYS_UPDATE_DATE
+					FROM 
+						PARTNER_COMPANY_INFO AS PCI
+						LEFT OUTER JOIN 
+						PARTNER_INDIVIDUAL_INFO AS CEO ON CEO.PARTNER_INDIVIDUAL_ID = PCI.CEO_ID
+						LEFT OUTER JOIN 
+						OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = PCI.CREATOR_ID
+					WHERE 1=1
+					AND PCI.PARTNER_ID = #{companyId}
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+				WHERE 1=1
+				ORDER BY ROWNUM DESC
+	</select>
+	
+	<select id="selectPartnerClient" parameterType="hashmap" resultType="hashmap">
+	<!-- <include refid="common.pagingPre"/> -->
+			SELECT 
+			@ROWNUM := ROUND(@ROWNUM +1, 0) AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					PII.PARTNER_INDIVIDUAL_ID,
+					PII.PARTNER_ID,
+					PII.PARTNER_PERSONAL_NAME,
+					PII.DIVISION,
+					PII.POST,
+					PII.TEAM,
+					PII.POSITION,
+					PII.SKILL_TYPE,
+					PII.DUTY,
+					PII.CELL_PHONE,
+					PII.PHONE,
+					PII.EMAIL,
+					PII.FRIENDSHIP_COMPANY,
+					PII.FRIENDSHIP_CUSTOMER, 
+					PII.POSITION_DUTY,
+					PII.USE_YN,
+					PCI.COMPANY_NAME,
+					OMI.HAN_NAME
+				
+					FROM PARTNER_INDIVIDUAL_INFO AS PII
+					LEFT OUTER JOIN 
+								OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = PII.CREATOR_ID
+					LEFT OUTER JOIN 
+					PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PII.PARTNER_ID
+					WHERE 1=1
+					<choose>
+						<when test="companyId != ''">
+						 AND PII.PARTNER_ID = #{hiddenModalPK}
+						</when>
+						<otherwise>
+						 AND PII.PARTNER_ID IN('')
+						</otherwise>
+					</choose>
+					<if test="textSearchClient != null and textSearchClient != '' ">
+						AND PII.PARTNER_PERSONAL_NAME LIKE CONCAT('%', #{textSearchClient}, '%')
+					</if>
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+			WHERE 1=1
+			AND TMP.POSITION IS NOT NULL
+			AND TMP.POSITION != ''
+			ORDER BY
+			CASE 
+			   WHEN TMP.POSITION = 'CEO' THEN 10
+			   WHEN TMP.POSITION = 'CIO' THEN 9
+			   WHEN TMP.POSITION = 'CKO' THEN 8
+			   WHEN TMP.POSITION = 'CSO' THEN 7
+			   WHEN TMP.POSITION = 'CPO' THEN 6
+			   WHEN TMP.POSITION = 'CTO' THEN 5
+			   WHEN TMP.POSITION = 'CAO' THEN 4
+			   WHEN TMP.POSITION = 'CRO' THEN 3
+			   WHEN TMP.POSITION = 'CMO' THEN 2
+			   WHEN TMP.POSITION = 'HRO' THEN 1
+			END DESC, FIELD(TMP.POSITION,'회장','대표이사','부회장','사장','부사장','전무','상무','이사','부장','차장','과장','계장','대리','주임','사원','인턴','',NULL)
+			<if test="numberPagingUseYn != null and numberPagingUseYn.equalsIgnoreCase('Y')">
+			<include refid="common.pagingPost2"/>
+			</if>
+		<!-- <include refid="common.pagingPost"/> -->
+		<!-- ORDER BY OC.CHECKLIST_SEQ ASC; -->
+	</select>
+	
+	<select id="selectCompanyPartnerCount" parameterType="hashmap" resultType="Integer">
+			SELECT 
+				COUNT(*) AS TOTAL_COUNT
+			FROM 
+				PARTNER_INDIVIDUAL_INFO AS PII
+				LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = PII.CREATOR_ID
+				<!-- LEFT OUTER JOIN 
+				OUR_MEMBERS_INFO AS OMI2 ON OMI2.MEMBER_ID_NUM = PII.DIRECTOR_ID << 다이렉터 아이디 -->
+				LEFT OUTER JOIN 
+				PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PII.PARTNER_ID
+				WHERE 1=1
+			<choose>
+				<when test="companyId != ''">
+				 AND PII.PARTNER_ID = #{hiddenModalPK}
+				</when>
+				<otherwise>
+				AND PII.PARTNER_ID = NULL
+				</otherwise>
+			</choose>
+			<if test="textSearchClient != null and textSearchClient != '' ">
+				AND PII.PARTNER_PERSONAL_NAME LIKE CONCAT('%', #{textSearchClient}, '%')
+			</if>
+	</select>
+	
+	<select id="companyOrganizationChart" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			FILE_ID, 
+			PARTNER_ID, 
+			CREATOR_ID, 
+			CREATE_DATETIME, 
+			FILE_NAME, 
+			FILE_PATH, 
+			FILE_TYPE, 
+			SYS_REGISTER_DATE, 
+			SYS_UPDATE_DATE
+		FROM PARTNER_COMPANY_INFO_FILE_STORE
+		<choose>
+			<when test="filePKArray != null and filePKArray != '' ">
+			WHERE PARTNER_ID IN(${filePKArray})
+			</when>
+			<when test="companyId != null and companyId != '' ">
+			WHERE PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			WHERE PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+		<!-- <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+	        #{item.BIZ_ID}
+	  	</foreach> -->
+	</select>
+	
+	<select id="companyIndividualSkillMap" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			PII.PARTNER_INDIVIDUAL_ID,
+			PII.PARTNER_PERSONAL_NAME,
+			PII.DIVISION,
+			PII.POSITION,
+			PSM.SKILL_CATEGORY,
+			VSA.PRODUCT_VENDOR,
+			VSA.PRODUCT_GROUP,
+			VSA.SOLUTION_AREA,
+			PSM.SKILL_LEVEL
+		FROM PARTNER_SKILL_MAP AS PSM
+		LEFT OUTER JOIN 
+			PARTNER_INDIVIDUAL_INFO AS PII ON PII.PARTNER_INDIVIDUAL_ID = PSM.PARTNER_INDIVIDUAL_ID
+		LEFT OUTER JOIN 
+			PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PII.PARTNER_ID
+		LEFT OUTER JOIN 
+			VENDOR_SOLUTION_AREA AS VSA ON VSA.SOLUTION_ID = PSM.SOLUTION_ID
+		WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PCI.PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PCI.PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+		<!-- <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+	        #{item.BIZ_ID}
+	  	</foreach> -->
+	</select>
+	
+	<select id="selectPartnerCompanyOrderStatus" parameterType="hashmap" resultType="hashmap">
+		<!-- <![CDATA[
+			SELECT 
+				PCOS.PARTNER_ID,
+				PCI.COMPANY_NAME,
+				YEAR(PCOS.STATUS_DATE) AS YEAR,
+				QUARTER(PCOS.STATUS_DATE) AS QUARTER,
+				SUM(PCOS.TOTAL_AMOUNT) AS TOTAL_AMOUNT
+			FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+			LEFT OUTER JOIN
+				PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+			WHERE 1=1
+		]]>
+			AND YEAR(PCOS.STATUS_DATE) IN (#{searchYear-2}, #{searchYear-1}, #{searchYear})
+			<if test="textSearchCompanyName != null and textSearchCompanyName !='' ">
+				AND PCI.COMPANY_NAME LIKE CONCAT('%', #{textSearchCompanyName}, '%')
+			</if>
+			GROUP BY YEAR(PCOS.STATUS_DATE), CEIL(QUARTER(PCOS.STATUS_DATE))
+			ORDER BY YEAR ASC, QUARTER ASC -->
+			
+			SELECT 
+				0TH.PARTNER_ID,
+				0TH.COMPANY_NAME,
+				1ST.searchYear2prev_1Q_TOTAL_AMOUNT/1000000 AS searchYear2prev_1Q_TOTAL_AMOUNT,
+				1ST.searchYear2prev_2Q_TOTAL_AMOUNT/1000000 AS searchYear2prev_2Q_TOTAL_AMOUNT,
+				1ST.searchYear2prev_3Q_TOTAL_AMOUNT/1000000 AS searchYear2prev_3Q_TOTAL_AMOUNT,
+				1ST.searchYear2prev_4Q_TOTAL_AMOUNT/1000000 AS searchYear2prev_4Q_TOTAL_AMOUNT,
+				2ND.searchYear1prev_1Q_TOTAL_AMOUNT/1000000 AS searchYear1prev_1Q_TOTAL_AMOUNT,
+				2ND.searchYear1prev_2Q_TOTAL_AMOUNT/1000000 AS searchYear1prev_2Q_TOTAL_AMOUNT,
+				2ND.searchYear1prev_3Q_TOTAL_AMOUNT/1000000 AS searchYear1prev_3Q_TOTAL_AMOUNT,
+				2ND.searchYear1prev_4Q_TOTAL_AMOUNT/1000000 AS searchYear1prev_4Q_TOTAL_AMOUNT,
+				3TH.searchYear_1Q_TOTAL_AMOUNT/1000000 AS searchYear_1Q_TOTAL_AMOUNT,
+				3TH.searchYear_2Q_TOTAL_AMOUNT/1000000 AS searchYear_2Q_TOTAL_AMOUNT,
+				3TH.searchYear_3Q_TOTAL_AMOUNT/1000000 AS searchYear_3Q_TOTAL_AMOUNT,
+				3TH.searchYear_4Q_TOTAL_AMOUNT/1000000 AS searchYear_4Q_TOTAL_AMOUNT
+			FROM
+				(
+				SELECT 
+					PCOS.PARTNER_ID,
+					PCI.COMPANY_NAME
+				FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+				LEFT OUTER JOIN
+					PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+				GROUP BY PCOS.PARTNER_ID
+				)AS 0TH
+				LEFT OUTER JOIN
+				(
+				SELECT 
+					Z.PARTNER_ID,
+					Z.COMPANY_NAME,
+					A.searchYear2prev_1Q_TOTAL_AMOUNT,
+					B.searchYear2prev_2Q_TOTAL_AMOUNT,
+					C.searchYear2prev_3Q_TOTAL_AMOUNT,
+					D.searchYear2prev_4Q_TOTAL_AMOUNT
+				FROM
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					GROUP BY PCOS.PARTNER_ID
+					)AS Z
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear2prev_1Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear2prev}
+					AND QUARTER(STATUS_DATE) = '1'
+					GROUP BY PCOS.PARTNER_ID
+					)AS A ON Z.PARTNER_ID = A.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear2prev_2Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear2prev}
+					AND QUARTER(STATUS_DATE) = '2'
+					GROUP BY PCOS.PARTNER_ID
+					)AS B ON Z.PARTNER_ID = B.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear2prev_3Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear2prev}
+					AND QUARTER(STATUS_DATE) = '3'
+					GROUP BY PCOS.PARTNER_ID
+					)AS C ON Z.PARTNER_ID = C.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear2prev_4Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear2prev}
+					AND QUARTER(STATUS_DATE) = '4'
+					GROUP BY PCOS.PARTNER_ID
+					)AS D ON Z.PARTNER_ID = D.PARTNER_ID
+				)AS 1ST ON 0TH.PARTNER_ID = 1ST.PARTNER_ID
+				LEFT JOIN
+				(
+				SELECT 
+					Z.PARTNER_ID,
+					Z.COMPANY_NAME,
+					A.searchYear1prev_1Q_TOTAL_AMOUNT,
+					B.searchYear1prev_2Q_TOTAL_AMOUNT,
+					C.searchYear1prev_3Q_TOTAL_AMOUNT,
+					D.searchYear1prev_4Q_TOTAL_AMOUNT
+				FROM
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					GROUP BY PCOS.PARTNER_ID
+					)AS Z
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear1prev_1Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear1prev}
+					AND QUARTER(STATUS_DATE) = '1'
+					GROUP BY PCOS.PARTNER_ID
+					)AS A ON Z.PARTNER_ID = A.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear1prev_2Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear1prev}
+					AND QUARTER(STATUS_DATE) = '2'
+					GROUP BY PCOS.PARTNER_ID
+					)AS B ON Z.PARTNER_ID = B.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear1prev_3Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear1prev}
+					AND QUARTER(STATUS_DATE) = '3'
+					GROUP BY PCOS.PARTNER_ID
+					)AS C ON Z.PARTNER_ID = C.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear1prev_4Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear1prev}
+					AND QUARTER(STATUS_DATE) = '4'
+					GROUP BY PCOS.PARTNER_ID
+					)AS D ON Z.PARTNER_ID = D.PARTNER_ID
+				)AS 2ND ON 0TH.PARTNER_ID = 2ND.PARTNER_ID
+				LEFT JOIN
+				(
+				SELECT 
+				Z.PARTNER_ID,
+				Z.COMPANY_NAME,
+				A.searchYear_1Q_TOTAL_AMOUNT,
+				B.searchYear_2Q_TOTAL_AMOUNT,
+				C.searchYear_3Q_TOTAL_AMOUNT,
+				D.searchYear_4Q_TOTAL_AMOUNT
+				FROM
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					GROUP BY PCOS.PARTNER_ID
+					)AS Z
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear_1Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear}
+					AND QUARTER(STATUS_DATE) = '1'
+					GROUP BY PCOS.PARTNER_ID
+					)AS A ON Z.PARTNER_ID = A.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear_2Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear}
+					AND QUARTER(STATUS_DATE) = '2'
+					GROUP BY PCOS.PARTNER_ID
+					)AS B ON Z.PARTNER_ID = B.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear_3Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear}
+					AND QUARTER(STATUS_DATE) = '3'
+					GROUP BY PCOS.PARTNER_ID
+					)AS C ON Z.PARTNER_ID = C.PARTNER_ID
+					LEFT JOIN
+					(
+					SELECT 
+						PCOS.PARTNER_ID,
+						PCI.COMPANY_NAME,
+						YEAR(PCOS.STATUS_DATE) AS YEAR,
+						SUM(PCOS.TOTAL_AMOUNT) AS searchYear_4Q_TOTAL_AMOUNT
+					FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+					LEFT OUTER JOIN
+						PARTNER_COMPANY_INFO AS PCI ON PCOS.PARTNER_ID = PCI.PARTNER_ID
+					WHERE 1=1
+					AND YEAR(STATUS_DATE) = #{searchYear}
+					AND QUARTER(STATUS_DATE) = '4'
+					GROUP BY PCOS.PARTNER_ID
+					)AS D ON Z.PARTNER_ID = D.PARTNER_ID
+				)AS 3TH ON 0TH.PARTNER_ID = 3TH.PARTNER_ID
+				WHERE 1=1
+				<if test="textSearchCompanyName != null and textSearchCompanyName !='' ">
+				AND 0TH.COMPANY_NAME LIKE CONCAT('%', #{textSearchCompanyName}, '%')
+				</if>
+				ORDER BY PARTNER_ID ASC
+	</select>
+	
+	<select id="selectPartnerCompanyOrderQuarterLength" parameterType="hashmap" resultType="hashmap">
+	SELECT
+	IFNULL(IF(
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		) > SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0)),
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		),
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0))
+	),0)AS Q1,
+	IFNULL(IF(
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		) > SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0)),
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		),
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0))
+	),0)AS Q2,
+	IFNULL(IF(
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		) > SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0)),
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		),
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0))
+	),0)AS Q3,
+	IFNULL(IF(
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		) > SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0)),
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		),
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0))
+	),0)AS Q4
+	FROM PARTNER_COMPANY_ORDER_STATUS
+	WHERE 1=1 
+	AND PARTNER_ID=#{companyId}
+	AND YEAR(STATUS_DATE) IN (#{searchYear-2},#{searchYear-1},#{searchYear})
+	</select>
+	
+	<select id="selectPartnerCompanyOrderList1" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			PCOS.STATUS_ID,
+			PCOS.PARTNER_ID,
+			PCOS.CREATOR_ID,
+			PCOS.CREATE_DATETIME,
+			PCOS.ORDER_NAME,
+			PCOS.MATERIAL_NAME,
+			DATE_FORMAT(PCOS.STATUS_DATE, "%m-%d")AS STATUS_DATE,
+			PCOS.STATUS_AMOUNT,
+			PCOS.PRICE,
+			PCOS.TOTAL_AMOUNT,
+			QUARTER(PCOS.STATUS_DATE)AS STATUS_Q,
+			PCOS.SYS_REGISTER_DATE,
+			PCOS.SYS_UPDATE_DATE
+		FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+		WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+		AND YEAR(STATUS_DATE)=#{searchYear}
+		ORDER BY STATUS_DATE ASC
+	</select>
+	
+	<select id="selectPartnerCompanyOrderList2" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			PCOS.STATUS_ID,
+			PCOS.PARTNER_ID,
+			PCOS.CREATOR_ID,
+			PCOS.CREATE_DATETIME,
+			PCOS.ORDER_NAME,
+			PCOS.MATERIAL_NAME,
+			DATE_FORMAT(PCOS.STATUS_DATE, "%m-%d")AS STATUS_DATE,
+			PCOS.STATUS_AMOUNT,
+			PCOS.PRICE,
+			PCOS.TOTAL_AMOUNT,
+			QUARTER(PCOS.STATUS_DATE)AS STATUS_Q,
+			PCOS.SYS_REGISTER_DATE,
+			PCOS.SYS_UPDATE_DATE
+		FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+		WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+		AND YEAR(STATUS_DATE)=#{searchYear-1}
+		ORDER BY STATUS_DATE ASC
+	</select>
+	
+	<select id="selectPartnerCompanyOrderList3" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			PCOS.STATUS_ID,
+			PCOS.PARTNER_ID,
+			PCOS.CREATOR_ID,
+			PCOS.CREATE_DATETIME,
+			PCOS.ORDER_NAME,
+			PCOS.MATERIAL_NAME,
+			DATE_FORMAT(PCOS.STATUS_DATE, "%m-%d")AS STATUS_DATE,
+			PCOS.STATUS_AMOUNT,
+			PCOS.PRICE,
+			PCOS.TOTAL_AMOUNT,
+			QUARTER(PCOS.STATUS_DATE)AS STATUS_Q,
+			PCOS.SYS_REGISTER_DATE,
+			PCOS.SYS_UPDATE_DATE
+		FROM PARTNER_COMPANY_ORDER_STATUS AS PCOS
+		WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+		AND YEAR(STATUS_DATE)=#{searchYear-2}
+		ORDER BY STATUS_DATE ASC
+	</select>
+	
+	<select id="selectPartnerCompanyOrder" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM PARTNER_COMPANY_ORDER_STATUS WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+			AND YEAR(STATUS_DATE)=#{selectYear}
+			ORDER BY STATUS_DATE ASC
+	</select>
+	
+	<update id="updatePartnerCompanyInfoOrder" parameterType="hashmap">
+		UPDATE PARTNER_COMPANY_ORDER_STATUS
+			SET 
+				CREATOR_ID		=	#{creatorId},
+				ORDER_NAME		=	#{ORDER_NAME},
+				MATERIAL_NAME	=	#{MATERIAL_NAME},
+				STATUS_DATE		=	#{STATUS_DATE},
+				STATUS_AMOUNT	=	#{STATUS_AMOUNT},
+				PRICE			=	#{PRICE},
+				TOTAL_AMOUNT	=	${STATUS_AMOUNT}*${PRICE},
+				SYS_UPDATE_DATE	=	CURRENT_TIMESTAMP
+			WHERE PARTNER_ID	=	#{companyId}
+			AND STATUS_ID = #{STATUS_ID}
+	</update>
+	
+	<insert id="insertPartnerCompanyInfoOrder" parameterType="hashmap">
+		INSERT INTO PARTNER_COMPANY_ORDER_STATUS
+		(
+			PARTNER_ID,
+			CREATOR_ID,
+			CREATE_DATETIME,
+			ORDER_NAME,
+			MATERIAL_NAME,
+			STATUS_DATE,
+			STATUS_AMOUNT,
+			PRICE,
+			TOTAL_AMOUNT,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{companyId}, 
+			#{creatorId}, 
+			CURRENT_TIMESTAMP,
+			#{ORDER_NAME},
+			#{MATERIAL_NAME},
+			#{STATUS_DATE},
+			#{STATUS_AMOUNT},
+			#{PRICE},
+			${STATUS_AMOUNT}*${PRICE},
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<delete id="deletePartnerCompanyOrder" parameterType="hashmap">
+		DELETE FROM PARTNER_COMPANY_ORDER_STATUS WHERE STATUS_ID = #{hiddenModalPK}
+	</delete>
+	
+	<select id="selectPartnerCompanySaleQuarterLength" parameterType="hashmap" resultType="hashmap">
+	SELECT
+	IFNULL(IF(
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		) > SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0)),
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		),
+		SUM(IF(QUARTER(STATUS_DATE) = 1 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0))
+	),0)AS Q1,
+	IFNULL(IF(
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		) > SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0)),
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		),
+		SUM(IF(QUARTER(STATUS_DATE) = 2 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0))
+	),0)AS Q2,
+	IFNULL(IF(
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		) > SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0)),
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		),
+		SUM(IF(QUARTER(STATUS_DATE) = 3 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0))
+	),0)AS Q3,
+	IFNULL(IF(
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		) > SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0)),
+		IF(
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0))
+		> SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0)), 
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-2}, 1, 0)),
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear-1}, 1, 0))
+		),
+		SUM(IF(QUARTER(STATUS_DATE) = 4 AND YEAR(STATUS_DATE) = #{searchYear}, 1, 0))
+	),0)AS Q4
+	FROM PARTNER_COMPANY_SALE_STATUS
+	WHERE 1=1 
+	AND PARTNER_ID=#{companyId}
+	AND YEAR(STATUS_DATE) IN (#{searchYear-2},#{searchYear-1},#{searchYear})
+	</select>
+	
+	<select id="selectPartnerCompanySaleList1" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			PCSS.STATUS_ID,
+			PCSS.PARTNER_ID,
+			PCSS.CREATOR_ID,
+			PCSS.CREATE_DATETIME,
+			PCSS.SALE_NAME,
+			PCSS.PRODUCT_NAME,
+			DATE_FORMAT(PCSS.STATUS_DATE, "%m-%d")AS STATUS_DATE,
+			PCSS.STATUS_AMOUNT,
+			PCSS.PRICE,
+			PCSS.TOTAL_AMOUNT,
+			QUARTER(PCSS.STATUS_DATE)AS STATUS_Q,
+			PCSS.SYS_REGISTER_DATE,
+			PCSS.SYS_UPDATE_DATE
+		FROM PARTNER_COMPANY_SALE_STATUS AS PCSS
+		WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+		AND YEAR(STATUS_DATE)=#{searchYear}
+		ORDER BY STATUS_DATE ASC
+	</select>
+	
+	<select id="selectPartnerCompanySaleList2" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			PCSS.STATUS_ID,
+			PCSS.PARTNER_ID,
+			PCSS.CREATOR_ID,
+			PCSS.CREATE_DATETIME,
+			PCSS.SALE_NAME,
+			PCSS.PRODUCT_NAME,
+			DATE_FORMAT(PCSS.STATUS_DATE, "%m-%d")AS STATUS_DATE,
+			PCSS.STATUS_AMOUNT,
+			PCSS.PRICE,
+			PCSS.TOTAL_AMOUNT,
+			QUARTER(PCSS.STATUS_DATE)AS STATUS_Q,
+			PCSS.SYS_REGISTER_DATE,
+			PCSS.SYS_UPDATE_DATE
+		FROM PARTNER_COMPANY_SALE_STATUS AS PCSS
+		WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+		AND YEAR(STATUS_DATE)=#{searchYear-1}
+		ORDER BY STATUS_DATE ASC
+	</select>
+	
+	<select id="selectPartnerCompanySaleList3" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			PCSS.STATUS_ID,
+			PCSS.PARTNER_ID,
+			PCSS.CREATOR_ID,
+			PCSS.CREATE_DATETIME,
+			PCSS.SALE_NAME,
+			PCSS.PRODUCT_NAME,
+			DATE_FORMAT(PCSS.STATUS_DATE, "%m-%d")AS STATUS_DATE,
+			PCSS.STATUS_AMOUNT,
+			PCSS.PRICE,
+			PCSS.TOTAL_AMOUNT,
+			QUARTER(PCSS.STATUS_DATE)AS STATUS_Q,
+			PCSS.SYS_REGISTER_DATE,
+			PCSS.SYS_UPDATE_DATE
+		FROM PARTNER_COMPANY_SALE_STATUS AS PCSS
+		WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+		AND YEAR(STATUS_DATE)=#{searchYear-2}
+		ORDER BY STATUS_DATE ASC
+	</select>
+	
+	<select id="selectPartnerCompanySale" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM PARTNER_COMPANY_SALE_STATUS WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+			AND YEAR(STATUS_DATE)=#{selectYear}
+			ORDER BY STATUS_DATE ASC
+	</select>
+	
+	<update id="updatePartnerCompanyInfoSale" parameterType="hashmap">
+		UPDATE PARTNER_COMPANY_SALE_STATUS
+			SET 
+				CREATOR_ID		=	#{creatorId},
+				SALE_NAME		=	#{SALE_NAME},
+				PRODUCT_NAME	=	#{PRODUCT_NAME},
+				STATUS_DATE		=	#{STATUS_DATE},
+				STATUS_AMOUNT	=	#{STATUS_AMOUNT},
+				PRICE			=	#{PRICE},
+				TOTAL_AMOUNT	=	${STATUS_AMOUNT}*${PRICE},
+				SYS_UPDATE_DATE	=	CURRENT_TIMESTAMP
+			WHERE PARTNER_ID	=	#{companyId}
+			AND STATUS_ID = #{STATUS_ID}
+	</update>
+	
+	<insert id="insertPartnerCompanyInfoSale" parameterType="hashmap">
+		INSERT INTO PARTNER_COMPANY_SALE_STATUS
+		(
+			PARTNER_ID,
+			CREATOR_ID,
+			CREATE_DATETIME,
+			SALE_NAME,
+			PRODUCT_NAME,
+			STATUS_DATE,
+			STATUS_AMOUNT,
+			PRICE,
+			TOTAL_AMOUNT,
+			SYS_REGISTER_DATE,
+			SYS_UPDATE_DATE
+		)
+		VALUES
+		(
+			#{companyId}, 
+			#{creatorId}, 
+			CURRENT_TIMESTAMP,
+			#{SALE_NAME},
+			#{PRODUCT_NAME},
+			#{STATUS_DATE},
+			#{STATUS_AMOUNT},
+			#{PRICE},
+			${STATUS_AMOUNT}*${PRICE},
+			CURRENT_TIMESTAMP, 
+			CURRENT_TIMESTAMP
+		);
+	</insert>
+	
+	<delete id="deletePartnerCompanySale" parameterType="hashmap">
+		DELETE FROM PARTNER_COMPANY_SALE_STATUS WHERE STATUS_ID = #{hiddenModalPK}
+	</delete>
+	
+	<select id="selectPartnerCompanyFileList" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM PARTNER_COMPANY_INFO_FILE_STORE WHERE 1=1 
+		<choose>
+			<when test="companyId != null and companyId != '' ">
+			AND PARTNER_ID=#{companyId}
+			</when>
+			<otherwise>
+			AND PARTNER_ID IN('')
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectPartnerCompanyOrganizationChart" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM PARTNER_COMPANY_INFO_FILE_STORE WHERE PARTNER_ID=#{hiddenModalPK} AND FILE_PATH LIKE 'organizationChart/%';
+	</select>
+	
+	<select id="selectAllPartnerCompanyInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM PARTNER_COMPANY_INFO WHERE PARTNER_ID=#{hiddenModalPK};
+	</select>
+	
+	
+	
+	<select id="partnerIndividualSkillList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					PSM.SKILL_MAP_ID,
+					PSM.PARTNER_INDIVIDUAL_ID,
+					PSM.SOLUTION_ID,
+					PSM.SKILL_CATEGORY,
+					PSM.SKILL_LEVEL,
+					VSA.PRODUCT_VENDOR,
+					VSA.PRODUCT_GROUP,
+					VSA.SOLUTION_AREA,
+					date_format(PSM.SYS_REGISTER_DATE,'%Y-%m-%d')AS SYS_REGISTER_DATE,
+					date_format(PSM.SYS_UPDATE_DATE,'%Y-%m-%d')AS SYS_UPDATE_DATE
+				
+					FROM PARTNER_SKILL_MAP AS PSM
+					LEFT OUTER JOIN 
+								VENDOR_SOLUTION_AREA AS VSA ON VSA.SOLUTION_ID = PSM.SOLUTION_ID
+					WHERE 1=1
+					<choose>
+					<when test="customerId != null and customerId != '' "> 
+					AND PSM.PARTNER_INDIVIDUAL_ID = #{customerId}
+					</when>
+					<otherwise>
+					AND PSM.PARTNER_INDIVIDUAL_ID = ''
+					</otherwise>
+					</choose>
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1 
+	</select>
+	
+	<select id="selectSolutionArea" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					PSM.SKILL_MAP_ID,
+					PSM.PARTNER_INDIVIDUAL_ID,
+					PSM.SOLUTION_ID,
+					PSM.SKILL_CATEGORY,
+					PSM.SKILL_LEVEL,
+					VSA.PRODUCT_VENDOR,
+					VSA.PRODUCT_GROUP,
+					VSA.SOLUTION_AREA,
+					PSM.SYS_REGISTER_DATE,
+					PSM.SYS_UPDATE_DATE
+				
+					FROM vendor_solution_area AS PSM
+					LEFT OUTER JOIN 
+								VENDOR_SOLUTION_AREA AS VSA ON VSA.SOLUTION_ID = PSM.SOLUTION_ID
+					WHERE 1=1
+					<choose>
+					<when test="customerId != null and customerId != '' "> 
+					AND PSM.PARTNER_INDIVIDUAL_ID = #{PRODUCT_VENDOR}
+					</when>
+					<otherwise>
+					AND PSM.PARTNER_INDIVIDUAL_ID = ''
+					</otherwise>
+					</choose>
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1 
+	</select>
+	
+	<select id="partnerEnableLogList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+					PEL.EDU_LOG_ID,
+					PEL.EDU_PLAN_ID,
+					PEL.CREATOR_ID,
+					PEL.CREATE_DATE,
+					PEL.PARTNER_INDIVIDUAL_ID,
+					PEL.ATTENDED_HOURS,
+					PEL.CERTIFICATION_YN,
+					PEL.SAT_VALUE,
+					PEL.SYS_REGISTER_DATE,
+					PEL.SYS_UPDATE_DATE,
+					PEL.PARTNER_ID,
+					PEP.EDU_AREA,
+					PEP.EDU_KIND,
+					PEP.EDU_SUBJECT,
+					PEP.EDU_TARGET,
+					PEP.EDU_BUDGET,
+					PEP.START_DATE,
+					PEP.END_DATE,
+					PEP.TOTAL_HOURS,
+					PEP.EDU_CONTENT,
+					PEP.EDU_LEVEL,
+					VSA.PRODUCT_VENDOR,
+					VSA.PRODUCT_GROUP,
+					VSA.SOLUTION_AREA,
+					OMI.HAN_NAME
+				
+					FROM PARTNER_ENABLE_LOG AS PEL
+					LEFT OUTER JOIN 
+								PARTNER_ENABLE_PLAN AS PEP ON PEP.EDU_PLAN_ID = PEL.EDU_PLAN_ID
+					LEFT OUTER JOIN 
+								VENDOR_SOLUTION_AREA AS VSA ON VSA.SOLUTION_ID = PEP.EDU_AREA
+					LEFT OUTER JOIN 
+								OUR_MEMBERS_INFO AS OMI ON OMI.MEMBER_ID_NUM = PEL.CREATOR_ID
+					WHERE 1=1
+					<choose>
+					<when test="customerId != null and customerId != '' "> 
+					AND PEL.PARTNER_INDIVIDUAL_ID = #{customerId}
+					</when>
+					</choose>
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1 
+	</select>
+	
+	<select id="selectVendorSolutionAreaList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			@ROWNUM := @ROWNUM +1 AS ROWNUM,	
+			TMP.*
+			FROM 
+				(
+					SELECT 
+						VSA.SOLUTION_ID,
+						VSA.PRODUCT_VENDOR,
+						VSA.PRODUCT_GROUP,
+						VSA.SOLUTION_AREA,
+						VSA.SYS_REGISTER_DATE,
+						VSA.SYS_UPDATE_DATE
+				
+					FROM VENDOR_SOLUTION_AREA AS VSA
+					WHERE 1=1
+					<choose>
+					<when test="PRODUCT_VENDOR != null and PRODUCT_VENDOR != '' "> 
+					AND VSA.PRODUCT_VENDOR = #{PRODUCT_VENDOR}
+					</when>
+					</choose>
+				) AS TMP, (SELECT @ROWNUM:=0) AS ROWNUM	
+					WHERE 1=1 
+	</select>
+	
+	<insert id="insertSolutionArea" parameterType="hashmap">
+	INSERT INTO PARTNER_SKILL_MAP
+	(
+		PARTNER_INDIVIDUAL_ID,
+		SOLUTION_ID,
+		SKILL_CATEGORY,
+		SKILL_LEVEL,
+		SYS_UPDATE_DATE
+	)
+	VALUES
+	(
+		#{customerId},  
+		#{SOLUTION_ID},
+		#{SKILL_CATEGORY},
+		#{SKILL_LEVEL},
+		CURRENT_TIMESTAMP
+	);
+	</insert>
+	
+	<update id="updateSolutionArea" parameterType="hashmap">
+		UPDATE PARTNER_SKILL_MAP
+		SET
+		SOLUTION_ID = #{SOLUTION_ID},
+		SKILL_CATEGORY = #{SKILL_CATEGORY},
+		SKILL_LEVEL = #{SKILL_LEVEL},
+		SYS_UPDATE_DATE = CURRENT_TIMESTAMP
+		WHERE 1=1
+		AND SKILL_MAP_ID = #{SKILL_MAP_ID}
+		AND PARTNER_INDIVIDUAL_ID = #{customerId}
+	</update>
+	
+	<delete id="deleteSolutionArea" parameterType="hashmap">
+		DELETE FROM PARTNER_SKILL_MAP
+		WHERE 1=1
+		AND SKILL_MAP_ID = #{SKILL_MAP_ID}
+	</delete>
+	
+
+    <select id="salesLinkageDetail" parameterType="hashmap" resultType="hashmap"> 
+         SELECT PSL.LINKAGE_ID
+              , PSL.PARTNER_ID
+              , PSL.FISCAL_YEAR
+              , PSL.BIZ_SEGMENT
+              , PSL.SALES_REP_ID
+              , OMI.HAN_NAME AS SALES_NAME
+              , PSL.RELATED_STAFF
+              , PSL.DIGITAL
+              , PSL.CADENCE_CYCLE
+              , PSL.CADENCE_TYPE
+              , PSL.PARTNER_INDIVIDUAL_ID
+              , PSL.CREATOR_ID
+              , CREATE_DATE
+              , PSL.SYS_REGISTER_DATE
+              , PSL.SYS_UPDATE_DATE
+              , PSL.PARTNER_CODE
+                    ,   PCI.COMPANY_NAME
+                    ,   PCI.CEO_NAME
+                    ,   PCI.COMPANY_TELNO
+          FROM PARTNER_SALES_LINAKGE PSL
+          INNER JOIN
+                            PARTNER_COMPANY_INFO AS PCI ON PSL.PARTNER_ID = PCI.PARTNER_ID
+          LEFT OUTER JOIN 
+                            OUR_MEMBERS_INFO AS OMI ON PSL.SALES_REP_ID = OMI.MEMBER_ID_NUM
+        WHERE PSL.LINKAGE_ID = #{linkage_id}
+    </select>
+    
+ 	<!-- 모바일 파트너사 협업관리 -> 파트너 정보 -> 전체 파트너 -->
+	<select id="totalPartnerIndividualCnt" parameterType="hashmap" resultType="Integer">
+		SELECT 
+			COUNT(PII.PARTNER_INDIVIDUAL_ID) AS OTALCLIENTCNT
+		FROM OUR_MEMBERS_INFO OMI
+		
+		LEFT OUTER JOIN OUR_TEAM_INFO OTI
+			ON OTI.TEAM_NO = OMI.MEMBER_TEAM
+		LEFT OUTER JOIN PARTNER_INDIVIDUAL_INFO PII
+			ON OMI.MEMBER_ID_NUM = PII.CREATOR_ID
+		LEFT OUTER JOIN OUR_DIVISION_INFO ODI
+			ON ODI.DIVISION_NO = OMI.MEMBER_DIVISION
+			
+		WHERE OMI.USE_YN = 'Y'
+		
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+			</when>			
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				AND ODI.DIVISION_NO = #{global_member_division}
+			</when>			
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				AND OTI.TEAM_NO = #{global_member_team}
+			</when>			
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				AND OMI.MEMBER_ID_NUM = #{global_member_id}
+			</when>			
+			<otherwise>
+			</otherwise>
+		</choose>
+	</select>
+  
+  <!-- 모바일 파트너사 협업 -> 파트너사 게이트 -> 금주 신규 고객 -->
+  <select id="weekPartnerIndividualNewCreateCnt" parameterType="hashmap" resultType="Integer">
+		SELECT
+			IFNULL(SUM(TB.WEEK_0_DAY + TB.WEEK_1_DAY + TB.WEEK_2_DAY + TB.WEEK_3_DAY + TB.WEEK_4_DAY + TB.WEEK_5_DAY + TB.WEEK_6_DAY), 0) AS WEEK_CNT
+		FROM
+		(	
+			SELECT
+			<foreach collection="weekCnt" item="item" separator=",">
+				(
+					SELECT COUNT(*) FROM OUR_MEMBERS_INFO AS OMI2
+					LEFT OUTER JOIN
+						PARTNER_INDIVIDUAL_INFO PII2
+						ON OMI2.MEMBER_ID_NUM = PII2.CREATOR_ID
+					LEFT OUTER JOIN
+						OUR_TEAM_INFO AS OTI2
+						ON OTI2.TEAM_NO = OMI2.MEMBER_TEAM
+					LEFT OUTER JOIN
+						OUR_DIVISION_INFO AS ODI2
+						ON ODI2.DIVISION_NO = OTI2.DIVISION_NO
+						
+					WHERE 1=1
+					<choose>
+						<when test="global_role_code.contains('CEO')">
+						</when>
+						<when test="global_role_code.contains('DIVISION')">
+							AND ODI2.DIVISION_NO = ODI.DIVISION_NO
+						</when>
+						<when test="global_role_code.contains('TEAM')">
+							AND OTI2.TEAM_NO = OTI.TEAM_NO
+							AND OMI2.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+						</when>
+						<when test="global_role_code.contains('MEMBER')">
+							AND OMI2.MEMBER_ID_NUM = OMI.MEMBER_ID_NUM
+						</when>
+						<otherwise>
+						</otherwise>
+					</choose>
+					AND PII2.SYS_REGISTER_DATE LIKE CONCAT(ADDDATE( CURDATE(), - WEEKDAY(CURDATE()) + #{item} ), '%')
+				) AS WEEK_${item}_DAY
+			</foreach>
+			FROM OUR_MEMBERS_INFO AS OMI
+			LEFT OUTER JOIN
+				OUR_TEAM_INFO AS OTI
+				ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+			LEFT OUTER JOIN 
+				OUR_DIVISION_INFO AS ODI
+				ON OTI.DIVISION_NO = ODI.DIVISION_NO
+				
+			WHERE 1=1
+			<choose>
+				<when test="global_role_code.contains('CEO')">
+					<choose>
+						<when test="global_division_type == null or global_division_type == '' ">
+							GROUP BY ODI.DIVISION_NO
+						</when>
+						<otherwise>
+							GROUP BY ODI.DIVISION_NO
+						</otherwise>
+					</choose>
+				</when>
+				<when test="global_role_code.contains('DIVISION')">
+					AND ODI.DIVISION_NO = #{global_member_division}
+					GROUP BY OTI.DIVISION_NO
+				</when>
+				<when test="global_role_code.contains('TEAM')">
+					AND OTI.TEAM_NO = #{global_member_team}
+					GROUP BY OTI.TEAM_NO
+				</when>
+				<when test="global_role_code.contains('MEMBER')">
+					AND OMI.MEMBER_ID_NUM = #{global_member_id}
+				</when>
+				<otherwise>
+					GROUP BY ODI.DIVISION_NO
+				</otherwise>
+			</choose>
+		) AS TB
+	</select>
+   
+  <!-- 모바일 파트너사 협업관리 -> 파트너 정보 -> 영역별 현황 -->
+  <select id="selecetPartnerIndividualStatusByAreaList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+					COALESCE(T.TARGET_NAME, '회사전체') AS TARGET_NAME
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					COALESCE(T.TARGET_NAME, '본부전체') AS TARGET_NAME
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+					COALESCE(T.TARGET_NAME, '팀전체') AS TARGET_NAME
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+					COALESCE(T.TARGET_NAME, '팀전체') AS TARGET_NAME
+				</when>
+				<otherwise>
+					COALESCE(T.TARGET_NAME, '회사전체') AS TARGET_NAME
+				</otherwise>
+			</choose>
+			,(
+				CASE WHEN T.TARGET_NAME IS NULL THEN 1
+				ELSE 2	
+				END
+			) AS BLANK_CNT
+			,T.*
+		FROM
+		(
+			SELECT
+				<choose>
+					<when test="global_role_code.contains('ROLE_CEO')">
+						(
+							CASE WHEN OTI.TEAM_NAME = 'CEO'
+							THEN '임원'
+							ELSE OTI.TEAM_NAME
+							END
+						) AS TARGET_NAME
+					</when>
+					<when test="global_role_code.contains('ROLE_DIVISION')">
+						OTI.TEAM_NAME AS TARGET_NAME
+					</when>
+					<when test="global_role_code.contains('ROLE_TEAM')">
+						OMI.HAN_NAME AS TARGET_NAME
+					</when>
+					<when test="global_role_code.contains('ROLE_MEMBER')">
+						OMI.HAN_NAME AS TARGET_NAME
+					</when>
+					<otherwise>
+						(
+							CASE WHEN OTI.TEAM_NAME = 'CEO'
+							THEN '임원'
+							ELSE OTI.TEAM_NAME
+							END
+						) AS TARGET_NAME
+					</otherwise>
+				</choose>
+				,COUNT(PII.PARTNER_INDIVIDUAL_ID) AS TOTAL_CNT
+				
+				<!-- 
+				현재 test 디비의 파트너코드
+				AHNLAB
+				IBMSW
+				IBMHW
+				MSSW
+				SI -->
+				
+				,COUNT(
+					CASE WHEN PCI.PARTNER_CODE = 'AHNLAB'
+					THEN 1
+					END
+				) AS AHNLAB_CNT
+				,COUNT(
+					CASE WHEN PCI.PARTNER_CODE = 'IBMSW'
+					THEN 1
+					END
+				) AS IBMSW_CNT
+				,COUNT(
+					CASE WHEN PCI.PARTNER_CODE = 'IBMHW'
+					THEN 1
+					END
+				) AS IBMHW_CNT
+				,COUNT(
+					CASE WHEN PCI.PARTNER_CODE = 'MSSW'
+					THEN 1
+					END
+				) AS MSSW_CNT
+				,COUNT(
+					CASE WHEN PCI.PARTNER_CODE = 'SI'
+					THEN 1
+					END
+				) AS SI_CNT
+			FROM OUR_MEMBERS_INFO AS OMI
+			LEFT OUTER JOIN
+				OUR_TEAM_INFO AS OTI
+				ON OMI.MEMBER_TEAM = OTI.TEAM_NO
+			LEFT OUTER JOIN
+				OUR_DIVISION_INFO AS ODI
+				ON ODI.DIVISION_NO = OTI.DIVISION_NO
+			LEFT OUTER JOIN
+				PARTNER_INDIVIDUAL_INFO AS PII
+				ON PII.CREATOR_ID = OMI.MEMBER_ID_NUM
+			LEFT OUTER JOIN
+				PARTNER_COMPANY_INFO AS PCI
+				ON PCI.PARTNER_ID = PII.PARTNER_ID
+			WHERE OMI.USE_YN = 'Y'
+			<![CDATA[ AND TOTAL_CNT > 0 ]]>
+			<choose>
+				<when test="global_role_code.contains('ROLE_CEO')">
+					AND OTI.TEAM_NO IN (
+						SELECT OTI2.TEAM_NO FROM OUR_TEAM_INFO AS OTI2
+						LEFT OUTER JOIN
+							OUR_MEMBERS_INFO AS OMI2
+							ON OMI2.MEMBER_TEAM = OTI2.TEAM_NO
+						GROUP BY OTI2.TEAM_NO
+					)
+					GROUP BY TARGET_NAME WITH ROLLUP
+				</when>
+				<when test="global_role_code.contains('ROLE_DIVISION')">
+					AND ODI.DIVISION_NO = #{global_member_division}
+					GROUP BY TARGET_NAME WITH ROLLUP
+				</when>
+				<when test="global_role_code.contains('ROLE_TEAM')">
+					AND OTI.TEAM_NO = #{global_member_team}
+					GROUP BY TARGET_NAME WITH ROLLUP
+				</when>
+				<when test="global_role_code.contains('ROLE_MEMBER')">
+					AND OMI.MEMBER_ID_NUM = #{global_member_id}
+				</when>
+				<otherwise>
+					AND OTI.TEAM_NO IN (
+						SELECT OTI2.TEAM_NO FROM OUR_TEAM_INFO AS OTI2
+						LEFT OUTER JOIN
+							OUR_MEMBERS_INFO AS OMI2
+							ON OMI2.MEMBER_TEAM = OTI2.TEAM_NO
+						GROUP BY OTI2.TEAM_NO
+					)
+					GROUP BY TARGET_NAME WITH ROLLUP
+				</otherwise>
+			</choose>
+		) AS T
+		<choose>
+			<when test="global_role_code.contains('ROLE_CEO')">
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '임원') DESC, TARGET_NAME ASC
+			</when>
+			<when test="global_role_code.contains('ROLE_DIVISION')">
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '본부장') DESC, TARGET_NAME ASC
+			</when>
+			<when test="global_role_code.contains('ROLE_TEAM')">
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '팀장') DESC, TARGET_NAME ASC
+			</when>
+			<when test="global_role_code.contains('ROLE_MEMBER')">
+				ORDER BY BLANK_CNT ASC, TARGET_NAME ASC
+			</when>
+			<otherwise>
+				ORDER BY BLANK_CNT ASC, FIELD(TARGET_NAME, '임원') DESC, TARGET_NAME ASC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectPartnerIndividualInfoCount" parameterType="hashmap" resultType="hashmap">
+	 SELECT 
+				COUNT(*) AS listCount,
+				GROUP_CONCAT(PII.PARTNER_INDIVIDUAL_ID) AS searchPKArray
+		FROM 
+			PARTNER_INDIVIDUAL_INFO AS PII
+			LEFT OUTER JOIN 
+			PARTNER_COMPANY_INFO AS PCI ON PCI.PARTNER_ID = PII.PARTNER_ID
+			LEFT OUTER JOIN 
+			OUR_MEMBERS_INFO AS OMI ON PII.CREATOR_ID = OMI.MEMBER_ID_NUM
+		WHERE 1=1
+			<if test="serchInfo != null and serchInfo != '' ">
+			   	AND (PII.PARTNER_PERSONAL_NAME LIKE CONCAT('%', #{serchInfo}, '%')
+			   	OR PCI.COMPANY_NAME LIKE CONCAT('%', #{serchInfo}, '%'))
+			</if>
+	</select>
+	
+	<select id="selectPartnerCompanyCount" parameterType="hashmap" resultType="hashmap">
+			SELECT 
+					COUNT(*) AS listCount,
+					GROUP_CONCAT(PCI.PARTNER_ID) AS searchPKArray
+			FROM 
+				PARTNER_COMPANY_INFO AS PCI
+				LEFT OUTER JOIN CODE_PARTNER_SEGMENT AS CPS 
+					ON CPS.USE_YN = 'Y' AND CPS.PARTNER_CODE = PCI.PARTNER_CODE
+			WHERE 1=1
+			<if test="serchInfo != null and serchInfo != '' ">
+			    AND PCI.COMPANY_NAME LIKE CONCAT('%', #{serchInfo}, '%')
+			</if>
+			
+	</select>
+</mapper>

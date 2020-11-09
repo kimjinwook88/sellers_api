@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>랜딩페이지</title>
+
+    <link href="../../css/pc/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link href="../../font-awesome/pc/css/font-awesome.css" rel="stylesheet">
+
+    <!-- datepicker3 style -->
+    <link href="../../css/pc/plugins/datapicker/datepicker3.css" rel="stylesheet">
+
+    <link href="../../css/pc/animate.css" rel="stylesheet">
+    <link href="../../css/pc/style.css" rel="stylesheet">
+
+</head>
+
+<body class="fixed-sidebar">
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header ta-c">
+                        <div class="dropdown profile-element">
+                            <div class="site-logo"><img src="../../images/pc/logo.png" alt=""/></div>
+                            <span><img alt="image" class="img-circle" src="../../img/pc/profile_small.jpg" /></span>
+                            <a href="#">
+                                <span class="clear"> <span class="block m-t-xs"> <strong class="font-bold">반갑습니다. 이상현님</strong></span> </span>
+                            </a>
+                        </div>
+                        <div class="logo-element"><!-- 왼쪽영역이 좁혀졌을 때 보여지는 로고 영역 -->
+                            디유넷
+                        </div>
+                    </li>
+                    <li class="">
+                        <a href="#"><i class="fa fa-user"></i> <span class="nav-label">고객사 및 고객개인정보</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class=""><a href="#">고객사정보</a></li>
+                            <li><a href="#">고객개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-diamond"></i> <span class="nav-label">고객영업활동</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객컨택내용</a></li>
+                            <li><a href="#">영업기회</a></li>
+                            <li><a href="#">잠재영업기회</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-pie-chart"></i> <span class="nav-label">고객만족</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">고객이슈</a></li>
+                            <li><a href="#">고객만족도</a></li>
+                            <li><a href="#">서비스프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="mailbox.html"><i class="fa fa-share-alt"></i> <span class="nav-label">파트너사협업관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">파트너사협업</a></li>
+                            <li><a href="#">파트너사정보</a></li>
+                            <li><a href="#">파트너사개인정보</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                        <a href="mailbox.html"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">성과관리</span>  <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li class=""><a href="#">성과관리</a></li>
+                            <li><a href="#">생산성</a></li>
+                            <li><a href="#">제안서정보</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">사업전략</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">회사/부문별전략</a></li>
+                            <li><a href="#">고객별전략</a></li>
+                            <li><a href="#">전략프로젝트</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#"><i class="fa fa-calendar"></i> <span class="nav-label">일정관리</span><span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
+                            <li><a href="#">캘린더</a></li>
+                            <li><a href="#">나의 할 일</a></li>
+                        </ul>
+                    </li>
+                    <li class="special_link">
+                        <a href="http://plaza.ksigroup.co.kr/" target="_blank"><i class="fa fa-database"></i> <span class="nav-label">seller's Plaza Site</span></a>
+                    </li>
+                </ul>
+                <div class="product-logo text-center">
+                    <img src="../../images/pc/product_logo.png" alt=""/>
+                    <span>Copyright Seller’s Company © 2016</span>
+                </div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="gray-bg">
+            <div class="row border-bottom white-bg">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-seller" href="#"><i class="fa fa-bars"></i> </a>                       
+                    </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li>
+                            <span class="m-r-sm text-muted welcome-message">이상현님 환영합니다.</span>
+                        </li>
+                        <li class="dropdown">
+                            <a class="count-info btn-alarm" data-toggle="dropdown" href="#">
+                                <i class="fa fa-bell"></i>  <span class="label alarm_count_bg">8</span>
+                            </a>
+                            <div class="alarm-menu off">
+                                <ul class="alarm-list-pop">
+                                    <li class="">
+                                        <div class="alarm-box">
+                                            <span class="label">고객사정보</span>
+                                            <strong>삼성글로벌</strong>
+                                            <small>게시물이 업데이트 됐습니다.</small><br/>
+                                            <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                        </div>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li class="">
+                                        <div class="alarm-box">
+                                            <span class="label">캘린더공유</span>
+                                            <strong>장성훈님의</strong>
+                                            <small>캘린더를 공유하였습니다.</small><br/>
+                                            <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                        </div>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <span class="icon_new">new</span>
+                                                <span class="label">고객개인정보</span>
+                                                <strong>허나경</strong>
+                                                <small>게시물이 등록됐습니다.</small><br/>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li class="visited">
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <span class="label">잠재기회</span>
+                                                <strong>2017년 제니퍼소프트 하드웨어 구매</strong>
+                                                <small>게시물이 업데이트 됐습니다.</small><br/>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li class="visited">
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <img src="../../images/pc/calendar_icon4.png" class="v-m"/>
+                                                <strong class="v-m">영업1팀 회의 소집</strong>
+                                                <small>일정이 공유됐습니다.</small>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <span class="icon_new">new</span>
+                                                <img src="../../images/pc/calendar_icon1.png" class="v-m"/>
+                                                <strong class="v-m">IBM고객 미팅 준비</strong>
+                                                <small>일정이 공유됐습니다.</small>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <span class="icon_new">new</span>
+                                                <img src="../../images/pc/calendar_icon4.png" class="v-m"/>
+                                                <strong class="v-m">영업1팀 회의 소집</strong>
+                                                <small>일정이 공유됐습니다.</small>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <span class="label">영업기회</span>
+                                                <strong>2017년 제니퍼소프트 하드웨어 구매</strong>
+                                                <small>게시물이 업데이트 됐습니다.</small><br/>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <span class="icon_new">new</span>
+                                                <span class="label">고객컨택내용</span>
+                                                <strong>2017년 제니퍼소프트 하드웨어 구매</strong>
+                                                <small>게시물이 업데이트 됐습니다.</small><br/>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <span class="icon_new">new</span>
+                                                <span class="label">고객컨택내용</span>
+                                                <strong>2017년 제니퍼소프트 하드웨어 구매</strong>
+                                                <small>게시물이 업데이트 됐습니다.</small><br/>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                            <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                        </a>
+                                    </li>
+                                    <li class="visited">
+                                        <a href="#">
+                                            <div class="alarm-box">
+                                                <span class="label">고객컨택내용</span>
+                                                <strong>2017년 제니퍼소프트 하드웨어 구매</strong>
+                                                <small>게시물이 업데이트 됐습니다.</small><br/>
+                                                <div><span class="text-muted small"><i class="fa fa-clock-o"></i> 2016-11-03 12:30:21</span></div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="btn_list_delete"><img src="../../images/pc/icon_check_no.png"></a>
+                                    </li>
+                                </ul>
+                                <div class="text-center link-block">
+                                    <a href="#"><!-- 랜딩페이지로 이동 -->
+                                        <strong>알림 전체보기</strong>
+                                        <i class="fa fa-angle-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="pos-rel">
+                            <a href="#" class="btn-pwset-pop" data-toggle="modal" data-target="#myinfo-pw">
+                                <i class="fa fa-gear"></i> 비밀번호수정
+                            </a>
+                            <!-- 비밀번호 변경 -->
+                            <div class="myinfo-pw-modal off">
+                                <div class="pop-header">
+                                    <strong class="pop-title">비밀번호 변경</strong>
+                                </div>
+                                <div class="col-sm-12 cont">
+                                    <div class="ibox-content border_n">
+                                        <form method="get" class="form-horizontal">
+                                            <div class="form-group">
+                                                <div class="col-sm-12 m-b">
+                                                    현재 비밀번호
+                                                    <input type="password" placeholder="" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-12 m-b">
+                                                    새 비밀번호 입력
+                                                    <input type="password" placeholder="" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-12">
+                                                    새 비밀번호 확인
+                                                    <input type="password" placeholder="" class="form-control">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div class="col-sm-12 ta-c">
+                                        <button type="button" class="btn btn-outline btn-seller-outline mg-r10 btn-cancle">취소</button>
+                                        <button type="button" class="btn btn-seller">변경</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--// 비밀번호 변경 -->
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-sign-out"></i> 로그아웃
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-4 pd-no">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <h5>영업실적</h5>                                
+                            </div>
+                            <div class="ibox-content">
+                                <div class="row">
+                                    <div class="col-sm-12 col-lg-12">
+                                        <!-- <h4>박형규</h4> -->
+                                        <div class="tabs-container landing-tab sales_top">
+                                            <ul class="nav nav-tabs">
+                                                <li class="active"><a data-toggle="tab" href="#tab-1">1분기</a></li>
+                                                <li class=""><a data-toggle="tab" href="#tab-2">2분기</a></li>
+                                                <li class=""><a data-toggle="tab" href="#tab-3">3분기</a></li>
+                                                <li class=""><a data-toggle="tab" href="#tab-4">4분기</a></li>
+                                                <li class=""><a data-toggle="tab" href="#tab-5">2016년</a></li>
+                                            </ul>
+                                            <div class="tab-content ">
+                                                <div id="tab-1" class="tab-pane active ">
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">박형규 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">7,055<span class="stat-percent">(110%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:110%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">35,028<span class="stat-percent">(50%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:50%;" class="bar gp_color"></div>                                                   
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">회사전체 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">7,055<span class="stat-percent">(110%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:110%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">35,028<span class="stat-percent">(50%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:50%;" class="bar gp_color"></div>                                                   
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="tab-2" class="tab-pane">
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">박형규 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">2,055<span class="stat-percent">(75%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:75%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">5,028<span class="stat-percent">(80%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:80%;" class="bar gp_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">회사전체 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">7,055<span class="stat-percent">(110%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:110%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">35,028<span class="stat-percent">(50%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:50%;" class="bar gp_color"></div>                                                   
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="tab-3" class="tab-pane">
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">박형규 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">3,055<span class="stat-percent">(120%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:120%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">61,028<span class="stat-percent">(80%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:120%;" class="bar gp_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">회사전체 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">7,055<span class="stat-percent">(110%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:110%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">35,028<span class="stat-percent">(50%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:50%;" class="bar gp_color"></div>                                                   
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="tab-4" class="tab-pane">
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">박형규 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">9,055<span class="stat-percent">(120%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:120%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">2,028<span class="stat-percent">(80%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:120%;" class="bar gp_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">회사전체 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">7,055<span class="stat-percent">(110%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:110%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">35,028<span class="stat-percent">(50%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:50%;" class="bar gp_color"></div>                                                   
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="tab-5" class="tab-pane">
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">박형규 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">9,055<span class="stat-percent">(120%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:120%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">2,028<span class="stat-percent">(80%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:120%;" class="bar gp_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="panel-body">
+                                                        <div class="total_year_result">
+                                                            <ul class="stat-list">
+                                                                <li>
+                                                                    <h2 class="no-margins">
+                                                                        <span class="small">회사전체 Target : 
+                                                                            <strong>2,000</strong><span class="ft-s12">(REV)</span> /
+                                                                            <strong>3,000</strong><span class="ft-s12">(GP)</span>
+                                                                        </span>
+                                                                    </h2>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">REV</span>
+                                                                        <span class="count">7,055<span class="stat-percent">(110%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:110%;" class="bar rev_color"></div>
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                                <li>
+                                                                    <h2 class="subtitle">
+                                                                        <span class="sub">GP</span>
+                                                                        <span class="count">35,028<span class="stat-percent">(50%)</span></span>
+                                                                    </h2>
+                                                                    <div class="result_total_track">
+                                                                        <div class="result_progress">
+                                                                            <div style="width:50%;" class="bar gp_color"></div>                                                   
+                                                                            <div class="line_100">100%</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>                                    
+                                        </div>
+                                    </div>                                
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 ">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <h5>나의 관리고객</h5>                                
+                            </div>
+                            <div class="ibox-content">
+                                <div class="row">
+                                    <div class="">
+                                        <h4>고객 리스트 <small>( 총 121개사 )</small></h4>
+
+                                        <div class="custom_list full-height-scroll">
+                                            <ul>
+                                                <li>
+                                                    <a href="#">(주)한국스탠다드차타드저축은행</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">(주)한신저축은행</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">IBK기업은행</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">JT친애저축은행</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">SC은행(교대역)</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">농협은행(주)</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">상호저축은행중앙회</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">삼성카드(주)</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">삼성전자서비스(주)</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">대신저축은행</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">SC은행(교대역)</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">농협은행(주)</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">상호저축은행중앙회</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">삼성카드(주)</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">삼성전자서비스(주)</a>
+                                                </li>
+                                                <li>
+                                                    <a href="#">대신저축은행</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 최근 등록된 고객 -->
+                    <div class="col-lg-4 pd-no">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <h5>최근 등록된 고객(최근 1개월내)</h5>                                
+                            </div>
+                            <div class="ibox-content landing-act2 no-padding">
+
+                                <div class="full-height-scroll pd20">
+
+                                    <div class="pull-right">
+                                        <button class="btn btn-white " data-toggle="modal" data-target="#myModal1"><i class="fa fa-plus"></i> 고객 간편등록</button>
+                                    </div>                                
+
+                                    <div class="new_custom_sum">
+                                        <div class="left">
+                                            <span class="ment">신규 고객수</span>
+                                            <strong class="count">17</strong>
+                                        </div>
+                                        <div class="right">
+                                            <ul>
+                                                <li class="first">대학: <a href="#">5</a>명</li>
+                                                <li>공공기관: <a href="#">5</a>명</li>
+                                                <li>기타: <a href="#">7</a>명</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="new_custom_list">
+                                        <strong class="title">전체 신규고객</strong><!-- 전체, 농민, 거래선, 영향력자의 고객리스트 표시 -->                                    
+                                        <ul>
+                                            <li>
+                                                <a href="#">
+                                                    <span class="name">김정민</span>
+                                                    <small class="block text-muted">경성대 / 2018-01-09</small>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#">
+                                                    <span class="name">홍길동</span>
+                                                    <small class="block text-muted">한국세무사회 / 2018-01-09</small>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#">
+                                                    <span class="name">이상현</span>
+                                                    <small class="block text-muted">전남대학교 / 2018-01-09</small>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#">
+                                                    <span class="name">홍경인</span>
+                                                    <small class="block text-muted">수성대 / 2018-01-09</small>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#">
+                                                    <span class="name">송혜교</span>
+                                                    <small class="block text-muted">전남대학교 / 2018-01-09</small>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#">
+                                                    <span class="name">태연</span>
+                                                    <small class="block text-muted">수성대 / 2018-01-09</small>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#">
+                                                    <span class="name">김정민</span>
+                                                    <small class="block text-muted">수성대 / 2018-01-09</small>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!--// 최근 등록된 고객 -->
+                </div>
+
+                <div class="row">
+                    <!-- 나의 오늘 일정 -->
+                    <div class="col-lg-4 pd-no">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title landing-header">
+                                <h5>홍길동님의 일정</h5>
+
+                                <div class="pull-right day-nav">
+                                    <button class="btn btn-white btn-sm"><i class="fa fa-arrow-left"></i></button>
+                                    <strong>11월 3일</strong>
+                                    <button class="btn btn-white btn-sm"><i class="fa fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                            <div class="">
+                                <div class="ibox-content inspinia-timeline landing-timeline ">
+
+                                    <div class="timeline-item">
+                                        <div class="date">
+                                            <span class="v-m">08:00</span> <!-- 일정 시작시간 기준 -->
+                                        </div>
+                                        <div class="content no-top-border" style="cursor:pointer;">
+                                            <p class="m-b-xs"><img src="../../images/pc/calendar_icon1.png" class="v-m"/> <strong>아침 커피타임</strong></p>
+                                            <p>팀원들과 어제 있었던 일 공유 팀원들과 어제 있었던 일 공유 팀원들과 어제 있었던 일 공유 팀원들과 어제 있었던 일 공유</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="">
+                                            <div class="date">
+                                                <span class="v-m">09:00</span>
+                                            </div>
+                                            <div class="content" style="cursor:pointer;">
+                                                <p class="m-b-xs"><img src="../../images/pc/calendar_icon2.png" class="v-m"/> <strong>영업1팀 조회</strong></p>
+                                                <p>팀의 하루 일정 체크 및 이슈사항 공유</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="date">
+                                            <span class="v-m">10:00</span>
+                                        </div>
+                                        <div class="content" style="cursor:pointer;">
+                                            <p class="m-b-xs"><img src="../../images/pc/calendar_icon3.png" class="v-m"/> <strong>고객미팅 준비</strong></p>
+                                            <p>삼성전사 김상무 미팅시 보여줄 셈플자료 준비</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="date">
+                                            <span class="v-m">11:00</span>
+                                        </div>
+                                        <div class="content" style="cursor:pointer;">
+                                            <p class="m-b-xs"><img src="../../images/pc/calendar_icon4.png" class="v-m"/> <strong>솔루션사업본부 성과 분석 회의</strong></p>
+                                            <p>하반기 성과 리뷰 및 4분기 예상 매출 계획</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="date">
+                                            <span class="v-m">13:00</span>
+                                        </div>
+                                        <div class="content" style="cursor:pointer;">
+                                            <p class="m-b-xs"><img src="../../images/pc/calendar_icon6.png" class="v-m"/> <strong>고객미팅 준비</strong></p>
+                                            <p>삼성전사 김상무 미팅시 보여줄 셈플자료 준비</p>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-item">
+                                        <div class="date">
+                                            <span class="v-m">14:00</span>
+                                        </div>
+                                        <div class="content" style="cursor:pointer;">
+                                            <p class="m-b-xs"><img src="../../images/pc/calendar_icon7.png" class="v-m"/> <strong>솔루션사업본부 성과 분석 회의</strong></p>
+                                            <p>하반기 성과 리뷰 및 4분기 예상 매출 계획</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--// 나의 오늘 일정 -->
+
+                    <!-- 나의 진행중인 영업활동 -->
+                    <div class="col-lg-4">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title landing-header">
+                                <h5>영업활동(영업기회, 잠재기회)</h5>
+                            </div>
+                            <div class="ibox-content landing-act">
+                                <table class="table table-hover no-margins">
+                                    <colgroup>
+                                        <col width=""/>
+                                        <col width=""/>
+                                        <col width="80px"/>
+                                    </colgroup>
+                                    <thead>
+                                        <tr>
+                                            <th class="ag_c">활동구분</th>
+                                            <th class="ag_c">제목</th>
+                                            <th class="ag_c">고객</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style="cursor:pointer;">
+                                            <td class="ag_c"><span class="label statusColor-green">영업기회</span> </td>
+                                            <td>제니퍼소프트 하드웨어 구매</td>
+                                            <td class="ag_c">김철중</td>
+                                        </tr>
+                                        <tr style="cursor:pointer;">
+                                            <td class="ag_c"><span class="label statusColor-green">영업기회</span> </td>
+                                            <td>삼성전자 솔루션판매</td>
+                                            <td class="ag_c">김철중</td>
+                                        </tr>
+                                        <tr style="cursor:pointer;">
+                                            <td class="ag_c"><small>고객컨텍</small></td>
+                                            <td>강유미고객 컨텍관리</td>
+                                            <td class="ag_c">강유미</td>
+                                        </tr>
+                                        <tr style="cursor:pointer;">
+                                            <td class="ag_c"><span class="label statusColor-yellow">고객이슈</span> </td>
+                                            <td>제니퍼소프트 강유미 고객 IBM S/W 제품관련 이슈</td>
+                                            <td class="ag_c">강유미</td>
+                                        </tr>
+                                        <tr style="cursor:pointer;">
+                                            <td class="ag_c"><small>고객컨텍</small></td>
+                                            <td>셀러스 프로젝트 진행목적</td>
+                                            <td class="ag_c">김동규</td>
+                                        </tr>
+                                        <tr style="cursor:pointer;">
+                                            <td class="ag_c"><span class="label statusColor-yellow">잠재기회</span> </td>
+                                            <td>삼성전자 솔루션판매</td>
+                                            <td class="ag_c">김철중</td>
+                                        </tr>
+                                        <tr style="cursor:pointer;">
+                                            <td class="ag_c"><span class="label statusColor-gray">잠재기회</span> </td>
+                                            <td>삼성전자 솔루션판매</td>
+                                            <td class="ag_c">김철중</td>
+                                        </tr>
+                                        <tr style="cursor:pointer;">
+                                            <td class="ag_c"><span class="label statusColor-green">영업기회</span> </td>
+                                            <td>삼성전자 솔루션판매</td>
+                                            <td class="ag_c">김철중</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!--// 나의 영업활동 관리 -->
+
+                    <!-- 신규 및 업데이트 알림 -->
+                    <div class="col-lg-4 pd-no">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title landing-header">
+                                <h5>고객이슈 및 고객만족</h5>
+                            </div>
+                            <div class="ibox-content no-padding landing-update">
+                                <ul class="list-group">
+                                    <li class="list-group-item" style="cursor:pointer;">
+                                        <p>
+                                            <span class="label statusColor-green">고객이슈</span>
+                                            <strong>삼성글로벌 이슈</strong>
+                                        </p>
+                                        <small class="block text-muted"><span>등록자 : 이상현 </span> / <i class="fa fa-clock-o"></i> 2016-11-03 12:30:30</small>
+                                    </li>
+                                    <li class="list-group-item" style="cursor:pointer;">
+                                        <p>
+                                            <span class="label statusColor-yellow">고객이슈</span>
+                                            <strong>강이식</strong>
+                                        </p>
+                                        <small class="block text-muted"><span>등록자 : 이상현 </span> / <i class="fa fa-clock-o"></i> 2016-11-03 12:30:30</small>
+                                    </li>
+                                    <li class="list-group-item" style="cursor:pointer;">
+                                        <p>
+                                            <span class="label statusColor-yellow">고객이슈</span>
+                                            <strong>제니터소프트 하드웨어 구매</strong>
+                                        </p>
+                                        <small class="block text-muted"><span>등록자 : 이상현 </span> / <i class="fa fa-clock-o"></i> 2016-11-03 12:30:30</small>
+                                    </li>
+                                    <li class="list-group-item" style="cursor:pointer;">
+                                        <p>
+                                            <span class="label statusColor-green">고객이슈</span>
+                                            <strong>2017년 제니터소프트 하드웨어 구매</strong>
+                                        </p>
+                                        <small class="block text-muted"><span>등록자 : 김이라 </span> / <i class="fa fa-clock-o"></i> 2016-11-03 12:30:30</small>
+                                    </li>
+                                    <li class="list-group-item" style="cursor:pointer;">
+                                        <p>
+                                            <span class="label statusColor-green">고객이슈</span>
+                                            <strong>제니터소프트 하드웨어 구매</strong>
+                                        </p>
+                                        <small class="block text-muted"><span>등록자 : 이상현 </span> / <i class="fa fa-clock-o"></i> 2016-11-03 12:30:30</small>
+                                    </li>
+                                    <li class="list-group-item" style="cursor:pointer;">
+                                        <p>
+                                            <span class="label statusColor-green">고객이슈</span>
+                                            <strong>IBM 하드웨어 구매가격 이슈제기</strong>
+                                        </p>
+                                        <small class="block text-muted"><span>등록자 : 김진욱 </span> / <i class="fa fa-clock-o"></i> 2016-11-03 12:30:30</small>
+                                    </li>
+                                    <li class="list-group-item" style="cursor:pointer;">
+                                        <p>
+                                            <span class="label statusColor-green">고객이슈</span>
+                                            <strong>제니터소프트 하드웨어 구매</strong>
+                                        </p>
+                                        <small class="block text-muted"><span>등록자 : 이상현 </span> / <i class="fa fa-clock-o"></i> 2016-11-03 12:30:30</small>
+                                    </li>
+                                    <li class="list-group-item" style="cursor:pointer;">
+                                        <p>
+                                            <span class="label statusColor-green">고객이슈</span>
+                                            <strong>IBM 하드웨어 구매가격 이슈제기</strong>
+                                        </p>
+                                        <small class="block text-muted"><span>등록자 : 김진욱 </span> / <i class="fa fa-clock-o"></i> 2016-11-03 12:30:30</small>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!--// 신규 및 업데이트 알림 -->
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- 고객 간편등록 -->
+    <div class="modal inmodal fade" id="myModal1" tabindex="-1" role="dialog"  aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">고객 간편등록</h4>
+                    <!-- <small class="font-bold">영업관리 세부 정보입니다.</small> -->
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-content border_n">
+                                    <form method="get" class="form-horizontal">
+
+                                        <div class="form-group">
+                                            <div class="">
+                                                <table id="" class="table-customsimple">
+                                                    <colgroup>
+                                                        <col width="10%"/>
+                                                        <col width=""/>
+                                                        <col width=""/>
+                                                        <col width=""/>
+                                                        <col width=""/>
+                                                        <col width=""/>
+                                                        <col width="25%"/>
+                                                        <col width="6%"/>
+                                                        <col width="6%"/>
+                                                    </colgroup>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>번호</th>
+                                                            <th>고객명</th>
+                                                            <th>직급</th>
+                                                            <th>소속사</th>
+                                                            <th>휴대전화</th>
+                                                            <th>이메일</th>
+                                                            <th>등록일</th>
+                                                            <th>수정</th>
+                                                            <th>삭제</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- num 1 -->
+                                                        <tr>
+                                                            <td  rowspan="2" class="first">1</td>
+                                                            <td><input type="text" class="" size="6" /></td>
+                                                            <td><input type="text" class="" size="10"/></td>
+                                                            <td><input type="text" class="" size="10" /></td>
+                                                            <td><input type="text" class="" size="15" /></td>
+                                                            <td><input type="text" class="" /></td>                                                            
+                                                            <td>
+                                                                <div id="data_1">
+                                                                    <div class="input-group date">
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="2018-04-01">
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td rowspan="2"><a href="#"><i class="fa fa-edit fa-lg"></i></a></td>
+                                                            <td rowspan="2"><a href="#"><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="6" class="ta_l">
+                                                                <select class="mg-r10">
+                                                                    <option>정보습득경로 선택</option>
+                                                                    <option>이벤트/행사</option>
+                                                                    <option>교육</option>
+                                                                    <option>이메일</option>
+                                                                    <option>전화</option>
+                                                                    <option>기타</option>
+                                                                </select>
+
+                                                                <span>정보습득자</span>
+                                                                <input type="text" size="6"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!--// num 1 -->
+
+                                                        <!-- num 2 -->
+                                                        <tr class="custom_div_line">
+                                                            <td  rowspan="2" class="first">2</td>
+                                                            <td><input type="text" class="" size="6" /></td>
+                                                            <td><input type="text" class="" size="10"/></td>
+                                                            <td><input type="text" class="" size="10" /></td>
+                                                            <td><input type="text" class="" size="15" /></td>
+                                                            <td><input type="text" class="" /></td>                                                            
+                                                            <td>
+                                                                <div id="data_1">
+                                                                    <div class="input-group date">
+                                                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span><input type="text" class="form-control" value="2018-04-01">
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td rowspan="2"><a href="#"><i class="fa fa-edit fa-lg"></i></a></td>
+                                                            <td rowspan="2"><a href="#"><i class="fa fa-trash-o fa-lg"></i></a></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="6" class="ta_l">
+                                                                <select class="mg-r10">
+                                                                    <option>정보습득경로 선택</option>
+                                                                    <option>이벤트/행사</option>
+                                                                    <option>교육</option>
+                                                                    <option>이메일</option>
+                                                                    <option>전화</option>
+                                                                    <option>기타</option>
+                                                                </select>
+
+                                                                <span>정보습득자</span>
+                                                                <input type="text" size="6"/>
+                                                            </td>
+                                                        </tr>
+                                                        <!--// num 2 -->
+                                                    </tbody>
+                                                </table>
+
+                                                <p class="">
+                                                    <div class="pull-left">
+                                                        <a href="javascript:void(0);" class="btn-row-add" name="buttonSaleAddRow" onclick="modal.addRow();">+ 입력란 추가</a>
+                                                    </div>
+                                                    <div class="pull-right">
+                                                        <button type="button" class="btn btn-gray">저장</button>
+                                                        <!-- <button type="button" class="btn btn-w-m btn-primary btn-seller">저장</button> -->
+                                                    </div>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <!--// 고객 간편등록 -->   
+
+
+    <!-- Mainly scripts -->
+    <script src="../../js/pc/jQuery/jquery-1.11.0.min.js"></script>
+    <script src="../../js/pc/bootstrap/bootstrap.min.js"></script>
+    <script src="../../js/pc/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="../../js/pc/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Table-rwd -->
+    <script src="../../js/pc/jQuery/jquery-ui.widget.min.js"></script>
+    <script src="../../js/pc/rwd-table.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="../../js/pc/inspinia.js"></script>
+    <script src="../../js/pc/plugins/datapicker/bootstrap-datepicker.js"></script>
+    <script src="../../js/pc/custom.js"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(document).ready(function() { 
+            // datapicker : 달력 노출 스크립트
+            $('#data_1 .input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+    </script>
+</body>
+</html>
